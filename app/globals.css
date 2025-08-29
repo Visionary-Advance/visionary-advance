@@ -1,0 +1,484 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&display=swap');
+
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.bg-dark{
+  background-color: #1a1a1a;
+}
+.bg-primary{
+  background-color: #008070;
+}
+
+.dm-sans-regular{
+  font-family: "DM Sans", serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal, italic;
+}
+.dm-sans-bold{
+  font-family: "DM Sans", serif;
+  font-optical-sizing: auto;
+  font-weight: 700;
+  font-style: normal, italic;
+}
+.inst-sans-bold{
+  font-family: "Instrument Sans", serif;
+  font-optical-sizing: auto;
+  font-weight: 600;
+  font-style: normal, italic;
+}
+.inst-sans-reg{
+  font-family: "Instrument Sans", serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal, italic;
+}
+
+.text-primary{
+  color: #008070;
+}
+.hover-primary:hover{
+  color: #008070;
+  
+}
+
+.card {
+  width: 280px;
+  height: 500px; /* Updated height */
+  background: #222222;
+  border-radius: 32px;
+
+  position: relative;
+  box-shadow: #604b4a30 0px 70px 30px -50px;
+  transition: all 0.5s ease-in-out;
+}
+
+.card .mail {
+  position: absolute;
+  right: 2rem;
+  top: 1.4rem;
+  background: transparent;
+  border: none;
+}
+
+.card .mail svg {
+  stroke: #008070;
+  stroke-width: 3px;
+}
+
+.card .mail svg:hover {
+  stroke: #008070;
+}
+
+.card .profile-pic {
+  position: absolute;
+  width: calc(100% - 6px);
+  height: calc(100% - 6px);
+  top: 3px;
+  left: 3px;
+  border-radius: 29px;
+  z-index: 1;
+  border: 0px solid #008070;
+  overflow: hidden;
+  transition: all 0.5s ease-in-out 0.2s, z-index 0.5s ease-in-out 0.2s;
+}
+
+.card .profile-pic img {
+  -o-object-fit: cover;
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+  
+ 
+  transition: all 0.5s ease-in-out 0s;
+}
+
+.card .profile-pic svg {
+  width: 100%;
+  height: 100%;
+  -o-object-fit: cover;
+  object-fit: cover;
+  -o-object-position: 0px 0px;
+  object-position: 0px 0px;
+  transform-origin: 45% 20%;
+  transition: all 0.5s ease-in-out 0s;
+}
+
+.card .bottom {
+  position: absolute;
+  bottom: 3px;
+  left: 3px;
+  right: 3px;
+  background: #008070;
+  top: 80%;
+  border-radius: 29px;
+  z-index: 2;
+  box-shadow: rgba(96, 75, 74, 0.1882352941) 0px 5px 5px 0px inset;
+  overflow: hidden;
+  transition: all 0.5s cubic-bezier(0.645, 0.045, 0.355, 1) 0s;
+}
+
+.card .bottom .content {
+  position: absolute;
+  top: 10%;
+  left: 1.5rem;
+  right: 1.5rem;
+  height: 160px;
+  opacity: 0; /* Hide content initially */
+  transition: opacity 0.5s ease-in-out;
+}
+
+.card .bottom .content .name {
+  display: hidden;
+  font-size: 1.2rem;
+  color: white;
+  font-weight: bold;
+  
+}
+
+.card .bottom .content .about-me {
+  display: block;
+  font-size: 0.9rem;
+  color: white;
+  margin-top: 1rem;
+}
+
+.card .bottom .bottom-bottom {
+  position: absolute;
+  bottom: 1rem;
+  left: 1.5rem;
+  right: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card .bottom .bottom-bottom .social-links-container {
+  display: flex;
+  gap: 1rem;
+}
+
+.card .bottom .bottom-bottom .social-links-container svg {
+  height: 40px;
+  fill: white;
+  filter: drop-shadow(0 5px 5px rgba(165, 132, 130, 0.1333333333));
+}
+
+.card .bottom .bottom-bottom .social-links-container svg:hover {
+  fill: #222222;
+
+}
+
+.card .bottom .bottom-bottom .button {
+  background: white;
+  color: #008070;
+  border: none;
+  border-radius: 20px;
+  font-size: 0.6rem;
+  padding: 0.4rem 0.6rem;
+  box-shadow: rgba(165, 132, 130, 0.1333333333) 0px 5px 5px 0px;
+}
+
+.card .bottom .bottom-bottom .button:hover {
+  background: #222222;
+  color: white;
+}
+
+.card:hover {
+  border-top-left-radius: 55px;
+}
+
+.card:hover .bottom {
+  top: 20%;
+  border-radius: 80px 29px 29px 29px;
+  transition: all 0.5s cubic-bezier(0.645, 0.045, 0.355, 1) 0.2s;
+}
+
+.card:hover .profile-pic {
+  width: 100px;
+  height: 100px;
+  aspect-ratio: 1;
+  top: 10px;
+  left: 0px;
+  border-radius: 50%;
+  z-index: 3;
+  border: 7px solid #008070;
+  box-shadow: rgba(96, 75, 74, 0.1882352941) 0px 5px 5px 0px;
+  transition: all 0.5s ease-in-out, z-index 0.5s ease-in-out 0.1s;
+}
+
+.card:hover .profile-pic:hover {
+  transform: scale(1.3);
+  border-radius: 0px;
+}
+
+.card:hover .profile-pic img {
+  transform: scale(1.7);
+  object-position: 0px 0px;
+  transition: all 0.5s ease-in-out 0.5s;
+}
+
+.card:hover .profile-pic svg {
+  transform: scale(2.5);
+  transition: all 0.5s ease-in-out 0.5s;
+}
+
+.card:hover .bottom .content {
+  opacity: 1; /* Show content on hover */
+  transition: opacity 0.5s ease-in-out 0.5s;
+}
+
+
+.service-card{
+  border-bottom: #d5d5d5 1px solid;
+  
+}
+.service-card:hover{
+  background-color: #222222;
+  transition: transform  .5s, background-color .5s;
+  
+}
+
+.service-card:hover .service-card-title{
+  color: #008070;
+  transition: color .75s,opacity .75s; ;
+  opacity: .3;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.circle {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, #008070 0%, rgba(0, 150, 136, 0) 100%);
+  filter: blur(120px);
+  animation: move 5s infinite alternate ease-in-out;
+  z-index: 0 ;
+}
+
+.circle1 {
+  width: 300px;
+  height: 300px;
+  top: -10%;
+  left: 3%;
+}
+
+.circle2 {
+  width: 400px;
+  height: 400px;
+  bottom: -10%;
+  left: 17%;
+}
+/* .circle3 {
+  width: 400px;
+  height: 400px;
+  bottom: -10%;
+  right: 17%;
+}
+.circle4 {
+  width: 400px;
+  height: 400px;
+  top: -10%;
+  right: 3%;
+} */
+
+
+
+.menu-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 100%;
+  z-index: 50;
+  transform: translateX(100%);
+  transition: transform 0.3s ease-in-out;
+}
+
+.menu-panel.menu-open {
+  transform: translateX(0);
+}
+
+.green-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background-color: #008070;
+  transform: translateX(100%);
+  transition: transform 0.3s ease-in-out;
+}
+
+.green-overlay.overlay-open {
+  transform: translateX(0);
+}
+
+.primaryHover a {
+  transition: color 0.3s ease;
+}
+
+.primaryHover a:hover {
+  color: #008070;
+}
+/* From Uiverse.io by Smit-Prajapati */ 
+.orange {
+  color: #008070;
+}
+
+.form-container {
+  max-width: 700px;
+  margin: 30px;
+  background-color: transparent;
+  padding: 30px;
+  border-left: 5px solid #008070;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%);
+}
+
+.heading {
+  display: block;
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin-bottom: 20px;
+}
+
+.form-container .form .input {
+  color: #888888;
+  width: 49%;
+  background-color: transparent;
+  border: #202020 1px solid;
+  outline: none;
+  padding: 10px;
+  margin-bottom: 20px;
+  margin-right: 6px; /* Add horizontal gap */
+  font-weight: bold;
+  transition: all 0.2s ease-in-out;
+  border-left: #202020 1px solid;
+}
+
+.form-container .form .input:last-child {
+  margin-right: 0; /* Remove margin from the last input element */
+}
+
+.form-container .form .input:focus {
+  border-left: 5px solid #008070;
+}
+
+.form-container .form .textarea {
+  width: 100%;
+  padding: 10px;
+  border: #202020 1px solid;
+  outline: none;
+  background-color: transparent;
+  color: #008070;
+  font-weight: bold;
+  resize: none;
+  max-height: 150px;
+  margin-bottom: 20px;
+  border-left: 1px solid #202020;
+  transition: all 0.2s ease-in-out;
+}
+
+.form-container .form .textarea:focus {
+  border-left: 5px solid #008070;
+}
+
+.form-container .form .button-container {
+  width: 100%;
+  gap: 10px;
+}
+
+.form-container .form .button-container .send-button {
+  flex-basis: 70%;
+  background: #008070;
+  padding: 10px;
+  color: #001925;
+  text-align: center;
+  font-weight: bold;
+  border: 1px solid transparent;
+  transition: all 0.2s ease-in-out;
+}
+
+.form-container .form .button-container .send-button:hover {
+  background: transparent;
+  border: 1px solid #008070;
+  color: #008070;
+}
+
+.form-container .form .button-container .reset-button-container {
+  filter: drop-shadow(1px 1px 0px #008070);
+  flex-basis: 30%;
+}
+
+.form-container .form .button-container .reset-button-container .reset-button {
+  position: relative;
+  text-align: center;
+  padding: 10px;
+  color: #008070;
+  font-weight: bold;
+  background: #001925;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
+  transition: all 0.2s ease-in-out;
+}
+
+.form-container .form .button-container .reset-button-container .reset-button:hover {
+  background: #008070;
+  color: #001925;
+}
+
+.send-button:active {
+  transform: scale(0.95);
+}
+
+@keyframes move {
+  0% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(30px, -20px);
+  }
+  100% {
+    transform: translate(-30px, 20px);
+  }
+}
+
+
+@media screen and (mibn-width: 390px) and (max-width: 768px) {
+  .form-container .form .input {
+    color: #888888;
+    width: 100%;
+    background-color: transparent;
+    border: #202020 1px solid;
+    outline: none;
+    padding: 10px;
+    margin-bottom: 20px;
+    margin-right: 6px; /* Add horizontal gap */
+    font-weight: bold;
+    transition: all 0.2s ease-in-out;
+    border-left: #202020 1px solid;
+  }
+}
