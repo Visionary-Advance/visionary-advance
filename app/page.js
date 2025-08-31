@@ -56,7 +56,7 @@ export default function LandingPage() {
             <div className="space-y-6 ">
               
               <SplitText
-  text="Building Stronger Communities Through  Digital Solutions"
+  text="Building Stronger Communities Through Digital Solutions"
   className="pb-2 font-anton text-5xl lg:text-6xl text-white leading-tight tracking-tight lg:max-w-4xl mx-auto"
   delay={100}
   duration={0.7}
