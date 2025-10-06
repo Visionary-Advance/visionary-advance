@@ -35,6 +35,23 @@ export async function GET(request) {
     console.log('Environment:', process.env.SQUARE_ENVIRONMENT || 'NOT SET');
     console.log('Base URL:', baseUrl);
     console.log('Redirect URI:', redirectUri);
+    console.log('Has Application ID?', !!process.env.SQUARE_APPLICATION_ID);
+    console.log('Has Application Secret?', !!process.env.SQUARE_APPLICATION_SECRET);
+    
+    // Validate env vars before calling Square
+    if (!process.env.SQUARE_APPLICATION_ID) {
+      console.error('❌ SQUARE_APPLICATION_ID is not set!');
+      return NextResponse.redirect(
+        new URL('/square/error?error=config_error&details=Missing%20SQUARE_APPLICATION_ID', request.url)
+      );
+    }
+    
+    if (!process.env.SQUARE_APPLICATION_SECRET) {
+      console.error('❌ SQUARE_APPLICATION_SECRET is not set!');
+      return NextResponse.redirect(
+        new URL('/square/error?error=config_error&details=Missing%20SQUARE_APPLICATION_SECRET', request.url)
+      );
+    }
     
     // Exchange authorization code for access token
     const tokenResponse = await fetch(`${baseUrl}/oauth2/token`, {
@@ -45,7 +62,7 @@ export async function GET(request) {
         'Accept': 'application/json'
       },
       body: JSON.stringify({
-        client_id: process.env.NEXT_PUBLIC_SQUARE_APPLICATION_ID,
+        client_id: process.env.SQUARE_APPLICATION_ID,
         client_secret: process.env.SQUARE_APPLICATION_SECRET,
         code: code,
         grant_type: 'authorization_code',
