@@ -45,7 +45,7 @@ export async function GET(request) {
         'Accept': 'application/json'
       },
       body: JSON.stringify({
-        client_id: process.env.SQUARE_APPLICATION_ID,
+        client_id: process.env.NEXT_PUBLIC_SQUARE_APPLICATION_ID,
         client_secret: process.env.SQUARE_APPLICATION_SECRET,
         code: code,
         grant_type: 'authorization_code',
