@@ -4,18 +4,5 @@
     "schedule": "0 2 * * *"
   }]
 
-,
-  "redirects": [
-    {
-      "source": "/(.*)",
-      "has": [
-        {
-          "type": "host",
-          "value": "www.visionaryadvance.com"
-        }
-      ],
-      "destination": "https://visionaryadvance.com/$1",
-      "permanent": true
-    }
-  ]
+
 }
