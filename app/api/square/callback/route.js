@@ -1,4 +1,4 @@
-// app/api/square/callback/route.js
+// app/api/square/callback/route.js - DIAGNOSTIC VERSION
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request) {
@@ -7,28 +7,35 @@ export async function GET(request) {
   const state = searchParams.get('state');
   const error = searchParams.get('error');
 
-  console.log('Square callback received:', { code: !!code, state, error });
+  console.log('\n========================================');
+  console.log('🔵 SQUARE CALLBACK STARTED');
+  console.log('========================================');
+  console.log('Code received:', !!code);
+  console.log('State:', state);
+  console.log('Error:', error);
 
   if (error) {
-    console.error('Square OAuth error:', error);
+    console.error('❌ OAuth error:', error);
     return NextResponse.redirect(new URL(`/square/error?error=${encodeURIComponent(error)}`, request.url));
   }
 
   if (!code) {
-    console.error('No authorization code received');
+    console.error('❌ No authorization code received');
     return NextResponse.redirect(new URL('/square/error?error=no_code', request.url));
   }
 
   try {
-    console.log('Exchanging authorization code for tokens...');
-    
-    const baseUrl = process.env.SQUARE_ENVIRONMENT === 'sandbox' 
-      ? 'https://connect.squareupsandbox.com' 
-      : 'https://connect.squareup.com';
+    const baseUrl = process.env.SQUARE_ENVIRONMENT === 'production'
+      ? 'https://connect.squareup.com' 
+      : 'https://connect.squareupsandbox.com';
     
     const redirectUri = `${new URL(request.url).protocol}//${new URL(request.url).host}/api/square/callback`;
     
-    console.log('Using redirect_uri:', redirectUri);
+    console.log('\n📡 Exchanging code for tokens...');
+    console.log('Environment:', process.env.SQUARE_ENVIRONMENT || 'NOT SET (defaulting to sandbox)');
+    console.log('Base URL:', baseUrl);
+    console.log('Redirect URI:', redirectUri);
+    console.log('Application ID:', process.env.SQUARE_APPLICATION_ID);
     
     // Exchange authorization code for access token
     const tokenResponse = await fetch(`${baseUrl}/oauth2/token`, {
@@ -50,17 +57,33 @@ export async function GET(request) {
     const tokenData = await tokenResponse.json();
 
     console.log('Token response status:', tokenResponse.status);
+    console.log('Token data keys:', Object.keys(tokenData));
 
     if (!tokenResponse.ok) {
-      console.error('Token exchange failed:', tokenData);
-      const errorMsg = tokenData.error_description || tokenData.error || 'unknown_error';
-      return NextResponse.redirect(new URL(`/square/error?error=token_exchange_failed&details=${encodeURIComponent(errorMsg)}`, request.url));
+      console.error('❌ Token exchange failed');
+      console.error('Status:', tokenResponse.status);
+      console.error('Full error response:', JSON.stringify(tokenData, null, 2));
+      
+      // Extract detailed error info
+      const errorDetail = tokenData.error_description || 
+                         tokenData.message || 
+                         (tokenData.errors && tokenData.errors[0]?.detail) ||
+                         tokenData.error || 
+                         'Unknown error';
+      
+      console.error('Error detail:', errorDetail);
+      
+      const errorMsg = encodeURIComponent(errorDetail);
+      return NextResponse.redirect(
+        new URL(`/square/error?error=token_exchange_failed&details=${errorMsg}`, request.url)
+      );
     }
 
-    console.log('Token exchange successful!');
+    console.log('✅ Token exchange successful!');
     console.log('Merchant ID:', tokenData.merchant_id);
+    console.log('Access token length:', tokenData.access_token?.length);
 
-    // ===== FETCH LOCATIONS FIRST =====
+    // ===== FETCH LOCATIONS =====
     let locations = [];
     let primaryLocationId = null;
     let merchantInfo = {
@@ -71,8 +94,8 @@ export async function GET(request) {
       address: null
     };
     
+    console.log('\n📍 Fetching locations...');
     try {
-      console.log('Fetching merchant locations...');
       const locationsResponse = await fetch(`${baseUrl}/v2/locations`, {
         headers: {
           'Authorization': `Bearer ${tokenData.access_token}`,
@@ -83,19 +106,33 @@ export async function GET(request) {
 
       console.log('Locations response status:', locationsResponse.status);
       const locationsData = await locationsResponse.json();
-      console.log('Locations data:', JSON.stringify(locationsData, null, 2));
+      
+      console.log('\n📦 FULL LOCATIONS RESPONSE:');
+      console.log(JSON.stringify(locationsData, null, 2));
 
       if (locationsResponse.ok && locationsData.locations && locationsData.locations.length > 0) {
         locations = locationsData.locations;
         primaryLocationId = locations[0].id;
         
-        // Extract business info from primary location
+        console.log(`\n✅ Found ${locations.length} location(s)`);
+        console.log('Primary location ID:', primaryLocationId);
+        
+        // Extract ALL fields from primary location
         const primaryLocation = locations[0];
+        console.log('\n🏢 PRIMARY LOCATION DATA:');
+        console.log('- ID:', primaryLocation.id);
+        console.log('- Name:', primaryLocation.name);
+        console.log('- Business Name:', primaryLocation.business_name);
+        console.log('- Phone:', primaryLocation.phone_number);
+        console.log('- Country:', primaryLocation.country);
+        console.log('- Status:', primaryLocation.status);
+        console.log('- Address:', primaryLocation.address);
+        console.log('- Capabilities:', primaryLocation.capabilities);
+        
         merchantInfo.businessName = primaryLocation.business_name || primaryLocation.name || null;
         merchantInfo.phone = primaryLocation.phone_number || null;
         merchantInfo.country = primaryLocation.country || primaryLocation.address?.country || null;
         
-        // Format address if available
         if (primaryLocation.address) {
           const addr = primaryLocation.address;
           merchantInfo.address = [
@@ -107,16 +144,19 @@ export async function GET(request) {
           ].filter(Boolean).join(', ');
         }
         
-        console.log('✅ Extracted info from primary location:', merchantInfo);
-        console.log(`Found ${locations.length} locations, primary: ${primaryLocationId}`);
+        console.log('\n📋 EXTRACTED MERCHANT INFO:');
+        console.log(JSON.stringify(merchantInfo, null, 2));
+      } else {
+        console.log('⚠️ No locations found or error:', locationsData);
       }
     } catch (locationError) {
-      console.error('❌ Failed to fetch locations:', locationError);
+      console.error('❌ Location fetch error:', locationError);
+      console.error('Error stack:', locationError.stack);
     }
 
-    // ===== TRY TO GET EMAIL FROM TEAM MEMBER API =====
+    // ===== TRY TEAM MEMBERS API =====
+    console.log('\n👥 Attempting to fetch team members...');
     try {
-      console.log('Attempting to fetch team members for email...');
       const teamResponse = await fetch(`${baseUrl}/v2/team-members/search`, {
         method: 'POST',
         headers: {
@@ -130,49 +170,49 @@ export async function GET(request) {
               status: 'ACTIVE'
             }
           },
-          limit: 1
+          limit: 5
         })
       });
 
+      console.log('Team response status:', teamResponse.status);
+      
       if (teamResponse.ok) {
         const teamData = await teamResponse.json();
-        console.log('Team data:', JSON.stringify(teamData, null, 2));
+        console.log('\n👤 TEAM MEMBERS RESPONSE:');
+        console.log(JSON.stringify(teamData, null, 2));
         
         if (teamData.team_members && teamData.team_members.length > 0) {
-          // Try to find an owner or admin
-          const owner = teamData.team_members.find(m => 
-            m.is_owner || 
-            m.assigned_locations?.is_all_locations
-          );
-          
+          const owner = teamData.team_members.find(m => m.is_owner);
           const emailSource = owner || teamData.team_members[0];
           merchantInfo.email = emailSource.email_address || null;
           
-          console.log('✅ Found email from team member:', merchantInfo.email);
+          console.log('✅ Found email:', merchantInfo.email);
         }
       } else {
-        console.log('⚠️ Team members API not accessible (may need EMPLOYEES_READ permission)');
+        const errorData = await teamResponse.json();
+        console.log('⚠️ Team API error:', JSON.stringify(errorData, null, 2));
       }
     } catch (teamError) {
-      console.log('⚠️ Could not fetch team members:', teamError.message);
+      console.log('⚠️ Team fetch error:', teamError.message);
     }
 
     // ===== STORE IN DATABASE =====
+    console.log('\n💾 Storing in database...');
     const { storeSquareAuth, storeSquareLocations } = await import('@/lib/square-auth');
     
     const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
     
-    // Use business name if available, otherwise use merchant ID
     const clientId = merchantInfo.businessName 
       ? `client_${merchantInfo.businessName.toLowerCase().replace(/[^a-z0-9]/g, '_')}_${tokenData.merchant_id.slice(-8)}`
       : `client_${tokenData.merchant_id}`;
     
-    console.log('Storing auth with client_id:', clientId);
-    console.log('Business name:', merchantInfo.businessName);
-    console.log('Email:', merchantInfo.email);
-    console.log('Phone:', merchantInfo.phone);
+    console.log('Client ID:', clientId);
+    console.log('Restaurant Name:', merchantInfo.businessName || tokenData.merchant_id);
+    console.log('Email:', merchantInfo.email || 'NULL');
+    console.log('Phone:', merchantInfo.phone || 'NULL');
+    console.log('Country:', merchantInfo.country || 'NULL');
+    console.log('Address:', merchantInfo.address || 'NULL');
     
-    // Store authentication with merchant info
     await storeSquareAuth({
       clientId: clientId,
       restaurantName: merchantInfo.businessName || tokenData.merchant_id,
@@ -188,12 +228,14 @@ export async function GET(request) {
       address: merchantInfo.address
     });
 
-    // Store all locations
     if (locations.length > 0) {
       await storeSquareLocations(clientId, locations);
     }
 
-    // Redirect to success page with merchant info
+    console.log('\n✅ Database storage complete!');
+    console.log('========================================\n');
+
+    // Redirect to success
     const successUrl = new URL('/square/success', request.url);
     successUrl.searchParams.set('merchant_id', tokenData.merchant_id);
     successUrl.searchParams.set('client_id', clientId);
@@ -212,7 +254,10 @@ export async function GET(request) {
     return NextResponse.redirect(successUrl);
 
   } catch (error) {
-    console.error('Square callback error:', error);
+    console.error('\n❌ CALLBACK ERROR:');
+    console.error('Message:', error.message);
+    console.error('Stack:', error.stack);
+    console.log('========================================\n');
     return NextResponse.redirect(new URL('/square/error?error=server_error', request.url));
   }
 }
