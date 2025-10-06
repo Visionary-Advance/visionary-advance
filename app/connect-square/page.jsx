@@ -15,28 +15,25 @@ export default function SquareConnectPage() {
       return;
     }
     
-    // Log the Application ID to verify it's correct
-    console.log('Square Application ID:', appId);
-    console.log('Is Production?', !appId.includes('sandbox'));
-    
     setIsConnecting(true);
     
-    // Build redirect URI - ensure it has https://
-    let baseURL = window.location.origin;
+    // FORCE the correct redirect URI based on environment
+    let redirectUri = process.env.NEXT_PUBLIC_SQUARE_REDIRECT_URI;
     
-    // Fix: If origin doesn't include protocol (some edge cases), add it
-    if (!baseURL.startsWith('http')) {
-      baseURL = `https://${window.location.host}`;
+    if (!redirectUri) {
+      const isLocalhost = typeof window !== 'undefined' && 
+                         (window.location.hostname === 'localhost' || 
+                          window.location.hostname === '127.0.0.1');
+      
+      if (isLocalhost) {
+        redirectUri = 'http://localhost:3000/api/square/callback';
+      } else {
+        // ALWAYS use non-www version to match Square Dashboard
+        redirectUri = 'https://visionaryadvance.com/api/square/callback';
+      }
     }
     
-    // For production, force HTTPS
-    if (!appId.includes('sandbox') && baseURL.startsWith('http://')) {
-      baseURL = baseURL.replace('http://', 'https://');
-    }
-    
-    const redirectUri = `${baseURL}/api/square/callback`;
-    
-    // Use production OAuth URL if not sandbox
+    // Determine OAuth base URL
     const isProduction = !appId.includes('sandbox');
     const oauthBaseUrl = isProduction 
       ? 'https://connect.squareup.com'
@@ -53,13 +50,22 @@ export default function SquareConnectPage() {
     const oauthUrl = `${oauthBaseUrl}/oauth2/authorize?${params.toString()}`;
     
     console.log('=== Square OAuth Debug Info ===');
+    console.log('Current hostname:', window.location.hostname);
     console.log('Environment:', isProduction ? 'PRODUCTION' : 'SANDBOX');
     console.log('OAuth Base URL:', oauthBaseUrl);
     console.log('Client ID:', appId);
-    console.log('Base URL:', baseURL);
-    console.log('Redirect URI:', redirectUri);
+    console.log('Redirect URI (forced):', redirectUri);
     console.log('Full OAuth URL:', oauthUrl);
     console.log('===============================');
+    
+    // Verify the URL has https://
+    if (!redirectUri.startsWith('http://') && !redirectUri.startsWith('https://')) {
+      console.error('❌ ERROR: Redirect URI missing protocol!');
+      console.error('Current value:', redirectUri);
+      alert('Configuration error: Redirect URI is malformed. Check console for details.');
+      setIsConnecting(false);
+      return;
+    }
     
     // Redirect to Square OAuth
     window.location.href = oauthUrl;
