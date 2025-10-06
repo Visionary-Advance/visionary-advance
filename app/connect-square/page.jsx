@@ -41,7 +41,7 @@ export default function SquareConnectPage() {
     
     const params = new URLSearchParams({
       client_id: appId,
-      scope: 'MERCHANT_PROFILE_READ PAYMENTS_READ PAYMENTS_WRITE ORDERS_READ ORDERS_WRITE',
+      scope: 'MERCHANT_PROFILE_READ ITEMS_READ PAYMENTS_READ PAYMENTS_WRITE ORDERS_READ ORDERS_WRITE',
       response_type: 'code',
       redirect_uri: redirectUri,
       state: `state_${Date.now()}_${Math.random().toString(36).substring(7)}`
