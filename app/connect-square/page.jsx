@@ -7,20 +7,59 @@ export default function SquareConnectPage() {
   const [isConnecting, setIsConnecting] = useState(false);
 
   const handleConnect = () => {
+    // Check if Application ID is configured
+    const appId = process.env.NEXT_PUBLIC_SQUARE_APPLICATION_ID;
+    
+    if (!appId) {
+      alert('Square Application ID is not configured. Please add NEXT_PUBLIC_SQUARE_APPLICATION_ID to your .env.local file and restart the server.');
+      return;
+    }
+    
+    // Log the Application ID to verify it's correct
+    console.log('Square Application ID:', appId);
+    console.log('Is Production?', !appId.includes('sandbox'));
+    
     setIsConnecting(true);
     
-    // Build OAuth URL
-    const baseURL = "visionaryadvance.com";
+    // Build redirect URI - ensure it has https://
+    let baseURL = window.location.origin;
+    
+    // Fix: If origin doesn't include protocol (some edge cases), add it
+    if (!baseURL.startsWith('http')) {
+      baseURL = `https://${window.location.host}`;
+    }
+    
+    // For production, force HTTPS
+    if (!appId.includes('sandbox') && baseURL.startsWith('http://')) {
+      baseURL = baseURL.replace('http://', 'https://');
+    }
+    
+    const redirectUri = `${baseURL}/api/square/callback`;
+    
+    // Use production OAuth URL if not sandbox
+    const isProduction = !appId.includes('sandbox');
+    const oauthBaseUrl = isProduction 
+      ? 'https://connect.squareup.com'
+      : 'https://connect.squareupsandbox.com';
     
     const params = new URLSearchParams({
-      client_id: process.env.NEXT_PUBLIC_SQUARE_APPLICATION_ID ,
+      client_id: appId,
       scope: 'MERCHANT_PROFILE_READ PAYMENTS_READ PAYMENTS_WRITE ORDERS_READ ORDERS_WRITE',
       response_type: 'code',
-      redirect_uri: `${baseURL}/api/square/callback`,
+      redirect_uri: redirectUri,
       state: `state_${Date.now()}_${Math.random().toString(36).substring(7)}`
     });
 
-    const oauthUrl = `https://connect.squareup.com/oauth2/authorize?${params.toString()}`;
+    const oauthUrl = `${oauthBaseUrl}/oauth2/authorize?${params.toString()}`;
+    
+    console.log('=== Square OAuth Debug Info ===');
+    console.log('Environment:', isProduction ? 'PRODUCTION' : 'SANDBOX');
+    console.log('OAuth Base URL:', oauthBaseUrl);
+    console.log('Client ID:', appId);
+    console.log('Base URL:', baseURL);
+    console.log('Redirect URI:', redirectUri);
+    console.log('Full OAuth URL:', oauthUrl);
+    console.log('===============================');
     
     // Redirect to Square OAuth
     window.location.href = oauthUrl;
@@ -57,7 +96,7 @@ export default function SquareConnectPage() {
   ];
 
   return (
-    <div className="min-h-screen pt-28 bg-[#191E1E] text-white">
+    <div className="min-h-screen bg-[#191E1E] text-white">
       {/* Hero Section */}
       <section className="px-4 md:px-16 py-16 md:py-20">
         <div className="max-w-6xl mx-auto">
