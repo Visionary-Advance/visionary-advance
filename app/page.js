@@ -23,13 +23,7 @@ const PlaceholderImage = ({ className = "" }) => (
   </div>
 );
 
-const StarRating = () => (
-  <div className="flex gap-1">
-    {[...Array(5)].map((_, i) => (
-      <Star key={i} className="w-4 h-4 fill-white text-white" />
-    ))}
-  </div>
-);
+
 
 export default function LandingPage() {
   return (

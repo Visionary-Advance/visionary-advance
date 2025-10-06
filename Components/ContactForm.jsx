@@ -1,143 +1,281 @@
 'use client'
 
 import { useState } from 'react'
-import { Field, Label, Switch } from '@headlessui/react'
-import Link from 'next/link'
+import { Send } from 'lucide-react'
 
-export default function Example() {
-  const [agreed, setAgreed] = useState(false)
+const projectTypes = [
+  'Website Design',
+  'E-commerce',
+  'Mobile App',
+  'Web Application',
+  'Branding',
+  'Other'
+]
+
+const budgetRanges = [
+  'Under $5,000',
+  '$5,000 - $10,000',
+  '$10,000 - $25,000',
+  '$25,000 - $50,000',
+  '$50,000+'
+]
+
+const timelines = [
+  'ASAP',
+  '1-2 months',
+  '3-6 months',
+  '6+ months',
+  'Flexible'
+]
+
+export default function ContactForm() {
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    company: '',
+    projectType: '',
+    budget: '',
+    timeline: '',
+    message: ''
+  })
+
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitStatus, setSubmitStatus] = useState('idle')
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }))
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setIsSubmitting(true)
+    setSubmitStatus('idle')
+
+    try {
+      const response = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      })
+
+      if (response.ok) {
+        setSubmitStatus('success')
+        setFormData({
+          firstName: '',
+          lastName: '',
+          email: '',
+          phone: '',
+          company: '',
+          projectType: '',
+          budget: '',
+          timeline: '',
+          message: ''
+        })
+      } else {
+        setSubmitStatus('error')
+      }
+    } catch (error) {
+      setSubmitStatus('error')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
   return (
-    <div className=" px-6  lg:px-8">
-      
-      
-      <form action="#" method="POST" className="mx-auto max-w-xl">
-        <div className="grid grid-cols-1 gap-x-8 gap-y-3 sm:grid-cols-2">
-          <div>
-            <label htmlFor="first-name" className="block text-sm/6 font-semibold text-white">
-              First name
-            </label>
-            <div className="mt-2.5">
+    <div className="lg:col-span-2">
+      <div className="space-y-8">
+        <div className="space-y-4">
+          <h2 className="font-anton text-3xl md:text-4xl text-white">
+            Tell Us About Your Project
+          </h2>
+          <p className="font-manrope text-white">
+            The more details you can share, the better we can tailor our response to your needs.
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Name Fields */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label htmlFor="firstName" className="block text-sm font-semibold text-white mb-2">
+                First Name *
+              </label>
               <input
-                id="first-name"
-                name="first-name"
                 type="text"
-                autoComplete="given-name"
-                className="block w-full text-black rounded-md bg-white px-3.5 py-2 text-base outline-1 -outline-offset-1 outline-[#008070] placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-[#008070]"
+                id="firstName"
+                name="firstName"
+                value={formData.firstName}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 bg-black/30 border border-white/20 rounded-lg text-white placeholder:text-gray-400 focus:outline-none focus:border-[#008070] transition-colors"
+                required
+              />
+            </div>
+            <div>
+              <label htmlFor="lastName" className="block text-sm font-semibold text-white mb-2">
+                Last Name *
+              </label>
+              <input
+                type="text"
+                id="lastName"
+                name="lastName"
+                value={formData.lastName}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 bg-black/30 border border-white/20 rounded-lg text-white placeholder:text-gray-400 focus:outline-none focus:border-[#008070] transition-colors"
+                required
               />
             </div>
           </div>
-          <div>
-            <label htmlFor="last-name" className="block text-sm/6 font-semibold text-white">
-              Last name
-            </label>
-            <div className="mt-2.5">
+
+          {/* Contact Fields */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label htmlFor="email" className="block text-sm font-semibold text-white mb-2">
+                Email Address *
+              </label>
               <input
-                id="last-name"
-                name="last-name"
-                type="text"
-                autoComplete="family-name"
-                className="block w-full text-black rounded-md bg-white px-3.5 py-2 text-base outline-1 -outline-offset-1 outline-[#008070] placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-[#008070]"
-              />
-            </div>
-          </div>
-          <div className="sm:col-span-2">
-            <label htmlFor="company" className="block text-sm/6 font-semibold text-white">
-              Company
-            </label>
-            <div className="mt-2.5">
-              <input
-                id="company"
-                name="company"
-                type="text"
-                autoComplete="organization"
-                className="block w-full text-black rounded-md bg-white px-3.5 py-2 text-base outline-1 -outline-offset-1 outline-[#008070] placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-[#008070]"
-              />
-            </div>
-          </div>
-          <div className="sm:col-span-2">
-            <label htmlFor="email" className="block text-sm/6 font-semibold text-white">
-              Email
-            </label>
-            <div className="mt-2.5">
-              <input
+                type="email"
                 id="email"
                 name="email"
-                type="email"
-                autoComplete="email"
-                className="block w-full text-black rounded-md bg-white px-3.5 py-2 text-base outline-1 -outline-offset-1 outline-[#008070] placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-[#008070]"
+                value={formData.email}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 bg-black/30 border border-white/20 rounded-lg text-white placeholder:text-gray-400 focus:outline-none focus:border-[#008070] transition-colors"
+                required
+              />
+            </div>
+            <div>
+              <label htmlFor="phone" className="block text-sm font-semibold text-white mb-2">
+                Phone Number
+              </label>
+              <input
+                type="tel"
+                id="phone"
+                name="phone"
+                value={formData.phone}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 bg-black/30 border border-white/20 rounded-lg text-white placeholder:text-gray-400 focus:outline-none focus:border-[#008070] transition-colors"
               />
             </div>
           </div>
-          <div className="sm:col-span-2">
-            <label htmlFor="phone-number" className="block text-sm/6 font-semibold text-white">
-              Phone number
-            </label>
-            <div className="mt-2.5">
-              <div className="flex rounded-md bg-white outline-1 -outline-offset-1 outline-[#008070] has-[input:focus-within]:outline-2 has-[input:focus-within]:-outline-offset-2 has-[input:focus-within]:outline-[#008070]">
-                
-                <input
-                  id="phone-number"
-                  name="phone-number"
-                  type="text"
-                  placeholder="  123-456-7890"
-                  className="flex rounded-md w-full m bg-white text-black outline-1 py-2 -outline-offset-1 outline-[#008070] has-[input:focus-within]:outline-2 has-[input:focus-within]:-outline-offset-2 has-[input:focus-within]:outline-[#008070]"
-                />
-              </div>
-            </div>
-          </div>
-          <div className="sm:col-span-2">
-            <label htmlFor="message" className="block text-sm/6 font-semibold text-white">
-              Message
-            </label>
-            <div className="mt-2.5">
-              <textarea
-                id="message"
-                name="message"
-                rows={4}
-                className="block w-full text-black rounded-md bg-white px-3.5 py-1 text-base outline-1 -outline-offset-1 outline-[#008070] placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-[#008070]"
-                defaultValue={''}
-              />
-            </div>
-          </div>
-          <Field className="flex gap-x-4 sm:col-span-2">
-            <div className="flex h-6 items-center">
-            <Switch
-  checked={agreed}
-  onChange={setAgreed}
-  className={`group flex w-8 flex-none cursor-pointer rounded-full ${
-    agreed ? 'bg-[#008070]' : 'bg-gray-200'
-  } p-px ring-1 ring-gray-900/5 transition-colors duration-200 ease-in-out ring-inset 
-    focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#008070]`}
->
-  <span className="sr-only">Agree to policies</span>
-  <span
-    aria-hidden="true"
-    className={`size-4 transform rounded-full bg-white ring-1 shadow-xs ring-gray-900/5 transition duration-200 ease-in-out ${
-      agreed ? 'translate-x-3.5' : ''
-    }`}
-  />
-</Switch>
 
+          {/* Company */}
+          <div>
+            <label htmlFor="company" className="block text-sm font-semibold text-white mb-2">
+              Company/Organization
+            </label>
+            <input
+              type="text"
+              id="company"
+              name="company"
+              value={formData.company}
+              onChange={handleInputChange}
+              className="w-full px-4 py-3 bg-black/30 border border-white/20 rounded-lg text-white placeholder:text-gray-400 focus:outline-none focus:border-[#008070] transition-colors"
+            />
+          </div>
+
+          {/* Project Details */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <label htmlFor="projectType" className="block text-sm font-semibold text-white mb-2">
+                Project Type
+              </label>
+              <select
+                id="projectType"
+                name="projectType"
+                value={formData.projectType}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 bg-black/30 border border-white/20 rounded-lg text-white focus:outline-none focus:border-[#008070] transition-colors"
+              >
+                <option value="">Select...</option>
+                {projectTypes.map((type) => (
+                  <option key={type} value={type} className="bg-[#191E1E]">{type}</option>
+                ))}
+              </select>
             </div>
-            <Label className="text-sm/6 text-gray-600">
-              By selecting this, you agree to our{' '}
-              <Link href="/privacy-policy" className="font-semibold text-[#008070] hover:text-[#00a287]">
-                privacy&nbsp;policy
-              </Link>
-              .
-            </Label>
-          </Field>
-        </div>
-        <div className="mt-10">
+            <div>
+              <label htmlFor="budget" className="block text-sm font-semibold text-white mb-2">
+                Budget Range
+              </label>
+              <select
+                id="budget"
+                name="budget"
+                value={formData.budget}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 bg-black/30 border border-white/20 rounded-lg text-white focus:outline-none focus:border-[#008070] transition-colors"
+              >
+                <option value="">Select...</option>
+                {budgetRanges.map((range) => (
+                  <option key={range} value={range} className="bg-[#191E1E]">{range}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label htmlFor="timeline" className="block text-sm font-semibold text-white mb-2">
+                Timeline
+              </label>
+              <select
+                id="timeline"
+                name="timeline"
+                value={formData.timeline}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 bg-black/30 border border-white/20 rounded-lg text-white focus:outline-none focus:border-[#008070] transition-colors"
+              >
+                <option value="">Select...</option>
+                {timelines.map((time) => (
+                  <option key={time} value={time} className="bg-[#191E1E]">{time}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Message */}
+          <div>
+            <label htmlFor="message" className="block text-sm font-semibold text-white mb-2">
+              Tell us about your project *
+            </label>
+            <textarea
+              id="message"
+              name="message"
+              rows={6}
+              value={formData.message}
+              onChange={handleInputChange}
+              placeholder="Describe your project goals, any specific requirements, inspiration sites, or questions you have..."
+              className="w-full px-4 py-3 bg-black/30 border border-white/20 rounded-lg text-white placeholder:text-gray-400 focus:outline-none focus:border-[#008070] transition-colors resize-none"
+              required
+            />
+          </div>
+
+          {/* Status Messages */}
+          {submitStatus === 'success' && (
+            <div className="p-4 rounded-lg bg-green-500/10 border border-green-500/20 text-green-400">
+              Thank you! Your message has been sent successfully. We'll get back to you soon!
+            </div>
+          )}
+
+          {submitStatus === 'error' && (
+            <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400">
+              Sorry, there was an error sending your message. Please try again.
+            </div>
+          )}
+
+          {/* Submit Button */}
           <button
             type="submit"
-            className="block w-full rounded-md bg-[#008070] hover:bg-[#00a287] px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-xs  focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#008070]"
+            disabled={isSubmitting}
+            className="w-full bg-[#008070] hover:bg-[#006b5d] text-white px-8 py-4 rounded-lg font-manrope font-semibold transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Let's talk
+            {isSubmitting ? 'Sending...' : 'Send Message'}
+            <Send className="w-4 h-4" />
           </button>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   )
 }

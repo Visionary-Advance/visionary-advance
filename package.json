@@ -8,6 +8,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.58.0",
     "framer-motion": "^12.23.12",
     "gsap": "^3.13.0",
     "headlessui": "^0.0.0",
@@ -17,7 +18,8 @@
     "ogl": "^1.0.11",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "resend": "^6.1.1"
+    "resend": "^6.1.1",
+    "supabase": "^2.48.3"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
