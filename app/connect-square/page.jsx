@@ -10,7 +10,7 @@ export default function SquareConnectPage() {
     setIsConnecting(true);
     
     // Build OAuth URL
-    const baseURL = window.location.origin;
+    const baseURL = "visionaryadvance.com";
     
     const params = new URLSearchParams({
       client_id: process.env.NEXT_PUBLIC_SQUARE_APPLICATION_ID ,
