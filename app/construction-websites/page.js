@@ -1,9 +1,112 @@
-// app/page.jsx
+// app/construction-websites/page.jsx
 'use client'
 
 import { useState } from 'react'
+import Script from 'next/script'
 
 export default function LandingPage() {
+  // Structured Data for SEO
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebPage",
+        "@id": "https://visionaryadvance.com/construction-websites",
+        "url": "https://visionaryadvance.com/construction-websites",
+        "name": "Construction Website Design & Development | Lead Generation Experts",
+        "description": "Professional construction website design services that generate leads. SEO-optimized, mobile-responsive websites for contractors, builders, and construction companies.",
+        "inLanguage": "en-US",
+        "isPartOf": {
+          "@id": "https://visionaryadvance.com/#website"
+        }
+      },
+      {
+        "@type": "LocalBusiness",
+        "@id": "https://visionaryadvance.com/#organization",
+        "name": "Visionary Advance",
+        "url": "https://visionaryadvance.com",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://visionaryadvance.com/logo.png"
+        },
+        "description": "Professional web design and development services specializing in construction company websites that generate leads.",
+        "priceRange": "$$",
+        "telephone": "+1-XXX-XXX-XXXX",
+        "email": "info@visionaryadvance.com"
+      },
+      {
+        "@type": "Service",
+        "serviceType": "Construction Website Design",
+        "provider": {
+          "@id": "https://visionaryadvance.com/#organization"
+        },
+        "areaServed": {
+          "@type": "Country",
+          "name": "United States"
+        },
+        "hasOfferCatalog": {
+          "@type": "OfferCatalog",
+          "name": "Construction Web Services",
+          "itemListElement": [
+            {
+              "@type": "Offer",
+              "itemOffered": {
+                "@type": "Service",
+                "name": "Construction Website Design",
+                "description": "Custom website design for construction companies with lead generation focus"
+              }
+            },
+            {
+              "@type": "Offer",
+              "itemOffered": {
+                "@type": "Service",
+                "name": "SEO for Construction Companies",
+                "description": "Search engine optimization tailored for construction and contractor businesses"
+              }
+            },
+            {
+              "@type": "Offer",
+              "itemOffered": {
+                "@type": "Service",
+                "name": "Website Audit",
+                "description": "Free comprehensive analysis of your current construction website"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Why do construction companies need professional websites?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Professional construction websites help you rank higher on Google, look credible to potential clients, work perfectly on mobile devices, and most importantly, convert visitors into qualified leads through strategic design and clear calls-to-action."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How can a website generate more leads for my construction business?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "A well-designed construction website generates leads through SEO optimization to attract local searches, mobile-responsive design for on-the-go clients, strategic contact forms and CTAs, project galleries showcasing your work, client testimonials building trust, and clear service descriptions."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What makes a construction website SEO-friendly?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "SEO-friendly construction websites include local keyword optimization, fast loading speeds, mobile responsiveness, quality content about your services, proper meta tags and descriptions, structured data markup, optimized images, and regular content updates."
+            }
+          }
+        ]
+      }
+    ]
+  }
+
   const [formData, setFormData] = useState({
     name: '',
     company: '',
@@ -53,9 +156,17 @@ export default function LandingPage() {
   }
 
   return (
-    <main>
-      {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-[#0f0f0f] to-[#1a1a1a] text-white py-32 px-5 text-center overflow-hidden">
+    <>
+      {/* Structured Data for SEO */}
+      <Script
+        id="structured-data"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+
+      <main>
+        {/* Hero Section */}
+        <section className="relative bg-gradient-to-br from-[#0f0f0f] to-[#1a1a1a] text-white py-32 px-5 text-center overflow-hidden">
         <div className="absolute inset-0 opacity-30" 
              style={{
                backgroundImage: 'linear-gradient(90deg, rgba(255,107,0,0.1) 1px, transparent 1px), linear-gradient(rgba(255,107,0,0.1) 1px, transparent 1px)',
@@ -346,5 +457,6 @@ export default function LandingPage() {
         </div>
       </section>
     </main>
+    </>
   )
 }
