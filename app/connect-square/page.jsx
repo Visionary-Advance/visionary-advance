@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { CheckCircle, CreditCard, ShoppingBag, Store, Lock, Zap, ArrowRight } from 'lucide-react';
+import { CheckCircle, CreditCard, ShoppingBag, Store, Lock, Zap, ArrowRight} from 'lucide-react';
 
 export default function SquareConnectPage() {
   const [isConnecting, setIsConnecting] = useState(false);

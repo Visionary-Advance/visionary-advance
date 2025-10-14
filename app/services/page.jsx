@@ -30,58 +30,58 @@ export default function ServicesPage() {
   const services = [
     {
       icon: <Palette className="w-12 h-12" />,
-      title: "Web Design",
-      description: "Beautiful, user-friendly designs that convert visitors into customers.",
+      title: "Custom Web Design",
+      description: "Sophisticated design that reflects your professional standard and positions you as the premium choice in your market.",
       features: [
         "Custom UI/UX Design",
-        "Mobile-First Approach", 
-        "Brand Identity Integration",
-        "Conversion Optimization",
-        "Accessibility Compliance"
+        "Strategic Brand Integration",
+        "Mobile-First Architecture",
+        "Conversion-Focused Layout",
+        "Professional Visual Identity"
       ],
-      color: "text-purple-400",
-      bgColor: "bg-purple-400/10",
-      borderColor: "border-purple-400/20"
+      color: "text-[#008070]",
+      bgColor: "bg-[#008070]/10",
+      borderColor: "border-[#008070]/20"
     },
     {
       icon: <Code className="w-12 h-12" />,
-      title: "Web Development", 
-      description: "Clean, efficient code that brings your designs to life.",
+      title: "Premium Development",
+      description: "Clean, efficient code built on modern architecture. Engineered for performance, security, and long-term reliability.",
       features: [
-        "Modern Frameworks (React, Next.js)",
-        "Responsive Development",
-        "SEO Optimization",
+        "Modern Framework Implementation",
+        "SEO Architecture",
         "Performance Optimization",
-        "Cross-Browser Compatibility"
+        "Security Best Practices",
+        "Cross-Platform Compatibility"
       ],
-      color: "text-blue-400",
-      bgColor: "bg-blue-400/10",
-      borderColor: "border-blue-400/20"
+      color: "text-[#008070]",
+      bgColor: "bg-[#008070]/10",
+      borderColor: "border-[#008070]/20"
     },
     {
       icon: <Wrench className="w-12 h-12" />,
-      title: "Web Maintenance",
-      description: "Keep your website running smoothly with our ongoing support.",
+      title: "Ongoing Optimization",
+      description: "Continuous improvement and technical excellence. Your website evolves with your business and market demands.",
       features: [
-        "Regular Updates & Patches",
-        "Security Monitoring",
-        "Content Management",
-        "Bug Fixes & Improvements",
-        "24/7 Technical Support"
+        "Proactive Maintenance",
+        "Security Monitoring & Updates",
+        "Performance Optimization",
+        "Strategic Enhancements",
+        "Priority Technical Support"
       ],
-      color: "text-green-400",
-      bgColor: "bg-green-400/10", 
-      borderColor: "border-green-400/20"
+      color: "text-[#008070]",
+      bgColor: "bg-[#008070]/10",
+      borderColor: "border-[#008070]/20"
     },
     {
       icon: <Server className="w-12 h-12" />,
-      title: "Web Hosting",
-      description: "Reliable, fast hosting on our own secure servers.",
+      title: "Professional Hosting",
+      description: "Enterprise-grade infrastructure with the reliability and performance your professional presence demands.",
       features: [
         "99.9% Uptime Guarantee",
-        "SSL Certificates Included",
-        "Daily Backups",
-        "CDN Integration",
+        "SSL & Security Certificates",
+        "Automated Daily Backups",
+        "Global CDN Integration",
         "Scalable Infrastructure"
       ],
       color: "text-[#008070]",
@@ -93,26 +93,26 @@ export default function ServicesPage() {
   const processSteps = [
     {
       number: "01",
-      title: "Discovery & Planning",
-      description: "We dive deep into your business goals, target audience, and technical requirements.",
+      title: "Discovery & Strategy",
+      description: "Comprehensive analysis of your business, market position, and objectives. Strategic planning that aligns with your goals.",
       icon: <Search className="w-8 h-8" />
     },
     {
-      number: "02", 
-      title: "Design & Prototype",
-      description: "Creating wireframes and mockups that align with your brand and user experience goals.",
+      number: "02",
+      title: "Design & Architecture",
+      description: "Custom design and technical architecture that reflects your professional standard and positions you for success.",
       icon: <Eye className="w-8 h-8" />
     },
     {
       number: "03",
-      title: "Development & Testing",
-      description: "Building your website with clean code, rigorous testing, and optimization.",
+      title: "Development & QA",
+      description: "Precision engineering with rigorous testing. Every detail examined to ensure flawless performance.",
       icon: <Code className="w-8 h-8" />
     },
     {
       number: "04",
-      title: "Launch & Support",
-      description: "Deploying your site and providing ongoing maintenance and support.",
+      title: "Launch & Optimization",
+      description: "Seamless deployment with ongoing support and strategic optimization for continued excellence.",
       icon: <CheckCircle className="w-8 h-8" />
     }
   ];
@@ -120,33 +120,33 @@ export default function ServicesPage() {
   const whyChooseUs = [
     {
       icon: <Zap className="w-8 h-8" />,
-      title: "Lightning Fast",
-      description: "Our sites load in under 3 seconds (because life's too short for slow websites)."
+      title: "Performance Engineering",
+      description: "Optimized for speed from the ground up. Fast load times aren't a bonus—they're a requirement for professional presence."
     },
     {
       icon: <Shield className="w-8 h-8" />,
-      title: "Secure by Design",
-      description: "Built with security best practices from day one, not as an afterthought."
+      title: "Security First",
+      description: "Enterprise-grade security built into every layer. Your reputation and client data protected with industry-leading practices."
+    },
+    {
+      icon: <Search className="w-8 h-8" />,
+      title: "Strategic SEO",
+      description: "Sophisticated search optimization that positions you in front of high-value clients. Built to be found by the right people."
+    },
+    {
+      icon: <Users className="w-8 h-8" />,
+      title: "Direct Partnership",
+      description: "Work directly with experienced professionals who understand your business. No outsourcing, no junior teams, no compromises."
     },
     {
       icon: <TrendingUp className="w-8 h-8" />,
-      title: "SEO Optimized",
-      description: "Your site will be Google-friendly right out of the gate."
+      title: "Long-Term Value",
+      description: "Websites engineered to perform and appreciate over time. Strategic decisions made with longevity and growth in mind."
     },
     {
-      icon: <Heart className="w-8 h-8" />,
-      title: "Personal Touch",
-      description: "You'll work directly with our team, not a chatbot or call center."
-    },
-    {
-      icon: <Coffee className="w-8 h-8" />,
-      title: "Caffeine-Powered",
-      description: "We fuel our creativity with quality coffee and deliver quality results."
-    },
-    {
-      icon: <Clock className="w-8 h-8" />,
-      title: "On-Time Delivery", 
-      description: "We respect your timeline and deliver projects when we say we will."
+      icon: <CheckCircle className="w-8 h-8" />,
+      title: "Proven Reliability",
+      description: "Disciplined process. Clear communication. Commitments honored. The professional standards you expect from a premium service."
     }
   ];
 
@@ -154,20 +154,23 @@ export default function ServicesPage() {
     <div className="min-h-screen pt-20 bg-[#191E1E] text-white">
      
 
-      {/* Hero Section - Variation 3 */}
+      {/* Hero Section */}
       <section className="px-4 md:px-16 py-16 md:py-20">
         <div className="max-w-6xl mx-auto">
           <div className="space-y-8">
             <div className="flex items-center gap-4">
               <div className="w-12 h-1 bg-[#008070]"></div>
-              <span className="font-manrope text-[#008070] font-semibold">Services</span>
+              <span className="font-manrope text-[#008070] font-semibold">Our Services</span>
             </div>
-            <div className="space-y-4">
+            <div className="space-y-6">
               <h1 className="font-anton text-4xl md:text-5xl lg:text-6xl text-white leading-tight tracking-tight">
-                How We Help Your Business Grow
+                Premium Web Solutions Built to Last
               </h1>
-              <p className="font-manrope text-lg text-white max-w-3xl">
-                We believe great websites are built on four pillars: thoughtful design, solid development, reliable hosting, and ongoing care. Here's how we deliver on each.
+              <p className="font-manrope text-xl text-gray-300 max-w-3xl leading-relaxed">
+                We deliver comprehensive web services designed for professionals who refuse to compromise on quality. Every solution is strategically crafted to position you as the premium choice in your market.
+              </p>
+              <p className="font-manrope text-lg text-gray-400 max-w-3xl leading-relaxed">
+                From custom design to strategic SEO, reliable hosting to ongoing optimization—we provide everything you need to maintain a professional digital presence that performs.
               </p>
             </div>
           </div>
@@ -178,10 +181,13 @@ export default function ServicesPage() {
       <section className="px-4 md:px-16 py-16 md:py-28">
         <div className="max-w-6xl mx-auto">
           <div className="text-center space-y-6 mb-16">
-            <p className="font-manrope font-semibold text-[#008070]">What We Do Best</p>
+            <p className="font-manrope font-semibold text-[#008070]">Core Capabilities</p>
             <h2 className="font-anton text-3xl md:text-5xl text-white leading-tight">
-              Four Core Services, Infinite Possibilities
+              Comprehensive Solutions for Professional Success
             </h2>
+            <p className="font-manrope text-lg text-gray-300 max-w-3xl mx-auto">
+              Four integrated services that work together to create and maintain a digital presence worthy of your expertise.
+            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -197,8 +203,8 @@ export default function ServicesPage() {
                 <h3 className="font-anton text-2xl md:text-3xl text-white mb-4">
                   {service.title}
                 </h3>
-                
-                <p className="font-manrope text-white mb-6">
+
+                <p className="font-manrope text-gray-300 mb-6">
                   {service.description}
                 </p>
 
@@ -206,7 +212,7 @@ export default function ServicesPage() {
                   {service.features.map((feature, idx) => (
                     <li key={idx} className="flex items-center gap-3">
                       <CheckCircle className={`w-5 h-5 ${service.color} flex-shrink-0`} />
-                      <span className="font-manrope text-white">{feature}</span>
+                      <span className="font-manrope text-gray-300">{feature}</span>
                     </li>
                   ))}
                 </ul>
@@ -224,12 +230,12 @@ export default function ServicesPage() {
       <section className="px-4 md:px-16 py-16 md:py-28 bg-black/20">
         <div className="max-w-6xl mx-auto">
           <div className="text-center space-y-6 mb-16">
-            <p className="font-manrope font-semibold text-[#008070]">Why Us</p>
+            <p className="font-manrope font-semibold text-[#008070]">Our Standards</p>
             <h2 className="font-anton text-3xl md:text-5xl text-white leading-tight">
-              What Makes Us Different
+              Why Professionals Choose Visionary Advance
             </h2>
-            <p className="font-manrope text-lg text-white max-w-3xl mx-auto">
-              Sure, there are other web agencies out there. But here's why smart businesses choose us.
+            <p className="font-manrope text-lg text-gray-300 max-w-3xl mx-auto">
+              We maintain the highest standards in every aspect of our work—because your reputation depends on the quality of your digital presence.
             </p>
           </div>
 
@@ -242,7 +248,7 @@ export default function ServicesPage() {
                 <h3 className="font-anton text-xl text-white mb-3">
                   {reason.title}
                 </h3>
-                <p className="font-manrope text-white">
+                <p className="font-manrope text-gray-300">
                   {reason.description}
                 </p>
               </div>
@@ -255,10 +261,13 @@ export default function ServicesPage() {
       <section className="px-4 md:px-16 py-16 md:py-28">
         <div className="max-w-6xl mx-auto">
           <div className="text-center space-y-6 mb-16">
-            <p className="font-manrope font-semibold text-[#008070]">Our Process</p>
+            <p className="font-manrope font-semibold text-[#008070]">Our Approach</p>
             <h2 className="font-anton text-3xl md:text-5xl text-white leading-tight">
-              How We Transform Ideas Into Digital Reality
+              A Disciplined Process for Exceptional Results
             </h2>
+            <p className="font-manrope text-lg text-gray-300 max-w-3xl mx-auto">
+              Quality doesn't happen by accident. Our structured approach ensures every project meets the highest standards from discovery through launch and beyond.
+            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -276,8 +285,8 @@ export default function ServicesPage() {
                   <h3 className="font-anton text-xl text-white mb-4">
                     {step.title}
                   </h3>
-                  
-                  <p className="font-manrope text-white">
+
+                  <p className="font-manrope text-gray-300">
                     {step.description}
                   </p>
                 </div>

@@ -23,23 +23,22 @@ export default function CTA(){
                         <div className="max-w-3xl mx-auto space-y-8">
                             <div className="space-y-6">
                                 <h2 className="font-anton text-3xl md:text-5xl text-white leading-tight">
-                                    Ready to Build Something Amazing?
+                                    Ready For A Website That Matches Your Standards?
                                 </h2>
                                 <p className="font-manrope text-lg text-white">
-                                    Let's discuss your project and see how we can help you achieve your digital goals. 
-                                    Free consultation and honest advice
+                                    Let's build something you're proud to share. Your expertise deserves a digital presence that does it justice.
                                 </p>
                             </div>
 
                             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                                 <Link href={"/contact"}>
                                     <button className="bg-[#008070] cursor-pointer hover:bg-[#006b5d] text-white px-8 py-4 rounded-lg font-manrope font-semibold w-full sm:w-auto transition-colors">
-                                        Start Your Project
+                                        Elevate Your Presence
                                     </button>
                                 </Link>
-                                <Link href={"/contact"}>
+                                <Link href={"/services"}>
                                     <button className="border-2 border-white cursor-pointer text-white bg-transparent hover:bg-white hover:text-[#191E1E] px-8 py-4 rounded-lg font-manrope font-semibold w-full sm:w-auto transition-colors">
-                                        Schedule a Call
+                                        See Our Approach
                                     </button>
                                 </Link>
                             </div>

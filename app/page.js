@@ -6,6 +6,10 @@ import {
   Globe,
   Smartphone,
   BarChart3,
+  AlertCircle,
+  TrendingDown,
+  Search,
+  Award,
 } from "lucide-react";
 import Image from 'next/image';
 
@@ -50,7 +54,7 @@ export default function LandingPage() {
             <div className="space-y-6 ">
               
               <SplitText
-  text="Building Stronger Communities Through Digital Solutions"
+  text="Your Work Is Exceptional. Your Website Should Reflect That."
   className="pb-2 font-anton text-5xl lg:text-6xl text-white leading-tight tracking-tight lg:max-w-4xl mx-auto"
   delay={100}
   duration={0.7}
@@ -61,39 +65,100 @@ export default function LandingPage() {
   threshold={0.1}
   rootMargin="-100px"
   textAlign="center"
- 
+
 />
 
-<p>At our core, we believe that strong communities are built on
-                meaningful relationships. Let us help you create a digital
-                presence that fosters connection and engagement.</p>
+<p className="text-lg md:text-xl">Premium web design and strategic SEO for businesses that refuse to settle for &apos;good enough.&apos; When someone searches for what you do, they should immediately see the quality and professionalism you bring to every project.</p>
 
           
             </div>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <a href="/services" className="bg-[#008070] hover:bg-[#006b5d] text-white px-6 py-3 rounded w-full sm:w-auto transition-colors text-center">
-                Learn More
+              <a href="/contact" className="bg-[#008070] hover:bg-[#006b5d] text-white px-6 py-3 rounded w-full sm:w-auto transition-colors text-center">
+                Elevate Your Presence
               </a>
-              <a href="/contact" className="border-2 border-white text-white bg-transparent hover:bg-white hover:text-[#191E1E] px-6 py-3 rounded w-full sm:w-auto transition-colors text-center">
-                Get Started
+              <a href="/services" className="border-2 border-white text-white bg-transparent hover:bg-white hover:text-[#191E1E] px-6 py-3 rounded w-full sm:w-auto transition-colors text-center">
+                See Our Approach
               </a>
             </div>
           </div>
         </section>
 
-      
+        {/* Problem/Gap Section */}
+        <section className="px-4 md:px-16 py-16 md:py-24 relative bg-white/5">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center space-y-4 mb-12 md:mb-16">
+              <p className="font-manrope font-semibold text-[#008070]">The Gap</p>
+              <SplitText
+                text="Does Your Website Match the Quality You Deliver?"
+                className="font-anton text-3xl md:text-4xl lg:text-5xl text-white leading-tight tracking-tight max-w-4xl mx-auto"
+                delay={100}
+                duration={0.7}
+                ease="power3.out"
+                splitType="words"
+                from={{ opacity: 0, y: 40 }}
+                to={{ opacity: 1, y: 0 }}
+                threshold={0.1}
+                rootMargin="-100px"
+                textAlign="center"
+              />
+              <p className="font-manrope text-base md:text-lg text-gray-300 max-w-3xl mx-auto">
+                You deliver exceptional results. But online? You&apos;re being judged before they ever meet you.
+              </p>
+            </div>
 
-       
+            <div className="space-y-8 md:grid md:grid-cols-2 lg:grid-cols-4 md:gap-8 md:space-y-0">
+              <div className="space-y-4 p-6 bg-white/5 rounded-lg border border-white/10">
+                <TrendingDown className="w-10 h-10 text-[#008070]" />
+                <h3 className="font-anton text-xl text-white">
+                  First Impressions Matter
+                </h3>
+                <p className="font-manrope text-gray-300">
+                  Potential clients search your business and see an outdated website. They assume your quality matches your site—and move on to competitors.
+                </p>
+              </div>
+
+              <div className="space-y-4 p-6 bg-white/5 rounded-lg border border-white/10">
+                <Search className="w-10 h-10 text-[#008070]" />
+                <h3 className="font-anton text-xl text-white">
+                  Invisible Excellence
+                </h3>
+                <p className="font-manrope text-gray-300">
+                  Your best work is hidden because you don&apos;t rank for the searches that matter. Competitors show up first simply because they invested in SEO.
+                </p>
+              </div>
+
+              <div className="space-y-4 p-6 bg-white/5 rounded-lg border border-white/10">
+                <AlertCircle className="w-10 h-10 text-[#008070]" />
+                <h3 className="font-anton text-xl text-white">
+                  Misrepresentation
+                </h3>
+                <p className="font-manrope text-gray-300">
+                  A DIY website or cheap template doesn&apos;t represent the premium service you deliver. The disconnect costs you high-value clients.
+                </p>
+              </div>
+
+              <div className="space-y-4 p-6 bg-white/5 rounded-lg border border-white/10">
+                <Award className="w-10 h-10 text-[#008070]" />
+                <h3 className="font-anton text-xl text-white">
+                  Professional Standard
+                </h3>
+                <p className="font-manrope text-gray-300">
+                  You wouldn&apos;t deliver mediocre work to clients—why accept it for yourself? Your online presence is an extension of your reputation.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
 
         {/* Services Section */}
         <section className="px-4 md:px-16 py-16 relative">
           <div className="max-w-6xl mx-auto">
             <div className="text-center space-y-4 mb-12 md:mb-16">
-            <p className="font-manrope font-semibold text-white">Connect</p>
- 
+            <p className="font-manrope font-semibold text-[#008070]">The Solution</p>
+
              <SplitText
-  text="Your Success Is Our Mission"
+  text="Web Design That Honors Your Expertise"
   className=" font-anton text-3xl md:text-4xl lg:text-5xl text-white leading-tight tracking-tight max-w-4xl mx-auto"
   delay={100}
   duration={0.7}
@@ -104,48 +169,46 @@ export default function LandingPage() {
   threshold={0.1}
   rootMargin="-100px"
   textAlign="center"
- 
+
 />
-<p className='font-manrope text-base md:text-lg text-white max-w-3xl mx-auto'>Our approach focuses on fostering relationships within
-                communities. We leverage our web design and hosting services to
-                empower local connections.</p>
+<p className='font-manrope text-base md:text-lg text-gray-300 max-w-3xl mx-auto'>We build websites for professionals who understand that quality matters—and who demand it in everything they do. Your years of experience and commitment to excellence deserve a digital presence that does it justice.</p>
 
               
             </div>
 
             <div className="space-y-12 md:grid md:grid-cols-3 md:gap-12 md:space-y-0 mb-12 md:mb-16">
               <div className="text-center space-y-6 md:space-y-8">
-                <img src='/Img/performance.jpg' className="w-full h-48 md:h-60" />
+                <img src='/Img/performance.jpg' className="w-full h-48 md:h-60 rounded-lg" />
                 <div className="space-y-4 md:space-y-6">
                   <h3 className="font-anton text-2xl md:text-3xl text-white leading-tight">
-                   Performance Focused Implementation
+                    Design That Reflects Your Standard
                   </h3>
-                  <p className="font-manrope text-white">
-                   Our development approach prioritizes speed, security, and user experience to ensure your digital presence delivers measurable business impact.
+                  <p className="font-manrope text-gray-300">
+                    Every pixel, every interaction, every detail crafted to showcase the level of quality you bring to your work. No templates. No shortcuts. Built to represent excellence.
                   </p>
                 </div>
               </div>
 
               <div className="text-center space-y-6 md:space-y-8">
-                <img src='/Img/partner.jpg' className="w-full h-48 md:h-60" />
+                <img src='/Img/partner.jpg' className="w-full h-48 md:h-60 rounded-lg" />
                 <div className="space-y-4 md:space-y-6">
                   <h3 className="font-anton text-2xl md:text-3xl text-white leading-tight">
-                    Strategic Digital Partnerships
+                    Found By The Right People
                   </h3>
-                  <p className="font-manrope text-white">
-                    We become an extension of your team, working collaboratively to achieve your business objectives through innovative web solutions.
+                  <p className="font-manrope text-gray-300">
+                    SEO strategy that puts you in front of clients who value expertise and quality. Show up first for searches that matter, with a presence that commands respect.
                   </p>
                 </div>
               </div>
 
               <div className="text-center space-y-6 md:space-y-8">
-                <img src='/Img/communication.jpg' className="w-full h-48 md:h-60" />
+                <img src='/Img/communication.jpg' className="w-full h-48 md:h-60 rounded-lg" />
                 <div className="space-y-4 md:space-y-6">
                   <h3 className="font-anton text-2xl md:text-3xl text-white leading-tight">
-                    Transparent Communication Process
+                    Built To Last, Built To Perform
                   </h3>
-                  <p className="font-manrope text-white">
-                  We maintain open dialogue throughout every project, providing regular updates and insights so you're always informed about your investment's progress.
+                  <p className="font-manrope text-gray-300">
+                    Fast, secure, and engineered for long-term performance. Your website should work as flawlessly as your business runs—no compromises.
                   </p>
                 </div>
               </div>
@@ -153,10 +216,10 @@ export default function LandingPage() {
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 md:gap-6">
               <a href="/services" className="border-2 border-white text-white bg-transparent hover:bg-white hover:text-[#191E1E] px-6 py-3 rounded w-full sm:w-auto transition-colors text-center">
-                Learn More
+                See Our Approach
               </a>
               <a href="/contact" className="text-white hover:text-gray-300 flex items-center gap-2 w-full sm:w-auto justify-center transition-colors">
-                Get Started
+                Start Your Project
                 <ChevronRight className="w-4 h-4" />
               </a>
             </div>
@@ -164,13 +227,13 @@ export default function LandingPage() {
         </section>
 
         {/* Split Content Section */}
-        <section className="px-4 md:px-16 py-16 md:py-28 relative">
+        <section className="px-4 md:px-16 py-16 md:py-28 relative bg-white/5">
           <div className="max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
             <div className="flex-1 space-y-8 order-2 lg:order-1">
               <div className="space-y-6 text-left">
-                <p className="font-manrope font-semibold text-white">Connect</p>
+                <p className="font-manrope font-semibold text-[#008070]">Honor</p>
                   <SplitText
-  text="Premium Web Solutions That Drive Business Success"
+  text="A Digital Presence That Matches Your Craftsmanship"
   className="pb-2 font-anton text-3xl text-left md:text-4xl lg:text-6xl text-white leading-tight tracking-tight max-w-4xl mx-auto"
   delay={100}
   duration={0.7}
@@ -181,37 +244,36 @@ export default function LandingPage() {
   threshold={0.1}
   rootMargin="-100px"
   textAlign="left"
- 
+
 />
 
-<p className='font-manrope text-left text-base md:text-lg text-white max-w-3xl mx-auto'>We craft exceptional digital experiences that reflect your brand's excellence. From sophisticated design to seamless functionality, we deliver websites that convert visitors into loyal customers.</p>
+<p className='font-manrope text-left text-base md:text-lg text-gray-300 max-w-3xl mx-auto'>We build websites for professionals who understand that quality matters—and who demand it in everything they do. Your years of experience, your attention to detail, your commitment to excellence—it all deserves a digital presence that does it justice.</p>
 
               </div>
 
               <div className="space-y-6 md:grid md:grid-cols-2 md:gap-8 md:space-y-0">
                 <div className="space-y-4">
                   <h3 className="font-anton text-xl text-white">
-                    Engage Locally
+                    Premium Positioning
                   </h3>
-                  <p className="font-manrope text-white">
-                    Empower your community with a website that reflects its unique
-                    spirit and needs.
+                  <p className="font-manrope text-gray-300">
+                    Attract clients who value expertise and quality over price. Your website should filter for the right opportunities, not just any opportunities.
                   </p>
                 </div>
                 <div className="space-y-4">
-                  <h3 className="font-anton text-xl text-white">Build Authority</h3>
-                  <p className="font-manrope text-white">
-                    Establish your brand as an industry leader with professional web presence that commands trust and credibility.
+                  <h3 className="font-anton text-xl text-white">Professional Standard</h3>
+                  <p className="font-manrope text-gray-300">
+                    Establish your brand as the premium choice in your market. When they search, they should see quality before they see your competitors.
                   </p>
                 </div>
               </div>
 
               <div className="flex flex-col sm:flex-row items-start gap-4 md:gap-6">
-                <a href="/services" className="border-2 border-white text-white bg-transparent hover:bg-white hover:text-[#191E1E] px-6 py-3 rounded w-full sm:w-auto transition-colors text-center">
-                  Learn More
+                <a href="/contact" className="bg-[#008070] hover:bg-[#006b5d] text-white px-6 py-3 rounded w-full sm:w-auto transition-colors text-center">
+                  Elevate Your Presence
                 </a>
-                <a href="/contact" className="text-white hover:text-gray-300 flex items-center gap-2 w-full sm:w-auto justify-center transition-colors">
-                  Get Started
+                <a href="/services" className="text-white hover:text-gray-300 flex items-center gap-2 w-full sm:w-auto justify-center transition-colors">
+                  See Our Approach
                   <ChevronRight className="w-4 h-4" />
                 </a>
               </div>
@@ -226,58 +288,58 @@ export default function LandingPage() {
         {/* Web Hosting Section */}
         <section className="px-4 md:px-16 py-16 md:py-28 relative">
           <div className="max-w-6xl mx-auto">
-            <h2 className="font-anton text-3xl md:text-4xl text-white leading-tight tracking-tight mb-12 md:mb-20 max-w-3xl">
-              Reliable Web Hosting Solutions for Your Growing Online Presence
-            </h2>
+            <div className="text-center space-y-4 mb-12 md:mb-16">
+              <p className="font-manrope font-semibold text-[#008070]">Excellence</p>
+              <h2 className="font-anton text-3xl md:text-4xl lg:text-5xl text-white leading-tight tracking-tight max-w-3xl mx-auto">
+                The Professional Standard for Web Presence
+              </h2>
+            </div>
 
             <div className="space-y-12 md:grid md:grid-cols-3 md:gap-12 md:space-y-0">
               <div className="space-y-6 md:space-y-8">
                 <div className="space-y-4 md:space-y-6">
-                  <Globe className="w-12 h-12 text-white" />
+                  <Globe className="w-12 h-12 text-[#008070]" />
                   <h3 className="font-anton text-xl md:text-2xl text-white leading-tight">
-                    Custom Web Development Tailored to Your Unique Business Needs
+                    Built With Obsessive Attention to Detail
                   </h3>
-                  <p className="font-manrope text-white">
-                    Our web hosting services ensure your site is fast, secure, and
-                    always online.
+                  <p className="font-manrope text-gray-300">
+                    Every line of code, every interaction designed for flawless performance. Your website should work as precisely as you operate your business.
                   </p>
                 </div>
                 <a href="/services" className="text-white hover:text-gray-300 flex items-center gap-2 p-0 transition-colors">
-                  Learn More
+                  See Our Approach
                   <ChevronRight className="w-4 h-4" />
                 </a>
               </div>
 
               <div className="space-y-6 md:space-y-8">
                 <div className="space-y-4 md:space-y-6">
-                  <Smartphone className="w-12 h-12 text-white" />
+                  <Search className="w-12 h-12 text-[#008070]" />
                   <h3 className="font-anton text-xl md:text-2xl text-white leading-tight">
-                    Expert Web Development with Code for Optimal Performance
+                    Found By Clients Who Value Quality
                   </h3>
-                  <p className="font-manrope text-white">
-                    We build responsive websites that engage users and drive
-                    conversions.
+                  <p className="font-manrope text-gray-300">
+                    Sophisticated SEO strategy that positions you in front of high-value clients searching for expertise, not the cheapest option.
                   </p>
                 </div>
                 <a href="/contact" className="text-white hover:text-gray-300 flex items-center gap-2 p-0 transition-colors">
-                  Get Started
+                  Start Your Project
                   <ChevronRight className="w-4 h-4" />
                 </a>
               </div>
 
               <div className="space-y-6 md:space-y-8">
                 <div className="space-y-4 md:space-y-6">
-                  <BarChart3 className="w-12 h-12 text-white" />
+                  <Award className="w-12 h-12 text-[#008070]" />
                   <h3 className="font-anton text-xl md:text-2xl text-white leading-tight">
-                    Data-Driven Analytics to Enhance Your Online Strategy
+                    Reliability You Can Count On
                   </h3>
-                  <p className="font-manrope text-white">
-                    Our analytics services provide insights to help you make
-                    informed decisions.
+                  <p className="font-manrope text-gray-300">
+                    Lightning-fast load times, rock-solid security, and technical excellence that performs year after year without compromise.
                   </p>
                 </div>
                 <a href="/about" className="text-white hover:text-gray-300 flex items-center gap-2 p-0 transition-colors">
-                  Discover
+                  Learn More
                   <ChevronRight className="w-4 h-4" />
                 </a>
               </div>

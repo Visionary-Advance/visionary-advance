@@ -24,11 +24,11 @@ const instSans = Instrument_Sans({
 export const metadata = {
   metadataBase: new URL('https://visionaryadvance.com'),
   title: {
-    default: "Visionary Advance - Web Design & Development for Growing Businesses",
+    default: "Visionary Advance - Premium Web Design That Honors Your Expertise",
     template: "%s | Visionary Advance"
   },
-  description: "Professional web design and development services specializing in high-converting websites for construction companies, contractors, and service businesses. Custom solutions that drive leads and growth.",
-  keywords: "web design, web development, construction websites, contractor websites, lead generation, custom websites, responsive design, SEO optimization",
+  description: "Premium web design and strategic SEO for professionals who refuse to settle for 'good enough.' We build websites that match the quality you deliver—custom, high-performing, and built to be found by the right clients.",
+  keywords: "premium web design, professional website design, custom web development, SEO services, quality web design, construction website design, contractor web design, professional digital presence, premium SEO",
   authors: [{ name: "Visionary Advance" }],
   creator: "Visionary Advance",
   publisher: "Visionary Advance",
@@ -38,16 +38,16 @@ export const metadata = {
     type: 'website',
     locale: 'en_US',
     url: 'https://visionaryadvance.com',
-    title: 'Visionary Advance - Web Design & Development',
-    description: 'Professional web design and development services that drive results for construction companies and service businesses.',
+    title: 'Visionary Advance - Premium Web Design That Honors Your Expertise',
+    description: 'Your work is exceptional. Your website should reflect that. Premium web design and strategic SEO for professionals who demand quality in everything they do.',
     siteName: 'Visionary Advance',
   },
 
   // Twitter Card
   twitter: {
     card: 'summary_large_image',
-    title: 'Visionary Advance - Web Design & Development',
-    description: 'Professional web design and development services for growing businesses.',
+    title: 'Premium Web Design That Honors Your Expertise',
+    description: 'Web design for professionals who refuse to settle for "good enough." Built to match the quality you deliver.',
     creator: '@visionaryadvance',
   },
 
