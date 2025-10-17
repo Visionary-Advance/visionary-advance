@@ -77,14 +77,19 @@ export default function RootLayout({ children }) {
       <body
         className={`${instSans.variable} ${dmSansReg.variable} ${dmSansBold.variable} antialiased`}
       >
-        <Script async src="https://www.googletagmanager.com/gtag/js?id=AW-17658795216"></Script>
-<Script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments)}
-  gtag('js', new Date());
-
-  gtag('config', 'AW-17658795216');
-</Script>
+        <Script
+          async
+          src="https://www.googletagmanager.com/gtag/js?id=AW-17658795216"
+          strategy="afterInteractive"
+        />
+        <Script id="google-ads-init" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'AW-17658795216');
+          `}
+        </Script>
         <ConditionalLayout>
           {children}
         </ConditionalLayout>
