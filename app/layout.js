@@ -1,6 +1,7 @@
 import { DM_Sans, Instrument_Sans } from "next/font/google";
 import "./globals.css";
 import ConditionalLayout from "@/Components/ConditionalLayout";
+import Script from "next/script";
 
 const dmSansReg = DM_Sans({
   variable: 'dm-sans-regular',
@@ -69,11 +70,21 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
+  
   return (
     <html lang="en">
+      
       <body
         className={`${instSans.variable} ${dmSansReg.variable} ${dmSansBold.variable} antialiased`}
       >
+        <Script async src="https://www.googletagmanager.com/gtag/js?id=AW-17658795216"></Script>
+<Script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments)}
+  gtag('js', new Date());
+
+  gtag('config', 'AW-17658795216');
+</Script>
         <ConditionalLayout>
           {children}
         </ConditionalLayout>
