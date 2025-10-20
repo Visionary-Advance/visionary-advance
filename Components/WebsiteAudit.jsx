@@ -108,65 +108,65 @@ export default function WebsiteAudit() {
   return (
     <div className="w-full">
       {/* Audit Form */}
-      <div className="max-w-3xl mx-auto">
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="audit-url" className="block mb-2 font-semibold text-[#0f0f0f] text-sm">
-              Enter Your Website URL
-            </label>
-            <div className="flex gap-3">
-              <input
-                type="text"
-                id="audit-url"
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                placeholder="example.com"
-                required
-                disabled={loading}
-                className="flex-1 px-4 py-3.5 border-2 border-gray-200 rounded-lg text-base text-gray-900 transition-all duration-300 bg-gray-50 focus:outline-none focus:border-[#008070] focus:bg-white focus:shadow-[0_0_0_3px_rgba(0,128,112,0.1)] disabled:opacity-50 disabled:cursor-not-allowed"
-              />
-              <button
-                type="submit"
-                disabled={loading}
-                className="px-8 py-3.5 bg-[#008070] text-white font-semibold rounded-lg transition-all duration-300 hover:bg-[#005F52] hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(0,128,112,0.3)] disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0"
-              >
-                {loading ? 'Analyzing...' : 'Run Audit'}
-              </button>
-            </div>
-          </div>
-        </form>
-
-        {/* Error State */}
-        {error && (
-          <div className="mt-6 bg-red-50 border-2 border-red-200 text-red-800 px-6 py-4 rounded-lg">
-            <p className="font-semibold">Unable to Run Audit</p>
-            <p className="text-sm mt-1">{error}</p>
-            <p className="text-sm mt-3">
-              No problem! Fill out our{' '}
-              <a href="#contact" className="underline font-semibold hover:text-red-900">
-                contact form below
-              </a>{' '}
-              and we'll send you a detailed audit within 24 hours.
-            </p>
-          </div>
-        )}
-
-        {/* Loading State */}
-        {loading && (
-          <div className="mt-8 text-center">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-[#008070]"></div>
-            <p className="mt-4 text-gray-600 font-medium">
-              Running comprehensive audit using Google Lighthouse...
-            </p>
-            <p className="mt-2 text-sm text-gray-500">
-              This performs a real performance test and typically takes 30-60 seconds
-            </p>
-            <p className="mt-1 text-sm text-gray-400">
-              We're checking performance, SEO, accessibility, and best practices
-            </p>
-          </div>
-        )}
+     <div className="max-w-3xl mx-auto">
+  <form onSubmit={handleSubmit} className="space-y-4">
+    <div>
+      <label htmlFor="audit-url" className="block mb-2 font-semibold text-[#0f0f0f] text-sm">
+        Enter Your Website URL
+      </label>
+      <div className="flex flex-col sm:flex-row gap-3">
+        <input
+          type="text"
+          id="audit-url"
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+          placeholder="example.com"
+          required
+          disabled={loading}
+          className="flex-1 px-4 py-3.5 border-2 border-gray-200 rounded-lg text-base text-gray-900 transition-all duration-300 bg-gray-50 focus:outline-none focus:border-[#008070] focus:bg-white focus:shadow-[0_0_0_3px_rgba(0,128,112,0.1)] disabled:opacity-50 disabled:cursor-not-allowed"
+        />
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full sm:w-auto px-8 py-3.5 bg-[#008070] text-white font-semibold rounded-lg transition-all duration-300 hover:bg-[#005F52] hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(0,128,112,0.3)] disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+        >
+          {loading ? 'Analyzing...' : 'Run Audit'}
+        </button>
       </div>
+    </div>
+  </form>
+
+  {/* Error State */}
+  {error && (
+    <div className="mt-6 bg-red-50 border-2 border-red-200 text-red-800 px-6 py-4 rounded-lg">
+      <p className="font-semibold">Unable to Run Audit</p>
+      <p className="text-sm mt-1">{error}</p>
+      <p className="text-sm mt-3">
+        No problem! Fill out our{' '}
+        <a href="#contact" className="underline font-semibold hover:text-red-900">
+          contact form below
+        </a>{' '}
+        and we'll send you a detailed audit within 24 hours.
+      </p>
+    </div>
+  )}
+
+  {/* Loading State */}
+  {loading && (
+    <div className="mt-8 text-center">
+      <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-[#008070]"></div>
+      <p className="mt-4 text-gray-600 font-medium">
+        Running comprehensive audit using Google Lighthouse...
+      </p>
+      <p className="mt-2 text-sm text-gray-500">
+        This performs a real performance test and typically takes 30-60 seconds
+      </p>
+      <p className="mt-1 text-sm text-gray-400">
+        We're checking performance, SEO, accessibility, and best practices
+      </p>
+    </div>
+  )}
+</div>
 
       {/* Results Display */}
       {results && !loading && (

@@ -2,12 +2,12 @@
 
 export default function TermsOfService() {
   return (
-    <section className="max-w-3xl mx-auto p-6 text-white leading-7">
+    <section className="max-w-3xl mx-auto p-6 pt-40 text-white leading-7">
       <h1 className="text-3xl font-bold mb-6">Terms of Service</h1>
 
       <p className="mb-4">
-        <strong>Effective Date:</strong> 10/20/25 <br />
-        <strong>Last Updated:</strong> 10/20/25
+        <strong>Effective Date:</strong> 01/20/25 <br />
+        <strong>Last Updated:</strong> 01/20/25
       </p>
 
       <p className="mb-6">
