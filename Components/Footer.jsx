@@ -1,3 +1,4 @@
+import Image from 'next/image';
 
 export default function Footer({ variant = "default" }) {
   const getNewsletterText = () => {
@@ -96,8 +97,8 @@ export default function Footer({ variant = "default" }) {
         <div className="space-y-12 lg:grid lg:grid-cols-4 lg:gap-16 lg:space-y-0 mb-16 md:mb-20">
           {/* Newsletter */}
           <div className="lg:col-span-2 space-y-6">
-           <img className="w-20" src="/Img/VALogo.png" />
-           
+           <Image className="w-20" src="/Img/VALogo.png" alt="Visionary Advance Logo" width={80} height={80} quality={100} />
+
           </div>
 
           {/* Quick Links */}

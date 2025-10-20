@@ -12,6 +12,10 @@ Disallow: /connect-square/
 # Disallow Square callback pages (OAuth flows)
 Disallow: /square/
 
+# Disallow privacy and terms pages
+Disallow: /privacy-policy
+Disallow: /terms-of-service
+
 # Allow construction-websites landing page (high priority)
 Allow: /construction-websites
 

@@ -178,7 +178,15 @@ export default function LandingPage() {
 
             <div className="space-y-12 md:grid md:grid-cols-3 md:gap-12 md:space-y-0 mb-12 md:mb-16">
               <div className="text-center space-y-6 md:space-y-8">
-                <img src='/Img/performance.jpg' className="w-full h-48 md:h-60 rounded-lg" />
+                <div className="relative w-full h-48 md:h-60">
+                  <Image
+                    src='/Img/performance.jpg'
+                    alt="Design that reflects professional standards"
+                    fill
+                    className="rounded-lg object-cover"
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                  />
+                </div>
                 <div className="space-y-4 md:space-y-6">
                   <h3 className="font-anton text-2xl md:text-3xl text-white leading-tight">
                     Design That Reflects Your Standard
@@ -190,7 +198,15 @@ export default function LandingPage() {
               </div>
 
               <div className="text-center space-y-6 md:space-y-8">
-                <img src='/Img/partner.jpg' className="w-full h-48 md:h-60 rounded-lg" />
+                <div className="relative w-full h-48 md:h-60">
+                  <Image
+                    src='/Img/partner.jpg'
+                    alt="SEO strategy to be found by the right clients"
+                    fill
+                    className="rounded-lg object-cover"
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                  />
+                </div>
                 <div className="space-y-4 md:space-y-6">
                   <h3 className="font-anton text-2xl md:text-3xl text-white leading-tight">
                     Found By The Right People
@@ -202,7 +218,15 @@ export default function LandingPage() {
               </div>
 
               <div className="text-center space-y-6 md:space-y-8">
-                <img src='/Img/communication.jpg' className="w-full h-48 md:h-60 rounded-lg" />
+                <div className="relative w-full h-48 md:h-60">
+                  <Image
+                    src='/Img/communication.jpg'
+                    alt="High-performance websites built to last"
+                    fill
+                    className="rounded-lg object-cover"
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                  />
+                </div>
                 <div className="space-y-4 md:space-y-6">
                   <h3 className="font-anton text-2xl md:text-3xl text-white leading-tight">
                     Built To Last, Built To Perform
@@ -280,7 +304,16 @@ export default function LandingPage() {
             </div>
 
             <div className="flex-1 order-1 lg:order-2">
-              <img src='/Img/success.png' className="w-full h-80 rounded-2xl md:h-[640px]" />
+              <div className="relative w-full h-80 md:h-[640px]">
+                <Image
+                  src='/Img/success.png'
+                  alt="Digital presence that matches your craftsmanship"
+                  fill
+                  className="rounded-2xl object-cover"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  priority
+                />
+              </div>
             </div>
           </div>
         </section>

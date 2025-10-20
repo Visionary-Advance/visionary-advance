@@ -3,6 +3,9 @@
 
 import { useState } from 'react'
 import Script from 'next/script'
+import WebsiteAudit from '@/Components/WebsiteAudit'
+import ConstructionHeader from '@/Components/ConstructionHeader'
+import ConstructionFooter from '@/Components/ConstructionFooter'
 
 export default function LandingPage() {
   // Structured Data for SEO
@@ -27,7 +30,7 @@ export default function LandingPage() {
         "url": "https://visionaryadvance.com",
         "logo": {
           "@type": "ImageObject",
-          "url": "https://visionaryadvance.com/logo.png"
+          "url": "https://visionaryadvance.com/VALogo.png"
         },
         "description": "Professional web design and development services specializing in construction company websites that generate leads.",
         "priceRange": "$$",
@@ -164,12 +167,14 @@ export default function LandingPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
 
-      <main>
+      <ConstructionHeader />
+
+      <main className="pt-24">
         {/* Hero Section */}
-        <section className="relative bg-gradient-to-br from-[#0f0f0f] to-[#1a1a1a] text-white py-32 px-5 text-center overflow-hidden">
-        <div className="absolute inset-0 opacity-30" 
+        <section className="relative bg-gradient-to-br from-[#0a0a0a] to-[#1a1a1a] text-white py-32 px-5 text-center overflow-hidden">
+        <div className="absolute inset-0 opacity-20"
              style={{
-               backgroundImage: 'linear-gradient(90deg, rgba(255,107,0,0.1) 1px, transparent 1px), linear-gradient(rgba(255,107,0,0.1) 1px, transparent 1px)',
+               backgroundImage: 'linear-gradient(90deg, rgba(0,128,112,0.15) 1px, transparent 1px), linear-gradient(rgba(0,128,112,0.15) 1px, transparent 1px)',
                backgroundSize: '50px 50px'
              }}>
         </div>
@@ -180,12 +185,25 @@ export default function LandingPage() {
           <p className="text-xl md:text-2xl text-gray-300 mb-12 max-w-3xl mx-auto">
             Professional websites designed specifically for construction companies that need more qualified leads
           </p>
-          <a 
-            href="#contact" 
-            className="inline-block bg-[#ff6b00] text-white px-12 py-4 text-lg font-semibold rounded-md border-2 border-transparent transition-all duration-300 hover:bg-[#ff8533] hover:-translate-y-0.5 hover:shadow-[0_10px_30px_rgba(255,107,0,0.3)]"
+          <a
+            href="#contact"
+            className="inline-block bg-[#008070] text-white px-12 py-4 text-lg font-semibold rounded-md border-2 border-transparent transition-all duration-300 hover:bg-[#005F52] hover:-translate-y-0.5 hover:shadow-[0_10px_30px_rgba(0,128,112,0.3)]"
           >
             Get Your Free Website Audit
           </a>
+        </div>
+      </section>
+
+      {/* Website Audit Section */}
+      <section className="py-24 px-5 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-center text-4xl md:text-5xl font-bold mb-5 text-[#0f0f0f] tracking-tight">
+            Get Your Free Website Performance Report
+          </h2>
+          <p className="text-center text-xl text-gray-600 mb-12 max-w-2xl mx-auto">
+            See exactly how your website performs on Google&apos;s standards. Get scores for performance, SEO, accessibility, and best practices - plus actionable recommendations to improve.
+          </p>
+          <WebsiteAudit />
         </div>
       </section>
 
@@ -217,9 +235,9 @@ export default function LandingPage() {
                 description: "Your website is just a digital brochure. It doesn't capture leads, showcase your work effectively, or give people a reason to contact you."
               }
             ].map((problem, index) => (
-              <div 
+              <div
                 key={index}
-                className="bg-white p-10 rounded-xl shadow-sm border border-gray-200 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-[#ff6b00]"
+                className="bg-white p-10 rounded-xl shadow-sm border border-gray-200 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-[#008070]"
               >
                 <h3 className="text-[#0f0f0f] mb-4 text-xl font-semibold">
                   {problem.title}
@@ -269,9 +287,9 @@ export default function LandingPage() {
                 description: 'Monthly optimization to keep you ranking higher and attracting more qualified leads over time.'
               }
             ].map((solution, index) => (
-              <div 
+              <div
                 key={index}
-                className="bg-gray-50 p-10 rounded-xl border-l-4 border-[#ff6b00] transition-all duration-300 hover:bg-gray-100 hover:border-l-6"
+                className="bg-gray-50 p-10 rounded-xl border-l-4 border-[#008070] transition-all duration-300 hover:bg-gray-100 hover:border-l-6"
               >
                 <h3 className="text-[#0f0f0f] mb-4 text-xl font-semibold">
                   {solution.title}
@@ -286,7 +304,7 @@ export default function LandingPage() {
       </section>
 
       {/* Social Proof Section */}
-      <section className="py-24 px-5 bg-[#0f0f0f] text-white text-center">
+      <section className="py-24 px-5 bg-[#0a0a0a] text-white text-center">
         <div className="max-w-7xl mx-auto">
           <h2 className="text-4xl md:text-5xl font-bold mb-5 tracking-tight">
             Results That Speak for Themselves
@@ -300,11 +318,11 @@ export default function LandingPage() {
               { number: '67%', label: 'Increase in Website Traffic' },
               { number: 'Page 1', label: 'Google Rankings' }
             ].map((stat, index) => (
-              <div 
+              <div
                 key={index}
                 className="p-8 bg-white/5 rounded-xl border border-white/10 transition-all duration-300 hover:bg-white/10 hover:-translate-y-1"
               >
-                <div className="text-6xl font-bold text-[#ff6b00] mb-3 tracking-tight">
+                <div className="text-6xl font-bold text-[#008070] mb-3 tracking-tight">
                   {stat.number}
                 </div>
                 <div className="text-lg text-gray-300 font-medium">
@@ -317,7 +335,7 @@ export default function LandingPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-24 px-5 bg-gradient-to-br from-[#ff6b00] to-[#ff8533] text-white text-center">
+      <section className="py-24 px-5 bg-gradient-to-br from-[#008070] to-[#005F52] text-white text-center">
         <div className="max-w-7xl mx-auto">
           <h2 className="text-4xl md:text-5xl font-bold mb-6 tracking-tight">
             Ready to Stop Losing Jobs to Your Competition?
@@ -325,9 +343,9 @@ export default function LandingPage() {
           <p className="text-xl mb-12 opacity-95">
             Get a free audit of your current website and see exactly what&apos;s holding you back
           </p>
-          <a 
-            href="#contact" 
-            className="inline-block bg-white text-[#ff6b00] px-12 py-4 text-lg font-semibold rounded-md transition-all duration-300 hover:bg-gray-100 hover:-translate-y-0.5 hover:shadow-[0_10px_30px_rgba(0,0,0,0.2)]"
+          <a
+            href="#contact"
+            className="inline-block bg-white text-[#008070] px-12 py-4 text-lg font-semibold rounded-md transition-all duration-300 hover:bg-gray-100 hover:-translate-y-0.5 hover:shadow-[0_10px_30px_rgba(0,0,0,0.2)]"
           >
             Get Your Free Audit Now
           </a>
@@ -368,7 +386,7 @@ export default function LandingPage() {
                 value={formData.name}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3.5 border-2 border-gray-200 rounded-lg text-base transition-all duration-300 bg-gray-50 focus:outline-none focus:border-[#ff6b00] focus:bg-white focus:shadow-[0_0_0_3px_rgba(255,107,0,0.1)]"
+                className="w-full px-4 py-3.5 border-2 border-gray-200 rounded-lg text-base text-gray-900 transition-all duration-300 bg-gray-50 focus:outline-none focus:border-[#008070] focus:bg-white focus:shadow-[0_0_0_3px_rgba(0,128,112,0.1)]"
               />
             </div>
             
@@ -383,7 +401,7 @@ export default function LandingPage() {
                 value={formData.company}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3.5 border-2 border-gray-200 rounded-lg text-base transition-all duration-300 bg-gray-50 focus:outline-none focus:border-[#ff6b00] focus:bg-white focus:shadow-[0_0_0_3px_rgba(255,107,0,0.1)]"
+                className="w-full px-4 py-3.5 border-2 border-gray-200 rounded-lg text-base text-gray-900 transition-all duration-300 bg-gray-50 focus:outline-none focus:border-[#008070] focus:bg-white focus:shadow-[0_0_0_3px_rgba(0,128,112,0.1)]"
               />
             </div>
             
@@ -398,7 +416,7 @@ export default function LandingPage() {
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3.5 border-2 border-gray-200 rounded-lg text-base transition-all duration-300 bg-gray-50 focus:outline-none focus:border-[#ff6b00] focus:bg-white focus:shadow-[0_0_0_3px_rgba(255,107,0,0.1)]"
+                className="w-full px-4 py-3.5 border-2 border-gray-200 rounded-lg text-base text-gray-900 transition-all duration-300 bg-gray-50 focus:outline-none focus:border-[#008070] focus:bg-white focus:shadow-[0_0_0_3px_rgba(0,128,112,0.1)]"
               />
             </div>
             
@@ -413,13 +431,13 @@ export default function LandingPage() {
                 value={formData.phone}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3.5 border-2 border-gray-200 rounded-lg text-base transition-all duration-300 bg-gray-50 focus:outline-none focus:border-[#ff6b00] focus:bg-white focus:shadow-[0_0_0_3px_rgba(255,107,0,0.1)]"
+                className="w-full px-4 py-3.5 border-2 border-gray-200 rounded-lg text-base text-gray-900 transition-all duration-300 bg-gray-50 focus:outline-none focus:border-[#008070] focus:bg-white focus:shadow-[0_0_0_3px_rgba(0,128,112,0.1)]"
               />
             </div>
             
             <div className="mb-6">
               <label htmlFor="website" className="block mb-2 font-semibold text-[#0f0f0f] text-sm">
-                Current Website (if you have one)
+                Current Website <span className="text-gray-500 font-normal">(optional)</span>
               </label>
               <input
                 type="url"
@@ -428,7 +446,7 @@ export default function LandingPage() {
                 value={formData.website}
                 onChange={handleChange}
                 placeholder="https://"
-                className="w-full px-4 py-3.5 border-2 border-gray-200 rounded-lg text-base transition-all duration-300 bg-gray-50 focus:outline-none focus:border-[#ff6b00] focus:bg-white focus:shadow-[0_0_0_3px_rgba(255,107,0,0.1)]"
+                className="w-full px-4 py-3.5 border-2 border-gray-200 rounded-lg text-base text-gray-900 transition-all duration-300 bg-gray-50 focus:outline-none focus:border-[#008070] focus:bg-white focus:shadow-[0_0_0_3px_rgba(0,128,112,0.1)]"
               />
             </div>
             
@@ -442,14 +460,14 @@ export default function LandingPage() {
                 value={formData.message}
                 onChange={handleChange}
                 rows="4"
-                className="w-full px-4 py-3.5 border-2 border-gray-200 rounded-lg text-base transition-all duration-300 bg-gray-50 focus:outline-none focus:border-[#ff6b00] focus:bg-white focus:shadow-[0_0_0_3px_rgba(255,107,0,0.1)]"
+                className="w-full px-4 py-3.5 border-2 border-gray-200 rounded-lg text-base text-gray-900 transition-all duration-300 bg-gray-50 focus:outline-none focus:border-[#008070] focus:bg-white focus:shadow-[0_0_0_3px_rgba(0,128,112,0.1)]"
               />
             </div>
             
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               disabled={status === 'loading'}
-              className="w-full bg-[#ff6b00] text-white py-4 rounded-lg text-lg font-semibold transition-all duration-300 mt-2 hover:bg-[#ff8533] hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(255,107,0,0.3)] disabled:opacity-60 disabled:cursor-not-allowed"
+              className="w-full bg-[#008070] text-white py-4 rounded-lg text-lg font-semibold transition-all duration-300 mt-2 hover:bg-[#005F52] hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(0,128,112,0.3)] disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {status === 'loading' ? 'Sending...' : 'Get My Free Audit'}
             </button>
@@ -457,6 +475,8 @@ export default function LandingPage() {
         </div>
       </section>
     </main>
+
+    <ConstructionFooter />
     </>
   )
 }

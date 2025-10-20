@@ -68,7 +68,7 @@ export default function Header({ currentPage = "" }) {
         {/* Desktop Get Started Button */}
         <div className="hidden md:flex items-center gap-4">
           <Link href={"/contact"}>
-            <button className="px-4 py-2 bg-[#008070] hover:bg-[#006b5d] text-white transition-colors rounded">
+            <button className="px-4 cursor-pointer py-2 bg-[#008070] hover:bg-[#006b5d] text-white transition-colors rounded">
               Get Started
             </button>
           </Link>
