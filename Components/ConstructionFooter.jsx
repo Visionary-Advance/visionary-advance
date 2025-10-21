@@ -13,7 +13,7 @@ export default function ConstructionFooter() {
           <Link href="/">
             <Image
               className="w-40 cursor-pointer"
-              src="/Img/VALogo_Large.png"
+              src="/Img/VaLogo_Large.png"
               alt="Visionary Advance Logo"
               width={160}
               height={160}
