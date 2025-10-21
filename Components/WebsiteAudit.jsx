@@ -5,9 +5,13 @@ import { useState } from 'react'
 
 export default function WebsiteAudit() {
   const [url, setUrl] = useState('')
+  const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [results, setResults] = useState(null)
   const [error, setError] = useState(null)
+  const [emailSending, setEmailSending] = useState(false)
+  const [emailSent, setEmailSent] = useState(false)
+  const [emailError, setEmailError] = useState(null)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -37,6 +41,40 @@ export default function WebsiteAudit() {
       console.error(err)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleEmailSubmit = async (e) => {
+    e.preventDefault()
+    setEmailSending(true)
+    setEmailError(null)
+
+    try {
+      const response = await fetch('/api/send-audit-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          url: results.url,
+          results: results
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        setEmailError(data.error || 'Failed to send email')
+        return
+      }
+
+      setEmailSent(true)
+    } catch (err) {
+      setEmailError('Something went wrong. Please try again.')
+      console.error(err)
+    } finally {
+      setEmailSending(false)
     }
   }
 
@@ -177,11 +215,6 @@ export default function WebsiteAudit() {
               Audit Results
             </h3>
             <p className="text-gray-600">for {results.url}</p>
-            {results.cached && (
-              <p className="text-sm text-gray-500 mt-1">
-                Cached results from {results.cacheAge} minute{results.cacheAge !== 1 ? 's' : ''} ago
-              </p>
-            )}
           </div>
 
           {/* Score Overview */}
@@ -254,6 +287,61 @@ export default function WebsiteAudit() {
                   </div>
                 ))}
               </div>
+            </div>
+          )}
+
+          {/* Email Capture Section */}
+          {!emailSent ? (
+            <div className="bg-white rounded-xl p-8 shadow-lg border-2 border-[#008070]">
+              <div className="text-center mb-6">
+                <h4 className="text-2xl font-bold text-[#0f0f0f] mb-2">
+                  Want These Results Sent to You?
+                </h4>
+                <p className="text-gray-600 text-lg">
+                  Get a detailed copy of this audit report delivered straight to your inbox
+                </p>
+              </div>
+
+              <form onSubmit={handleEmailSubmit} className="max-w-md mx-auto">
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="your@email.com"
+                    required
+                    disabled={emailSending}
+                    className="flex-1 px-4 py-3.5 border-2 border-gray-200 rounded-lg text-base text-gray-900 transition-all duration-300 bg-gray-50 focus:outline-none focus:border-[#008070] focus:bg-white focus:shadow-[0_0_0_3px_rgba(0,128,112,0.1)] disabled:opacity-50 disabled:cursor-not-allowed"
+                  />
+                  <button
+                    type="submit"
+                    disabled={emailSending}
+                    className="w-full sm:w-auto px-8 py-3.5 bg-[#008070] text-white font-semibold rounded-lg transition-all duration-300 hover:bg-[#005F52] hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(0,128,112,0.3)] disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                  >
+                    {emailSending ? 'Sending...' : 'Send Results'}
+                  </button>
+                </div>
+
+                {emailError && (
+                  <div className="mt-4 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg text-sm text-center">
+                    {emailError}
+                  </div>
+                )}
+              </form>
+            </div>
+          ) : (
+            <div className="bg-green-50 border-2 border-green-200 rounded-xl p-8 text-center">
+              <div className="text-green-600 mb-3">
+                <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h4 className="text-2xl font-bold text-[#0f0f0f] mb-2">
+                Results Sent Successfully!
+              </h4>
+              <p className="text-gray-700 text-lg">
+                Check your inbox at <strong>{email}</strong> for your detailed audit report.
+              </p>
             </div>
           )}
 

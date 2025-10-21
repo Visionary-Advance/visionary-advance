@@ -5,13 +5,9 @@ import { Resend } from 'resend'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
-// Simple in-memory cache (consider using Redis for production)
-const cache = new Map()
-const CACHE_DURATION = 24 * 60 * 60 * 1000 // 24 hours
-
 // Rate limiting map
 const rateLimitMap = new Map()
-const RATE_LIMIT = 10 // requests per hour (only counts new audits, not cached)
+const RATE_LIMIT = 50 // requests per hour
 const RATE_LIMIT_WINDOW = 60 * 60 * 1000 // 1 hour
 
 function getRateLimitKey(request) {
@@ -63,6 +59,7 @@ async function sendAuditNotificationEmail(url, results) {
       html: `
         <h2>New Website Audit Completed</h2>
         <p><strong>Website:</strong> <a href="${url}">${url}</a></p>
+        <p><em>User ran audit but did not provide email yet</em></p>
 
         <h3>Scores</h3>
         <ul>
@@ -90,18 +87,19 @@ async function sendAuditNotificationEmail(url, results) {
           </ul>
         ` : ''}
 
-        <p style="margin-top: 20px; padding: 15px; background-color: #f0f0f0; border-left: 4px solid #ff6b00;">
-          <strong>Lead Opportunity:</strong> This is a potential client who is interested in improving their website performance.
+        <p style="margin-top: 20px; padding: 15px; background-color: #f0f0f0; border-left: 4px solid #008070;">
+          <strong>Potential Lead:</strong> Someone is interested in their website performance.
           ${avgScore < 70 ? 'Their low scores indicate significant room for improvement!' : 'They may benefit from optimization services.'}
+          <br><em>Watch for email request follow-up notification</em>
         </p>
 
         <p style="margin-top: 20px;">
-          <a href="https://visionaryadvance.com/construction-websites" style="background-color: #ff6b00; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">View Full Audit Dashboard</a>
+          <a href="https://visionaryadvance.com/construction-websites" style="background-color: #008070; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">View Full Audit Dashboard</a>
         </p>
       `,
     })
   } catch (err) {
-    console.error('Failed to send email:', err)
+    console.error('Failed to send notification email:', err)
     throw err
   }
 }
@@ -149,18 +147,7 @@ export async function POST(request) {
       )
     }
 
-    // Check cache first (before rate limiting so cached results don't count)
-    const cacheKey = formattedUrl.toLowerCase()
-    const cachedResult = cache.get(cacheKey)
-    if (cachedResult && Date.now() - cachedResult.timestamp < CACHE_DURATION) {
-      return NextResponse.json({
-        ...cachedResult.data,
-        cached: true,
-        cacheAge: Math.round((Date.now() - cachedResult.timestamp) / 1000 / 60) // minutes
-      }, { status: 200 })
-    }
-
-    // Check rate limit only for new audits
+    // Check rate limit
     const rateLimitKey = getRateLimitKey(request)
     if (!checkRateLimit(rateLimitKey)) {
       return NextResponse.json(
@@ -249,18 +236,12 @@ export async function POST(request) {
       fetchTime: lighthouseResult.fetchTime,
     }
 
-    // Cache the results
-    cache.set(cacheKey, {
-      data: results,
-      timestamp: Date.now()
-    })
-
     // Save to database (non-blocking, don't wait for it)
     saveAuditToDatabase(formattedUrl, results).catch(err => {
       console.error('Failed to save audit to database:', err)
     })
 
-    // Send email notification (non-blocking)
+    // Send email notification to admin (non-blocking)
     sendAuditNotificationEmail(formattedUrl, results).catch(err => {
       console.error('Failed to send audit notification:', err)
     })
