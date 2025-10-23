@@ -7,8 +7,8 @@ const resend = new Resend(process.env.RESEND_API_KEY)
 
 // Rate limiting map
 const rateLimitMap = new Map()
-const RATE_LIMIT = 50 // requests per hour
-const RATE_LIMIT_WINDOW = 60 * 60 * 1000 // 1 hour
+const RATE_LIMIT = 200 // requests per hour
+const RATE_LIMIT_WINDOW = 0 // 1 hour
 
 function getRateLimitKey(request) {
   // Use IP address for rate limiting
