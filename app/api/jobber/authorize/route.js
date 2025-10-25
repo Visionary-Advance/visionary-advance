@@ -27,7 +27,8 @@ export async function GET(request) {
   authUrl.searchParams.append('response_type', 'code');
 
   // Add required scopes for client and request management
-  const scopes = 'client:read client:write request:read request:write';
+  // Note: Jobber scopes use plural forms (clients, requests)
+  const scopes = 'clients:read clients:write requests:read requests:write';
   authUrl.searchParams.append('scope', scopes);
 
   const state = Math.random().toString(36).substring(7);
