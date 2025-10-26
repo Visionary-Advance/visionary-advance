@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { CheckCircle, Briefcase, Calendar, Users, Lock, Zap, ArrowRight, AlertCircle } from 'lucide-react';
+import Image from 'next/image';
 
 export default function JobberConnectPage() {
   const [isConnecting, setIsConnecting] = useState(false);
@@ -42,24 +43,24 @@ export default function JobberConnectPage() {
 
   const features = [
     {
-      icon: <Briefcase className="w-8 h-8" />,
-      title: "Manage Jobs",
-      description: "Track and organize all your service jobs in one place"
-    },
-    {
-      icon: <Calendar className="w-8 h-8" />,
-      title: "Schedule Work",
-      description: "Coordinate appointments and dispatch your team"
-    },
-    {
       icon: <Users className="w-8 h-8" />,
-      title: "Client Management",
-      description: "Keep all customer information organized and accessible"
+      title: "Auto-Create Clients",
+      description: "Form submissions automatically create new clients in your Jobber account"
+    },
+    {
+      icon: <Briefcase className="w-8 h-8" />,
+      title: "Auto-Create Requests",
+      description: "Service requests are instantly generated in Jobber from website forms"
     },
     {
       icon: <Zap className="w-8 h-8" />,
-      title: "Auto-sync Data",
-      description: "Get instant updates when new requests come in"
+      title: "Instant Sync",
+      description: "No manual data entry - form data syncs to Jobber in real-time"
+    },
+    {
+      icon: <CheckCircle className="w-8 h-8" />,
+      title: "Streamlined Workflow",
+      description: "Turn website inquiries into Jobber jobs in seconds, not minutes"
     }
   ];
 
@@ -67,11 +68,11 @@ export default function JobberConnectPage() {
     "Click 'Connect Jobber Account' below",
     "Log in to your Jobber account",
     "Authorize the connection",
-    "Start syncing your client data!"
+    "Start creating requests automatically with every form submission!"
   ];
 
   return (
-    <div className="min-h-screen bg-[#191E1E] pt-30 text-white">
+    <div className="min-h-screen bg-[#191E1E] pt-28.5 text-white">
       {/* Message Banner */}
       {message.text && (
         <div className={`px-4 md:px-16 py-4 ${message.type === 'success' ? 'bg-green-900/30 border-green-500' : 'bg-red-900/30 border-red-500'} border-t-4`}>
@@ -96,11 +97,19 @@ export default function JobberConnectPage() {
             </div>
             
             <div className="space-y-4">
-              <h1 className="font-anton text-4xl md:text-5xl lg:text-6xl text-white leading-tight tracking-tight">
-                Connect Your Jobber Account
+              <h1 className="font-anton text-4xl md:text-5xl lg:text-6xl text-white leading-tight tracking-tight flex items-center justify-center gap-3 md:gap-4 flex-wrap">
+                Connect Your
+                <Image
+                  src="/Img/Jobber-WhiteFull.png"
+                  alt="Jobber"
+                  width={600}
+                  height={120}
+                  className="h-20 md:h-14 lg:h-20 w-auto"
+                />
+                Account
               </h1>
               <p className="font-manrope text-lg text-white max-w-3xl mx-auto">
-                Integrate Jobber with your website to automatically sync client data, manage job requests, and streamline your workflow
+                Integrate Jobber with your website to automatically create clients and requests right from your form when users submit a form
               </p>
             </div>
           </div>
@@ -163,31 +172,31 @@ export default function JobberConnectPage() {
       <section className="px-4 md:px-16 py-16 md:py-20">
         <div className="max-w-4xl mx-auto">
           <div className="p-8 bg-black/30 rounded-2xl border border-[#008070]/30">
-            <div className="flex items-start gap-6">
-              <div className="flex-shrink-0 w-12 h-12 bg-[#008070]/20 rounded-full flex items-center justify-center">
-                <Lock className="w-6 h-6 text-[#008070]" />
-              </div>
-              <div className="space-y-4">
+            <div className="space-y-4">
+              <div className="flex items-center gap-6">
+                <div className="flex-shrink-0 w-12 h-12 bg-[#008070]/20 rounded-full flex items-center justify-center">
+                  <Lock className="w-6 h-6 text-[#008070]" />
+                </div>
                 <h3 className="font-anton text-2xl text-[#008070]">
                   Secure & Private
                 </h3>
-                <p className="font-manrope text-white">
-                  Your Jobber credentials are never stored on our servers. We use OAuth 2.0, 
-                  the industry standard for secure authorization. You can revoke access at any time 
-                  from your Jobber account settings.
-                </p>
-                <div className="flex items-center gap-3 pt-2">
-                  <CheckCircle className="w-5 h-5 text-[#008070]" />
-                  <span className="font-manrope text-white">Bank-level encryption</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 text-[#008070]" />
-                  <span className="font-manrope text-white">Revoke access anytime</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 text-[#008070]" />
-                  <span className="font-manrope text-white">Industry standard OAuth 2.0</span>
-                </div>
+              </div>
+              <p className="font-manrope text-white">
+                Your Jobber credentials are never stored on our servers. We use OAuth 2.0,
+                the industry standard for secure authorization. You can revoke access at any time
+                from your Jobber account settings.
+              </p>
+              <div className="flex items-center gap-3 pt-2">
+                <CheckCircle className="w-5 h-5 text-[#008070]" />
+                <span className="font-manrope text-white">Bank-level encryption</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <CheckCircle className="w-5 h-5 text-[#008070]" />
+                <span className="font-manrope text-white">Revoke access anytime</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <CheckCircle className="w-5 h-5 text-[#008070]" />
+                <span className="font-manrope text-white">Industry standard OAuth 2.0</span>
               </div>
             </div>
           </div>
@@ -240,12 +249,7 @@ export default function JobberConnectPage() {
               info@visionaryadvance.com
             </a>
           </p>
-          <p className="font-manrope text-white">
-            Already connected?{' '}
-            <a href="/dashboard" className="text-[#008070] hover:underline font-semibold">
-              Go to Dashboard
-            </a>
-          </p>
+         
         </div>
       </section>
     </div>

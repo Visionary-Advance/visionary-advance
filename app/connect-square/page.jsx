@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { CheckCircle, CreditCard, ShoppingBag, Store, Lock, Zap, ArrowRight} from 'lucide-react';
+import Image from 'next/image';
 
 export default function SquareConnectPage() {
   const [isConnecting, setIsConnecting] = useState(false);
@@ -79,7 +80,7 @@ export default function SquareConnectPage() {
     },
     {
       icon: <ShoppingBag className="w-8 h-8" />,
-      title: "Manage Orders",
+      title: "Take Orders",
       description: "Track and fulfill customer orders seamlessly"
     },
     {
@@ -98,11 +99,11 @@ export default function SquareConnectPage() {
     "Click 'Connect Square Account' below",
     "Log in to your Square account",
     "Authorize the connection",
-    "Start accepting payments!"
+    "Start accepting payments on your website!"
   ];
 
   return (
-    <div className="min-h-screen bg-[#191E1E] text-white">
+    <div className="min-h-screen bg-gradient-to-r from-[#191E1E] to-[#252e2e] pt-26 text-white">
       {/* Hero Section */}
       <section className="px-4 md:px-16 py-16 md:py-20">
         <div className="max-w-6xl mx-auto">
@@ -112,12 +113,20 @@ export default function SquareConnectPage() {
               <span className="font-manrope text-[#008070] font-semibold">Integration</span>
             </div>
             
-            <div className="space-y-4">
-              <h1 className="font-anton text-4xl md:text-5xl lg:text-6xl text-white leading-tight tracking-tight">
-                Connect Your Square Account
+            <div className="space-y-4 ">
+              <h1 className="font-anton text-4xl md:text-5xl lg:text-6xl text-white leading-tight tracking-tight flex items-center justify-center gap-3 md:gap-4 flex-wrap">
+                Connect Your
+                <Image
+                  src="/Img/Square_Logo_2025_White.png"
+                  alt="Square"
+                  width={600}
+                  height={120}
+                  className="h-10 md:h-14 lg:h-16 w-auto"
+                />
+                Account
               </h1>
               <p className="font-manrope text-lg text-white max-w-3xl mx-auto">
-                Integrate Square with your website to accept payments, manage orders, and grow your business
+                Integrate Square with your website to take orders, accept payments, and grow your business
               </p>
             </div>
           </div>
@@ -180,31 +189,31 @@ export default function SquareConnectPage() {
       <section className="px-4 md:px-16 py-16 md:py-20">
         <div className="max-w-4xl mx-auto">
           <div className="p-8 bg-black/30 rounded-2xl border border-[#008070]/30">
-            <div className="flex items-start gap-6">
-              <div className="flex-shrink-0 w-12 h-12 bg-[#008070]/20 rounded-full flex items-center justify-center">
-                <Lock className="w-6 h-6 text-[#008070]" />
-              </div>
-              <div className="space-y-4">
+            <div className="space-y-4">
+              <div className="flex items-center gap-6">
+                <div className="flex-shrink-0 w-12 h-12 bg-[#008070]/20 rounded-full flex items-center justify-center">
+                  <Lock className="w-6 h-6 text-[#008070]" />
+                </div>
                 <h3 className="font-anton text-2xl text-[#008070]">
                   Secure & Private
                 </h3>
-                <p className="font-manrope text-white">
-                  Your Square credentials are never stored on our servers. We use OAuth 2.0, 
-                  the industry standard for secure authorization. You can revoke access at any time 
-                  from your Square dashboard.
-                </p>
-                <div className="flex items-center gap-3 pt-2">
-                  <CheckCircle className="w-5 h-5 text-[#008070]" />
-                  <span className="font-manrope text-white">Bank-level encryption</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 text-[#008070]" />
-                  <span className="font-manrope text-white">Revoke access anytime</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 text-[#008070]" />
-                  <span className="font-manrope text-white">Industry standard OAuth 2.0</span>
-                </div>
+              </div>
+              <p className="font-manrope text-white">
+                Your Square credentials are never stored on our servers. We use OAuth 2.0,
+                the industry standard for secure authorization. You can revoke access at any time
+                from your Square dashboard.
+              </p>
+              <div className="flex items-center gap-3 pt-2">
+                <CheckCircle className="w-5 h-5 text-[#008070]" />
+                <span className="font-manrope text-white">Bank-level encryption</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <CheckCircle className="w-5 h-5 text-[#008070]" />
+                <span className="font-manrope text-white">Revoke access anytime</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <CheckCircle className="w-5 h-5 text-[#008070]" />
+                <span className="font-manrope text-white">Industry standard OAuth 2.0</span>
               </div>
             </div>
           </div>
@@ -258,12 +267,7 @@ export default function SquareConnectPage() {
               info@visionaryadvance.com
             </a>
           </p>
-          <p className="font-manrope text-white">
-            Already connected?{' '}
-            <a href="/dashboard" className="text-[#008070] hover:underline font-semibold">
-              Go to Dashboard
-            </a>
-          </p>
+          
         </div>
       </section>
     </div>
