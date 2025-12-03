@@ -278,7 +278,7 @@ export default function ServicesPage() {
                     {step.icon}
                   </div>
                   
-                  <div className="absolute -top-4 -left-4 w-12 h-12 bg-[#191E1E] border-2 border-[#008070] rounded-full flex items-center justify-center">
+                  <div className="absolute -top-4 -left-0 w-12 h-12 bg-[#191E1E] border-2 border-[#008070] rounded-full flex items-center justify-center">
                     <span className="font-anton text-[#008070] text-sm">{step.number}</span>
                   </div>
 
