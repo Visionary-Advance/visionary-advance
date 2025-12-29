@@ -14,7 +14,8 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }) {
-  const category = await getCategoryBySlug(params.slug);
+  const { slug } = await params;
+  const category = await getCategoryBySlug(slug);
 
   if (!category) {
     return { title: 'Category Not Found' };
@@ -47,13 +48,14 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function CategoryPage({ params }) {
-  const category = await getCategoryBySlug(params.slug);
+  const { slug } = await params;
+  const category = await getCategoryBySlug(slug);
 
   if (!category) {
     notFound();
   }
 
-  const posts = await getPostsByCategory(params.slug);
+  const posts = await getPostsByCategory(slug);
 
   // Generate breadcrumb structured data
   const breadcrumbSchema = generateBreadcrumbSchema([

@@ -15,7 +15,8 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }) {
-  const series = await getSeriesBySlug(params.slug);
+  const { slug } = await params;
+  const series = await getSeriesBySlug(slug);
 
   if (!series) {
     return { title: 'Series Not Found' };
@@ -48,7 +49,8 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function SeriesPage({ params }) {
-  const series = await getSeriesBySlug(params.slug);
+  const { slug } = await params;
+  const series = await getSeriesBySlug(slug);
 
   if (!series) {
     notFound();

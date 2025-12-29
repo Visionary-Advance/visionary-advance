@@ -14,7 +14,8 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }) {
-  const tag = await getTagBySlug(params.slug);
+  const { slug } = await params;
+  const tag = await getTagBySlug(slug);
 
   if (!tag) {
     return { title: 'Tag Not Found' };
@@ -43,13 +44,14 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function TagPage({ params }) {
-  const tag = await getTagBySlug(params.slug);
+  const { slug } = await params;
+  const tag = await getTagBySlug(slug);
 
   if (!tag) {
     notFound();
   }
 
-  const posts = await getPostsByTag(params.slug);
+  const posts = await getPostsByTag(slug);
 
   // Generate breadcrumb structured data
   const breadcrumbSchema = generateBreadcrumbSchema([
