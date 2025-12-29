@@ -3,7 +3,7 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project Overview
-Visionary Advance is a Next.js 15.5.2 application providing premium web design and development services, with a specialized focus on construction company websites. The project features multiple landing pages, OAuth integrations (Square, Jobber), and automated website auditing capabilities.
+Visionary Advance is a Next.js 16.1.1 application providing premium web design and development services, with a specialized focus on construction company websites. The project features multiple landing pages, OAuth integrations (Square, Jobber), and automated website auditing capabilities.
 
 ## Development Commands
 ```bash
@@ -13,13 +13,14 @@ npm run start  # Start production server
 ```
 
 ## Tech Stack
-- **Framework**: Next.js 15.5.2 (App Router)
-- **React**: 19.1.0
+- **Framework**: Next.js 16.1.1 (App Router)
+- **React**: 19.2.3
 - **Styling**: Tailwind CSS v4 with PostCSS
 - **Animations**: Framer Motion, GSAP
 - **Backend**: Supabase (database), Resend (email)
 - **Integrations**: Square API, Jobber API, HubSpot CRM
 - **3D Graphics**: OGL (WebGL library)
+- **CMS**: Sanity v5.1.0 with next-sanity v12.0.5
 
 ## Architecture
 
@@ -151,20 +152,25 @@ construction website design, contractor website, construction company website, b
 
 1. **Component Directory**: Uses capital `Components/` not `components/`
 
-2. **Server-Side Keys**: Always use `SUPABASE_SERVICE_ROLE_KEY` in API routes (never anon key for privileged operations)
+2. **Next.js 16 Breaking Changes**:
+   - `params` in page components and `generateMetadata` must be awaited (e.g., `const { slug } = await params`)
+   - Supabase clients use lazy initialization to prevent build-time errors
+   - All dynamic routes have been updated to handle async params
 
-3. **OAuth Token Pattern**: Both Square and Jobber use similar patterns:
+3. **Server-Side Keys**: Always use `SUPABASE_SERVICE_ROLE_KEY` in API routes (never anon key for privileged operations)
+
+4. **OAuth Token Pattern**: Both Square and Jobber use similar patterns:
    - Store tokens in Supabase with expiration
    - Auto-refresh when getting valid tokens
    - Handle 401s with automatic retry after refresh
 
-4. **Rate Limiting**: Lighthouse audit endpoint implements in-memory rate limiting (200 req/hr per IP)
+5. **Rate Limiting**: Lighthouse audit endpoint implements in-memory rate limiting (200 req/hr per IP)
 
-5. **Google Fonts**: Custom font configuration in root layout using DM Sans and Instrument Sans
+6. **Google Fonts**: Custom font configuration in root layout using DM Sans and Instrument Sans
 
-6. **SEO Metadata**: Root layout includes comprehensive Open Graph, Twitter Cards, and robots directives
+7. **SEO Metadata**: Root layout includes comprehensive Open Graph, Twitter Cards, and robots directives
 
-7. **Error Handling**: API routes should return descriptive JSON errors with appropriate status codes
+8. **Error Handling**: API routes should return descriptive JSON errors with appropriate status codes
 
 ## Business Context
 - **Primary Service**: Web design/development for construction companies
