@@ -18,7 +18,7 @@ npm run start  # Start production server
 - **Styling**: Tailwind CSS v4 with PostCSS
 - **Animations**: Framer Motion, GSAP
 - **Backend**: Supabase (database), Resend (email)
-- **Integrations**: Square API, Jobber API
+- **Integrations**: Square API, Jobber API, HubSpot CRM
 - **3D Graphics**: OGL (WebGL library)
 
 ## Architecture
@@ -49,6 +49,17 @@ The codebase implements a sophisticated OAuth token management system for both S
 - `createJobberClient()` and `createJobberRequest()` for lead capture
 - Tokens stored in `jobber_accounts` table in Supabase
 
+**HubSpot (`lib/hubspot.js`)**:
+- Automatic CRM integration for contact form submissions
+- `handleContactFormSubmission(formData)` - Main function that orchestrates all HubSpot operations
+- Creates/updates Contacts with email, phone, name
+- Creates/updates Companies based on company name
+- Creates Deals automatically for each form submission
+- Creates high-priority Tasks for follow-up
+- Automatically associates all objects (Contact → Company → Deal → Task)
+- Non-blocking integration (doesn't fail form submission if HubSpot is down)
+- Handles duplicate detection by searching for existing contacts/companies first
+
 #### Supabase Database Architecture
 Uses TWO separate Supabase instances:
 1. **Main instance** (`NEXT_PUBLIC_SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY`)
@@ -69,8 +80,8 @@ The app uses a conditional layout system via `Components/ConditionalLayout.jsx`:
 ### API Routes
 
 **Email Endpoints**:
-- `/api/send` - Main contact form submissions (Resend)
-- `/api/send-email` - Alternative email endpoint
+- `/api/send` - Main contact form submissions (Resend + HubSpot integration)
+- `/api/send-email` - Alternative email endpoint (Resend + HubSpot integration)
 - `/api/send-audit-email` - Website audit report emails
 
 **OAuth Callbacks**:
@@ -108,6 +119,9 @@ The app uses a conditional layout system via `Components/ConditionalLayout.jsx`:
 - `JOBBER_CLIENT_ID`
 - `JOBBER_CLIENT_SECRET`
 - `JOBBER_REDIRECT_URI`
+
+**HubSpot Integration**:
+- `HUBSPOT_ACCESS_TOKEN` (Private App Access Token from HubSpot)
 
 **Optional**:
 - `PAGESPEED_API_KEY` (Google PageSpeed API, falls back to anonymous if not set)

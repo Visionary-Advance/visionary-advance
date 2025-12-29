@@ -85,7 +85,7 @@ export default function ContactPage() {
     },
     {
       question: "Do you work with businesses outside Oregon?",
-      answer: "Absolutely! While we're based in Eugene, we work with clients across the country and internationally."
+      answer: "Absolutely! While we're based in Eugene, we work with clients everywhere."
     },
     {
       question: "What's included in your hosting service?",

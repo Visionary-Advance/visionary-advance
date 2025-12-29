@@ -10,6 +10,7 @@ export default function Header({ currentPage = "" }) {
     { name: "Home", href: "/", key: "home" },
     { name: "About Us", href: "/about", key: "about" },
     { name: "Our Services", href: "/services", key: "services" },
+    { name: "Blog", href: "/blog", key: "blog" },
     { name: "Contact", href: "/contact", key: "contact" }
   ];
 

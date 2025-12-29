@@ -3,7 +3,13 @@
     "allow": [
       "WebSearch",
       "WebFetch(domain:developer.getjobber.com)",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Bash(cat:*)",
+      "Bash(npm install:*)",
+      "Bash(test:*)",
+      "Bash(npx sanity deploy)",
+      "Bash(npx sanity:*)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []
