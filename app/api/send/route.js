@@ -1,5 +1,6 @@
 import { Resend } from 'resend';
 import { NextResponse } from 'next/server';
+import { handleContactFormSubmission } from '@/lib/hubspot';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -8,7 +9,8 @@ export async function POST(request) {
     const body = await request.json();
     const { name, company, email, phone, website, message } = body;
 
-    const data = await resend.emails.send({
+    // Send email notification
+    const emailData = await resend.emails.send({
       from: 'no-reply@mail.visionaryadvance.com', // Change this to your verified domain
       to: ['brandon@visionaryadvance.com'], // Change this to your email
       subject: `New Construction Lead (${company})`,
@@ -24,8 +26,29 @@ export async function POST(request) {
       `,
     });
 
-    return NextResponse.json({ success: true, data });
+    // Create HubSpot records (non-blocking - don't fail if HubSpot has issues)
+    let hubspotResult = null;
+    try {
+      hubspotResult = await handleContactFormSubmission({
+        name,
+        company,
+        email,
+        phone,
+        website,
+        message,
+      });
+      console.log('HubSpot integration result:', hubspotResult);
+    } catch (hubspotError) {
+      console.error('HubSpot integration failed (non-critical):', hubspotError);
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: emailData,
+      hubspot: hubspotResult,
+    });
   } catch (error) {
+    console.error('Contact form submission error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

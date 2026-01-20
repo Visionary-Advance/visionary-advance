@@ -12,14 +12,6 @@ const projectTypes = [
   'Other'
 ]
 
-const budgetRanges = [
-  'Under $5,000',
-  '$5,000 - $10,000',
-  '$10,000 - $25,000',
-  '$25,000 - $50,000',
-  '$50,000+'
-]
-
 const timelines = [
   'ASAP',
   '1-2 months',
@@ -36,7 +28,6 @@ export default function ContactForm() {
     phone: '',
     company: '',
     projectType: '',
-    budget: '',
     timeline: '',
     message: ''
   })
@@ -75,7 +66,6 @@ export default function ContactForm() {
           phone: '',
           company: '',
           projectType: '',
-          budget: '',
           timeline: '',
           message: ''
         })
@@ -181,7 +171,7 @@ export default function ContactForm() {
           </div>
 
           {/* Project Details */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label htmlFor="projectType" className="block text-sm font-semibold text-white mb-2">
                 Project Type
@@ -196,23 +186,6 @@ export default function ContactForm() {
                 <option value="">Select...</option>
                 {projectTypes.map((type) => (
                   <option key={type} value={type} className="bg-[#191E1E]">{type}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label htmlFor="budget" className="block text-sm font-semibold text-white mb-2">
-                Budget Range
-              </label>
-              <select
-                id="budget"
-                name="budget"
-                value={formData.budget}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 bg-black/30 border border-white/20 rounded-lg text-white focus:outline-none focus:border-[#008070] transition-colors"
-              >
-                <option value="">Select...</option>
-                {budgetRanges.map((range) => (
-                  <option key={range} value={range} className="bg-[#191E1E]">{range}</option>
                 ))}
               </select>
             </div>

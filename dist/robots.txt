@@ -1,0 +1,30 @@
+# Robots.txt for Visionary Advance
+# https://visionaryadvance.com
+
+# Allow all crawlers
+User-agent: *
+Allow: /
+
+# Disallow admin and API routes
+Disallow: /api/
+Disallow: /connect-square/
+
+# Disallow Square callback pages (OAuth flows)
+Disallow: /square/
+
+# Disallow privacy and terms pages
+Disallow: /privacy-policy
+Disallow: /terms-of-service
+
+# Allow construction-websites landing page (high priority)
+Allow: /construction-websites
+
+# Sitemap location
+Sitemap: https://visionaryadvance.com/sitemap.xml
+
+# Crawl-delay for specific bots (optional)
+User-agent: Googlebot
+Crawl-delay: 0
+
+User-agent: Bingbot
+Crawl-delay: 0

@@ -1,0 +1,20 @@
+{
+  "version": 3,
+  "createdAt": "2025-12-29T12:59:46.255Z",
+  "workspaces": [
+    {
+      "name": "visionary-advance-blog",
+      "title": "Visionary Advance Blog",
+      "basePath": "/",
+      "projectId": "g84uoyk7",
+      "dataset": "production",
+      "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 32 32\"><rect width=\"32\" height=\"32\" rx=\"2\" fill=\"#cc2819\"></rect><text x=\"50%\" y=\"50%\" text-anchor=\"middle\" alignment-baseline=\"middle\" fill=\"hsla(5, 78%, 5%, 1)\" style=\"font-family:Inter, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, &quot;Helvetica Neue&quot;, &quot;Liberation Sans&quot;, Helvetica, Arial, system-ui, sans-serif;font-weight:500;font-size:13px;transform:translateY(1px)\">VA</text></svg>",
+      "mediaLibrary": {
+        "enabled": false
+      },
+      "schema": "7763b266.create-schema.json",
+      "tools": "ba47da56.create-tools.json"
+    }
+  ],
+  "studioVersion": "5.1.0"
+}

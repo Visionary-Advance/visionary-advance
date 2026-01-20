@@ -73,7 +73,7 @@ export default function LandingPage() {
           
             </div>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-11/12 mx-auto">
               <a href="/contact" className="bg-[#008070] hover:bg-[#006b5d] text-white px-6 py-3 rounded w-full sm:w-auto transition-colors text-center">
                 Elevate Your Presence
               </a>
@@ -83,6 +83,10 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
+
+
+
+        {/* <iframe width="100%" height="640" frameBorder="0" allow="xr-spatial-tracking; gyroscope; accelerometer" allowFullScreen scrolling="yes" src="https://kuula.co/share/collection/7HFB6?logo=0&info=0&fs=0&vr=0&sd=1&thumbs=1"></iframe> */}
 
         {/* Problem/Gap Section */}
         <section className="px-4 md:px-16 py-16 md:py-24 relative bg-white/5">

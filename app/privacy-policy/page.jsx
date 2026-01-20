@@ -2,7 +2,7 @@
 
 export default function PrivacyPolicy() {
   return (
-    <section className="max-w-3xl mx-auto p-6 text-white leading-7">
+    <section className="max-w-3xl mx-auto mt-26 p-6 text-white leading-7">
       <h1 className="text-3xl font-bold mb-6">Privacy Policy</h1>
 
       <p className="mb-4">

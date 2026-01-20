@@ -124,7 +124,7 @@ export default function Footer({ variant = "default" }) {
             <h3 className="font-manrope font-semibold text-white">
               {/* {getConnectTitle()} */}
             </h3>
-            <div className="space-y-2">
+            {/* <div className="space-y-2">
               {getSocialPlatforms().map((platform) => (
                 <a
                   key={platform}
@@ -134,7 +134,7 @@ export default function Footer({ variant = "default" }) {
                   {platform}
                 </a>
               ))}
-            </div>
+            </div> */}
           </div>
         </div>
 
