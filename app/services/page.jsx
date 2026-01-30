@@ -30,44 +30,44 @@ export default function ServicesPage() {
   const services = [
     {
       icon: <Palette className="w-12 h-12" />,
-      title: "Custom Web Design",
-      description: "Sophisticated design that reflects your professional standard and positions you as the premium choice in your market.",
+      title: "Custom Websites",
+      description: "No templates. No page builders. Every website is designed and coded specifically for your business, your workflow, and how you serve your clients.",
       features: [
-        "Custom UI/UX Design",
-        "Strategic Brand Integration",
+        "Custom Design & Development",
+        "SEO Built Into the Foundation",
         "Mobile-First Architecture",
-        "Conversion-Focused Layout",
-        "Professional Visual Identity"
+        "Fast Load Times & Performance",
+        "Easy Content Management"
       ],
       color: "text-[#008070]",
       bgColor: "bg-[#008070]/10",
       borderColor: "border-[#008070]/20"
     },
     {
-      icon: <Code className="w-12 h-12" />,
-      title: "Premium Development",
-      description: "Clean, efficient code built on modern architecture. Engineered for performance, security, and long-term reliability.",
+      icon: <Database className="w-12 h-12" />,
+      title: "Custom Business Systems",
+      description: "Dashboards, inventory systems, job tracking, and internal tools built around how your business actually operates — not platforms you have to adapt to.",
       features: [
-        "Modern Framework Implementation",
-        "SEO Architecture",
-        "Performance Optimization",
-        "Security Best Practices",
-        "Cross-Platform Compatibility"
+        "Custom Dashboards & Analytics",
+        "Inventory & Warehouse Systems",
+        "Job Tracking & Labor Management",
+        "Client Portals & Reporting",
+        "API Integrations"
       ],
       color: "text-[#008070]",
       bgColor: "bg-[#008070]/10",
       borderColor: "border-[#008070]/20"
     },
     {
-      icon: <Wrench className="w-12 h-12" />,
-      title: "Ongoing Optimization",
-      description: "Continuous improvement and technical excellence. Your website evolves with your business and market demands.",
+      icon: <Search className="w-12 h-12" />,
+      title: "SEO & Visibility",
+      description: "Strategic SEO that positions you in front of the right clients — the ones searching for expertise and quality, not the lowest price.",
       features: [
-        "Proactive Maintenance",
-        "Security Monitoring & Updates",
-        "Performance Optimization",
-        "Strategic Enhancements",
-        "Priority Technical Support"
+        "Local SEO (Eugene & Oregon)",
+        "Technical SEO Architecture",
+        "Content Strategy",
+        "Google Business Optimization",
+        "Ongoing Visibility Improvements"
       ],
       color: "text-[#008070]",
       bgColor: "bg-[#008070]/10",
@@ -75,14 +75,14 @@ export default function ServicesPage() {
     },
     {
       icon: <Server className="w-12 h-12" />,
-      title: "Professional Hosting",
-      description: "Enterprise-grade infrastructure with the reliability and performance your professional presence demands.",
+      title: "Hosting & Support",
+      description: "Reliable infrastructure and ongoing support so your website and systems perform consistently — without you having to think about it.",
       features: [
         "99.9% Uptime Guarantee",
-        "SSL & Security Certificates",
+        "Security & SSL Certificates",
         "Automated Daily Backups",
-        "Global CDN Integration",
-        "Scalable Infrastructure"
+        "Performance Monitoring",
+        "Priority Technical Support"
       ],
       color: "text-[#008070]",
       bgColor: "bg-[#008070]/10",
@@ -93,26 +93,26 @@ export default function ServicesPage() {
   const processSteps = [
     {
       number: "01",
-      title: "Discovery & Strategy",
-      description: "Comprehensive analysis of your business, market position, and objectives. Strategic planning that aligns with your goals.",
+      title: "Discovery & Planning",
+      description: "We start by understanding your business, your workflow, and what you actually need — not what we want to sell you.",
       icon: <Search className="w-8 h-8" />
     },
     {
       number: "02",
       title: "Design & Architecture",
-      description: "Custom design and technical architecture that reflects your professional standard and positions you for success.",
+      description: "Custom design and system architecture built specifically for how your business operates. No templates, no shortcuts.",
       icon: <Eye className="w-8 h-8" />
     },
     {
       number: "03",
-      title: "Development & QA",
-      description: "Precision engineering with rigorous testing. Every detail examined to ensure flawless performance.",
+      title: "Build & Test",
+      description: "Clean, efficient code with rigorous testing. Everything is built to perform reliably under real-world conditions.",
       icon: <Code className="w-8 h-8" />
     },
     {
       number: "04",
-      title: "Launch & Optimization",
-      description: "Seamless deployment with ongoing support and strategic optimization for continued excellence.",
+      title: "Launch & Support",
+      description: "Smooth deployment with ongoing support. We're invested in your success beyond launch day.",
       icon: <CheckCircle className="w-8 h-8" />
     }
   ];
@@ -120,33 +120,33 @@ export default function ServicesPage() {
   const whyChooseUs = [
     {
       icon: <Zap className="w-8 h-8" />,
-      title: "Performance Engineering",
-      description: "Optimized for speed from the ground up. Fast load times aren't a bonus—they're a requirement for professional presence."
+      title: "Built for Performance",
+      description: "Fast load times, clean code, and modern architecture. Everything we build is engineered to perform reliably under real-world conditions."
     },
     {
       icon: <Shield className="w-8 h-8" />,
-      title: "Security First",
-      description: "Enterprise-grade security built into every layer. Your reputation and client data protected with industry-leading practices."
+      title: "Secure by Default",
+      description: "Security built into every layer — not added as an afterthought. Your data and your clients' data protected properly."
     },
     {
       icon: <Search className="w-8 h-8" />,
-      title: "Strategic SEO",
-      description: "Sophisticated search optimization that positions you in front of high-value clients. Built to be found by the right people."
+      title: "Found by the Right Clients",
+      description: "SEO that positions you in front of people searching for quality and expertise — not bargain hunters looking for the lowest price."
     },
     {
       icon: <Users className="w-8 h-8" />,
-      title: "Direct Partnership",
-      description: "Work directly with experienced professionals who understand your business. No outsourcing, no junior teams, no compromises."
+      title: "Direct Communication",
+      description: "Work directly with the people building your systems. No account managers, no outsourcing, no telephone games."
     },
     {
       icon: <TrendingUp className="w-8 h-8" />,
-      title: "Long-Term Value",
-      description: "Websites engineered to perform and appreciate over time. Strategic decisions made with longevity and growth in mind."
+      title: "Built to Scale",
+      description: "Systems designed with growth in mind. What we build today should support your business for years — not need replacing in six months."
     },
     {
       icon: <CheckCircle className="w-8 h-8" />,
-      title: "Proven Reliability",
-      description: "Disciplined process. Clear communication. Commitments honored. The professional standards you expect from a premium service."
+      title: "Clear Process, Reliable Results",
+      description: "Disciplined approach. Clear communication. Commitments honored. We operate the way you'd expect a serious partner to operate."
     }
   ];
 
@@ -164,13 +164,13 @@ export default function ServicesPage() {
             </div>
             <div className="space-y-6">
               <h1 className="font-anton text-4xl md:text-5xl lg:text-6xl text-white leading-tight tracking-tight">
-                Premium Web Solutions Built to Last
+                Websites & Systems Built Around How You Work
               </h1>
               <p className="font-manrope text-xl text-gray-300 max-w-3xl leading-relaxed">
-                We deliver comprehensive web services designed for professionals who refuse to compromise on quality. Every solution is strategically crafted to position you as the premium choice in your market.
+                We build custom websites and business systems for professionals who take their operations seriously. No templates. No bloated platforms. Just solutions designed specifically for your business and workflow.
               </p>
               <p className="font-manrope text-lg text-gray-400 max-w-3xl leading-relaxed">
-                From custom design to strategic SEO, reliable hosting to ongoing optimization—we provide everything you need to maintain a professional digital presence that performs.
+                Based in Eugene, serving Lane County and Oregon businesses — from custom websites and SEO to dashboards, inventory systems, and internal tools that match how you actually operate.
               </p>
             </div>
           </div>
@@ -181,12 +181,12 @@ export default function ServicesPage() {
       <section className="px-4 md:px-16 py-16 md:py-28">
         <div className="max-w-6xl mx-auto">
           <div className="text-center space-y-6 mb-16">
-            <p className="font-manrope font-semibold text-[#008070]">Core Capabilities</p>
+            <p className="font-manrope font-semibold text-[#008070]">What We Build</p>
             <h2 className="font-anton text-3xl md:text-5xl text-white leading-tight">
-              Comprehensive Solutions for Professional Success
+              Custom Solutions for Real Operations
             </h2>
             <p className="font-manrope text-lg text-gray-300 max-w-3xl mx-auto">
-              Four integrated services that work together to create and maintain a digital presence worthy of your expertise.
+              Everything we build is designed to support how your business actually works — not force you into someone else's workflow.
             </p>
           </div>
 
@@ -230,12 +230,12 @@ export default function ServicesPage() {
       <section className="px-4 md:px-16 py-16 md:py-28 bg-black/20">
         <div className="max-w-6xl mx-auto">
           <div className="text-center space-y-6 mb-16">
-            <p className="font-manrope font-semibold text-[#008070]">Our Standards</p>
+            <p className="font-manrope font-semibold text-[#008070]">How We Work</p>
             <h2 className="font-anton text-3xl md:text-5xl text-white leading-tight">
-              Why Professionals Choose Visionary Advance
+              Designed for Serious Operators
             </h2>
             <p className="font-manrope text-lg text-gray-300 max-w-3xl mx-auto">
-              We maintain the highest standards in every aspect of our work—because your reputation depends on the quality of your digital presence.
+              We partner with businesses that care how things are built. If you value precision, reliability, and long-term thinking — you'll feel at home here.
             </p>
           </div>
 
@@ -261,12 +261,12 @@ export default function ServicesPage() {
       <section className="px-4 md:px-16 py-16 md:py-28">
         <div className="max-w-6xl mx-auto">
           <div className="text-center space-y-6 mb-16">
-            <p className="font-manrope font-semibold text-[#008070]">Our Approach</p>
+            <p className="font-manrope font-semibold text-[#008070]">Our Process</p>
             <h2 className="font-anton text-3xl md:text-5xl text-white leading-tight">
-              A Disciplined Process for Exceptional Results
+              Built on Precision and Partnership
             </h2>
             <p className="font-manrope text-lg text-gray-300 max-w-3xl mx-auto">
-              Quality doesn't happen by accident. Our structured approach ensures every project meets the highest standards from discovery through launch and beyond.
+              Quality doesn't happen by accident. It's the result of a disciplined approach where every detail is considered and every decision is intentional.
             </p>
           </div>
 

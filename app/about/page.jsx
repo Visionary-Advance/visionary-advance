@@ -96,14 +96,12 @@ export default function AboutPage() {
             </div>
             <div className="space-y-6">
               <h1 className="font-anton text-4xl md:text-5xl lg:text-6xl text-white leading-tight tracking-tight">
-                Built on Expertise, Driven by Excellence
+               Built on Experience. Designed for How Businesses Operate.
               </h1>
               <p className="font-manrope text-xl text-gray-300 max-w-3xl leading-relaxed">
-                We build premium web experiences for professionals who understand that quality matters. Your business deserves a digital presence that reflects the expertise and standards you've spent years building.
-              </p>
+We build websites and internal systems for professionals who value clarity, performance, and long-term reliability. No templates. No shortcuts. Everything is designed to support how your business actually works.              </p>
               <p className="font-manrope text-lg text-gray-400 max-w-3xl leading-relaxed">
-                Based in Eugene, Oregon, we specialize in creating high-performance websites that don't just look professional—they position you as the premium choice in your market.
-              </p>
+Based in Eugene, Oregon, Visionary Advance partners with local and regional businesses to create digital infrastructure — from websites to dashboards — that positions them as confident, capable leaders in their market.              </p>
             </div>
 
             {/* Hero Stats Grid */}
@@ -132,11 +130,10 @@ export default function AboutPage() {
               <div className="space-y-6">
                 <p className="font-manrope font-semibold text-[#008070]">Our Philosophy</p>
                 <h2 className="font-anton text-3xl md:text-5xl text-white leading-tight">
-                  Quality Isn't Optional—It's Everything
+                 Quality Is the Baseline
                 </h2>
                 <p className="font-manrope text-lg text-gray-300 leading-relaxed">
-                  We build websites for professionals who refuse to compromise on quality. Every project is approached with the same attention to detail and commitment to excellence that you bring to your own work.
-                </p>
+We work with professionals who don’t cut corners — and neither do we. Every website and system we build is approached with the same level of care, precision, and intentionality you bring to your own work.                </p>
                 <p className="font-manrope text-lg text-gray-300 leading-relaxed">
                   Our focus isn't on being the cheapest or the fastest—it's on being the best choice for businesses that value expertise, reliability, and long-term results.
                 </p>
@@ -176,10 +173,19 @@ export default function AboutPage() {
             </div>
 
             <div className="relative">
-              <img src='/Img/coding.jpg' className="w-full rounded-2xl h-96 md:h-[500px] object-cover" />
+              <div className="relative w-full h-96 md:h-[500px]">
+                <Image
+                  src='/Img/coding.jpg'
+                  alt="Custom code development at Visionary Advance"
+                  fill
+                  className="rounded-2xl object-cover"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  priority
+                />
+              </div>
               <div className="absolute -bottom-6 -left-6 bg-[#191E1E] p-6 rounded-xl border border-[#008070]/30 max-w-xs">
                 <p className="font-manrope text-sm text-gray-300 italic">
-                  "Your expertise deserves a digital presence that does it justice."
+                  "Your business deserves tools that match how you work."
                 </p>
               </div>
             </div>
@@ -193,11 +199,10 @@ export default function AboutPage() {
           <div className="text-center space-y-6 mb-16">
             <p className="font-manrope font-semibold text-[#008070]">Why Visionary Advance</p>
             <h2 className="font-anton text-3xl md:text-5xl text-white leading-tight">
-              Built For Professionals Who Demand More
+              Designed for Serious Operators
             </h2>
             <p className="font-manrope text-lg text-gray-300 max-w-3xl mx-auto">
-              We're not the right fit for everyone—and that's intentional. We work with businesses that value quality, understand the importance of professional positioning, and are ready to invest in their digital presence.
-            </p>
+We partner with businesses that care how things are built. If you value precision, reliability, and long-term thinking, you’ll feel at home here.            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -205,40 +210,36 @@ export default function AboutPage() {
               <div className="w-12 h-12 bg-[#008070] rounded-lg flex items-center justify-center mb-6">
                 <Lightbulb className="w-6 h-6 text-white" />
               </div>
-              <h3 className="font-anton text-2xl text-white mb-4">No Cookie-Cutter Solutions</h3>
+              <h3 className="font-anton text-2xl text-white mb-4">Custom by Default</h3>
               <p className="font-manrope text-gray-300 leading-relaxed">
-                Every business is unique. We don't use templates or one-size-fits-all approaches. Your website is custom-built to reflect your specific expertise and market position.
-              </p>
+No templates. No pre-packaged solutions. Everything we build is tailored to your business, your workflow, and how you serve your clients.              </p>
             </div>
 
             <div className="p-8 bg-[#191E1E] rounded-2xl border border-white/10">
               <div className="w-12 h-12 bg-[#008070] rounded-lg flex items-center justify-center mb-6">
                 <TrendingUp className="w-6 h-6 text-white" />
               </div>
-              <h3 className="font-anton text-2xl text-white mb-4">Strategic, Not Just Pretty</h3>
+              <h3 className="font-anton text-2xl text-white mb-4">Built With Purpose</h3>
               <p className="font-manrope text-gray-300 leading-relaxed">
-                Design matters, but strategy matters more. We build websites that position you correctly in your market and attract the clients you actually want to work with.
-              </p>
+Design is just one layer. Strategy, structure, and performance come first — ensuring your digital presence actually works for your business.              </p>
             </div>
 
             <div className="p-8 bg-[#191E1E] rounded-2xl border border-white/10">
               <div className="w-12 h-12 bg-[#008070] rounded-lg flex items-center justify-center mb-6">
                 <CheckCircle className="w-6 h-6 text-white" />
               </div>
-              <h3 className="font-anton text-2xl text-white mb-4">Quality Over Quantity</h3>
+              <h3 className="font-anton text-2xl text-white mb-4">Precision Over Speed</h3>
               <p className="font-manrope text-gray-300 leading-relaxed">
-                We limit our client roster to ensure every project receives the attention it deserves. You're not just another ticket in a queue—you're a partnership we're invested in.
-              </p>
+We prioritize clarity, structure, and long-term outcomes over rushing to launch. The result is work that holds up under real use.              </p>
             </div>
 
             <div className="p-8 bg-[#191E1E] rounded-2xl border border-white/10">
               <div className="w-12 h-12 bg-[#008070] rounded-lg flex items-center justify-center mb-6">
                 <Clock className="w-6 h-6 text-white" />
               </div>
-              <h3 className="font-anton text-2xl text-white mb-4">Long-Term Thinking</h3>
+              <h3 className="font-anton text-2xl text-white mb-4">Long-Term Systems, Not Short-Term Fixes</h3>
               <p className="font-manrope text-gray-300 leading-relaxed">
-                We're not interested in quick wins that fade. Every decision is made with longevity in mind—building digital assets that continue to perform and appreciate over time.
-              </p>
+We build with growth and longevity in mind — not temporary solutions that need to be replaced in a year.              </p>
             </div>
           </div>
         </div>

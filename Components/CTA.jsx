@@ -23,17 +23,17 @@ export default function CTA(){
                         <div className="max-w-3xl mx-auto space-y-8">
                             <div className="space-y-6">
                                 <h2 className="font-anton text-3xl md:text-5xl text-white leading-tight">
-                                    Ready For A Website That Matches Your Standards?
+                                    Ready for a Website That Actually Supports Your Business?
                                 </h2>
                                 <p className="font-manrope text-lg text-white">
-                                    Let's build something you're proud to share. Your expertise deserves a digital presence that does it justice.
+                                    Let’s design something that works as hard as you do, from first impression to daily operation.
                                 </p>
                             </div>
 
                             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                                 <Link href={"/contact"}>
                                     <button className="bg-[#008070] cursor-pointer hover:bg-[#006b5d] text-white px-8 py-4 rounded-lg font-manrope font-semibold w-full sm:w-auto transition-colors">
-                                        Elevate Your Presence
+                                        Map Your Workflow
                                     </button>
                                 </Link>
                                 <Link href={"/services"}>

@@ -9,7 +9,11 @@
       "Bash(test:*)",
       "Bash(npx sanity deploy)",
       "Bash(npx sanity:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(ls:*)",
+      "Bash(npx next build:*)",
+      "Bash(npx next lint)",
+      "Bash(node -e:*)"
     ],
     "deny": [],
     "ask": []

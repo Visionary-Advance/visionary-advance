@@ -31,12 +31,52 @@ export default function ContactPage() {
     timeline: '',
     message: ''
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState('idle'); // 'idle' | 'success' | 'error'
 
   const handleInputChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
     });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setSubmitStatus('idle');
+
+    try {
+      const response = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        setSubmitStatus('success');
+        setFormData({
+          firstName: '',
+          lastName: '',
+          email: '',
+          phone: '',
+          company: '',
+          projectType: '',
+          budget: '',
+          timeline: '',
+          message: ''
+        });
+      } else {
+        setSubmitStatus('error');
+      }
+    } catch (error) {
+      console.error('Form submission error:', error);
+      setSubmitStatus('error');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const contactMethods = [
@@ -60,11 +100,13 @@ export default function ContactPage() {
 
   const projectTypes = [
     "New Website",
-    "Website Redesign", 
-    "E-commerce Site",
-    "Web Application",
+    "Website Redesign",
+    "Custom Dashboard / Analytics",
+    "Inventory / Warehouse System",
+    "Job Tracking / Contractor System",
+    "Custom CMS",
+    "SEO & Visibility",
     "Maintenance & Support",
-    "Hosting Services",
     "Other"
   ];
 
@@ -81,17 +123,20 @@ export default function ContactPage() {
   const faqs = [
     {
       question: "How long does a typical project take?",
-      answer: "Most websites take 4-8 weeks from start to finish, depending on complexity and content readiness."
+      answer: "Websites typically take 4-8 weeks. Custom systems and dashboards vary based on complexity — we'll give you a clear timeline after understanding your requirements."
     },
     {
       question: "Do you work with businesses outside Oregon?",
-      answer: "Absolutely! While we're based in Eugene, we work with clients everywhere."
+      answer: "Yes. While we're based in Eugene and serve many Lane County businesses, we work with clients across Oregon and beyond."
     },
     {
-      question: "What's included in your hosting service?",
-      answer: "Our hosting includes SSL certificates, daily backups, security monitoring, and 99.9% uptime guarantee."
+      question: "What's the difference between a website and a custom system?",
+      answer: "A website is your public-facing presence. Custom systems are internal tools — dashboards, inventory tracking, job management — built around how your team actually works."
     },
-   
+    {
+      question: "Do you use templates?",
+      answer: "No. Everything we build is custom — designed and coded specifically for your business, your workflow, and your goals."
+    }
   ];
 
   return (
@@ -109,13 +154,13 @@ export default function ContactPage() {
             </div>
             <div className="space-y-6">
               <h1 className="font-anton text-4xl md:text-5xl lg:text-6xl text-white leading-tight tracking-tight">
-                Start Your Project With Confidence
+                Let's Talk About What You Need
               </h1>
               <p className="font-manrope text-xl text-gray-300 max-w-3xl leading-relaxed">
-                Your expertise deserves a digital presence built to the same standards you maintain in your own work. Let's discuss how we can create a website worthy of your professional reputation.
+                Whether it's a new website, a custom dashboard, or a system to streamline your operations — we'll start by understanding how your business actually works.
               </p>
               <p className="font-manrope text-lg text-gray-400 max-w-3xl leading-relaxed">
-                We work with professionals who value quality, understand the importance of strategic positioning, and are ready to invest in a digital presence that performs.
+                Based in Eugene, serving Lane County and Oregon. We work with businesses that take their operations seriously and want solutions built specifically for them.
               </p>
             </div>
           </div>
@@ -159,14 +204,14 @@ export default function ContactPage() {
               <div className="space-y-8">
                 <div className="space-y-4">
                   <h2 className="font-anton text-3xl md:text-4xl text-white">
-                    Tell Us About Your Project
+                    Tell Us What You're Working On
                   </h2>
                   <p className="font-manrope text-gray-300">
-                    Provide details about your business and objectives so we can understand how best to serve your needs.
+                    Share some details about your business and what you're looking to build. We'll follow up with questions and next steps.
                   </p>
                 </div>
 
-                <form className="space-y-6">
+                <form onSubmit={handleSubmit} className="space-y-6">
                   {/* Name Fields */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
@@ -287,7 +332,7 @@ export default function ContactPage() {
                   {/* Message */}
                   <div>
                     <label htmlFor="message" className="block text-sm font-semibold text-white mb-2">
-                      Tell us about your project *
+                      What are you looking to build? *
                     </label>
                     <textarea
                       id="message"
@@ -295,18 +340,35 @@ export default function ContactPage() {
                       rows={6}
                       value={formData.message}
                       onChange={handleInputChange}
-                      placeholder="Describe your project goals, any specific requirements, inspiration sites, or questions you have..."
+                      placeholder="What problems are you trying to solve? What does your current workflow look like? Any details help us understand how we can help..."
                       className="w-full px-4 py-3 bg-black/30 border border-white/20 rounded-lg text-white placeholder:text-gray-400 focus:outline-none focus:border-[#008070] transition-colors resize-none"
                       required
                     />
                   </div>
 
+                  {/* Status Messages */}
+                  {submitStatus === 'success' && (
+                    <div className="p-4 rounded-lg bg-green-500/10 border border-green-500/20 text-green-400">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="w-5 h-5" />
+                        <span>Thank you! We've received your message and will be in touch within 24 hours.</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {submitStatus === 'error' && (
+                    <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400">
+                      Sorry, there was an error sending your message. Please try again or email us directly at info@visionaryadvance.com
+                    </div>
+                  )}
+
                   {/* Submit Button */}
                   <button
                     type="submit"
-                    className="w-full bg-[#008070] hover:bg-[#006b5d] text-white px-8 py-4 rounded-lg font-manrope font-semibold transition-colors flex items-center justify-center gap-2"
+                    disabled={isSubmitting}
+                    className="w-full bg-[#008070] hover:bg-[#006b5d] disabled:opacity-50 disabled:cursor-not-allowed text-white px-8 py-4 rounded-lg font-manrope font-semibold transition-colors flex items-center justify-center gap-2"
                   >
-                    Send Message
+                    {isSubmitting ? 'Sending...' : 'Send Message'}
                     <Send className="w-4 h-4" />
                   </button>
                 </form>
@@ -319,23 +381,23 @@ export default function ContactPage() {
               <div className="p-6 bg-black/30 rounded-2xl border border-white/10">
                 <div className="flex items-center gap-3 mb-4">
                   <Clock className="w-6 h-6 text-[#008070]" />
-                  <h3 className="font-anton text-xl text-white">Response Time</h3>
+                  <h3 className="font-anton text-xl text-white">What to Expect</h3>
                 </div>
                 <p className="font-manrope text-gray-300 mb-4">
-                  We respond to all professional inquiries within 24 hours with a thoughtful, detailed assessment of your project.
+                  We respond to all inquiries within 24 hours. No sales pitch — just a straightforward conversation about what you need.
                 </p>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <CheckCircle className="w-4 h-4 text-[#008070]" />
-                    <span className="font-manrope text-sm text-gray-300">Strategic consultation</span>
+                    <span className="font-manrope text-sm text-gray-300">Direct communication</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <CheckCircle className="w-4 h-4 text-[#008070]" />
-                    <span className="font-manrope text-sm text-gray-300">No obligation required</span>
+                    <span className="font-manrope text-sm text-gray-300">No obligation</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <CheckCircle className="w-4 h-4 text-[#008070]" />
-                    <span className="font-manrope text-sm text-gray-300">Honest expert guidance</span>
+                    <span className="font-manrope text-sm text-gray-300">Honest guidance</span>
                   </div>
                 </div>
               </div>
@@ -344,14 +406,14 @@ export default function ContactPage() {
               <div className="p-6 bg-black/30 rounded-2xl border border-white/10">
                 <div className="flex items-center gap-3 mb-4">
                   <MessageCircle className="w-6 h-6 text-[#008070]" />
-                  <h3 className="font-anton text-xl text-white">Our Process</h3>
+                  <h3 className="font-anton text-xl text-white">How It Works</h3>
                 </div>
                 <div className="space-y-4">
                   <div className="flex items-start gap-3">
                     <span className="font-anton text-[#008070] text-sm mt-1">01</span>
                     <div>
                       <p className="font-manrope text-gray-300 text-sm">
-                        <strong className="text-white">Initial Review:</strong> Detailed assessment of your project requirements and objectives
+                        <strong className="text-white">You reach out:</strong> Tell us what you're working on and what you need
                       </p>
                     </div>
                   </div>
@@ -359,7 +421,7 @@ export default function ContactPage() {
                     <span className="font-anton text-[#008070] text-sm mt-1">02</span>
                     <div>
                       <p className="font-manrope text-gray-300 text-sm">
-                        <strong className="text-white">Strategic Consultation:</strong> In-depth discussion of your business goals and technical needs
+                        <strong className="text-white">We talk:</strong> A conversation to understand your business and workflow
                       </p>
                     </div>
                   </div>
@@ -367,7 +429,7 @@ export default function ContactPage() {
                     <span className="font-anton text-[#008070] text-sm mt-1">03</span>
                     <div>
                       <p className="font-manrope text-gray-300 text-sm">
-                        <strong className="text-white">Custom Proposal:</strong> Comprehensive plan with timeline, deliverables, and investment details
+                        <strong className="text-white">Clear proposal:</strong> Scope, timeline, and pricing — no surprises
                       </p>
                     </div>
                   </div>
@@ -386,7 +448,7 @@ export default function ContactPage() {
           <div className="text-center space-y-6 mb-16">
             <p className="font-manrope font-semibold text-[#008070]">FAQ</p>
             <h2 className="font-anton text-3xl md:text-4xl text-white leading-tight">
-              Common Questions About Our Services
+              Common Questions
             </h2>
           </div>
 
@@ -405,12 +467,12 @@ export default function ContactPage() {
 
           <div className="text-center mt-12">
             <p className="font-manrope text-gray-300 mb-4">
-              Have additional questions about working with us?
+              Have a different question? Just ask — we're happy to answer.
             </p>
-            <button className="inline-flex items-center gap-2 text-[#008070] hover:text-white transition-colors font-manrope font-semibold">
-              Contact us for answers
+            <a href="mailto:info@visionaryadvance.com" className="inline-flex items-center gap-2 text-[#008070] hover:text-white transition-colors font-manrope font-semibold">
+              Email us directly
               <ArrowRight className="w-4 h-4" />
-            </button>
+            </a>
           </div>
         </div>
       </section>

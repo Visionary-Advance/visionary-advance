@@ -2,12 +2,21 @@ import { Resend } from 'resend';
 import { NextResponse } from 'next/server';
 import { handleContactFormSubmission } from '@/lib/hubspot';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 export async function POST(request) {
   try {
     const body = await request.json();
     const { name, company, email, phone, website, message } = body;
+
+    // Check for Resend API key
+    if (!process.env.RESEND_API_KEY) {
+      console.error('RESEND_API_KEY is not configured');
+      return NextResponse.json(
+        { error: 'Email service not configured. Please contact us directly.' },
+        { status: 500 }
+      );
+    }
+
+    const resend = new Resend(process.env.RESEND_API_KEY);
 
     // Send email notification
     const emailData = await resend.emails.send({

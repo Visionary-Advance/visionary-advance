@@ -25,11 +25,11 @@ const instSans = Instrument_Sans({
 export const metadata = {
   metadataBase: new URL('https://visionaryadvance.com'),
   title: {
-    default: "Visionary Advance - Premium Web Design That Honors Your Expertise",
+    default: "Custom Business Systems & SEO Web Design | Eugene, OR – Visionary Advance",
     template: "%s | Visionary Advance"
   },
-  description: "Premium web design and strategic SEO for professionals who refuse to settle for 'good enough.' We build websites that match the quality you deliver—custom, high-performing, and built to be found by the right clients.",
-  keywords: "premium web design, professional website design, custom web development, SEO services, quality web design, construction website design, contractor web design, professional digital presence, premium SEO",
+  description: "Custom-built websites, dashboards, and business systems designed around how you work. Serving Eugene & Lane County businesses.",
+  keywords: "custom business systems, Eugene web design, contractor management systems, warehouse inventory systems, custom dashboards, custom CMS, Lane County web development, Oregon web design, SEO services",
   authors: [{ name: "Visionary Advance" }],
   creator: "Visionary Advance",
   publisher: "Visionary Advance",
@@ -39,17 +39,26 @@ export const metadata = {
     type: 'website',
     locale: 'en_US',
     url: 'https://visionaryadvance.com',
-    title: 'Visionary Advance - Premium Web Design That Honors Your Expertise',
-    description: 'Your work is exceptional. Your website should reflect that. Premium web design and strategic SEO for professionals who demand quality in everything they do.',
+    title: 'Custom Websites & Business Systems | Eugene, OR – Visionary Advance',
+    description: 'Custom-built websites, dashboards, and business systems designed around how you work. Serving Eugene, Lane County & Oregon businesses.',
     siteName: 'Visionary Advance',
+    images: [
+      {
+        url: 'https://visionaryadvance.com/Img/VaLogo_Large.png',
+        width: 1200,
+        height: 630,
+        alt: 'Visionary Advance - Custom Websites & Business Systems',
+      },
+    ],
   },
 
   // Twitter Card
   twitter: {
     card: 'summary_large_image',
-    title: 'Premium Web Design That Honors Your Expertise',
-    description: 'Web design for professionals who refuse to settle for "good enough." Built to match the quality you deliver.',
+    title: 'Custom Websites & Business Systems | Eugene, OR',
+    description: 'Custom-built websites, dashboards, and business systems designed around how you work. Serving Eugene & Lane County.',
     creator: '@visionaryadvance',
+    images: ['https://visionaryadvance.com/Img/VaLogo_Large.png'],
   },
 
   // Robots
@@ -67,6 +76,14 @@ export const metadata = {
 
   // Category
   category: 'Web Design & Development',
+
+  // Search Engine Verification
+  // Add your verification codes from Google Search Console, Bing Webmaster Tools, etc.
+  verification: {
+    google: process.env.NEXT_PUBLIC_GSC_VERIFICATION || null,
+    // yandex: 'your-yandex-verification-code',
+    // bing: 'your-bing-verification-code',
+  },
 };
 
 export default function RootLayout({ children }) {
@@ -77,6 +94,7 @@ export default function RootLayout({ children }) {
       <body
         className={`${instSans.variable} ${dmSansReg.variable} ${dmSansBold.variable} antialiased`}
       >
+        {/* Google Ads Conversion Tracking */}
         <Script
           async
           src="https://www.googletagmanager.com/gtag/js?id=AW-17658795216"
@@ -90,6 +108,24 @@ export default function RootLayout({ children }) {
             gtag('config', 'AW-17658795216');
           `}
         </Script>
+        {/* GA4 Analytics */}
+        {process.env.NEXT_PUBLIC_GA_ID && (
+          <>
+            <Script
+              async
+              src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID}`}
+              strategy="afterInteractive"
+            />
+            <Script id="ga4-init" strategy="afterInteractive">
+              {`
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '${process.env.NEXT_PUBLIC_GA_ID}');
+              `}
+            </Script>
+          </>
+        )}
         <ConditionalLayout>
           {children}
         </ConditionalLayout>

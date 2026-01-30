@@ -6,13 +6,16 @@ import {
   Globe,
   Smartphone,
   BarChart3,
-  AlertCircle,
-  TrendingDown,
+  Eye,
+  SearchX,
+  MessageCircleX,
+  ShieldCheck,
   Search,
   Award,
 } from "lucide-react";
 import Image from 'next/image';
 
+import Link from 'next/link';
 import Footer from '@/Components/Footer';
 import DarkVeil from '@/Components/DarkVeil';
 import SplitText from '@/Components/SplitText';
@@ -54,7 +57,7 @@ export default function LandingPage() {
             <div className="space-y-6 ">
               
               <SplitText
-  text="Your Work Is Exceptional. Your Website Should Reflect That."
+  text="Custom Websites, SEO & Business Systems Built Around How You Work"
   className="pb-2 font-anton text-5xl lg:text-6xl text-white leading-tight tracking-tight lg:max-w-4xl mx-auto"
   delay={100}
   duration={0.7}
@@ -68,14 +71,14 @@ export default function LandingPage() {
 
 />
 
-<p className="text-lg md:text-xl">Premium web design and strategic SEO for businesses that refuse to settle for &apos;good enough.&apos; When someone searches for what you do, they should immediately see the quality and professionalism you bring to every project.</p>
+<p className="text-lg md:text-xl">We design modern, SEO-driven websites and custom business systems from dashboards to inventory built around your workflow, not the other way around. Serving Eugene, Lane County & Oregon businesses.</p>
 
           
             </div>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-11/12 mx-auto">
               <a href="/contact" className="bg-[#008070] hover:bg-[#006b5d] text-white px-6 py-3 rounded w-full sm:w-auto transition-colors text-center">
-                Elevate Your Presence
+                Map Your Workflow
               </a>
               <a href="/services" className="border-2 border-white text-white bg-transparent hover:bg-white hover:text-[#191E1E] px-6 py-3 rounded w-full sm:w-auto transition-colors text-center">
                 See Our Approach
@@ -94,7 +97,7 @@ export default function LandingPage() {
             <div className="text-center space-y-4 mb-12 md:mb-16">
               <p className="font-manrope font-semibold text-[#008070]">The Gap</p>
               <SplitText
-                text="Does Your Website Match the Quality You Deliver?"
+                text="Built in Eugene. Designed for Real Businesses."
                 className="font-anton text-3xl md:text-4xl lg:text-5xl text-white leading-tight tracking-tight max-w-4xl mx-auto"
                 delay={100}
                 duration={0.7}
@@ -107,48 +110,48 @@ export default function LandingPage() {
                 textAlign="center"
               />
               <p className="font-manrope text-base md:text-lg text-gray-300 max-w-3xl mx-auto">
-                You deliver exceptional results. But online? You&apos;re being judged before they ever meet you.
+                No templates. No bloated platforms. Just custom solutions that fit how your business already operates.
               </p>
             </div>
 
             <div className="space-y-8 md:grid md:grid-cols-2 lg:grid-cols-4 md:gap-8 md:space-y-0">
               <div className="space-y-4 p-6 bg-white/5 rounded-lg border border-white/10">
-                <TrendingDown className="w-10 h-10 text-[#008070]" />
+                <Eye className="w-10 h-10 text-[#008070]" />
                 <h3 className="font-anton text-xl text-white">
-                  First Impressions Matter
+                  First Impressions Still Decide
                 </h3>
                 <p className="font-manrope text-gray-300">
-                  Potential clients search your business and see an outdated website. They assume your quality matches your site—and move on to competitors.
+                 When potential clients search your business, your website sets expectations instantly. An outdated or generic site signals outdated systems, even if your work is excellent.
                 </p>
               </div>
 
               <div className="space-y-4 p-6 bg-white/5 rounded-lg border border-white/10">
-                <Search className="w-10 h-10 text-[#008070]" />
+                <SearchX className="w-10 h-10 text-[#008070]" />
                 <h3 className="font-anton text-xl text-white">
-                  Invisible Excellence
+                 Invisible to the Right Buyers
                 </h3>
                 <p className="font-manrope text-gray-300">
-                  Your best work is hidden because you don&apos;t rank for the searches that matter. Competitors show up first simply because they invested in SEO.
+                 Your best work doesn't matter if it isn't found. Without SEO built into your website, competitors win visibility simply by showing up first.
                 </p>
               </div>
 
               <div className="space-y-4 p-6 bg-white/5 rounded-lg border border-white/10">
-                <AlertCircle className="w-10 h-10 text-[#008070]" />
+                <MessageCircleX className="w-10 h-10 text-[#008070]" />
                 <h3 className="font-anton text-xl text-white">
-                  Misrepresentation
+                  The Wrong Message
                 </h3>
                 <p className="font-manrope text-gray-300">
-                  A DIY website or cheap template doesn&apos;t represent the premium service you deliver. The disconnect costs you high-value clients.
+                 Template sites and DIY builds don't reflect premium services. When your website undersells you, high-value clients never reach out.
                 </p>
               </div>
 
               <div className="space-y-4 p-6 bg-white/5 rounded-lg border border-white/10">
-                <Award className="w-10 h-10 text-[#008070]" />
+                <ShieldCheck className="w-10 h-10 text-[#008070]" />
                 <h3 className="font-anton text-xl text-white">
-                  Professional Standard
+                  Your Reputation, Online
                 </h3>
                 <p className="font-manrope text-gray-300">
-                  You wouldn&apos;t deliver mediocre work to clients—why accept it for yourself? Your online presence is an extension of your reputation.
+                  You don't cut corners for clients. Your website and systems shouldn't either. Your digital presence is part of how you deliver trust.
                 </p>
               </div>
             </div>
@@ -162,7 +165,7 @@ export default function LandingPage() {
             <p className="font-manrope font-semibold text-[#008070]">The Solution</p>
 
              <SplitText
-  text="Web Design That Honors Your Expertise"
+  text="Websites & Systems That Match How You Work"
   className=" font-anton text-3xl md:text-4xl lg:text-5xl text-white leading-tight tracking-tight max-w-4xl mx-auto"
   delay={100}
   duration={0.7}
@@ -175,7 +178,7 @@ export default function LandingPage() {
   textAlign="center"
 
 />
-<p className='font-manrope text-base md:text-lg text-gray-300 max-w-3xl mx-auto'>We build websites for professionals who understand that quality matters—and who demand it in everything they do. Your years of experience and commitment to excellence deserve a digital presence that does it justice.</p>
+<p className='font-manrope text-base md:text-lg text-gray-300 max-w-3xl mx-auto'>We build custom websites and business systems for professionals who take their operations seriously. Your experience, reputation, and workflow deserve more than templates — they deserve solutions built specifically for you.</p>
 
               
             </div>
@@ -184,7 +187,7 @@ export default function LandingPage() {
               <div className="text-center space-y-6 md:space-y-8">
                 <div className="relative w-full h-48 md:h-60">
                   <Image
-                    src='/Img/performance.jpg'
+                    src='/Img/Design.jpg'
                     alt="Design that reflects professional standards"
                     fill
                     className="rounded-lg object-cover"
@@ -193,18 +196,17 @@ export default function LandingPage() {
                 </div>
                 <div className="space-y-4 md:space-y-6">
                   <h3 className="font-anton text-2xl md:text-3xl text-white leading-tight">
-                    Design That Reflects Your Standard
+                    Design That Reflects Your Standards
                   </h3>
                   <p className="font-manrope text-gray-300">
-                    Every pixel, every interaction, every detail crafted to showcase the level of quality you bring to your work. No templates. No shortcuts. Built to represent excellence.
-                  </p>
+Every interaction, every detail, every decision is intentional. We design websites and dashboards that reflect the level of quality you deliver. No shortcuts, no recycled layouts, no compromises.                  </p>
                 </div>
               </div>
 
               <div className="text-center space-y-6 md:space-y-8">
                 <div className="relative w-full h-48 md:h-60">
                   <Image
-                    src='/Img/partner.jpg'
+                    src='/Img/Clients.jpg'
                     alt="SEO strategy to be found by the right clients"
                     fill
                     className="rounded-lg object-cover"
@@ -213,11 +215,10 @@ export default function LandingPage() {
                 </div>
                 <div className="space-y-4 md:space-y-6">
                   <h3 className="font-anton text-2xl md:text-3xl text-white leading-tight">
-                    Found By The Right People
+                    Found By The Right Clients
                   </h3>
                   <p className="font-manrope text-gray-300">
-                    SEO strategy that puts you in front of clients who value expertise and quality. Show up first for searches that matter, with a presence that commands respect.
-                  </p>
+SEO isn’t about traffic — it’s about alignment. We build SEO into the foundation so the right clients find you first: the ones who value expertise, professionalism, and long-term partnerships.                  </p>
                 </div>
               </div>
 
@@ -233,10 +234,10 @@ export default function LandingPage() {
                 </div>
                 <div className="space-y-4 md:space-y-6">
                   <h3 className="font-anton text-2xl md:text-3xl text-white leading-tight">
-                    Built To Last, Built To Perform
+                   Built To Perform. Built To Scale.
                   </h3>
                   <p className="font-manrope text-gray-300">
-                    Fast, secure, and engineered for long-term performance. Your website should work as flawlessly as your business runs—no compromises.
+                   Fast, secure, and engineered for long-term performance. From modern websites to internal systems, everything we build is designed to scale as your business grows, not hold it back.
                   </p>
                 </div>
               </div>
@@ -259,9 +260,9 @@ export default function LandingPage() {
           <div className="max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
             <div className="flex-1 space-y-8 order-2 lg:order-1">
               <div className="space-y-6 text-left">
-                <p className="font-manrope font-semibold text-[#008070]">Honor</p>
+                <p className="font-manrope font-semibold text-[#008070]">Built to Represent You</p>
                   <SplitText
-  text="A Digital Presence That Matches Your Craftsmanship"
+  text="A Digital Presence That Matches How You Work"
   className="pb-2 font-anton text-3xl text-left md:text-4xl lg:text-6xl text-white leading-tight tracking-tight max-w-4xl mx-auto"
   delay={100}
   duration={0.7}
@@ -275,23 +276,22 @@ export default function LandingPage() {
 
 />
 
-<p className='font-manrope text-left text-base md:text-lg text-gray-300 max-w-3xl mx-auto'>We build websites for professionals who understand that quality matters—and who demand it in everything they do. Your years of experience, your attention to detail, your commitment to excellence—it all deserves a digital presence that does it justice.</p>
+<p className='font-manrope text-left text-base md:text-lg text-gray-300 max-w-3xl mx-auto'>We build custom websites and business systems for professionals who take pride in their craft. Your experience, precision, and operational standards deserve a digital presence that reflects the same level of quality.</p>
 
               </div>
 
               <div className="space-y-6 md:grid md:grid-cols-2 md:gap-8 md:space-y-0">
                 <div className="space-y-4">
                   <h3 className="font-anton text-xl text-white">
-                    Premium Positioning
+                    Attract the Right Opportunities
                   </h3>
                   <p className="font-manrope text-gray-300">
-                    Attract clients who value expertise and quality over price. Your website should filter for the right opportunities, not just any opportunities.
-                  </p>
+Your digital presence should work as a filter — drawing in clients who value professionalism and pushing away those who don’t.                  </p>
                 </div>
                 <div className="space-y-4">
-                  <h3 className="font-anton text-xl text-white">Professional Standard</h3>
+                  <h3 className="font-anton text-xl text-white">Stand Out for the Right Reasons</h3>
                   <p className="font-manrope text-gray-300">
-                    Establish your brand as the premium choice in your market. When they search, they should see quality before they see your competitors.
+                    When potential clients search, your website should immediately communicate trust, quality, and capability.
                   </p>
                 </div>
               </div>
@@ -310,7 +310,7 @@ export default function LandingPage() {
             <div className="flex-1 order-1 lg:order-2">
               <div className="relative w-full h-80 md:h-[640px]">
                 <Image
-                  src='/Img/success.png'
+                  src='/Img/Work.jpg'
                   alt="Digital presence that matches your craftsmanship"
                   fill
                   className="rounded-2xl object-cover"
@@ -326,9 +326,9 @@ export default function LandingPage() {
         <section className="px-4 md:px-16 py-16 md:py-28 relative">
           <div className="max-w-6xl mx-auto">
             <div className="text-center space-y-4 mb-12 md:mb-16">
-              <p className="font-manrope font-semibold text-[#008070]">Excellence</p>
+              <p className="font-manrope font-semibold text-[#008070]">Built to Perform</p>
               <h2 className="font-anton text-3xl md:text-4xl lg:text-5xl text-white leading-tight tracking-tight max-w-3xl mx-auto">
-                The Professional Standard for Web Presence
+                A Digital Presence Built for Real Operations
               </h2>
             </div>
 
@@ -337,10 +337,10 @@ export default function LandingPage() {
                 <div className="space-y-4 md:space-y-6">
                   <Globe className="w-12 h-12 text-[#008070]" />
                   <h3 className="font-anton text-xl md:text-2xl text-white leading-tight">
-                    Built With Obsessive Attention to Detail
+                    Precision in Every Detail
                   </h3>
                   <p className="font-manrope text-gray-300">
-                    Every line of code, every interaction designed for flawless performance. Your website should work as precisely as you operate your business.
+                   Every line of code, every interaction, every system is built with intention. From public-facing websites to internal dashboards, everything we create is designed to perform as precisely as you run your business.
                   </p>
                 </div>
                 <a href="/services" className="text-white hover:text-gray-300 flex items-center gap-2 p-0 transition-colors">
@@ -353,10 +353,10 @@ export default function LandingPage() {
                 <div className="space-y-4 md:space-y-6">
                   <Search className="w-12 h-12 text-[#008070]" />
                   <h3 className="font-anton text-xl md:text-2xl text-white leading-tight">
-                    Found By Clients Who Value Quality
+                    Found by Clients Who Value Quality
                   </h3>
                   <p className="font-manrope text-gray-300">
-                    Sophisticated SEO strategy that positions you in front of high-value clients searching for expertise, not the cheapest option.
+                   SEO isn’t about being everywhere — it’s about showing up where it matters. We position you in front of clients actively searching for expertise, professionalism, and long-term quality, not the lowest price.
                   </p>
                 </div>
                 <a href="/contact" className="text-white hover:text-gray-300 flex items-center gap-2 p-0 transition-colors">
@@ -372,7 +372,7 @@ export default function LandingPage() {
                     Reliability You Can Count On
                   </h3>
                   <p className="font-manrope text-gray-300">
-                    Lightning-fast load times, rock-solid security, and technical excellence that performs year after year without compromise.
+                    Fast load times, secure architecture, and modern technology built to last. Your website and systems should perform reliably year after year — without constant fixes or compromises.
                   </p>
                 </div>
                 <a href="/about" className="text-white hover:text-gray-300 flex items-center gap-2 p-0 transition-colors">
@@ -435,6 +435,80 @@ export default function LandingPage() {
             </div>
           </div>
         </section> */}
+
+        {/* Custom Systems Section */}
+        <section className="px-4 md:px-16 py-16 md:py-28 relative bg-white/5">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center space-y-4 mb-12 md:mb-16">
+              <p className="font-manrope font-semibold text-[#008070]">Custom Systems</p>
+              <h2 className="font-anton text-3xl md:text-4xl lg:text-5xl text-white leading-tight tracking-tight max-w-4xl mx-auto">
+                Custom Systems Built Around Your Workflow
+              </h2>
+              <p className="font-manrope text-lg md:text-xl text-[#008070] max-w-3xl mx-auto">
+                Not platforms you have to adapt to.
+              </p>
+              <p className="font-manrope text-base md:text-lg text-gray-300 max-w-3xl mx-auto">
+                Built in Eugene, serving Lane County + Oregon. Modern frameworks, custom code, secure dashboards.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+              <Link href="/contractor-systems" className="group">
+                <div className="bg-white/5 border border-white/10 rounded-xl p-6 h-full hover:border-[#008070]/50 transition-colors">
+                  <h3 className="font-anton text-xl text-white mb-3 group-hover:text-[#008070] transition-colors">
+                    Contractor Systems
+                  </h3>
+                  <p className="font-manrope text-gray-400 text-sm">
+                    Job tracking, labor management, inventory, and reporting designed for contractors.
+                  </p>
+                </div>
+              </Link>
+
+              <Link href="/warehouse-inventory-systems" className="group">
+                <div className="bg-white/5 border border-white/10 rounded-xl p-6 h-full hover:border-[#008070]/50 transition-colors">
+                  <h3 className="font-anton text-xl text-white mb-3 group-hover:text-[#008070] transition-colors">
+                    Warehouse & Inventory
+                  </h3>
+                  <p className="font-manrope text-gray-400 text-sm">
+                    Real-time inventory tracking, stock alerts, and warehouse dashboards.
+                  </p>
+                </div>
+              </Link>
+
+              <Link href="/custom-dashboards-analytics" className="group">
+                <div className="bg-white/5 border border-white/10 rounded-xl p-6 h-full hover:border-[#008070]/50 transition-colors">
+                  <h3 className="font-anton text-xl text-white mb-3 group-hover:text-[#008070] transition-colors">
+                    Custom Dashboards
+                  </h3>
+                  <p className="font-manrope text-gray-400 text-sm">
+                    Analytics and reporting dashboards that show exactly what matters.
+                  </p>
+                </div>
+              </Link>
+
+              <Link href="/custom-cms-development" className="group">
+                <div className="bg-white/5 border border-white/10 rounded-xl p-6 h-full hover:border-[#008070]/50 transition-colors">
+                  <h3 className="font-anton text-xl text-white mb-3 group-hover:text-[#008070] transition-colors">
+                    Custom CMS
+                  </h3>
+                  <p className="font-manrope text-gray-400 text-sm">
+                    Secure, scalable content management tailored to your workflow.
+                  </p>
+                </div>
+              </Link>
+            </div>
+
+            <div className="text-center">
+              <Link
+                href="/custom-business-systems"
+                className="inline-flex items-center gap-2 bg-[#008070] hover:bg-[#006b5d] text-white px-6 py-3 rounded transition-colors"
+              >
+                Explore Custom Business Systems
+                <ChevronRight className="w-4 h-4" />
+              </Link>
+            </div>
+          </div>
+        </section>
 
         {/* CTA Section */}
       <CTA />

@@ -67,11 +67,18 @@ export default function Footer({ variant = "default" }) {
   //   ];
   // };
 
-  const services = [
+  const quickLinks = [
     {name: "About Us", link: "/about"},
     {name: "Our Services", link: "/services"},
     {name: "Contact Us", link: "/contact"},
-    {name: "Home", link: "/"},
+    {name: "Blog", link: "/blog"},
+  ]
+
+  const serviceLinks = [
+    {name: "Eugene Web Design", link: "/eugene-web-design"},
+    {name: "Custom Business Systems", link: "/custom-business-systems"},
+    {name: "Contractor Systems", link: "/contractor-systems"},
+    {name: "Custom Dashboards", link: "/custom-dashboards-analytics"},
   ]
 
   const getSocialPlatforms = () => {
@@ -103,38 +110,34 @@ export default function Footer({ variant = "default" }) {
 
           {/* Quick Links */}
           <div className="space-y-4">
-            <h3 className="font-manrope font-semibold text-white">
-              {variant === "services" ? "Our Services" : "Quick Links"}
-            </h3>
+            <h3 className="font-manrope font-semibold text-white">Quick Links</h3>
             <div className="space-y-2">
-              {services.map((service) => (
+              {quickLinks.map((item) => (
                 <a
-                  key={service.link}
-                  href={service.link}
+                  key={item.link}
+                  href={item.link}
                   className="block font-manrope text-sm text-white hover:text-gray-300 transition-colors py-2"
                 >
-                  {service.name}
+                  {item.name}
                 </a>
               ))}
             </div>
           </div>
 
-          {/* Connect */}
+          {/* Services */}
           <div className="space-y-4">
-            <h3 className="font-manrope font-semibold text-white">
-              {/* {getConnectTitle()} */}
-            </h3>
-            {/* <div className="space-y-2">
-              {getSocialPlatforms().map((platform) => (
+            <h3 className="font-manrope font-semibold text-white">Services</h3>
+            <div className="space-y-2">
+              {serviceLinks.map((item) => (
                 <a
-                  key={platform}
-                  href="#"
+                  key={item.link}
+                  href={item.link}
                   className="block font-manrope text-sm text-white hover:text-gray-300 transition-colors py-2"
                 >
-                  {platform}
+                  {item.name}
                 </a>
               ))}
-            </div> */}
+            </div>
           </div>
         </div>
 
