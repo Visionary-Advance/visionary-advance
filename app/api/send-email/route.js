@@ -1,11 +1,13 @@
 import { NextResponse } from 'next/server'
 import { Resend } from 'resend'
-import { handleContactFormSubmission } from '@/lib/hubspot'
+import { createOrUpdateLead } from '@/lib/crm'
+import { getUTMFromRequest } from '@/lib/utm'
 
 export async function POST(request) {
   try {
     const body = await request.json()
     const { firstName, lastName, email, phone, company, projectType, budget, timeline, message } = body
+    const utmParams = getUTMFromRequest(request)
 
     // Check for Resend API key
     if (!process.env.RESEND_API_KEY) {
@@ -50,28 +52,41 @@ export async function POST(request) {
       return NextResponse.json({ error }, { status: 400 })
     }
 
-    // Create HubSpot records (non-blocking - don't fail if HubSpot has issues)
-    let hubspotResult = null
+    // Create/update CRM lead (non-blocking - handles HubSpot sync internally)
+    let crmResult = null
     try {
-      const projectDetails = `Project Type: ${projectType || 'Not specified'}\nBudget: ${budget || 'Not specified'}\nTimeline: ${timeline || 'Not specified'}\n\n${message || ''}`
-
-      hubspotResult = await handleContactFormSubmission({
-        name: fullName,
-        company,
+      crmResult = await createOrUpdateLead({
         email,
+        first_name: firstName,
+        last_name: lastName,
+        full_name: fullName,
         phone,
-        website: null,
-        message: projectDetails,
+        company,
+        source: 'contact_form',
+        conversion_page: body.conversion_page || '/contact',
+        utm_source: body.utm_source || utmParams.utm_source,
+        utm_medium: body.utm_medium || utmParams.utm_medium,
+        utm_campaign: body.utm_campaign || utmParams.utm_campaign,
+        utm_term: body.utm_term || utmParams.utm_term,
+        utm_content: body.utm_content || utmParams.utm_content,
+        referrer: body.referrer || utmParams.referrer,
+        form_data: {
+          projectType,
+          message,
+        },
+        project_type: projectType,
+        budget_range: budget,
+        timeline,
       })
-      console.log('HubSpot integration result:', hubspotResult)
-    } catch (hubspotError) {
-      console.error('HubSpot integration failed (non-critical):', hubspotError)
+      console.log('CRM lead result:', crmResult.isNew ? 'New lead created' : 'Lead updated')
+    } catch (crmError) {
+      console.error('CRM integration failed (non-critical):', crmError)
     }
 
     return NextResponse.json({
       success: true,
       data,
-      hubspot: hubspotResult,
+      lead: crmResult?.lead?.id,
     })
   } catch (error) {
     console.error('Contact form submission error:', error)

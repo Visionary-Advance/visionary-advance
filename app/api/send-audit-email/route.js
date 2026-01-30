@@ -1,6 +1,8 @@
 // app/api/send-audit-email/route.js
 import { NextResponse } from 'next/server'
 import { Resend } from 'resend'
+import { createOrUpdateLead } from '@/lib/crm'
+import { getUTMFromRequest } from '@/lib/utm'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -203,7 +205,9 @@ async function sendAdminNotification(email, url, results) {
 
 export async function POST(request) {
   try {
-    const { email, url, results } = await request.json()
+    const body = await request.json()
+    const { email, url, results } = body
+    const utmParams = getUTMFromRequest(request)
 
     if (!email || !url || !results) {
       return NextResponse.json(
@@ -229,7 +233,33 @@ export async function POST(request) {
       console.error('Admin notification failed:', err)
     })
 
-    return NextResponse.json({ success: true }, { status: 200 })
+    // Create/update CRM lead with audit data (non-blocking)
+    let crmResult = null
+    try {
+      crmResult = await createOrUpdateLead({
+        email,
+        website: url,
+        source: 'audit_email',
+        conversion_page: body.conversion_page || '/construction-websites',
+        utm_source: body.utm_source || utmParams.utm_source,
+        utm_medium: body.utm_medium || utmParams.utm_medium,
+        utm_campaign: body.utm_campaign || utmParams.utm_campaign,
+        utm_term: body.utm_term || utmParams.utm_term,
+        utm_content: body.utm_content || utmParams.utm_content,
+        referrer: body.referrer || utmParams.referrer,
+        audit_scores: results.scores,
+        form_data: {
+          audit_url: url,
+          audit_metrics: results.metrics,
+        },
+        business_type: 'construction',
+      })
+      console.log('CRM lead result:', crmResult.isNew ? 'New lead created' : 'Lead updated')
+    } catch (crmError) {
+      console.error('CRM integration failed (non-critical):', crmError)
+    }
+
+    return NextResponse.json({ success: true, lead: crmResult?.lead?.id }, { status: 200 })
   } catch (error) {
     console.error('Send Audit Email Error:', error)
     return NextResponse.json(

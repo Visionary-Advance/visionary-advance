@@ -61,8 +61,33 @@ The codebase implements a sophisticated OAuth token management system for both S
 - Non-blocking integration (doesn't fail form submission if HubSpot is down)
 - Handles duplicate detection by searching for existing contacts/companies first
 
+#### Internal CRM System (`lib/crm.js`)
+A unified CRM system with Supabase as the source of truth:
+- `createOrUpdateLead(data)` - Main entry point for all lead sources, handles deduplication
+- `updateLeadStage(leadId, stage)` - Pipeline stage transitions with activity logging
+- `calculateLeadScore(data)` - Automatic lead scoring (0-100) based on needs, company, budget, timeline
+- `logActivity(data)` - Activity/note logging for lead timeline
+- `syncToHubSpot(lead)` - Background sync to HubSpot (non-blocking)
+
+**Database Tables** (in main Supabase instance):
+- `crm_leads` - Unified leads table with contact info, pipeline stage, scoring, UTM tracking
+- `crm_activities` - Activity timeline (notes, stage changes, form submissions)
+- `crm_stage_history` - Track time spent in each pipeline stage
+
+**Pipeline Stages**: contact → plan_audit_meeting → discovery_call → proposal → offer → negotiating → won/lost
+
+**Lead Sources**: website_audit, systems_form, contact_form, audit_email, manual
+
+**Discord Notifications** (`lib/discord.js`):
+- Sends webhook notifications for new leads and stage changes
+- Requires `DISCORD_CRM_WEBHOOK_URL` environment variable
+
+**UTM Tracking** (`lib/utm.js`):
+- Captures utm_source, utm_medium, utm_campaign, utm_term, utm_content
+- Extracts from URL params, cookies, and request headers
+
 #### Supabase Database Architecture
-Uses TWO separate Supabase instances:
+Uses THREE separate Supabase instances:
 1. **Main instance** (`NEXT_PUBLIC_SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY`)
    - Website audits (`va_website_audits`)
    - Square auth and locations
@@ -70,6 +95,13 @@ Uses TWO separate Supabase instances:
 2. **Tokens instance** (`SUPABASE_TOKENS_URL` + `SUPABASE_TOKENS_SERVICE_KEY`)
    - Jobber accounts
    - Note: `lib/jobber.js` uses tokens instance, `lib/square-auth.js` uses main instance
+
+3. **CRM instance** (`NEXT_PUBLIC_CRM_DB_URL` + `NEXT_PUBLIC_CRM_DB_ANON`)
+   - CRM leads (`crm_leads`)
+   - CRM activities (`crm_activities`)
+   - CRM stage history (`crm_stage_history`)
+   - Admin authentication (Supabase Auth)
+   - Note: `lib/supabase-crm.js` handles this instance
 
 #### Layout System
 The app uses a conditional layout system via `Components/ConditionalLayout.jsx`:
@@ -81,9 +113,17 @@ The app uses a conditional layout system via `Components/ConditionalLayout.jsx`:
 ### API Routes
 
 **Email Endpoints**:
-- `/api/send` - Main contact form submissions (Resend + HubSpot integration)
-- `/api/send-email` - Alternative email endpoint (Resend + HubSpot integration)
-- `/api/send-audit-email` - Website audit report emails
+- `/api/send` - Main contact form submissions (Resend + CRM integration)
+- `/api/send-email` - Alternative email endpoint (Resend + CRM integration)
+- `/api/send-audit-email` - Website audit report emails (creates CRM lead)
+
+**CRM Endpoints** (`/api/crm/`):
+- `GET/POST /api/crm/leads` - List leads (with filters/pagination) or create new lead
+- `GET/PATCH/DELETE /api/crm/leads/[id]` - Get, update, or delete a specific lead
+- `POST /api/crm/leads/[id]/activities` - Add note or activity to lead
+- `PATCH /api/crm/leads/[id]/stage` - Transition lead to new pipeline stage
+- `GET /api/crm/pipeline` - Get pipeline data for kanban view
+- `GET /api/crm/stats` - Dashboard statistics and metrics
 
 **OAuth Callbacks**:
 - `/api/square/callback` - Square OAuth flow completion
@@ -124,6 +164,15 @@ The app uses a conditional layout system via `Components/ConditionalLayout.jsx`:
 **HubSpot Integration**:
 - `HUBSPOT_ACCESS_TOKEN` (Private App Access Token from HubSpot)
 
+**CRM/Discord**:
+- `DISCORD_CRM_WEBHOOK_URL` (Discord webhook for lead notifications)
+
+**CRM Database** (separate Supabase instance):
+- `NEXT_PUBLIC_CRM_DB_URL` (CRM Supabase URL)
+- `NEXT_PUBLIC_CRM_DB_ANON` (CRM Supabase anon key for client-side auth)
+- `SUPABASE_CRM_SERVICE_KEY` (Optional: CRM service role key for server-side operations)
+- `ADMIN_EMAILS` (Comma-separated list of allowed admin email addresses)
+
 **Optional**:
 - `PAGESPEED_API_KEY` (Google PageSpeed API, falls back to anonymous if not set)
 
@@ -139,6 +188,22 @@ Primary lead generation page with:
 
 ### Target Keywords
 construction website design, contractor website, construction company website, builder website design, construction web development, contractor lead generation
+
+### CRM Dashboard (`/admin/crm`)
+Internal lead management dashboard with:
+- `/admin/crm/leads` - Leads list with filtering, search, and pagination
+- `/admin/crm/leads/[id]` - Lead detail view with activity timeline and stage management
+- `/admin/crm/pipeline` - Kanban-style pipeline view
+- `/admin/crm/settings` - Account settings and MFA management
+- Vercel/Notion-inspired dark theme (black/gray with teal accent)
+
+### Admin Authentication (`/admin/login`)
+The admin section is protected with Supabase Auth:
+- Email/password authentication
+- MFA support (TOTP via authenticator apps like Google Authenticator, Authy, 1Password)
+- Session-based with automatic refresh
+- Only emails in `ADMIN_EMAILS` env var can access
+- No header/footer (completely separate from main site)
 
 ## Deployment
 

@@ -3,10 +3,13 @@
 
 import { NextResponse } from 'next/server'
 import { Resend } from 'resend'
+import { createOrUpdateLead } from '@/lib/crm'
+import { getUTMFromRequest } from '@/lib/utm'
 
 export async function POST(request) {
   try {
     const body = await request.json()
+    const utmParams = getUTMFromRequest(request)
 
     // Check for Resend API key
     if (!process.env.RESEND_API_KEY) {
@@ -75,39 +78,43 @@ export async function POST(request) {
       )
     }
 
-    // Optional: Save to Supabase if configured (non-blocking)
+    // Create/update CRM lead (non-blocking - handles HubSpot sync internally)
+    let crmResult = null
     try {
-      if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
-        const { supabase } = await import('@/lib/supabase')
+      // Split name into first and last
+      const nameParts = body.name ? body.name.trim().split(' ') : []
+      const firstName = nameParts[0] || null
+      const lastName = nameParts.slice(1).join(' ') || null
 
-        const leadData = {
-          name: body.name,
-          email: body.email,
-          phone: body.phone || null,
-          business_type: body.business_type || null,
-          current_tools: body.current_tools || null,
-          biggest_bottleneck: body.biggest_bottleneck || null,
-          desired_outcome: body.desired_outcome || null,
-          page_path: body.page_path || null,
-        }
-
-        const { error } = await supabase
-          .from('leads')
-          .insert([leadData])
-
-        if (error) {
-          console.error('Supabase insert error (non-critical):', error)
-        } else {
-          console.log('Lead saved to Supabase successfully')
-        }
-      }
-    } catch (dbError) {
-      // Don't fail the request if DB save fails - email was already sent
-      console.error('Supabase save failed (non-critical):', dbError)
+      crmResult = await createOrUpdateLead({
+        email: body.email,
+        first_name: firstName,
+        last_name: lastName,
+        full_name: body.name,
+        phone: body.phone,
+        source: 'systems_form',
+        conversion_page: body.page_path || '/systems',
+        utm_source: body.utm_source || utmParams.utm_source,
+        utm_medium: body.utm_medium || utmParams.utm_medium,
+        utm_campaign: body.utm_campaign || utmParams.utm_campaign,
+        utm_term: body.utm_term || utmParams.utm_term,
+        utm_content: body.utm_content || utmParams.utm_content,
+        referrer: body.referrer || utmParams.referrer,
+        form_data: {
+          current_tools: body.current_tools,
+          biggest_bottleneck: body.biggest_bottleneck,
+          desired_outcome: body.desired_outcome,
+        },
+        business_type: body.business_type,
+      })
+      console.log('CRM lead result:', crmResult.isNew ? 'New lead created' : 'Lead updated')
+    } catch (crmError) {
+      // Don't fail the request if CRM save fails - email was already sent
+      console.error('CRM integration failed (non-critical):', crmError)
     }
 
     return NextResponse.json(
-      { success: true, message: 'Lead submitted successfully' },
+      { success: true, message: 'Lead submitted successfully', lead: crmResult?.lead?.id },
       { status: 200 }
     )
   } catch (error) {

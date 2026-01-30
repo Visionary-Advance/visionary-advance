@@ -6,13 +6,18 @@ import Footer from './Footer';
 
 export default function ConditionalLayout({ children }) {
   const pathname = usePathname();
+
+  // Pages that should not have header/footer
   const isLandingPage = pathname === '/construction-websites';
-  
+  const isAdminPage = pathname?.startsWith('/admin');
+
+  const hideLayout = isLandingPage || isAdminPage;
+
   return (
     <>
-      {!isLandingPage && <Header />}
+      {!hideLayout && <Header />}
       {children}
-      {!isLandingPage && <Footer variant="default" />}
+      {!hideLayout && <Footer variant="default" />}
     </>
   );
 }
