@@ -13,7 +13,15 @@
       "Bash(ls:*)",
       "Bash(npx next build:*)",
       "Bash(npx next lint)",
-      "Bash(node -e:*)"
+      "Bash(node -e:*)",
+      "Bash(npm run build:*)",
+      "Bash(netstat:*)",
+      "Bash(npm run dev:*)",
+      "Bash(timeout:*)",
+      "Bash(findstr:*)",
+      "Bash(node --check:*)",
+      "Bash(npm --version)",
+      "Bash(node:*)"
     ],
     "deny": [],
     "ask": []

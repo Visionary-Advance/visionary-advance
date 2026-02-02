@@ -25,11 +25,18 @@ export function AdminAuthProvider({ children }) {
   const [mfaStatus, setMfaStatus] = useState({ enabled: false, verified: false })
 
   useEffect(() => {
-    // Check initial session
-    checkAuth()
+    let initialCheckDone = false
 
-    // Listen for auth changes
+    // Check initial session
+    checkAuth().then(() => {
+      initialCheckDone = true
+    })
+
+    // Listen for auth changes (skip initial SIGNED_IN event to avoid race condition)
     const { data: { subscription } } = onAuthStateChange(async (event, session) => {
+      if (!initialCheckDone && event === 'SIGNED_IN') {
+        return
+      }
       if (event === 'SIGNED_OUT') {
         setUser(null)
         router.replace('/admin/login')
