@@ -1,7 +1,7 @@
 // app/admin/page.js
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useAdminAuth } from '@/Components/Admin/AdminAuthProvider'
 import SettingsModal from '@/Components/Admin/SettingsModal'
@@ -9,6 +9,27 @@ import SettingsModal from '@/Components/Admin/SettingsModal'
 export default function AdminDashboard() {
   const { user, signOut } = useAdminAuth()
   const [showSettings, setShowSettings] = useState(false)
+  const [stats, setStats] = useState(null)
+  const [statsLoading, setStatsLoading] = useState(true)
+
+  // Fetch CRM stats
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        const res = await fetch('/api/crm/stats')
+        if (res.ok) {
+          const data = await res.json()
+          setStats(data)
+        }
+      } catch (err) {
+        console.error('Error fetching stats:', err)
+      } finally {
+        setStatsLoading(false)
+      }
+    }
+
+    fetchStats()
+  }, [])
 
   const tools = [
     {
@@ -126,21 +147,39 @@ export default function AdminDashboard() {
           ))}
         </div>
 
-        {/* Quick Stats (placeholder for future) */}
+        {/* Quick Stats */}
         <div className="mt-12 rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
           <h3 className="text-sm font-medium text-[#a1a1aa]">Quick Stats</h3>
-          <div className="mt-4 grid gap-6 sm:grid-cols-3">
+          <div className="mt-4 grid gap-6 sm:grid-cols-5">
             <div>
-              <p className="text-3xl font-semibold text-[#fafafa]">—</p>
-              <p className="mt-1 text-sm text-[#525252]">Active Leads</p>
+              <p className="text-3xl font-semibold text-[#fafafa]">
+                {statsLoading ? '—' : stats?.overview?.totalLeads || 0}
+              </p>
+              <p className="mt-1 text-sm text-[#525252]">Total Leads</p>
             </div>
             <div>
-              <p className="text-3xl font-semibold text-[#fafafa]">—</p>
-              <p className="mt-1 text-sm text-[#525252]">Code Modules</p>
+              <p className="text-3xl font-semibold text-[#fafafa]">
+                {statsLoading ? '—' : stats?.overview?.leadsThisWeek || 0}
+              </p>
+              <p className="mt-1 text-sm text-[#525252]">New This Week</p>
             </div>
             <div>
-              <p className="text-3xl font-semibold text-[#fafafa]">—</p>
-              <p className="mt-1 text-sm text-[#525252]">Projects Generated</p>
+              <p className="text-3xl font-semibold text-[#fafafa]">
+                {statsLoading ? '—' : stats?.overview?.activePipeline || 0}
+              </p>
+              <p className="mt-1 text-sm text-[#525252]">In Pipeline</p>
+            </div>
+            <div>
+              <p className="text-3xl font-semibold text-[#10b981]">
+                {statsLoading ? '—' : stats?.overview?.wonCount || 0}
+              </p>
+              <p className="mt-1 text-sm text-[#525252]">Won Deals</p>
+            </div>
+            <div>
+              <p className="text-3xl font-semibold text-[#fafafa]">
+                {statsLoading ? '—' : `${stats?.overview?.conversionRate || 0}%`}
+              </p>
+              <p className="mt-1 text-sm text-[#525252]">Win Rate</p>
             </div>
           </div>
         </div>

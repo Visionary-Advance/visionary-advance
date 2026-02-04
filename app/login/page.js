@@ -1,4 +1,4 @@
-// app/admin/login/page.js
+// app/login/page.js
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -43,7 +43,7 @@ export default function AdminLoginPage() {
           }
         } else {
           // Fully authenticated, redirect
-          router.replace('/admin/crm')
+          router.replace('/admin')
         }
       }
     } catch (err) {
@@ -71,7 +71,7 @@ export default function AdminLoginPage() {
         setMfaFactorId(mfaStatus.factorId)
       } else {
         // No MFA or already verified, redirect
-        router.replace('/admin/crm')
+        router.replace('/admin')
       }
     } catch (err) {
       setError(err.message)
@@ -87,7 +87,7 @@ export default function AdminLoginPage() {
 
     try {
       await verifyMFA(mfaFactorId, mfaCode)
-      router.replace('/admin/crm')
+      router.replace('/admin')
     } catch (err) {
       setError(err.message)
       setMfaCode('')

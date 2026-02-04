@@ -234,7 +234,7 @@ export default function SEODashboardPage() {
             Connect your Google account to access Search Console data.
           </div>
           <button
-            onClick={() => router.push('/admin/crm/settings')}
+            onClick={() => router.push('/admin')}
             className="bg-teal-500 hover:bg-teal-600 text-white px-6 py-2 rounded-lg transition-colors"
           >
             Connect Google Account

@@ -16,7 +16,7 @@ export async function GET(request) {
   const error = searchParams.get('error');
 
   // Default return URL
-  let returnUrl = '/admin/crm/settings';
+  let returnUrl = '/admin';
 
   try {
     // Handle OAuth errors from Google
@@ -71,16 +71,17 @@ export async function GET(request) {
       );
     }
 
-    // Store tokens in database
+    // Store tokens in database (link to admin email if provided)
     await storeGoogleAuth({
-      email: userInfo.email,
+      adminEmail: stateData.adminEmail, // Admin user's email for lookup
+      googleEmail: userInfo.email,       // Google account email for display
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
       expiresIn: tokens.expiresIn,
       scopes: tokens.scope
     });
 
-    console.log(`Google OAuth successful for: ${userInfo.email}`);
+    console.log(`Google OAuth successful for admin: ${stateData.adminEmail || userInfo.email} (Google: ${userInfo.email})`);
 
     // Redirect back with success
     return NextResponse.redirect(

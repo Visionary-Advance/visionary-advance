@@ -10,36 +10,37 @@ export async function GET(request) {
     if (!process.env.GOOGLE_CLIENT_ID) {
       console.error('GOOGLE_CLIENT_ID not configured');
       return NextResponse.redirect(
-        new URL('/admin/crm/settings?google_error=config_missing', request.url)
+        new URL('/admin?google_error=config_missing', request.url)
       );
     }
 
     if (!process.env.GOOGLE_CLIENT_SECRET) {
       console.error('GOOGLE_CLIENT_SECRET not configured');
       return NextResponse.redirect(
-        new URL('/admin/crm/settings?google_error=config_missing', request.url)
+        new URL('/admin?google_error=config_missing', request.url)
       );
     }
 
     if (!process.env.GOOGLE_OAUTH_STATE_SECRET) {
       console.error('GOOGLE_OAUTH_STATE_SECRET not configured');
       return NextResponse.redirect(
-        new URL('/admin/crm/settings?google_error=config_missing', request.url)
+        new URL('/admin?google_error=config_missing', request.url)
       );
     }
 
-    // Get return URL from query params (optional)
+    // Get params from query (optional)
     const { searchParams } = new URL(request.url);
-    const returnUrl = searchParams.get('returnUrl') || '/admin/crm/settings';
+    const returnUrl = searchParams.get('returnUrl') || '/admin';
+    const adminEmail = searchParams.get('adminEmail');
 
-    // Generate OAuth URL and redirect
-    const authUrl = generateOAuthUrl(returnUrl);
+    // Generate OAuth URL and redirect (include admin email to link connection)
+    const authUrl = generateOAuthUrl(returnUrl, adminEmail);
 
     return NextResponse.redirect(authUrl);
   } catch (error) {
     console.error('Error starting Google OAuth:', error);
     return NextResponse.redirect(
-      new URL(`/admin/crm/settings?google_error=${encodeURIComponent(error.message)}`, request.url)
+      new URL(`/admin?google_error=${encodeURIComponent(error.message)}`, request.url)
     );
   }
 }

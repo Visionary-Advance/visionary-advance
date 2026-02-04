@@ -1,10 +1,43 @@
 // app/admin/crm/pipeline/page.js
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import ScoreBadge from '@/Components/CRM/Shared/ScoreBadge'
 import SourceBadge from '@/Components/CRM/Shared/SourceBadge'
+
+// Custom scrollbar styles for the kanban board
+const scrollbarStyles = `
+  .kanban-scroll::-webkit-scrollbar {
+    height: 8px;
+    background: transparent;
+  }
+  .kanban-scroll::-webkit-scrollbar-track {
+    background: #171717;
+    border-radius: 4px;
+  }
+  .kanban-scroll::-webkit-scrollbar-thumb {
+    background: #262626;
+    border-radius: 4px;
+  }
+  .kanban-scroll::-webkit-scrollbar-thumb:hover {
+    background: #404040;
+  }
+  .column-scroll::-webkit-scrollbar {
+    width: 6px;
+    background: transparent;
+  }
+  .column-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .column-scroll::-webkit-scrollbar-thumb {
+    background: #262626;
+    border-radius: 3px;
+  }
+  .column-scroll::-webkit-scrollbar-thumb:hover {
+    background: #404040;
+  }
+`
 
 const STAGES = [
   { key: 'contact', label: 'Contact', color: '#6b7280' },
@@ -22,6 +55,8 @@ export default function PipelinePage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [updatingLead, setUpdatingLead] = useState(null)
+  const [draggedLead, setDraggedLead] = useState(null)
+  const [dragOverStage, setDragOverStage] = useState(null)
 
   useEffect(() => {
     fetchPipeline()
@@ -60,6 +95,48 @@ export default function PipelinePage() {
     }
   }
 
+  // Drag and drop handlers
+  const handleDragStart = (e, lead, currentStage) => {
+    setDraggedLead({ ...lead, currentStage })
+    e.dataTransfer.effectAllowed = 'move'
+    e.dataTransfer.setData('text/plain', lead.id)
+    // Add a slight delay to show the drag ghost
+    setTimeout(() => {
+      e.target.style.opacity = '0.5'
+    }, 0)
+  }
+
+  const handleDragEnd = (e) => {
+    e.target.style.opacity = '1'
+    setDraggedLead(null)
+    setDragOverStage(null)
+  }
+
+  const handleDragOver = (e, stageKey) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'move'
+    if (dragOverStage !== stageKey) {
+      setDragOverStage(stageKey)
+    }
+  }
+
+  const handleDragLeave = (e) => {
+    // Only clear if we're leaving the column entirely
+    if (!e.currentTarget.contains(e.relatedTarget)) {
+      setDragOverStage(null)
+    }
+  }
+
+  const handleDrop = (e, targetStage) => {
+    e.preventDefault()
+    setDragOverStage(null)
+
+    if (draggedLead && draggedLead.currentStage !== targetStage) {
+      moveToStage(draggedLead.id, targetStage)
+    }
+    setDraggedLead(null)
+  }
+
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
@@ -81,12 +158,15 @@ export default function PipelinePage() {
 
   return (
     <div className="space-y-6">
+      {/* Inject custom scrollbar styles */}
+      <style>{scrollbarStyles}</style>
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-[#fafafa]">Pipeline</h1>
           <p className="mt-1 text-sm text-[#a1a1aa]">
-            {data?.summary?.activeLeads || 0} active leads | {data?.summary?.won || 0} won | {data?.summary?.lost || 0} lost
+            Drag and drop leads between stages to update their status
           </p>
         </div>
         <Link
@@ -98,32 +178,33 @@ export default function PipelinePage() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         <SummaryCard label="Total Leads" value={data?.summary?.totalLeads || 0} />
-        <SummaryCard label="Active Pipeline" value={data?.summary?.activeLeads || 0} />
-        <SummaryCard label="Avg Score" value={data?.summary?.avgScore || 0} suffix="/100" />
-        <SummaryCard
-          label="Win Rate"
-          value={
-            data?.summary?.won + data?.summary?.lost > 0
-              ? Math.round((data?.summary?.won / (data?.summary?.won + data?.summary?.lost)) * 100)
-              : 0
-          }
-          suffix="%"
-        />
+        <SummaryCard label="New This Week" value={data?.summary?.newThisWeek || 0} />
+        <SummaryCard label="In Pipeline" value={data?.summary?.activeLeads || 0} />
+        <SummaryCard label="Won" value={data?.summary?.won || 0} color="#10b981" />
+        <SummaryCard label="Win Rate" value={data?.summary?.winRate || 0} suffix="%" />
       </div>
 
       {/* Kanban Board */}
-      <div className="overflow-x-auto pb-4">
+      <div className="overflow-x-auto pb-4 kanban-scroll">
         <div className="inline-flex gap-4 min-w-full">
           {STAGES.map((stage) => {
             const leads = data?.leadsByStage?.[stage.key] || []
             const count = leads.length
+            const isDropTarget = dragOverStage === stage.key && draggedLead?.currentStage !== stage.key
 
             return (
               <div
                 key={stage.key}
-                className="flex w-72 flex-shrink-0 flex-col rounded-xl border border-[#262626] bg-[#0a0a0a]"
+                className={`flex w-72 flex-shrink-0 flex-col rounded-xl border bg-[#0a0a0a] transition-all duration-200 ${
+                  isDropTarget
+                    ? 'border-[#008070] ring-2 ring-[#008070]/30 bg-[#008070]/5'
+                    : 'border-[#262626]'
+                }`}
+                onDragOver={(e) => handleDragOver(e, stage.key)}
+                onDragLeave={handleDragLeave}
+                onDrop={(e) => handleDrop(e, stage.key)}
               >
                 {/* Column Header */}
                 <div
@@ -137,9 +218,11 @@ export default function PipelinePage() {
                 </div>
 
                 {/* Cards */}
-                <div className="flex-1 space-y-3 overflow-y-auto p-3" style={{ maxHeight: 'calc(100vh - 350px)' }}>
+                <div className="flex-1 space-y-3 overflow-y-auto p-3 column-scroll" style={{ maxHeight: 'calc(100vh - 350px)', minHeight: '100px' }}>
                   {leads.length === 0 ? (
-                    <p className="py-8 text-center text-xs text-[#a1a1aa]">No leads</p>
+                    <p className={`py-8 text-center text-xs ${isDropTarget ? 'text-[#008070]' : 'text-[#a1a1aa]'}`}>
+                      {isDropTarget ? 'Drop here' : 'No leads'}
+                    </p>
                   ) : (
                     leads.map((lead) => (
                       <PipelineCard
@@ -149,6 +232,9 @@ export default function PipelinePage() {
                         stages={STAGES}
                         onMove={moveToStage}
                         isUpdating={updatingLead === lead.id}
+                        onDragStart={handleDragStart}
+                        onDragEnd={handleDragEnd}
+                        isDragging={draggedLead?.id === lead.id}
                       />
                     ))
                   )}
@@ -162,11 +248,11 @@ export default function PipelinePage() {
   )
 }
 
-function SummaryCard({ label, value, suffix = '' }) {
+function SummaryCard({ label, value, suffix = '', color }) {
   return (
     <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-4">
       <p className="text-xs font-medium uppercase tracking-wider text-[#a1a1aa]">{label}</p>
-      <p className="mt-2 text-2xl font-semibold text-[#fafafa]">
+      <p className="mt-2 text-2xl font-semibold" style={{ color: color || '#fafafa' }}>
         {value}
         {suffix && <span className="text-lg text-[#a1a1aa]">{suffix}</span>}
       </p>
@@ -174,8 +260,21 @@ function SummaryCard({ label, value, suffix = '' }) {
   )
 }
 
-function PipelineCard({ lead, currentStage, stages, onMove, isUpdating }) {
+function PipelineCard({ lead, currentStage, stages, onMove, isUpdating, onDragStart, onDragEnd, isDragging }) {
   const [showMenu, setShowMenu] = useState(false)
+  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 })
+  const buttonRef = useRef(null)
+
+  const handleMenuOpen = () => {
+    if (buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect()
+      setMenuPosition({
+        top: rect.bottom + 4,
+        left: Math.min(rect.right - 192, window.innerWidth - 200), // 192 = menu width (w-48)
+      })
+    }
+    setShowMenu(!showMenu)
+  }
 
   const formatTime = (dateString) => {
     if (!dateString) return ''
@@ -192,9 +291,12 @@ function PipelineCard({ lead, currentStage, stages, onMove, isUpdating }) {
 
   return (
     <div
-      className={`group relative rounded-lg border border-[#262626] bg-[#171717] p-3 transition-all hover:border-[#404040] ${
-        isUpdating ? 'opacity-50' : ''
-      }`}
+      draggable
+      onDragStart={(e) => onDragStart(e, lead, currentStage)}
+      onDragEnd={onDragEnd}
+      className={`group relative rounded-lg border border-[#262626] bg-[#171717] p-3 transition-all hover:border-[#404040] cursor-grab active:cursor-grabbing ${
+        isUpdating ? 'opacity-50 pointer-events-none' : ''
+      } ${isDragging ? 'opacity-50 ring-2 ring-[#008070]' : ''}`}
     >
       {/* Card Header */}
       <div className="flex items-start justify-between gap-2">
@@ -217,20 +319,24 @@ function PipelineCard({ lead, currentStage, stages, onMove, isUpdating }) {
 
       {/* Move Menu Button */}
       <button
-        onClick={() => setShowMenu(!showMenu)}
+        ref={buttonRef}
+        onClick={handleMenuOpen}
         className="absolute -right-1 -top-1 hidden rounded-lg bg-[#262626] p-1.5 text-[#a1a1aa] shadow-lg hover:bg-[#404040] hover:text-[#fafafa] group-hover:block"
       >
         <DotsIcon className="h-4 w-4" />
       </button>
 
-      {/* Move Menu */}
+      {/* Move Menu - Fixed position to avoid overflow clipping */}
       {showMenu && (
         <>
           <div
-            className="fixed inset-0 z-10"
+            className="fixed inset-0 z-50"
             onClick={() => setShowMenu(false)}
           />
-          <div className="absolute right-0 top-8 z-20 w-48 rounded-lg border border-[#262626] bg-[#171717] py-1 shadow-xl">
+          <div
+            className="fixed z-50 w-48 rounded-lg border border-[#262626] bg-[#171717] py-1 shadow-xl"
+            style={{ top: menuPosition.top, left: menuPosition.left }}
+          >
             <p className="px-3 py-1.5 text-xs font-medium uppercase tracking-wider text-[#a1a1aa]">
               Move to
             </p>

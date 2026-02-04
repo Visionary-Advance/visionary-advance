@@ -10,8 +10,9 @@ export default function ConditionalLayout({ children }) {
   // Pages that should not have header/footer
   const isLandingPage = pathname === '/construction-websites';
   const isAdminPage = pathname?.startsWith('/admin');
+  const isLoginPage = pathname === '/login';
 
-  const hideLayout = isLandingPage || isAdminPage;
+  const hideLayout = isLandingPage || isAdminPage || isLoginPage;
 
   return (
     <>

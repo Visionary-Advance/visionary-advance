@@ -85,7 +85,9 @@ export default function SettingsModal({ isOpen, onClose }) {
   }
 
   const handleConnectGoogle = () => {
-    window.location.href = '/api/auth/google/start'
+    // Pass admin email so the connection is linked to this account
+    const adminEmail = encodeURIComponent(user?.email || '')
+    window.location.href = `/api/auth/google/start?adminEmail=${adminEmail}`
   }
 
   const handleDisconnectGoogle = async () => {

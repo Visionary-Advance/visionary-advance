@@ -71,7 +71,7 @@ export default function AddSiteModal({ availableSites, onAdd, onClose }) {
                     Open Search Console →
                   </a>
                   <a
-                    href="/admin/crm/settings"
+                    href="/admin"
                     className="text-blue-400 hover:text-blue-300 text-sm"
                   >
                     Reconnect Google →

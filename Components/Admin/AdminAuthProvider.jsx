@@ -15,7 +15,7 @@ import {
 const AdminAuthContext = createContext(null)
 
 // Routes that don't require authentication
-const PUBLIC_ROUTES = ['/admin/login']
+const PUBLIC_ROUTES = ['/login']
 
 export function AdminAuthProvider({ children }) {
   const pathname = usePathname()
@@ -26,26 +26,45 @@ export function AdminAuthProvider({ children }) {
 
   useEffect(() => {
     let initialCheckDone = false
+    let subscription = null
 
-    // Check initial session
-    checkAuth().then(() => {
+    // Check initial session with timeout to prevent stalling
+    const initAuth = async () => {
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Auth check timeout')), 5000)
+      )
+
+      try {
+        await Promise.race([checkAuth(), timeoutPromise])
+      } catch (err) {
+        console.error('Initial auth check failed:', err)
+        setUser(null)
+        setLoading(false)
+      }
       initialCheckDone = true
-    })
+    }
+
+    initAuth()
 
     // Listen for auth changes (skip initial SIGNED_IN event to avoid race condition)
-    const { data: { subscription } } = onAuthStateChange(async (event, session) => {
-      if (!initialCheckDone && event === 'SIGNED_IN') {
-        return
-      }
-      if (event === 'SIGNED_OUT') {
-        setUser(null)
-        router.replace('/admin/login')
-      } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-        await checkAuth()
-      }
-    })
+    try {
+      const { data } = onAuthStateChange(async (event, session) => {
+        if (!initialCheckDone && event === 'SIGNED_IN') {
+          return
+        }
+        if (event === 'SIGNED_OUT') {
+          setUser(null)
+          router.replace('/login')
+        } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+          await checkAuth()
+        }
+      })
+      subscription = data?.subscription
+    } catch (err) {
+      console.error('Auth state change listener failed:', err)
+    }
 
-    return () => subscription.unsubscribe()
+    return () => subscription?.unsubscribe()
   }, [])
 
   useEffect(() => {
@@ -55,44 +74,66 @@ export function AdminAuthProvider({ children }) {
 
       if (!user && !isPublicRoute) {
         // Not authenticated and trying to access protected route
-        router.replace('/admin/login')
+        router.replace('/login')
       } else if (user && isPublicRoute) {
         // Authenticated but on login page, redirect to dashboard
-        router.replace('/admin/crm')
+        router.replace('/admin')
       }
     }
   }, [user, loading, pathname, router])
 
   const checkAuth = async () => {
     try {
-      const session = await getSession()
-
-      if (!session) {
+      let session
+      try {
+        session = await getSession()
+      } catch (sessionErr) {
+        console.error('Failed to get session:', sessionErr)
         setUser(null)
-        setLoading(false)
         return
       }
 
-      const currentUser = await getUser()
+      if (!session) {
+        setUser(null)
+        return
+      }
+
+      let currentUser
+      try {
+        currentUser = await getUser()
+      } catch (userErr) {
+        console.error('Failed to get user:', userErr)
+        setUser(null)
+        return
+      }
 
       if (!currentUser || !isAdminEmail(currentUser.email)) {
         // Not an admin, sign out
-        await signOut()
+        try {
+          await signOut()
+        } catch (signOutErr) {
+          console.error('Sign out failed:', signOutErr)
+        }
         setUser(null)
-        setLoading(false)
         return
       }
 
       // Check MFA status
-      const mfa = await getMFAStatus()
-      const assurance = await getAssuranceLevel()
+      let mfa = { enabled: false, verified: false }
+      let assurance = { currentLevel: null, nextLevel: null }
+
+      try {
+        mfa = await getMFAStatus()
+        assurance = await getAssuranceLevel()
+      } catch (mfaErr) {
+        console.error('MFA check failed:', mfaErr)
+      }
 
       // If MFA is enabled but not verified, redirect to login
       if (mfa.enabled && assurance.nextLevel === 'aal2' && assurance.currentLevel === 'aal1') {
         setUser(null)
         setMfaStatus(mfa)
-        setLoading(false)
-        router.replace('/admin/login')
+        router.replace('/login')
         return
       }
 
@@ -109,7 +150,7 @@ export function AdminAuthProvider({ children }) {
   const handleSignOut = async () => {
     await signOut()
     setUser(null)
-    router.replace('/admin/login')
+    router.replace('/login')
   }
 
   // Show loading state

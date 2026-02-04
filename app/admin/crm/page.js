@@ -81,10 +81,10 @@ export default function CRMDashboardPage() {
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
         <QuickStatCard
           label="Total Leads"
-          value={stats?.totalLeads || 0}
+          value={stats?.overview?.totalLeads || 0}
           icon={
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -94,17 +94,17 @@ export default function CRMDashboardPage() {
         />
         <QuickStatCard
           label="New This Week"
-          value={stats?.newThisWeek || 0}
+          value={stats?.overview?.leadsThisWeek || 0}
           icon={
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
             </svg>
           }
-          href="/admin/crm/leads?status=new"
+          href="/admin/crm/leads"
         />
         <QuickStatCard
           label="In Pipeline"
-          value={stats?.inPipeline || 0}
+          value={stats?.overview?.activePipeline || 0}
           icon={
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -114,7 +114,7 @@ export default function CRMDashboardPage() {
         />
         <QuickStatCard
           label="Won Deals"
-          value={stats?.wonDeals || 0}
+          value={stats?.overview?.wonCount || 0}
           icon={
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -122,6 +122,17 @@ export default function CRMDashboardPage() {
           }
           color="green"
           href="/admin/crm/leads?stage=won"
+        />
+        <QuickStatCard
+          label="Win Rate"
+          value={`${stats?.overview?.conversionRate || 0}%`}
+          icon={
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
+            </svg>
+          }
+          color="purple"
+          href="/admin/crm/pipeline"
         />
       </div>
 
