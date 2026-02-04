@@ -37,9 +37,76 @@ export default function SEODashboardWidget({ widget, onRemove }) {
 
   if (loading) {
     return (
-      <div className="bg-gray-800 rounded-lg border border-gray-700 p-6 animate-pulse">
-        <div className="h-4 bg-gray-700 rounded w-1/2 mb-4"></div>
-        <div className="h-8 bg-gray-700 rounded w-3/4"></div>
+      <div className="relative bg-gray-800 rounded-lg border border-gray-700 p-6 overflow-hidden">
+        {/* Pulsing ring animation */}
+        <div className="absolute inset-0 rounded-lg pointer-events-none">
+          <div
+            className="absolute inset-0 rounded-lg border-2 border-teal-500/50"
+            style={{
+              animation: 'pulse-ring 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            }}
+          />
+          <div
+            className="absolute inset-0 rounded-lg"
+            style={{
+              background: 'linear-gradient(90deg, transparent, rgba(20, 184, 166, 0.08), transparent)',
+              animation: 'shimmer 2s infinite',
+            }}
+          />
+        </div>
+
+        {/* Header - matches WidgetHeader structure */}
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <div className="h-5 bg-gray-700 rounded w-28 mb-1 animate-pulse"></div>
+            <div className="h-3 bg-gray-700/60 rounded w-20 animate-pulse"></div>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-gray-700/50 rounded animate-pulse"></div>
+            <div className="w-4 h-4 bg-gray-700/50 rounded animate-pulse"></div>
+          </div>
+        </div>
+
+        {/* 2x2 Grid - matches OverviewWidget structure */}
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <div className="h-4 bg-gray-700/60 rounded w-12 mb-1 animate-pulse"></div>
+            <div className="h-8 bg-gray-700 rounded w-16 animate-pulse"></div>
+          </div>
+          <div>
+            <div className="h-4 bg-gray-700/60 rounded w-20 mb-1 animate-pulse" style={{ animationDelay: '0.1s' }}></div>
+            <div className="h-8 bg-gray-700 rounded w-20 animate-pulse" style={{ animationDelay: '0.1s' }}></div>
+          </div>
+          <div>
+            <div className="h-4 bg-gray-700/60 rounded w-8 mb-1 animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+            <div className="h-8 bg-gray-700 rounded w-16 animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+          </div>
+          <div>
+            <div className="h-4 bg-gray-700/60 rounded w-20 mb-1 animate-pulse" style={{ animationDelay: '0.3s' }}></div>
+            <div className="h-8 bg-gray-700 rounded w-12 animate-pulse" style={{ animationDelay: '0.3s' }}></div>
+          </div>
+        </div>
+
+        <style jsx>{`
+          @keyframes pulse-ring {
+            0%, 100% {
+              opacity: 1;
+              box-shadow: 0 0 0 0 rgba(20, 184, 166, 0.4);
+            }
+            50% {
+              opacity: 0.5;
+              box-shadow: 0 0 0 4px rgba(20, 184, 166, 0);
+            }
+          }
+          @keyframes shimmer {
+            0% {
+              transform: translateX(-100%);
+            }
+            100% {
+              transform: translateX(100%);
+            }
+          }
+        `}</style>
       </div>
     );
   }

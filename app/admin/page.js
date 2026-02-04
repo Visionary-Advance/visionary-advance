@@ -41,6 +41,14 @@ export default function AdminDashboard() {
       stats: ['Leads', 'Pipeline', 'SEO Reports']
     },
     {
+      name: 'DevOps',
+      description: 'Monitor client website health, uptime, and incidents',
+      href: '/admin/devops',
+      icon: DevOpsIcon,
+      color: 'from-purple-500 to-pink-500',
+      stats: ['Sites', 'Health Checks', 'Incidents']
+    },
+    {
       name: 'SystemForge',
       description: 'AI-powered project scaffolding from reusable code modules',
       href: '/admin/system-forge',
@@ -205,6 +213,14 @@ function ForgeIcon({ className }) {
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M15.362 5.214A8.252 8.252 0 0112 21 8.25 8.25 0 016.038 7.048 8.287 8.287 0 009 9.6a8.983 8.983 0 013.361-6.867 8.21 8.21 0 003 2.48z" />
       <path strokeLinecap="round" strokeLinejoin="round" d="M12 18a3.75 3.75 0 00.495-7.467 5.99 5.99 0 00-1.925 3.546 5.974 5.974 0 01-2.133-1A3.75 3.75 0 0012 18z" />
+    </svg>
+  )
+}
+
+function DevOpsIcon({ className }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 17.25v-.228a4.5 4.5 0 00-.12-1.03l-2.268-9.64a3.375 3.375 0 00-3.285-2.602H7.923a3.375 3.375 0 00-3.285 2.602l-2.268 9.64a4.5 4.5 0 00-.12 1.03v.228m19.5 0a3 3 0 01-3 3H5.25a3 3 0 01-3-3m19.5 0a3 3 0 00-3-3H5.25a3 3 0 00-3 3m16.5 0h.008v.008h-.008v-.008zm-3 0h.008v.008h-.008v-.008z" />
     </svg>
   )
 }
