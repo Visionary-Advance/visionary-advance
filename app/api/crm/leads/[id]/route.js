@@ -47,6 +47,7 @@ export async function PATCH(request, { params }) {
       'tags', 'score', 'score_breakdown', 'form_data',
       'hubspot_contact_id', 'hubspot_deal_id', 'hubspot_sync_status',
       'last_contacted_at', 'is_duplicate',
+      'has_website', 'hosting_start_date', 'hosting_expiry_date',
     ]
 
     // Filter to only allowed fields

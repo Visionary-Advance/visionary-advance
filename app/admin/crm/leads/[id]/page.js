@@ -30,6 +30,7 @@ export default function LeadDetailPage({ params }) {
   const [updatingStage, setUpdatingStage] = useState(false)
   const [newNote, setNewNote] = useState('')
   const [addingNote, setAddingNote] = useState(false)
+  const [savingHosting, setSavingHosting] = useState(false)
 
   useEffect(() => {
     fetchLead()
@@ -95,6 +96,63 @@ export default function LeadDetailPage({ params }) {
       alert(err.message)
     } finally {
       setAddingNote(false)
+    }
+  }
+
+  const updateHostingInfo = async (updates) => {
+    setSavingHosting(true)
+    try {
+      const res = await fetch(`/api/crm/leads/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+      })
+
+      if (!res.ok) throw new Error('Failed to update hosting info')
+
+      const data = await res.json()
+      setLead(data.lead)
+    } catch (err) {
+      alert(err.message)
+    } finally {
+      setSavingHosting(false)
+    }
+  }
+
+  const toggleHasWebsite = () => {
+    const newValue = !lead.has_website
+    updateHostingInfo({
+      has_website: newValue,
+      // Clear dates if turning off
+      ...(newValue ? {} : { hosting_start_date: null, hosting_expiry_date: null })
+    })
+  }
+
+  const updateHostingDate = (field, value) => {
+    updateHostingInfo({ [field]: value || null })
+  }
+
+  const formatDateShort = (dateString) => {
+    if (!dateString) return '-'
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    })
+  }
+
+  const getHostingStatus = () => {
+    if (!lead?.hosting_expiry_date) return null
+    const expiry = new Date(lead.hosting_expiry_date)
+    const now = new Date()
+    const daysUntilExpiry = Math.ceil((expiry - now) / (1000 * 60 * 60 * 24))
+
+    if (daysUntilExpiry < 0) {
+      return { label: 'Expired', color: 'text-red-400 bg-red-500/10 ring-red-500/20' }
+    } else if (daysUntilExpiry <= 30) {
+      return { label: `Expires in ${daysUntilExpiry}d`, color: 'text-amber-400 bg-amber-500/10 ring-amber-500/20' }
+    } else {
+      return { label: 'Active', color: 'text-emerald-400 bg-emerald-500/10 ring-emerald-500/20' }
     }
   }
 
@@ -250,6 +308,75 @@ export default function LeadDetailPage({ params }) {
                 </div>
               )}
             </dl>
+          </div>
+
+          {/* Hosting Info */}
+          <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
+                Hosting
+              </h2>
+              {lead.has_website && getHostingStatus() && (
+                <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset ${getHostingStatus().color}`}>
+                  {getHostingStatus().label}
+                </span>
+              )}
+            </div>
+
+            {/* Has Website Toggle */}
+            <div className="flex items-center justify-between py-3 border-b border-[#262626]">
+              <div>
+                <p className="text-sm text-[#fafafa]">Has Website</p>
+                <p className="text-xs text-[#a1a1aa]">Client has a site hosted with us</p>
+              </div>
+              <button
+                onClick={toggleHasWebsite}
+                disabled={savingHosting}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                  lead.has_website ? 'bg-[#008070]' : 'bg-[#262626]'
+                } ${savingHosting ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    lead.has_website ? 'translate-x-6' : 'translate-x-1'
+                  }`}
+                />
+              </button>
+            </div>
+
+            {/* Hosting Dates - Only show when has_website is true */}
+            {lead.has_website && (
+              <div className="mt-4 space-y-4">
+                <div>
+                  <label className="text-xs text-[#a1a1aa]">Start Date</label>
+                  <input
+                    type="date"
+                    value={lead.hosting_start_date ? lead.hosting_start_date.split('T')[0] : ''}
+                    onChange={(e) => updateHostingDate('hosting_start_date', e.target.value)}
+                    disabled={savingHosting}
+                    className="mt-1 w-full rounded-lg border border-[#262626] bg-[#171717] px-3 py-2 text-sm text-[#fafafa] focus:border-[#008070] focus:outline-none focus:ring-1 focus:ring-[#008070] disabled:opacity-50"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-[#a1a1aa]">Expiry Date</label>
+                  <input
+                    type="date"
+                    value={lead.hosting_expiry_date ? lead.hosting_expiry_date.split('T')[0] : ''}
+                    onChange={(e) => updateHostingDate('hosting_expiry_date', e.target.value)}
+                    disabled={savingHosting}
+                    className="mt-1 w-full rounded-lg border border-[#262626] bg-[#171717] px-3 py-2 text-sm text-[#fafafa] focus:border-[#008070] focus:outline-none focus:ring-1 focus:ring-[#008070] disabled:opacity-50"
+                  />
+                </div>
+
+                {/* Quick Info */}
+                {lead.hosting_start_date && lead.hosting_expiry_date && (
+                  <div className="rounded-lg bg-[#171717] p-3 text-xs text-[#a1a1aa]">
+                    <p>Started: {formatDateShort(lead.hosting_start_date)}</p>
+                    <p>Expires: {formatDateShort(lead.hosting_expiry_date)}</p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Business Info */}
