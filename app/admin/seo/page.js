@@ -192,31 +192,6 @@ export default function SEODashboardPage() {
     }
   }
 
-  // Add to dashboard
-  async function handleAddToDashboard(widgetType) {
-    try {
-      const res = await fetch('/api/seo/widgets', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userEmail: user.email,
-          widgetType,
-          siteId: selectedSite?.id
-        })
-      });
-
-      const data = await res.json();
-      if (data.error) {
-        alert('Failed to add widget: ' + data.error);
-        return;
-      }
-
-      alert('Widget added to dashboard!');
-    } catch (err) {
-      alert('Failed to add widget: ' + err.message);
-    }
-  }
-
   if (authLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -227,9 +202,9 @@ export default function SEODashboardPage() {
 
   if (!googleConnected) {
     return (
-      <div className="p-6">
+      <div>
         <h1 className="text-2xl font-bold text-white mb-6">SEO Dashboard</h1>
-        <div className="bg-gray-800 rounded-lg border border-gray-700 p-8 text-center">
+        <div className="bg-[#0a0a0a] rounded-lg border border-[#262626] p-8 text-center">
           <div className="text-gray-400 mb-4">
             Connect your Google account to access Search Console data.
           </div>
@@ -245,7 +220,7 @@ export default function SEODashboardPage() {
   }
 
   return (
-    <div className="p-6">
+    <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-white">SEO Dashboard</h1>
         <div className="flex gap-3">
@@ -262,7 +237,7 @@ export default function SEODashboardPage() {
             <button
               onClick={handleSync}
               disabled={syncing}
-              className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50"
+              className="bg-[#171717] hover:bg-[#262626] border border-[#262626] text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50"
             >
               <svg className={`w-5 h-5 ${syncing ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -284,7 +259,7 @@ export default function SEODashboardPage() {
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-400"></div>
         </div>
       ) : sites.length === 0 ? (
-        <div className="bg-gray-800 rounded-lg border border-gray-700 p-8 text-center">
+        <div className="bg-[#0a0a0a] rounded-lg border border-[#262626] p-8 text-center">
           <div className="text-gray-400 mb-4">
             No sites added yet. Add a site from your Search Console to get started.
           </div>
@@ -316,7 +291,7 @@ export default function SEODashboardPage() {
             {selectedSite ? (
               <div className="space-y-6">
                 {/* Site Header */}
-                <div className="bg-gray-800 rounded-lg border border-gray-700 p-6">
+                <div className="bg-[#0a0a0a] rounded-lg border border-[#262626] p-6">
                   <div className="flex items-center justify-between">
                     <div>
                       <h2 className="text-xl font-bold text-white">{selectedSite.display_name}</h2>
@@ -326,14 +301,6 @@ export default function SEODashboardPage() {
                           Last synced: {new Date(selectedSite.last_sync_at).toLocaleString()}
                         </p>
                       )}
-                    </div>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleAddToDashboard('overview')}
-                        className="text-sm bg-gray-700 hover:bg-gray-600 text-white px-3 py-1.5 rounded transition-colors"
-                      >
-                        + Add to Dashboard
-                      </button>
                     </div>
                   </div>
                 </div>
@@ -365,31 +332,15 @@ export default function SEODashboardPage() {
                     </div>
 
                     {/* Traffic Chart */}
-                    <div className="bg-gray-800 rounded-lg border border-gray-700 p-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-semibold text-white">Traffic (Last 28 Days)</h3>
-                        <button
-                          onClick={() => handleAddToDashboard('traffic_chart')}
-                          className="text-xs text-gray-400 hover:text-white"
-                        >
-                          + Add to Dashboard
-                        </button>
-                      </div>
+                    <div className="bg-[#0a0a0a] rounded-lg border border-[#262626] p-6">
+                      <h3 className="text-lg font-semibold text-white mb-4">Traffic (Last 28 Days)</h3>
                       <SEOAnalyticsChart data={analytics.dailyData || []} />
                     </div>
 
                     {/* Top Queries & Pages */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="bg-gray-800 rounded-lg border border-gray-700 p-6">
-                        <div className="flex items-center justify-between mb-4">
-                          <h3 className="text-lg font-semibold text-white">Top Queries</h3>
-                          <button
-                            onClick={() => handleAddToDashboard('top_queries')}
-                            className="text-xs text-gray-400 hover:text-white"
-                          >
-                            + Add to Dashboard
-                          </button>
-                        </div>
+                      <div className="bg-[#0a0a0a] rounded-lg border border-[#262626] p-6">
+                        <h3 className="text-lg font-semibold text-white mb-4">Top Queries</h3>
                         <div className="space-y-3">
                           {(analytics.topQueries || []).slice(0, 10).map((q, i) => (
                             <div key={i} className="flex items-center justify-between text-sm">
@@ -405,16 +356,8 @@ export default function SEODashboardPage() {
                         </div>
                       </div>
 
-                      <div className="bg-gray-800 rounded-lg border border-gray-700 p-6">
-                        <div className="flex items-center justify-between mb-4">
-                          <h3 className="text-lg font-semibold text-white">Top Pages</h3>
-                          <button
-                            onClick={() => handleAddToDashboard('top_pages')}
-                            className="text-xs text-gray-400 hover:text-white"
-                          >
-                            + Add to Dashboard
-                          </button>
-                        </div>
+                      <div className="bg-[#0a0a0a] rounded-lg border border-[#262626] p-6">
+                        <h3 className="text-lg font-semibold text-white mb-4">Top Pages</h3>
                         <div className="space-y-3">
                           {(analytics.topPages || []).slice(0, 10).map((p, i) => (
                             <div key={i} className="flex items-center justify-between text-sm">
@@ -439,7 +382,7 @@ export default function SEODashboardPage() {
                 )}
 
                 {!analytics && (
-                  <div className="bg-gray-800 rounded-lg border border-gray-700 p-8 text-center">
+                  <div className="bg-[#0a0a0a] rounded-lg border border-[#262626] p-8 text-center">
                     <div className="text-gray-400 mb-4">
                       No analytics data cached yet. Click "Sync Data" to fetch data from Search Console.
                     </div>
@@ -454,7 +397,7 @@ export default function SEODashboardPage() {
                 )}
               </div>
             ) : (
-              <div className="bg-gray-800 rounded-lg border border-gray-700 p-8 text-center">
+              <div className="bg-[#0a0a0a] rounded-lg border border-[#262626] p-8 text-center">
                 <p className="text-gray-400">Select a site to view analytics</p>
               </div>
             )}
@@ -476,7 +419,7 @@ export default function SEODashboardPage() {
 
 function MetricCard({ label, value, trend }) {
   return (
-    <div className="bg-gray-800 rounded-lg border border-gray-700 p-4">
+    <div className="bg-[#0a0a0a] rounded-lg border border-[#262626] p-4">
       <p className="text-gray-400 text-sm mb-1">{label}</p>
       <p className="text-2xl font-bold text-white">{value}</p>
       {trend !== null && (

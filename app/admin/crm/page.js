@@ -3,30 +3,12 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAdminAuth } from '@/Components/Admin/AdminAuthProvider';
-import SEODashboardWidget from '@/Components/Admin/SEO/SEODashboardWidget';
+import ProjectWidgets from '@/Components/CRM/Dashboard/ProjectWidgets';
 
 export default function CRMDashboardPage() {
   const { user, loading: authLoading } = useAdminAuth();
-  const [widgets, setWidgets] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  // Fetch dashboard widgets
-  useEffect(() => {
-    if (!user?.email) return;
-
-    async function fetchWidgets() {
-      try {
-        const res = await fetch(`/api/seo/widgets?email=${encodeURIComponent(user.email)}`);
-        const data = await res.json();
-        setWidgets(data.widgets || []);
-      } catch (err) {
-        console.error('Error fetching widgets:', err);
-      }
-    }
-
-    fetchWidgets();
-  }, [user?.email]);
 
   // Fetch CRM stats
   useEffect(() => {
@@ -46,22 +28,6 @@ export default function CRMDashboardPage() {
 
     fetchStats();
   }, []);
-
-  // Remove widget
-  async function handleRemoveWidget(widgetId) {
-    try {
-      const res = await fetch(
-        `/api/seo/widgets?id=${widgetId}&email=${encodeURIComponent(user.email)}`,
-        { method: 'DELETE' }
-      );
-
-      if (res.ok) {
-        setWidgets(widgets.filter(w => w.id !== widgetId));
-      }
-    } catch (err) {
-      console.error('Error removing widget:', err);
-    }
-  }
 
   if (authLoading) {
     return (
@@ -136,32 +102,8 @@ export default function CRMDashboardPage() {
         />
       </div>
 
-      {/* SEO Widgets Section */}
-      {widgets.length > 0 && (
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-white">SEO Insights</h2>
-            <Link
-              href="/admin/crm/seo"
-              className="text-sm text-teal-400 hover:text-teal-300 transition-colors"
-            >
-              View All →
-            </Link>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {widgets.map(widget => (
-              <SEODashboardWidget
-                key={widget.id}
-                widget={widget}
-                onRemove={() => handleRemoveWidget(widget.id)}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* Quick Actions */}
-      <div className="bg-gray-800 rounded-lg border border-gray-700 p-6">
+      <div className="bg-gray-800 rounded-lg border border-gray-700 p-6 mb-8">
         <h2 className="text-lg font-semibold text-white mb-4">Quick Actions</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Link
@@ -190,44 +132,32 @@ export default function CRMDashboardPage() {
             </div>
             <div>
               <div className="text-white font-medium">Pipeline View</div>
-              <div className="text-gray-400 text-sm">Kanban board</div>
+              <div className="text-gray-400 text-sm">Lead kanban board</div>
             </div>
           </Link>
 
           <Link
-            href="/admin/crm/seo"
+            href="/admin/crm/projects"
             className="flex items-center gap-3 p-4 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors"
           >
             <div className="p-2 bg-purple-500/20 rounded-lg">
               <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
               </svg>
             </div>
             <div>
-              <div className="text-white font-medium">SEO Dashboard</div>
-              <div className="text-gray-400 text-sm">Search analytics</div>
+              <div className="text-white font-medium">Projects</div>
+              <div className="text-gray-400 text-sm">Project kanban board</div>
             </div>
           </Link>
         </div>
       </div>
 
-      {/* Add Widget Prompt (if no widgets) */}
-      {widgets.length === 0 && (
-        <div className="mt-6 bg-gray-800 rounded-lg border border-gray-700 p-6 text-center">
-          <div className="text-gray-400 mb-3">
-            Add SEO widgets to your dashboard for quick insights
-          </div>
-          <Link
-            href="/admin/crm/seo"
-            className="inline-flex items-center gap-2 text-teal-400 hover:text-teal-300 transition-colors"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            Go to SEO Dashboard
-          </Link>
-        </div>
-      )}
+      {/* Project Widgets */}
+      <div className="mb-8">
+        <h2 className="text-lg font-semibold text-white mb-4">Project Overview</h2>
+        <ProjectWidgets />
+      </div>
     </div>
   );
 }

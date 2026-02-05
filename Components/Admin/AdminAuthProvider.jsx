@@ -31,7 +31,7 @@ export function AdminAuthProvider({ children }) {
     // Check initial session with timeout to prevent stalling
     const initAuth = async () => {
       const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Auth check timeout')), 5000)
+        setTimeout(() => reject(new Error('Auth check timeout')), 10000)
       )
 
       try {

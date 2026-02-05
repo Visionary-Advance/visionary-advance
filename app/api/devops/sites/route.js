@@ -19,6 +19,9 @@ export async function GET(request) {
         *,
         devops_health_checks (
           id, status, response_time_ms, checked_at
+        ),
+        devops_incidents (
+          id, status
         )
       `)
       .order('created_at', { ascending: false })
@@ -45,12 +48,17 @@ export async function GET(request) {
 
     if (error) throw error
 
-    // Transform to include latest check at top level
-    const sites = data.map(site => ({
-      ...site,
-      latestCheck: site.devops_health_checks?.[0] || null,
-      devops_health_checks: undefined,
-    }))
+    // Transform to include latest check and open incident count at top level
+    const sites = data.map(site => {
+      const openIncidentCount = site.devops_incidents?.filter(i => i.status !== 'resolved').length || 0
+      return {
+        ...site,
+        latestCheck: site.devops_health_checks?.[0] || null,
+        openIncidentCount,
+        devops_health_checks: undefined,
+        devops_incidents: undefined,
+      }
+    })
 
     return NextResponse.json({ sites })
   } catch (error) {
@@ -75,6 +83,10 @@ export async function POST(request) {
       timeout_seconds = 30,
       is_active = true,
       ssl_check_enabled = true,
+      health_url,
+      monitor_link,
+      sla_target = 99.9,
+      crm_lead_id,
     } = body
 
     // Validate required fields
@@ -93,6 +105,30 @@ export async function POST(request) {
         { error: 'Invalid URL format' },
         { status: 400 }
       )
+    }
+
+    // Validate health_url if provided
+    if (health_url) {
+      try {
+        new URL(health_url)
+      } catch {
+        return NextResponse.json(
+          { error: 'Invalid health URL format' },
+          { status: 400 }
+        )
+      }
+    }
+
+    // Validate monitor_link if provided
+    if (monitor_link) {
+      try {
+        new URL(monitor_link)
+      } catch {
+        return NextResponse.json(
+          { error: 'Invalid monitor link format' },
+          { status: 400 }
+        )
+      }
     }
 
     // Check for duplicate URL
@@ -122,6 +158,10 @@ export async function POST(request) {
         timeout_seconds,
         is_active,
         ssl_check_enabled,
+        health_url: health_url || null,
+        monitor_link: monitor_link || null,
+        sla_target: parseFloat(sla_target) || 99.9,
+        crm_lead_id: crm_lead_id || null,
       })
       .select()
       .single()

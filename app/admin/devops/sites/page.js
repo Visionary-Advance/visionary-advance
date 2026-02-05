@@ -190,6 +190,7 @@ export default function SitesListPage() {
                 <th className="p-4 font-medium">Name</th>
                 <th className="p-4 font-medium">URL</th>
                 <th className="p-4 font-medium">Environment</th>
+                <th className="p-4 font-medium">SLA</th>
                 <th className="p-4 font-medium">Response</th>
                 <th className="p-4 font-medium">Last Check</th>
               </tr>
@@ -231,7 +232,7 @@ function StatusTab({ label, count, active, onClick, color }) {
 }
 
 function SiteTableRow({ site }) {
-  const status = site.latestCheck?.status || 'unknown'
+  const status = site.current_status || site.latestCheck?.status || 'unknown'
   const responseTime = site.latestCheck?.response_time_ms
   const lastChecked = site.latestCheck?.checked_at
 
@@ -255,9 +256,21 @@ function SiteTableRow({ site }) {
         <StatusBadge status={status} size="sm" />
       </td>
       <td className="p-4">
-        <Link href={`/admin/devops/sites/${site.id}`} className="text-white font-medium hover:text-purple-400">
-          {site.name}
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link href={`/admin/devops/sites/${site.id}`} className="text-white font-medium hover:text-purple-400">
+            {site.name}
+          </Link>
+          {site.openIncidentCount > 0 && (
+            <span className="px-1.5 py-0.5 text-xs bg-red-500/20 text-red-400 rounded-full">
+              {site.openIncidentCount}
+            </span>
+          )}
+          {site.crm_lead_id && (
+            <span className="px-1.5 py-0.5 text-xs bg-purple-500/20 text-purple-400 rounded" title="Linked to CRM">
+              CRM
+            </span>
+          )}
+        </div>
       </td>
       <td className="p-4 text-gray-400 text-sm">
         {getDomain(site.url)}
@@ -270,6 +283,9 @@ function SiteTableRow({ site }) {
         }`}>
           {site.environment || 'production'}
         </span>
+      </td>
+      <td className="p-4 font-mono text-sm text-gray-300">
+        {site.sla_target ? `${site.sla_target}%` : '99.9%'}
       </td>
       <td className="p-4 font-mono text-sm text-gray-300">
         {responseTime ? `${responseTime}ms` : 'N/A'}

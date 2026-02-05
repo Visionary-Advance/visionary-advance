@@ -7,6 +7,11 @@ import { useRouter } from 'next/navigation'
 import ScoreBadge from '@/Components/CRM/Shared/ScoreBadge'
 import StageBadge, { STAGE_CONFIG } from '@/Components/CRM/Shared/StageBadge'
 import SourceBadge from '@/Components/CRM/Shared/SourceBadge'
+import PinButton from '@/Components/CRM/Shared/PinButton'
+import InvoiceList from '@/Components/CRM/Stripe/InvoiceList'
+import ProjectCard from '@/Components/CRM/Projects/ProjectCard'
+import ProjectForm from '@/Components/CRM/Projects/ProjectForm'
+import ProposalCard from '@/Components/CRM/Proposals/ProposalCard'
 
 const STAGES = [
   'contact',
@@ -25,15 +30,23 @@ export default function LeadDetailPage({ params }) {
 
   const [lead, setLead] = useState(null)
   const [activities, setActivities] = useState([])
+  const [devopsSites, setDevopsSites] = useState([])
+  const [projects, setProjects] = useState([])
+  const [proposals, setProposals] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [updatingStage, setUpdatingStage] = useState(false)
   const [newNote, setNewNote] = useState('')
   const [addingNote, setAddingNote] = useState(false)
   const [savingHosting, setSavingHosting] = useState(false)
+  const [showProjectForm, setShowProjectForm] = useState(false)
+  const [showProjectPrompt, setShowProjectPrompt] = useState(false)
 
   useEffect(() => {
     fetchLead()
+    fetchDevOpsSites()
+    fetchProjects()
+    fetchProposals()
   }, [id])
 
   const fetchLead = async () => {
@@ -51,7 +64,44 @@ export default function LeadDetailPage({ params }) {
     }
   }
 
+  const fetchDevOpsSites = async () => {
+    try {
+      const res = await fetch(`/api/crm/leads/${id}/devops`)
+      if (res.ok) {
+        const data = await res.json()
+        setDevopsSites(data.sites || [])
+      }
+    } catch (err) {
+      console.error('Failed to fetch DevOps sites:', err)
+    }
+  }
+
+  const fetchProjects = async () => {
+    try {
+      const res = await fetch(`/api/crm/leads/${id}/projects`)
+      if (res.ok) {
+        const data = await res.json()
+        setProjects(data.projects || [])
+      }
+    } catch (err) {
+      console.error('Failed to fetch projects:', err)
+    }
+  }
+
+  const fetchProposals = async () => {
+    try {
+      const res = await fetch(`/api/crm/leads/${id}/proposals`)
+      if (res.ok) {
+        const data = await res.json()
+        setProposals(data.proposals || [])
+      }
+    } catch (err) {
+      console.error('Failed to fetch proposals:', err)
+    }
+  }
+
   const updateStage = async (newStage) => {
+    const previousStage = lead?.stage
     setUpdatingStage(true)
     try {
       const res = await fetch(`/api/crm/leads/${id}/stage`, {
@@ -65,6 +115,11 @@ export default function LeadDetailPage({ params }) {
       const data = await res.json()
       setLead(data.lead)
       fetchLead() // Refresh to get updated activities
+
+      // Show project prompt when moving to 'won' and no projects exist
+      if (newStage === 'won' && previousStage !== 'won' && projects.length === 0) {
+        setShowProjectPrompt(true)
+      }
     } catch (err) {
       alert(err.message)
     } finally {
@@ -123,13 +178,65 @@ export default function LeadDetailPage({ params }) {
     const newValue = !lead.has_website
     updateHostingInfo({
       has_website: newValue,
-      // Clear dates if turning off
       ...(newValue ? {} : { hosting_start_date: null, hosting_expiry_date: null })
     })
   }
 
   const updateHostingDate = (field, value) => {
     updateHostingInfo({ [field]: value || null })
+  }
+
+  const handlePinToggle = (updatedActivity) => {
+    // Refresh activities to get proper sort order
+    fetchLead()
+  }
+
+  const handleProjectCreated = (project) => {
+    setProjects(prev => [project, ...prev])
+    setShowProjectForm(false)
+    setShowProjectPrompt(false)
+  }
+
+  const handleSendProposal = async (proposal) => {
+    const email = lead?.email
+    if (!email) {
+      alert('Lead has no email address')
+      return
+    }
+
+    if (!confirm(`Send proposal "${proposal.title}" to ${email}?`)) return
+
+    try {
+      const res = await fetch(`/api/crm/proposals/${proposal.id}/send`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      })
+
+      if (!res.ok) throw new Error('Failed to send proposal')
+
+      alert('Proposal sent!')
+      fetchProposals()
+      fetchLead() // Refresh activities
+    } catch (err) {
+      alert(err.message)
+    }
+  }
+
+  const handleDeleteProposal = async (proposal) => {
+    if (!confirm(`Delete proposal "${proposal.title}"?`)) return
+
+    try {
+      const res = await fetch(`/api/crm/proposals/${proposal.id}`, {
+        method: 'DELETE',
+      })
+
+      if (!res.ok) throw new Error('Failed to delete proposal')
+
+      setProposals(prev => prev.filter(p => p.id !== proposal.id))
+    } catch (err) {
+      alert(err.message)
+    }
   }
 
   const formatDateShort = (dateString) => {
@@ -187,6 +294,11 @@ export default function LeadDetailPage({ params }) {
     }
   }
 
+  // Separate pinned and regular activities
+  const pinnedActivities = activities.filter(a => a.is_pinned)
+  const regularActivities = activities.filter(a => !a.is_pinned)
+  const pinnableTypes = ['note', 'email_sent', 'email_received']
+
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
@@ -208,6 +320,49 @@ export default function LeadDetailPage({ params }) {
 
   return (
     <div className="space-y-6">
+      {/* Project Prompt Modal */}
+      {showProjectPrompt && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="w-full max-w-md rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+            <h3 className="text-lg font-semibold text-[#fafafa]">Create a Project?</h3>
+            <p className="mt-2 text-sm text-[#a1a1aa]">
+              This lead has been marked as won. Would you like to create a project to track the work?
+            </p>
+            <div className="mt-4 flex items-center justify-end gap-3">
+              <button
+                onClick={() => setShowProjectPrompt(false)}
+                className="rounded-lg px-4 py-2 text-sm text-[#a1a1aa] hover:text-[#fafafa]"
+              >
+                Maybe Later
+              </button>
+              <button
+                onClick={() => {
+                  setShowProjectPrompt(false)
+                  setShowProjectForm(true)
+                }}
+                className="rounded-lg bg-[#008070] px-4 py-2 text-sm font-medium text-white hover:bg-[#006b5d]"
+              >
+                Create Project
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Project Form Modal */}
+      {showProjectForm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-lg rounded-xl border border-[#262626] bg-[#0a0a0a] p-6 max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg font-semibold text-[#fafafa] mb-4">Create Project</h3>
+            <ProjectForm
+              leadId={id}
+              onSave={handleProjectCreated}
+              onCancel={() => setShowProjectForm(false)}
+            />
+          </div>
+        </div>
+      )}
+
       {/* Back button and header */}
       <div className="flex items-start justify-between">
         <div>
@@ -310,25 +465,91 @@ export default function LeadDetailPage({ params }) {
             </dl>
           </div>
 
-          {/* Hosting Info */}
+          {/* Stripe Invoices */}
+          <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+            <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
+              Invoices
+            </h2>
+            <InvoiceList leadId={id} limit={5} showTotals={true} />
+          </div>
+
+          {/* Projects */}
           <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
+                Projects
+              </h2>
+              <button
+                onClick={() => setShowProjectForm(true)}
+                className="text-sm text-[#008070] hover:text-[#006b5d]"
+              >
+                + New
+              </button>
+            </div>
+            {projects.length === 0 ? (
+              <p className="text-sm text-[#a1a1aa] text-center py-4">No projects yet</p>
+            ) : (
+              <div className="space-y-2">
+                {projects.slice(0, 3).map(project => (
+                  <Link
+                    key={project.id}
+                    href={`/admin/crm/projects/${project.id}`}
+                    className="block"
+                  >
+                    <ProjectCard project={project} compact />
+                  </Link>
+                ))}
+                {projects.length > 3 && (
+                  <Link
+                    href={`/admin/crm/leads/${id}/projects`}
+                    className="block text-center text-sm text-[#008070] hover:underline pt-2"
+                  >
+                    View all {projects.length} projects
+                  </Link>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Proposals */}
+          <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
+                Proposals
+              </h2>
+              <Link
+                href={`/admin/crm/leads/${id}/proposals/new`}
+                className="text-sm text-[#008070] hover:text-[#006b5d]"
+              >
+                + New
+              </Link>
+            </div>
+            {proposals.length === 0 ? (
+              <p className="text-sm text-[#a1a1aa] text-center py-4">No proposals yet</p>
+            ) : (
+              <div className="space-y-2">
+                {proposals.slice(0, 3).map(proposal => (
+                  <ProposalCard
+                    key={proposal.id}
+                    proposal={proposal}
+                    compact
+                  />
+                ))}
+                {proposals.length > 3 && (
+                  <p className="text-center text-sm text-[#a1a1aa] pt-2">
+                    +{proposals.length - 3} more
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Hosting Info */}
+          <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
                 Hosting
               </h2>
-              {lead.has_website && getHostingStatus() && (
-                <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset ${getHostingStatus().color}`}>
-                  {getHostingStatus().label}
-                </span>
-              )}
-            </div>
-
-            {/* Has Website Toggle */}
-            <div className="flex items-center justify-between py-3 border-b border-[#262626]">
-              <div>
-                <p className="text-sm text-[#fafafa]">Has Website</p>
-                <p className="text-xs text-[#a1a1aa]">Client has a site hosted with us</p>
-              </div>
               <button
                 onClick={toggleHasWebsite}
                 disabled={savingHosting}
@@ -344,35 +565,63 @@ export default function LeadDetailPage({ params }) {
               </button>
             </div>
 
-            {/* Hosting Dates - Only show when has_website is true */}
             {lead.has_website && (
               <div className="mt-4 space-y-4">
-                <div>
-                  <label className="text-xs text-[#a1a1aa]">Start Date</label>
-                  <input
-                    type="date"
-                    value={lead.hosting_start_date ? lead.hosting_start_date.split('T')[0] : ''}
-                    onChange={(e) => updateHostingDate('hosting_start_date', e.target.value)}
-                    disabled={savingHosting}
-                    className="mt-1 w-full rounded-lg border border-[#262626] bg-[#171717] px-3 py-2 text-sm text-[#fafafa] focus:border-[#008070] focus:outline-none focus:ring-1 focus:ring-[#008070] disabled:opacity-50"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs text-[#a1a1aa]">Expiry Date</label>
-                  <input
-                    type="date"
-                    value={lead.hosting_expiry_date ? lead.hosting_expiry_date.split('T')[0] : ''}
-                    onChange={(e) => updateHostingDate('hosting_expiry_date', e.target.value)}
-                    disabled={savingHosting}
-                    className="mt-1 w-full rounded-lg border border-[#262626] bg-[#171717] px-3 py-2 text-sm text-[#fafafa] focus:border-[#008070] focus:outline-none focus:ring-1 focus:ring-[#008070] disabled:opacity-50"
-                  />
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-[#a1a1aa]">Start</span>
+                    <input
+                      type="date"
+                      value={lead.hosting_start_date ? lead.hosting_start_date.split('T')[0] : ''}
+                      onChange={(e) => updateHostingDate('hosting_start_date', e.target.value)}
+                      disabled={savingHosting}
+                      className="rounded border border-[#262626] bg-[#171717] px-2 py-1 text-xs text-[#fafafa] focus:border-[#008070] focus:outline-none disabled:opacity-50"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-[#a1a1aa]">Expiry</span>
+                    <div className="flex items-center gap-2">
+                      {getHostingStatus() && (
+                        <span className={`rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${getHostingStatus().color}`}>
+                          {getHostingStatus().label}
+                        </span>
+                      )}
+                      <input
+                        type="date"
+                        value={lead.hosting_expiry_date ? lead.hosting_expiry_date.split('T')[0] : ''}
+                        onChange={(e) => updateHostingDate('hosting_expiry_date', e.target.value)}
+                        disabled={savingHosting}
+                        className="rounded border border-[#262626] bg-[#171717] px-2 py-1 text-xs text-[#fafafa] focus:border-[#008070] focus:outline-none disabled:opacity-50"
+                      />
+                    </div>
+                  </div>
                 </div>
 
-                {/* Quick Info */}
-                {lead.hosting_start_date && lead.hosting_expiry_date && (
-                  <div className="rounded-lg bg-[#171717] p-3 text-xs text-[#a1a1aa]">
-                    <p>Started: {formatDateShort(lead.hosting_start_date)}</p>
-                    <p>Expires: {formatDateShort(lead.hosting_expiry_date)}</p>
+                {devopsSites.length > 0 && (
+                  <div className="pt-4 border-t border-[#262626] space-y-3">
+                    {devopsSites.map((site) => (
+                      <Link
+                        key={site.id}
+                        href={`/admin/devops/sites/${site.id}`}
+                        className="block rounded-lg bg-[#171717] p-3 hover:bg-[#262626] transition-colors"
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium text-[#fafafa] truncate">{site.name}</span>
+                          <DevOpsStatusBadge status={site.status} />
+                        </div>
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-[#a1a1aa]">
+                            {site.latestCheck?.response_time_ms ? `${site.latestCheck.response_time_ms}ms` : 'N/A'}
+                          </span>
+                          {site.openIncidentCount > 0 && (
+                            <span className="flex items-center gap-1 text-red-400">
+                              <AlertIcon className="h-3 w-3" />
+                              {site.openIncidentCount}
+                            </span>
+                          )}
+                        </div>
+                      </Link>
+                    ))}
                   </div>
                 )}
               </div>
@@ -526,12 +775,53 @@ export default function LeadDetailPage({ params }) {
               </div>
             </form>
 
+            {/* Pinned Activities */}
+            {pinnedActivities.length > 0 && (
+              <div className="mb-6 space-y-4">
+                <h3 className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-[#a1a1aa]">
+                  <PinFilledIcon className="h-3.5 w-3.5 text-[#008070]" />
+                  Pinned
+                </h3>
+                {pinnedActivities.map((activity) => (
+                  <div key={activity.id} className="flex gap-4 rounded-lg bg-[#008070]/5 p-3 border border-[#008070]/20">
+                    <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#171717] text-[#a1a1aa]">
+                      {getActivityIcon(activity.type)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <p className="text-sm font-medium text-[#fafafa]">{activity.title}</p>
+                          {activity.description && (
+                            <p className="mt-1 text-sm text-[#a1a1aa] whitespace-pre-wrap">
+                              {activity.description}
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <time className="text-xs text-[#a1a1aa]">
+                            {formatDate(activity.created_at)}
+                          </time>
+                          {pinnableTypes.includes(activity.type) && (
+                            <PinButton
+                              activityId={activity.id}
+                              isPinned={activity.is_pinned}
+                              onToggle={handlePinToggle}
+                            />
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
             {/* Activity List */}
             <div className="space-y-4">
               {activities.length === 0 ? (
                 <p className="text-center text-sm text-[#a1a1aa]">No activity yet</p>
               ) : (
-                activities.map((activity) => (
+                regularActivities.map((activity) => (
                   <div key={activity.id} className="flex gap-4">
                     <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#171717] text-[#a1a1aa]">
                       {getActivityIcon(activity.type)}
@@ -546,9 +836,18 @@ export default function LeadDetailPage({ params }) {
                             </p>
                           )}
                         </div>
-                        <time className="flex-shrink-0 text-xs text-[#a1a1aa]">
-                          {formatDate(activity.created_at)}
-                        </time>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <time className="text-xs text-[#a1a1aa]">
+                            {formatDate(activity.created_at)}
+                          </time>
+                          {pinnableTypes.includes(activity.type) && (
+                            <PinButton
+                              activityId={activity.id}
+                              isPinned={activity.is_pinned}
+                              onToggle={handlePinToggle}
+                            />
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -625,5 +924,39 @@ function SystemIcon({ className }) {
       <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
       <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
     </svg>
+  )
+}
+
+function AlertIcon({ className }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+    </svg>
+  )
+}
+
+function PinFilledIcon({ className }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M16 4a1 1 0 0 1 .117 1.993L16 6v4.293l1.854 1.854a.5.5 0 0 1 .146.353V14a.5.5 0 0 1-.5.5H13v5.5a.5.5 0 0 1-.41.492L12.5 20.5a.5.5 0 0 1-.492-.41L12 20v-5.5H6.5a.5.5 0 0 1-.492-.41L6 14v-1.5a.5.5 0 0 1 .146-.354L8 10.293V6a1 1 0 0 1-.117-1.993L8 4h8z"/>
+    </svg>
+  )
+}
+
+function DevOpsStatusBadge({ status }) {
+  const configs = {
+    healthy: { label: 'Healthy', bg: 'bg-emerald-500/10', text: 'text-emerald-400', ring: 'ring-emerald-500/20' },
+    degraded: { label: 'Degraded', bg: 'bg-amber-500/10', text: 'text-amber-400', ring: 'ring-amber-500/20' },
+    down: { label: 'Down', bg: 'bg-red-500/10', text: 'text-red-400', ring: 'ring-red-500/20' },
+    unknown: { label: 'Unknown', bg: 'bg-gray-500/10', text: 'text-gray-400', ring: 'ring-gray-500/20' },
+  }
+
+  const config = configs[status] || configs.unknown
+
+  return (
+    <span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${config.bg} ${config.text} ${config.ring}`}>
+      <span className={`h-1.5 w-1.5 rounded-full ${status === 'healthy' ? 'bg-emerald-400' : status === 'degraded' ? 'bg-amber-400' : status === 'down' ? 'bg-red-400' : 'bg-gray-400'}`} />
+      {config.label}
+    </span>
   )
 }

@@ -206,6 +206,45 @@ export default function SiteDetailPage({ params }) {
             </div>
           )}
 
+          {/* Last Incident Summary */}
+          {site.lastIncident && (
+            <div className="bg-[#0a0a0a] border border-[#262626] rounded-lg p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-white">Last Incident</h2>
+                {site.openIncidentCount > 0 && (
+                  <span className="px-2 py-1 text-xs bg-red-500/20 text-red-400 rounded-full">
+                    {site.openIncidentCount} open
+                  </span>
+                )}
+              </div>
+              <Link
+                href={`/admin/devops/incidents/${site.lastIncident.id}`}
+                className="block p-4 bg-[#171717] rounded-lg hover:bg-[#262626] transition-colors"
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <SeverityBadge severity={site.lastIncident.severity} size="sm" />
+                  <span className={`text-xs px-2 py-0.5 rounded ${
+                    site.lastIncident.status === 'resolved' ? 'bg-green-500/20 text-green-400' : 'bg-amber-500/20 text-amber-400'
+                  }`}>
+                    {site.lastIncident.status}
+                  </span>
+                  <span className="text-gray-500 text-xs ml-auto">
+                    {new Date(site.lastIncident.created_at).toLocaleString()}
+                  </span>
+                </div>
+                <p className="text-white font-medium">{site.lastIncident.title}</p>
+                {site.lastIncident.description && (
+                  <p className="text-gray-400 text-sm mt-1 line-clamp-2">{site.lastIncident.description}</p>
+                )}
+                {site.lastIncident.resolved_at && (
+                  <p className="text-green-400 text-xs mt-2">
+                    Resolved: {new Date(site.lastIncident.resolved_at).toLocaleString()}
+                  </p>
+                )}
+              </Link>
+            </div>
+          )}
+
           {/* Check History */}
           <div className="bg-[#0a0a0a] border border-[#262626] rounded-lg p-6">
             <h2 className="text-lg font-semibold text-white mb-4">Check History</h2>
@@ -240,6 +279,10 @@ export default function SiteDetailPage({ params }) {
                   {site.environment || 'production'}
                 </span>
               </div>
+              <div>
+                <p className="text-gray-400 text-sm mb-1">SLA Target</p>
+                <p className="text-white font-mono">{site.sla_target || 99.9}%</p>
+              </div>
               {site.category && (
                 <div>
                   <p className="text-gray-400 text-sm mb-1">Category</p>
@@ -265,9 +308,56 @@ export default function SiteDetailPage({ params }) {
                 <p className="text-white">{site.is_active ? 'Yes' : 'No'}</p>
               </div>
 
+              {/* Health URL */}
+              <div className="pt-4 border-t border-[#262626]">
+                <p className="text-gray-400 text-sm mb-1">Health Endpoint</p>
+                {site.health_url ? (
+                  <a
+                    href={site.health_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-purple-400 hover:text-purple-300 break-all text-sm"
+                  >
+                    {site.health_url}
+                  </a>
+                ) : (
+                  <p className="text-gray-500 text-sm">{site.url}/api/health (default)</p>
+                )}
+              </div>
+
+              {/* External Monitor Link */}
+              {site.monitor_link && (
+                <div>
+                  <p className="text-gray-400 text-sm mb-1">External Monitor</p>
+                  <a
+                    href={site.monitor_link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-purple-400 hover:text-purple-300 flex items-center gap-1 text-sm"
+                  >
+                    <ExternalLinkIcon className="w-3 h-3" />
+                    View Dashboard
+                  </a>
+                </div>
+              )}
+
+              {/* CRM Link */}
+              {site.crm_lead_id && (
+                <div>
+                  <p className="text-gray-400 text-sm mb-1">CRM Lead</p>
+                  <Link
+                    href={`/admin/crm/leads/${site.crm_lead_id}`}
+                    className="text-purple-400 hover:text-purple-300 flex items-center gap-1 text-sm"
+                  >
+                    <UserIcon className="w-3 h-3" />
+                    View Lead
+                  </Link>
+                </div>
+              )}
+
               {/* Copy Health API Button */}
               <div className="pt-4 border-t border-[#262626]">
-                <p className="text-gray-400 text-sm mb-2">Health Endpoint</p>
+                <p className="text-gray-400 text-sm mb-2">API Template</p>
                 <HealthAPITemplateCompact />
               </div>
             </div>
@@ -374,6 +464,22 @@ function CheckIcon({ className }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+  )
+}
+
+function ExternalLinkIcon({ className }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+    </svg>
+  )
+}
+
+function UserIcon({ className }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
     </svg>
   )
 }

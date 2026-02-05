@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAdminAuth } from '@/Components/Admin/AdminAuthProvider'
 import HealthAPITemplate from '@/Components/Admin/DevOps/HealthAPITemplate'
+import CRMLeadSelector from '@/Components/Admin/DevOps/CRMLeadSelector'
 
 export default function NewSitePage() {
   const router = useRouter()
@@ -23,6 +24,10 @@ export default function NewSitePage() {
     timeout_seconds: 30,
     is_active: true,
     ssl_check_enabled: true,
+    health_url: '',
+    monitor_link: '',
+    sla_target: 99.9,
+    crm_lead_id: null,
   })
 
   const handleChange = (e) => {
@@ -46,6 +51,7 @@ export default function NewSitePage() {
           ...formData,
           check_interval_minutes: parseInt(formData.check_interval_minutes, 10),
           timeout_seconds: parseInt(formData.timeout_seconds, 10),
+          sla_target: parseFloat(formData.sla_target) || 99.9,
         }),
       })
 
@@ -148,6 +154,40 @@ export default function NewSitePage() {
                 Sent as X-API-Key header to the health endpoint
               </p>
             </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Custom Health URL (Optional)
+              </label>
+              <input
+                type="url"
+                name="health_url"
+                value={formData.health_url}
+                onChange={handleChange}
+                placeholder="https://example.com/custom-health"
+                className="w-full px-4 py-2 bg-[#171717] border border-[#262626] rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
+              />
+              <p className="text-gray-500 text-xs mt-1">
+                Custom health endpoint. Defaults to {'{URL}/api/health'} if not set
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                External Monitor Link (Optional)
+              </label>
+              <input
+                type="url"
+                name="monitor_link"
+                value={formData.monitor_link}
+                onChange={handleChange}
+                placeholder="https://betterstack.com/team/123/monitors/456"
+                className="w-full px-4 py-2 bg-[#171717] border border-[#262626] rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
+              />
+              <p className="text-gray-500 text-xs mt-1">
+                Link to external monitoring dashboard (BetterStack, UptimeRobot, etc.)
+              </p>
+            </div>
           </div>
         </div>
 
@@ -185,7 +225,7 @@ export default function NewSitePage() {
               />
             </div>
 
-            <div className="col-span-2">
+            <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Owner Email
               </label>
@@ -196,6 +236,33 @@ export default function NewSitePage() {
                 onChange={handleChange}
                 placeholder="client@example.com"
                 className="w-full px-4 py-2 bg-[#171717] border border-[#262626] rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                SLA Target (%)
+              </label>
+              <input
+                type="number"
+                name="sla_target"
+                value={formData.sla_target}
+                onChange={handleChange}
+                min="90"
+                max="100"
+                step="0.1"
+                className="w-full px-4 py-2 bg-[#171717] border border-[#262626] rounded-lg text-white focus:outline-none focus:border-purple-500"
+              />
+              <p className="text-gray-500 text-xs mt-1">
+                Target uptime percentage (default 99.9%)
+              </p>
+            </div>
+
+            <div className="col-span-2">
+              <CRMLeadSelector
+                value={formData.crm_lead_id}
+                onChange={(id) => setFormData(prev => ({ ...prev, crm_lead_id: id }))}
+                ownerEmail={formData.owner_email}
               />
             </div>
           </div>

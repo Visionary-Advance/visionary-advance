@@ -132,3 +132,27 @@ COMMENT ON TABLE devops_sites IS 'Client websites monitored by DevOps dashboard'
 COMMENT ON TABLE devops_health_checks IS 'Health check results for monitored sites';
 COMMENT ON TABLE devops_incidents IS 'Incidents created when sites go down or degrade';
 COMMENT ON TABLE devops_alerts IS 'Alert rules for notification triggers';
+
+-- ============================================
+-- Migration: Add CRM integration and monitoring fields
+-- Run this section on existing databases
+-- ============================================
+
+-- New columns for devops_sites
+ALTER TABLE devops_sites
+ADD COLUMN IF NOT EXISTS health_url TEXT,
+ADD COLUMN IF NOT EXISTS monitor_link TEXT,
+ADD COLUMN IF NOT EXISTS sla_target DECIMAL(5,2) DEFAULT 99.9,
+ADD COLUMN IF NOT EXISTS current_status TEXT DEFAULT 'unknown',
+ADD COLUMN IF NOT EXISTS current_status_since TIMESTAMPTZ DEFAULT NOW(),
+ADD COLUMN IF NOT EXISTS crm_lead_id UUID;
+
+-- Index for CRM lead lookups
+CREATE INDEX IF NOT EXISTS idx_devops_sites_crm_lead_id ON devops_sites(crm_lead_id);
+
+COMMENT ON COLUMN devops_sites.health_url IS 'Custom health endpoint URL (falls back to {url}/api/health if not set)';
+COMMENT ON COLUMN devops_sites.monitor_link IS 'External monitoring dashboard URL';
+COMMENT ON COLUMN devops_sites.sla_target IS 'Target uptime percentage (default 99.9)';
+COMMENT ON COLUMN devops_sites.current_status IS 'Denormalized status, updated on each health check';
+COMMENT ON COLUMN devops_sites.current_status_since IS 'When the current status was first recorded';
+COMMENT ON COLUMN devops_sites.crm_lead_id IS 'Link to CRM lead for notifications';

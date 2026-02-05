@@ -39,6 +39,10 @@ export async function PATCH(request, { params }) {
       'timeout_seconds',
       'is_active',
       'ssl_check_enabled',
+      'health_url',
+      'monitor_link',
+      'sla_target',
+      'crm_lead_id',
     ]
 
     // Filter to only allowed fields
@@ -67,6 +71,40 @@ export async function PATCH(request, { params }) {
         )
       }
     }
+
+    // Validate health_url if provided
+    if (updateData.health_url) {
+      try {
+        new URL(updateData.health_url)
+      } catch {
+        return NextResponse.json(
+          { error: 'Invalid health URL format' },
+          { status: 400 }
+        )
+      }
+    }
+
+    // Validate monitor_link if provided
+    if (updateData.monitor_link) {
+      try {
+        new URL(updateData.monitor_link)
+      } catch {
+        return NextResponse.json(
+          { error: 'Invalid monitor link format' },
+          { status: 400 }
+        )
+      }
+    }
+
+    // Parse sla_target as float if provided
+    if (updateData.sla_target !== undefined) {
+      updateData.sla_target = parseFloat(updateData.sla_target) || 99.9
+    }
+
+    // Handle null values for optional fields
+    if (updateData.health_url === '') updateData.health_url = null
+    if (updateData.monitor_link === '') updateData.monitor_link = null
+    if (updateData.crm_lead_id === '') updateData.crm_lead_id = null
 
     updateData.updated_at = new Date().toISOString()
 
