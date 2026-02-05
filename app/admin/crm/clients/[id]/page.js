@@ -1,28 +1,16 @@
-// app/admin/crm/leads/[id]/page.js
+// app/admin/crm/clients/[id]/page.js
 'use client'
 
 import { useState, useEffect, use } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import ScoreBadge from '@/Components/CRM/Shared/ScoreBadge'
-import StageBadge, { STAGE_CONFIG } from '@/Components/CRM/Shared/StageBadge'
 import SourceBadge from '@/Components/CRM/Shared/SourceBadge'
 import PinButton from '@/Components/CRM/Shared/PinButton'
 import InvoiceList from '@/Components/CRM/Stripe/InvoiceList'
 import ProjectCard from '@/Components/CRM/Projects/ProjectCard'
 import ProjectForm from '@/Components/CRM/Projects/ProjectForm'
 import ProposalCard from '@/Components/CRM/Proposals/ProposalCard'
-
-const STAGES = [
-  'contact',
-  'plan_audit_meeting',
-  'discovery_call',
-  'proposal',
-  'offer',
-  'negotiating',
-  'won',
-  'lost',
-]
 
 const ACTIVITY_TYPES = [
   { key: 'note', label: 'Note', icon: 'note' },
@@ -33,39 +21,44 @@ const ACTIVITY_TYPES = [
   { key: 'task', label: 'Task', icon: 'task' },
 ]
 
-export default function LeadDetailPage({ params }) {
+export default function ClientDetailPage({ params }) {
   const { id } = use(params)
   const router = useRouter()
 
-  const [lead, setLead] = useState(null)
+  const [client, setClient] = useState(null)
   const [activities, setActivities] = useState([])
   const [devopsSites, setDevopsSites] = useState([])
   const [projects, setProjects] = useState([])
   const [proposals, setProposals] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [updatingStage, setUpdatingStage] = useState(false)
   const [newNote, setNewNote] = useState('')
   const [activityType, setActivityType] = useState('note')
   const [addingNote, setAddingNote] = useState(false)
   const [savingHosting, setSavingHosting] = useState(false)
   const [showProjectForm, setShowProjectForm] = useState(false)
-  const [showProjectPrompt, setShowProjectPrompt] = useState(false)
 
   useEffect(() => {
-    fetchLead()
+    fetchClient()
     fetchDevOpsSites()
     fetchProjects()
     fetchProposals()
   }, [id])
 
-  const fetchLead = async () => {
+  const fetchClient = async () => {
     try {
       const res = await fetch(`/api/crm/leads/${id}`)
-      if (!res.ok) throw new Error('Failed to fetch lead')
+      if (!res.ok) throw new Error('Failed to fetch client')
 
       const data = await res.json()
-      setLead(data)
+
+      // Redirect to leads page if not a client
+      if (!data.is_client && data.stage !== 'won') {
+        router.replace(`/admin/crm/leads/${id}`)
+        return
+      }
+
+      setClient(data)
       setActivities(data.activities || [])
     } catch (err) {
       setError(err.message)
@@ -110,33 +103,6 @@ export default function LeadDetailPage({ params }) {
     }
   }
 
-  const updateStage = async (newStage) => {
-    const previousStage = lead?.stage
-    setUpdatingStage(true)
-    try {
-      const res = await fetch(`/api/crm/leads/${id}/stage`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ stage: newStage }),
-      })
-
-      if (!res.ok) throw new Error('Failed to update stage')
-
-      const data = await res.json()
-      setLead(data.lead)
-      fetchLead() // Refresh to get updated activities
-
-      // Show project prompt when moving to 'won' and no projects exist
-      if (newStage === 'won' && previousStage !== 'won' && projects.length === 0) {
-        setShowProjectPrompt(true)
-      }
-    } catch (err) {
-      alert(err.message)
-    } finally {
-      setUpdatingStage(false)
-    }
-  }
-
   const addNote = async (e) => {
     e.preventDefault()
     if (!newNote.trim()) return
@@ -160,7 +126,7 @@ export default function LeadDetailPage({ params }) {
 
       setNewNote('')
       setActivityType('note')
-      fetchLead() // Refresh activities
+      fetchClient()
     } catch (err) {
       alert(err.message)
     } finally {
@@ -180,7 +146,7 @@ export default function LeadDetailPage({ params }) {
       if (!res.ok) throw new Error('Failed to update hosting info')
 
       const data = await res.json()
-      setLead(data.lead)
+      setClient(data.lead)
     } catch (err) {
       alert(err.message)
     } finally {
@@ -189,7 +155,7 @@ export default function LeadDetailPage({ params }) {
   }
 
   const toggleHasWebsite = () => {
-    const newValue = !lead.has_website
+    const newValue = !client.has_website
     updateHostingInfo({
       has_website: newValue,
       ...(newValue ? {} : { hosting_start_date: null, hosting_expiry_date: null })
@@ -200,21 +166,19 @@ export default function LeadDetailPage({ params }) {
     updateHostingInfo({ [field]: value || null })
   }
 
-  const handlePinToggle = (updatedActivity) => {
-    // Refresh activities to get proper sort order
-    fetchLead()
+  const handlePinToggle = () => {
+    fetchClient()
   }
 
   const handleProjectCreated = (project) => {
     setProjects(prev => [project, ...prev])
     setShowProjectForm(false)
-    setShowProjectPrompt(false)
   }
 
   const handleSendProposal = async (proposal) => {
-    const email = lead?.email
+    const email = client?.email
     if (!email) {
-      alert('Lead has no email address')
+      alert('Client has no email address')
       return
     }
 
@@ -231,7 +195,7 @@ export default function LeadDetailPage({ params }) {
 
       alert('Proposal sent!')
       fetchProposals()
-      fetchLead() // Refresh activities
+      fetchClient()
     } catch (err) {
       alert(err.message)
     }
@@ -263,8 +227,8 @@ export default function LeadDetailPage({ params }) {
   }
 
   const getHostingStatus = () => {
-    if (!lead?.hosting_expiry_date) return null
-    const expiry = new Date(lead.hosting_expiry_date)
+    if (!client?.hosting_expiry_date) return null
+    const expiry = new Date(client.hosting_expiry_date)
     const now = new Date()
     const daysUntilExpiry = Math.ceil((expiry - now) / (1000 * 60 * 60 * 24))
 
@@ -314,7 +278,6 @@ export default function LeadDetailPage({ params }) {
     }
   }
 
-  // Separate pinned and regular activities
   const pinnedActivities = activities.filter(a => a.is_pinned)
   const regularActivities = activities.filter(a => !a.is_pinned)
   const pinnableTypes = ['note', 'email_sent', 'email_received', 'call', 'meeting', 'visit', 'task']
@@ -327,12 +290,12 @@ export default function LeadDetailPage({ params }) {
     )
   }
 
-  if (error || !lead) {
+  if (error || !client) {
     return (
       <div className="flex h-64 flex-col items-center justify-center gap-4">
-        <p className="text-red-400">{error || 'Lead not found'}</p>
-        <Link href="/admin/crm/leads" className="text-[#008070] hover:underline">
-          Back to leads
+        <p className="text-red-400">{error || 'Client not found'}</p>
+        <Link href="/admin/crm/clients" className="text-[#008070] hover:underline">
+          Back to clients
         </Link>
       </div>
     )
@@ -340,35 +303,6 @@ export default function LeadDetailPage({ params }) {
 
   return (
     <div className="space-y-6">
-      {/* Project Prompt Modal */}
-      {showProjectPrompt && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-md rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
-            <h3 className="text-lg font-semibold text-[#fafafa]">Create a Project?</h3>
-            <p className="mt-2 text-sm text-[#a1a1aa]">
-              This lead has been marked as won. Would you like to create a project to track the work?
-            </p>
-            <div className="mt-4 flex items-center justify-end gap-3">
-              <button
-                onClick={() => setShowProjectPrompt(false)}
-                className="rounded-lg px-4 py-2 text-sm text-[#a1a1aa] hover:text-[#fafafa]"
-              >
-                Maybe Later
-              </button>
-              <button
-                onClick={() => {
-                  setShowProjectPrompt(false)
-                  setShowProjectForm(true)
-                }}
-                className="rounded-lg bg-[#008070] px-4 py-2 text-sm font-medium text-white hover:bg-[#006b5d]"
-              >
-                Create Project
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Project Form Modal */}
       {showProjectForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
@@ -387,69 +321,35 @@ export default function LeadDetailPage({ params }) {
       <div className="flex items-start justify-between">
         <div>
           <Link
-            href="/admin/crm/leads"
+            href="/admin/crm/clients"
             className="mb-4 inline-flex items-center gap-2 text-sm text-[#a1a1aa] hover:text-[#fafafa]"
           >
             <ArrowLeftIcon className="h-4 w-4" />
-            Back to leads
+            Back to clients
           </Link>
           <div className="flex items-center gap-4">
             <h1 className="text-2xl font-semibold text-[#fafafa]">
-              {lead.full_name || lead.email}
+              {client.full_name || client.email}
             </h1>
-            <ScoreBadge score={lead.score || 0} size="lg" />
+            <ScoreBadge score={client.score || 0} size="lg" />
           </div>
-          {lead.company && (
-            <p className="mt-1 text-lg text-[#a1a1aa]">{lead.company}</p>
+          {client.company && (
+            <p className="mt-1 text-lg text-[#a1a1aa]">{client.company}</p>
           )}
         </div>
         <div className="flex items-center gap-3">
-          {(lead.is_client || lead.stage === 'won') && (
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1 text-sm font-medium text-emerald-400 ring-1 ring-inset ring-emerald-500/20">
-              <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-              Client
-            </span>
-          )}
-          <SourceBadge source={lead.source} />
-          <StageBadge stage={lead.stage} />
-        </div>
-      </div>
-
-      {/* Stage Pipeline */}
-      <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
-        <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
-          Pipeline Stage
-        </h2>
-        <div className="flex items-center gap-2 overflow-x-auto pb-2">
-          {STAGES.map((stage, index) => {
-            const isCurrent = lead.stage === stage
-            const isPast = STAGES.indexOf(lead.stage) > index
-            const config = STAGE_CONFIG[stage]
-
-            return (
-              <button
-                key={stage}
-                onClick={() => !isCurrent && updateStage(stage)}
-                disabled={updatingStage || isCurrent}
-                className={`flex-shrink-0 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-                  isCurrent
-                    ? 'bg-[#008070] text-white'
-                    : isPast
-                    ? 'bg-[#171717] text-[#fafafa] hover:bg-[#262626]'
-                    : 'bg-[#0a0a0a] text-[#a1a1aa] hover:bg-[#171717] hover:text-[#fafafa]'
-                } border border-[#262626] disabled:cursor-not-allowed`}
-              >
-                {config?.label || stage}
-              </button>
-            )
-          })}
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1 text-sm font-medium text-emerald-400 ring-1 ring-inset ring-emerald-500/20">
+            <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+            Client
+          </span>
+          <SourceBadge source={client.source} />
         </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
-        {/* Lead Info */}
+        {/* Client Info */}
         <div className="space-y-6 lg:col-span-1">
           {/* Contact Info */}
           <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
@@ -460,32 +360,32 @@ export default function LeadDetailPage({ params }) {
               <div>
                 <dt className="text-xs text-[#a1a1aa]">Email</dt>
                 <dd className="mt-1">
-                  <a href={`mailto:${lead.email}`} className="text-[#008070] hover:underline">
-                    {lead.email}
+                  <a href={`mailto:${client.email}`} className="text-[#008070] hover:underline">
+                    {client.email}
                   </a>
                 </dd>
               </div>
-              {lead.phone && (
+              {client.phone && (
                 <div>
                   <dt className="text-xs text-[#a1a1aa]">Phone</dt>
                   <dd className="mt-1">
-                    <a href={`tel:${lead.phone}`} className="text-[#fafafa] hover:text-[#008070]">
-                      {lead.phone}
+                    <a href={`tel:${client.phone}`} className="text-[#fafafa] hover:text-[#008070]">
+                      {client.phone}
                     </a>
                   </dd>
                 </div>
               )}
-              {lead.website && (
+              {client.website && (
                 <div>
                   <dt className="text-xs text-[#a1a1aa]">Website</dt>
                   <dd className="mt-1">
                     <a
-                      href={lead.website}
+                      href={client.website}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-[#008070] hover:underline"
                     >
-                      {lead.website}
+                      {client.website}
                     </a>
                   </dd>
                 </div>
@@ -493,55 +393,51 @@ export default function LeadDetailPage({ params }) {
             </dl>
           </div>
 
-          {/* Stripe Invoices - Client Only */}
-          {(lead.is_client || lead.stage === 'won') && (
-            <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
-              <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
-                Invoices
-              </h2>
-              <InvoiceList leadId={id} limit={5} showTotals={true} />
-            </div>
-          )}
+          {/* Invoices */}
+          <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+            <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
+              Invoices
+            </h2>
+            <InvoiceList leadId={id} limit={5} showTotals={true} />
+          </div>
 
-          {/* Projects - Client Only */}
-          {(lead.is_client || lead.stage === 'won') && (
-            <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
-                  Projects
-                </h2>
-                <button
-                  onClick={() => setShowProjectForm(true)}
-                  className="text-sm text-[#008070] hover:text-[#006b5d]"
-                >
-                  + New
-                </button>
-              </div>
-              {projects.length === 0 ? (
-                <p className="text-sm text-[#a1a1aa] text-center py-4">No projects yet</p>
-              ) : (
-                <div className="space-y-2">
-                  {projects.slice(0, 3).map(project => (
-                    <Link
-                      key={project.id}
-                      href={`/admin/crm/projects/${project.id}`}
-                      className="block"
-                    >
-                      <ProjectCard project={project} compact />
-                    </Link>
-                  ))}
-                  {projects.length > 3 && (
-                    <Link
-                      href={`/admin/crm/leads/${id}/projects`}
-                      className="block text-center text-sm text-[#008070] hover:underline pt-2"
-                    >
-                      View all {projects.length} projects
-                    </Link>
-                  )}
-                </div>
-              )}
+          {/* Projects */}
+          <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
+                Projects
+              </h2>
+              <button
+                onClick={() => setShowProjectForm(true)}
+                className="text-sm text-[#008070] hover:text-[#006b5d]"
+              >
+                + New
+              </button>
             </div>
-          )}
+            {projects.length === 0 ? (
+              <p className="text-sm text-[#a1a1aa] text-center py-4">No projects yet</p>
+            ) : (
+              <div className="space-y-2">
+                {projects.slice(0, 3).map(project => (
+                  <Link
+                    key={project.id}
+                    href={`/admin/crm/projects/${project.id}`}
+                    className="block"
+                  >
+                    <ProjectCard project={project} compact />
+                  </Link>
+                ))}
+                {projects.length > 3 && (
+                  <Link
+                    href={`/admin/crm/clients/${id}/projects`}
+                    className="block text-center text-sm text-[#008070] hover:underline pt-2"
+                  >
+                    View all {projects.length} projects
+                  </Link>
+                )}
+              </div>
+            )}
+          </div>
 
           {/* Proposals */}
           <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
@@ -550,7 +446,7 @@ export default function LeadDetailPage({ params }) {
                 Proposals
               </h2>
               <Link
-                href={`/admin/crm/leads/${id}/proposals/new`}
+                href={`/admin/crm/clients/${id}/proposals/new`}
                 className="text-sm text-[#008070] hover:text-[#006b5d]"
               >
                 + New
@@ -576,175 +472,119 @@ export default function LeadDetailPage({ params }) {
             )}
           </div>
 
-          {/* Hosting Info - Client Only */}
-          {(lead.is_client || lead.stage === 'won') && (
-            <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
-              <div className="flex items-center justify-between">
-                <h2 className="text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
-                  Hosting
-                </h2>
-                <button
-                  onClick={toggleHasWebsite}
-                  disabled={savingHosting}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                    lead.has_website ? 'bg-[#008070]' : 'bg-[#262626]'
-                  } ${savingHosting ? 'opacity-50 cursor-not-allowed' : ''}`}
-                >
-                  <span
-                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                      lead.has_website ? 'translate-x-6' : 'translate-x-1'
-                    }`}
-                  />
-                </button>
-              </div>
+          {/* Hosting Info */}
+          <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
+                Hosting
+              </h2>
+              <button
+                onClick={toggleHasWebsite}
+                disabled={savingHosting}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                  client.has_website ? 'bg-[#008070]' : 'bg-[#262626]'
+                } ${savingHosting ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    client.has_website ? 'translate-x-6' : 'translate-x-1'
+                  }`}
+                />
+              </button>
+            </div>
 
-              {lead.has_website && (
-                <div className="mt-4 space-y-4">
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-[#a1a1aa]">Start</span>
+            {client.has_website && (
+              <div className="mt-4 space-y-4">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-[#a1a1aa]">Start</span>
+                    <input
+                      type="date"
+                      value={client.hosting_start_date ? client.hosting_start_date.split('T')[0] : ''}
+                      onChange={(e) => updateHostingDate('hosting_start_date', e.target.value)}
+                      disabled={savingHosting}
+                      className="rounded border border-[#262626] bg-[#171717] px-2 py-1 text-xs text-[#fafafa] focus:border-[#008070] focus:outline-none disabled:opacity-50"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-[#a1a1aa]">Expiry</span>
+                    <div className="flex items-center gap-2">
+                      {getHostingStatus() && (
+                        <span className={`rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${getHostingStatus().color}`}>
+                          {getHostingStatus().label}
+                        </span>
+                      )}
                       <input
                         type="date"
-                        value={lead.hosting_start_date ? lead.hosting_start_date.split('T')[0] : ''}
-                        onChange={(e) => updateHostingDate('hosting_start_date', e.target.value)}
+                        value={client.hosting_expiry_date ? client.hosting_expiry_date.split('T')[0] : ''}
+                        onChange={(e) => updateHostingDate('hosting_expiry_date', e.target.value)}
                         disabled={savingHosting}
                         className="rounded border border-[#262626] bg-[#171717] px-2 py-1 text-xs text-[#fafafa] focus:border-[#008070] focus:outline-none disabled:opacity-50"
                       />
                     </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-[#a1a1aa]">Expiry</span>
-                      <div className="flex items-center gap-2">
-                        {getHostingStatus() && (
-                          <span className={`rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${getHostingStatus().color}`}>
-                            {getHostingStatus().label}
-                          </span>
-                        )}
-                        <input
-                          type="date"
-                          value={lead.hosting_expiry_date ? lead.hosting_expiry_date.split('T')[0] : ''}
-                          onChange={(e) => updateHostingDate('hosting_expiry_date', e.target.value)}
-                          disabled={savingHosting}
-                          className="rounded border border-[#262626] bg-[#171717] px-2 py-1 text-xs text-[#fafafa] focus:border-[#008070] focus:outline-none disabled:opacity-50"
-                        />
-                      </div>
-                    </div>
                   </div>
-
-                  {devopsSites.length > 0 && (
-                    <div className="pt-4 border-t border-[#262626] space-y-3">
-                      {devopsSites.map((site) => (
-                        <Link
-                          key={site.id}
-                          href={`/admin/devops/sites/${site.id}`}
-                          className="block rounded-lg bg-[#171717] p-3 hover:bg-[#262626] transition-colors"
-                        >
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="text-sm font-medium text-[#fafafa] truncate">{site.name}</span>
-                            <DevOpsStatusBadge status={site.status} />
-                          </div>
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="text-[#a1a1aa]">
-                              {site.latestCheck?.response_time_ms ? `${site.latestCheck.response_time_ms}ms` : 'N/A'}
-                            </span>
-                            {site.openIncidentCount > 0 && (
-                              <span className="flex items-center gap-1 text-red-400">
-                                <AlertIcon className="h-3 w-3" />
-                                {site.openIncidentCount}
-                              </span>
-                            )}
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
-                  )}
                 </div>
-              )}
-            </div>
-          )}
+
+                {devopsSites.length > 0 && (
+                  <div className="pt-4 border-t border-[#262626] space-y-3">
+                    {devopsSites.map((site) => (
+                      <Link
+                        key={site.id}
+                        href={`/admin/devops/sites/${site.id}`}
+                        className="block rounded-lg bg-[#171717] p-3 hover:bg-[#262626] transition-colors"
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium text-[#fafafa] truncate">{site.name}</span>
+                          <DevOpsStatusBadge status={site.status} />
+                        </div>
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-[#a1a1aa]">
+                            {site.latestCheck?.response_time_ms ? `${site.latestCheck.response_time_ms}ms` : 'N/A'}
+                          </span>
+                          {site.openIncidentCount > 0 && (
+                            <span className="flex items-center gap-1 text-red-400">
+                              <AlertIcon className="h-3 w-3" />
+                              {site.openIncidentCount}
+                            </span>
+                          )}
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
 
           {/* Business Info */}
-          {(lead.business_type || lead.project_type || lead.budget_range || lead.timeline) && (
+          {(client.business_type || client.project_type || client.budget_range || client.timeline) && (
             <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
               <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
                 Business Info
               </h2>
               <dl className="space-y-4">
-                {lead.business_type && (
+                {client.business_type && (
                   <div>
                     <dt className="text-xs text-[#a1a1aa]">Business Type</dt>
-                    <dd className="mt-1 text-[#fafafa]">{lead.business_type}</dd>
+                    <dd className="mt-1 text-[#fafafa]">{client.business_type}</dd>
                   </div>
                 )}
-                {lead.project_type && (
+                {client.project_type && (
                   <div>
                     <dt className="text-xs text-[#a1a1aa]">Project Type</dt>
-                    <dd className="mt-1 text-[#fafafa]">{lead.project_type}</dd>
+                    <dd className="mt-1 text-[#fafafa]">{client.project_type}</dd>
                   </div>
                 )}
-                {lead.budget_range && (
+                {client.budget_range && (
                   <div>
                     <dt className="text-xs text-[#a1a1aa]">Budget Range</dt>
-                    <dd className="mt-1 text-[#fafafa]">{lead.budget_range}</dd>
+                    <dd className="mt-1 text-[#fafafa]">{client.budget_range}</dd>
                   </div>
                 )}
-                {lead.timeline && (
+                {client.timeline && (
                   <div>
                     <dt className="text-xs text-[#a1a1aa]">Timeline</dt>
-                    <dd className="mt-1 text-[#fafafa]">{lead.timeline}</dd>
-                  </div>
-                )}
-              </dl>
-            </div>
-          )}
-
-          {/* Audit Scores */}
-          {lead.audit_scores && (
-            <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
-              <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
-                Audit Scores
-              </h2>
-              <div className="grid grid-cols-2 gap-4">
-                {Object.entries(lead.audit_scores).map(([key, value]) => (
-                  <div key={key} className="text-center">
-                    <div className="text-2xl font-bold text-[#fafafa]">{value}</div>
-                    <div className="text-xs capitalize text-[#a1a1aa]">
-                      {key.replace(/([A-Z])/g, ' $1').trim()}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* UTM Data */}
-          {(lead.utm_source || lead.utm_medium || lead.utm_campaign) && (
-            <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
-              <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
-                Attribution
-              </h2>
-              <dl className="space-y-3">
-                {lead.utm_source && (
-                  <div>
-                    <dt className="text-xs text-[#a1a1aa]">Source</dt>
-                    <dd className="mt-1 text-sm text-[#fafafa]">{lead.utm_source}</dd>
-                  </div>
-                )}
-                {lead.utm_medium && (
-                  <div>
-                    <dt className="text-xs text-[#a1a1aa]">Medium</dt>
-                    <dd className="mt-1 text-sm text-[#fafafa]">{lead.utm_medium}</dd>
-                  </div>
-                )}
-                {lead.utm_campaign && (
-                  <div>
-                    <dt className="text-xs text-[#a1a1aa]">Campaign</dt>
-                    <dd className="mt-1 text-sm text-[#fafafa]">{lead.utm_campaign}</dd>
-                  </div>
-                )}
-                {lead.conversion_page && (
-                  <div>
-                    <dt className="text-xs text-[#a1a1aa]">Conversion Page</dt>
-                    <dd className="mt-1 text-sm text-[#fafafa]">{lead.conversion_page}</dd>
+                    <dd className="mt-1 text-[#fafafa]">{client.timeline}</dd>
                   </div>
                 )}
               </dl>
@@ -758,23 +598,21 @@ export default function LeadDetailPage({ params }) {
             </h2>
             <dl className="space-y-3">
               <div>
-                <dt className="text-xs text-[#a1a1aa]">Created</dt>
-                <dd className="mt-1 text-sm text-[#fafafa]">{formatDate(lead.created_at)}</dd>
+                <dt className="text-xs text-[#a1a1aa]">Lead Created</dt>
+                <dd className="mt-1 text-sm text-[#fafafa]">{formatDate(client.created_at)}</dd>
               </div>
-              {lead.client_since && (
-                <div>
-                  <dt className="text-xs text-[#a1a1aa]">Client Since</dt>
-                  <dd className="mt-1 text-sm text-emerald-400">{formatDate(lead.client_since)}</dd>
-                </div>
-              )}
+              <div>
+                <dt className="text-xs text-[#a1a1aa]">Client Since</dt>
+                <dd className="mt-1 text-sm text-emerald-400">{formatDate(client.client_since)}</dd>
+              </div>
               <div>
                 <dt className="text-xs text-[#a1a1aa]">Last Activity</dt>
-                <dd className="mt-1 text-sm text-[#fafafa]">{formatDate(lead.last_activity_at)}</dd>
+                <dd className="mt-1 text-sm text-[#fafafa]">{formatDate(client.last_activity_at)}</dd>
               </div>
-              {lead.hubspot_contact_id && (
+              {client.hubspot_contact_id && (
                 <div>
                   <dt className="text-xs text-[#a1a1aa]">HubSpot Contact</dt>
-                  <dd className="mt-1 text-sm text-[#008070]">{lead.hubspot_contact_id}</dd>
+                  <dd className="mt-1 text-sm text-[#008070]">{client.hubspot_contact_id}</dd>
                 </div>
               )}
             </dl>

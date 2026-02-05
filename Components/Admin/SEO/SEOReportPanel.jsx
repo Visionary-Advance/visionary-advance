@@ -199,6 +199,7 @@ function ReportList({ reports, onSelect }) {
         const title = currentMonth && previousMonth
           ? `${currentMonth} vs ${previousMonth}`
           : formatDateRange(report.start_date, report.end_date);
+        const taskCount = report.seo_plan?.tasks?.length || 0;
 
         return (
           <button
@@ -210,10 +211,13 @@ function ReportList({ reports, onSelect }) {
               <div>
                 <p className="text-white font-medium">{title}</p>
                 <p className="text-gray-400 text-sm">
-                  {report.total_clicks?.toLocaleString()} clicks • {report.recommendations?.length || 0} recommendations
+                  {report.total_clicks?.toLocaleString()} clicks • {taskCount} tasks
                 </p>
               </div>
               <div className="flex items-center gap-2">
+                {report.project_id && (
+                  <span className="text-xs bg-teal-900/50 text-teal-300 px-2 py-0.5 rounded">Project</span>
+                )}
                 {report.status === 'sent' && (
                   <span className="text-xs bg-green-900/50 text-green-300 px-2 py-0.5 rounded">Sent</span>
                 )}
@@ -229,7 +233,7 @@ function ReportList({ reports, onSelect }) {
 
 function ReportView({ report, site, onBack, onSend, onDelete }) {
   const [deleting, setDeleting] = useState(false);
-  const recommendations = report.recommendations || [];
+  const seoPlan = report.seo_plan;
   const monthComparison = report.month_comparison;
   const currentMonth = monthComparison?.currentMonth;
   const previousMonth = monthComparison?.previousMonth;
@@ -237,13 +241,27 @@ function ReportView({ report, site, onBack, onSend, onDelete }) {
   const priorityColors = {
     high: 'border-red-500 bg-red-500/10',
     medium: 'border-yellow-500 bg-yellow-500/10',
-    info: 'border-green-500 bg-green-500/10'
+    low: 'border-blue-500 bg-blue-500/10'
   };
 
   const priorityLabels = {
     high: { text: 'High Priority', color: 'bg-red-500' },
     medium: { text: 'Medium Priority', color: 'bg-yellow-500' },
-    info: { text: 'Good News', color: 'bg-green-500' }
+    low: { text: 'Low Priority', color: 'bg-blue-500' }
+  };
+
+  const categoryColors = {
+    technical: 'text-purple-400',
+    content: 'text-green-400',
+    'on-page': 'text-blue-400',
+    'off-page': 'text-orange-400',
+    analytics: 'text-teal-400'
+  };
+
+  const effortLabels = {
+    small: { text: 'Quick', color: 'bg-green-600' },
+    medium: { text: 'Medium', color: 'bg-yellow-600' },
+    large: { text: 'Large', color: 'bg-red-600' }
   };
 
   async function handleDelete() {
@@ -386,48 +404,148 @@ function ReportView({ report, site, onBack, onSend, onDelete }) {
         </table>
       </div>
 
-      {/* Recommendations */}
-      <h4 className="text-lg font-semibold text-white mb-4">
-        AI-Powered Recommendations ({recommendations.length})
-      </h4>
+      {/* SEO Plan */}
+      {seoPlan ? (
+        <>
+          <div className="flex items-center justify-between mb-4">
+            <h4 className="text-lg font-semibold text-white">
+              Monthly SEO Plan
+            </h4>
+            {report.project_id && (
+              <a
+                href={`/admin/crm/projects/${report.project_id}`}
+                className="text-sm text-teal-400 hover:text-teal-300 flex items-center gap-1"
+              >
+                <ProjectIcon className="w-4 h-4" />
+                View Project
+              </a>
+            )}
+          </div>
 
-      {recommendations.length === 0 ? (
-        <p className="text-gray-400">No specific recommendations at this time.</p>
-      ) : (
-        <div className="space-y-4">
-          {recommendations.map((rec, idx) => (
-            <div
-              key={rec.id || idx}
-              className={`p-4 rounded-lg border-l-4 ${priorityColors[rec.priority] || 'border-gray-500'}`}
-            >
-              <div className="flex items-center gap-2 mb-2">
-                <span className={`text-xs text-white px-2 py-0.5 rounded ${priorityLabels[rec.priority]?.color || 'bg-gray-500'}`}>
-                  {priorityLabels[rec.priority]?.text || rec.priority}
-                </span>
-                <span className="text-gray-500 text-xs">{rec.category}</span>
-              </div>
-              <h5 className="text-white font-medium mb-2">{rec.title}</h5>
-              <p className="text-gray-300 text-sm mb-3">{rec.description}</p>
-              <p className="text-teal-400 text-xs mb-3">💡 {rec.impact}</p>
-
-              {rec.actions && rec.actions.length > 0 && (
-                <div className="mt-3 pt-3 border-t border-gray-600">
-                  <p className="text-gray-400 text-xs font-medium mb-2">ACTION ITEMS:</p>
-                  <ul className="space-y-1">
-                    {rec.actions.slice(0, 5).map((action, i) => (
-                      <li key={i} className="text-gray-300 text-sm flex items-start gap-2">
-                        <span className="text-teal-400 mt-0.5">•</span>
-                        {action.suggestion}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+          {/* Plan Summary */}
+          {seoPlan.summary && (
+            <div className="bg-gray-700/50 rounded-lg p-4 mb-4">
+              <p className="text-gray-300">{seoPlan.summary}</p>
             </div>
-          ))}
+          )}
+
+          {/* Goals */}
+          {seoPlan.goals && seoPlan.goals.length > 0 && (
+            <div className="mb-6">
+              <h5 className="text-sm font-medium text-gray-400 uppercase tracking-wider mb-3">Goals for {seoPlan.month}</h5>
+              <ul className="space-y-2">
+                {seoPlan.goals.map((goal, idx) => (
+                  <li key={idx} className="flex items-start gap-2 text-gray-300">
+                    <span className="text-teal-400 mt-0.5">🎯</span>
+                    {goal}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Tasks */}
+          {seoPlan.tasks && seoPlan.tasks.length > 0 && (
+            <div className="mb-6">
+              <h5 className="text-sm font-medium text-gray-400 uppercase tracking-wider mb-3">
+                Tasks ({seoPlan.tasks.length})
+              </h5>
+              <div className="space-y-3">
+                {seoPlan.tasks.map((task, idx) => (
+                  <div
+                    key={task.id || idx}
+                    className={`p-4 rounded-lg border-l-4 ${priorityColors[task.priority] || 'border-gray-500'}`}
+                  >
+                    <div className="flex items-center gap-2 mb-2 flex-wrap">
+                      <span className={`text-xs text-white px-2 py-0.5 rounded ${priorityLabels[task.priority]?.color || 'bg-gray-500'}`}>
+                        {priorityLabels[task.priority]?.text || task.priority}
+                      </span>
+                      <span className={`text-xs ${categoryColors[task.category] || 'text-gray-400'}`}>
+                        {task.category}
+                      </span>
+                      {task.estimated_effort && (
+                        <span className={`text-xs text-white px-2 py-0.5 rounded ${effortLabels[task.estimated_effort]?.color || 'bg-gray-600'}`}>
+                          {effortLabels[task.estimated_effort]?.text || task.estimated_effort}
+                        </span>
+                      )}
+                    </div>
+                    <h5 className="text-white font-medium mb-2">{task.title}</h5>
+                    <p className="text-gray-300 text-sm mb-3">{task.description}</p>
+
+                    {task.files_to_modify && task.files_to_modify.length > 0 && (
+                      <div className="mb-2">
+                        <p className="text-gray-500 text-xs mb-1">Files:</p>
+                        <div className="flex flex-wrap gap-1">
+                          {task.files_to_modify.map((file, i) => (
+                            <span key={i} className="text-xs bg-gray-700 text-gray-300 px-2 py-0.5 rounded">
+                              {file}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {task.acceptance_criteria && task.acceptance_criteria.length > 0 && (
+                      <div className="mt-3 pt-3 border-t border-gray-600">
+                        <p className="text-gray-400 text-xs font-medium mb-2">ACCEPTANCE CRITERIA:</p>
+                        <ul className="space-y-1">
+                          {task.acceptance_criteria.map((criterion, i) => (
+                            <li key={i} className="text-gray-300 text-sm flex items-start gap-2">
+                              <span className="text-gray-500 mt-0.5">☐</span>
+                              {criterion}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Metrics to Track */}
+          {seoPlan.metrics_to_track && seoPlan.metrics_to_track.length > 0 && (
+            <div>
+              <h5 className="text-sm font-medium text-gray-400 uppercase tracking-wider mb-3">Metrics to Track</h5>
+              <div className="bg-gray-700 rounded-lg overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-gray-600">
+                      <th className="px-4 py-2 text-left text-gray-400">Metric</th>
+                      <th className="px-4 py-2 text-center text-gray-400">Current</th>
+                      <th className="px-4 py-2 text-center text-gray-400">Target</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {seoPlan.metrics_to_track.map((metric, idx) => (
+                      <tr key={idx} className="border-b border-gray-600 last:border-0">
+                        <td className="px-4 py-2 text-gray-300">{metric.metric}</td>
+                        <td className="px-4 py-2 text-center text-gray-400">{metric.current_value}</td>
+                        <td className="px-4 py-2 text-center text-teal-400 font-medium">{metric.target_value}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </>
+      ) : (
+        <div className="text-center py-8 text-gray-400">
+          <p>No SEO plan generated for this report.</p>
+          <p className="text-sm mt-1">Plans are generated automatically with new reports.</p>
         </div>
       )}
     </div>
+  );
+}
+
+function ProjectIcon({ className }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+    </svg>
   );
 }
 

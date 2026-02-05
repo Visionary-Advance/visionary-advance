@@ -2,7 +2,7 @@
 // Manage SEO sites
 
 import { NextResponse } from 'next/server';
-import { getSites, addSite, removeSite, listSearchConsoleSites } from '@/lib/search-console';
+import { getSites, addSite, removeSite, updateSite, listSearchConsoleSites } from '@/lib/search-console';
 import { getGoogleConnectionStatus } from '@/lib/google-auth';
 
 export async function GET(request) {
@@ -60,7 +60,7 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
-    const { siteUrl, googleEmail, displayName } = await request.json();
+    const { siteUrl, googleEmail, displayName, leadId } = await request.json();
 
     if (!siteUrl || !googleEmail) {
       return NextResponse.json(
@@ -69,11 +69,36 @@ export async function POST(request) {
       );
     }
 
-    const site = await addSite(siteUrl, googleEmail, displayName);
+    const site = await addSite(siteUrl, googleEmail, displayName, leadId);
 
     return NextResponse.json({ site });
   } catch (error) {
     console.error('Error adding SEO site:', error);
+    return NextResponse.json(
+      { error: error.message },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PATCH(request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const siteId = searchParams.get('id');
+    const updates = await request.json();
+
+    if (!siteId) {
+      return NextResponse.json(
+        { error: 'Site ID is required' },
+        { status: 400 }
+      );
+    }
+
+    const site = await updateSite(siteId, updates);
+
+    return NextResponse.json({ site });
+  } catch (error) {
+    console.error('Error updating SEO site:', error);
     return NextResponse.json(
       { error: error.message },
       { status: 500 }

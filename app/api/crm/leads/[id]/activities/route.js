@@ -82,7 +82,7 @@ export async function POST(request, { params }) {
 
     // Validate type
     const validTypes = [
-      'note', 'email_sent', 'email_received', 'call', 'meeting',
+      'note', 'email_sent', 'email_received', 'call', 'meeting', 'visit', 'task',
       'stage_change', 'form_submission', 'audit_completed', 'hubspot_sync', 'system',
     ]
 

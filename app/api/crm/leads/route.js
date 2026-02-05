@@ -25,11 +25,21 @@ export async function GET(request) {
     const sortOrder = searchParams.get('sortOrder') || 'desc'
     const minScore = searchParams.get('minScore')
     const maxScore = searchParams.get('maxScore')
+    const type = searchParams.get('type') // 'leads', 'clients', or 'all'
 
     // Build query
     let query = supabase
       .from('crm_leads')
       .select('*', { count: 'exact' })
+
+    // Filter by type (leads vs clients)
+    if (type === 'clients') {
+      query = query.eq('is_client', true)
+    } else if (type === 'leads' || !type) {
+      // Default: show only leads (non-clients)
+      query = query.or('is_client.is.null,is_client.eq.false')
+    }
+    // type === 'all' shows both
 
     // Apply filters
     if (stage) {
@@ -64,9 +74,9 @@ export async function GET(request) {
     }
 
     // Apply sorting
-    const validSortFields = ['created_at', 'updated_at', 'score', 'stage_changed_at', 'last_activity_at']
+    const validSortFields = ['created_at', 'updated_at', 'score', 'stage_changed_at', 'last_activity_at', 'client_since']
     const sortField = validSortFields.includes(sortBy) ? sortBy : 'created_at'
-    query = query.order(sortField, { ascending: sortOrder === 'asc' })
+    query = query.order(sortField, { ascending: sortOrder === 'asc', nullsFirst: false })
 
     // Apply pagination
     query = query.range(offset, offset + limit - 1)

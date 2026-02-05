@@ -13,13 +13,21 @@ export async function GET(request) {
     const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
     const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
 
-    // Get all non-archived leads
+    // Get all non-archived leads (excluding clients)
     const { data: allLeads, error: leadsError } = await supabase
       .from('crm_leads')
-      .select('id, stage, source, score, status, created_at, stage_changed_at')
+      .select('id, stage, source, score, status, created_at, stage_changed_at, is_client')
       .neq('status', 'archived')
+      .or('is_client.is.null,is_client.eq.false')
 
     if (leadsError) throw leadsError
+
+    // Get client count separately
+    const { count: clientCount } = await supabase
+      .from('crm_leads')
+      .select('id', { count: 'exact', head: true })
+      .eq('is_client', true)
+      .neq('status', 'archived')
 
     // Calculate metrics
     const totalLeads = allLeads.length
@@ -85,6 +93,7 @@ export async function GET(request) {
     return NextResponse.json({
       overview: {
         totalLeads,
+        totalClients: clientCount || 0,
         activePipeline,
         leadsToday,
         leadsThisWeek,

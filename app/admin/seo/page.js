@@ -7,6 +7,7 @@ import SEOSiteCard from '@/Components/Admin/SEO/SEOSiteCard';
 import SEOAnalyticsChart from '@/Components/Admin/SEO/SEOAnalyticsChart';
 import AddSiteModal from '@/Components/Admin/SEO/AddSiteModal';
 import SEOReportPanel from '@/Components/Admin/SEO/SEOReportPanel';
+import LinkToBusinessModal from '@/Components/Admin/SEO/LinkToBusinessModal';
 
 export default function SEODashboardPage() {
   const { user, loading: authLoading } = useAdminAuth();
@@ -19,6 +20,9 @@ export default function SEODashboardPage() {
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showLinkModal, setShowLinkModal] = useState(false);
+  const [siteToLink, setSiteToLink] = useState(null);
+  const [linkedBusinesses, setLinkedBusinesses] = useState({});
   const [error, setError] = useState(null);
   const [googleConnected, setGoogleConnected] = useState(false);
 
@@ -100,6 +104,41 @@ export default function SEODashboardPage() {
 
     fetchAnalytics();
   }, [selectedSite?.id]);
+
+  // Fetch linked businesses info for sites
+  useEffect(() => {
+    if (!sites || sites.length === 0) return;
+
+    async function fetchLinkedBusinesses() {
+      const businessesToFetch = sites
+        .filter(s => s.business_id && !linkedBusinesses[s.business_id])
+        .map(s => s.business_id);
+
+      if (businessesToFetch.length === 0) return;
+
+      try {
+        // Fetch each business's basic info
+        const businessPromises = businessesToFetch.map(businessId =>
+          fetch(`/api/crm/businesses/${businessId}`).then(r => r.json())
+        );
+
+        const businessResults = await Promise.all(businessPromises);
+        const newLinkedBusinesses = { ...linkedBusinesses };
+
+        businessResults.forEach(result => {
+          if (result.business) {
+            newLinkedBusinesses[result.business.id] = result.business;
+          }
+        });
+
+        setLinkedBusinesses(newLinkedBusinesses);
+      } catch (err) {
+        console.error('Error fetching linked businesses:', err);
+      }
+    }
+
+    fetchLinkedBusinesses();
+  }, [sites]);
 
   // Sync data
   async function handleSync() {
@@ -192,6 +231,52 @@ export default function SEODashboardPage() {
     }
   }
 
+  // Link site to business
+  async function handleLinkSite(businessId) {
+    if (!siteToLink) return;
+
+    const res = await fetch(`/api/seo/sites?id=${siteToLink.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ business_id: businessId })
+    });
+
+    const data = await res.json();
+
+    if (data.error) {
+      throw new Error(data.error);
+    }
+
+    // Update local state
+    setSites(sites.map(s =>
+      s.id === siteToLink.id ? { ...s, business_id: businessId } : s
+    ));
+
+    // Update selected site if it was the one linked
+    if (selectedSite?.id === siteToLink.id) {
+      setSelectedSite({ ...selectedSite, business_id: businessId });
+    }
+
+    // Fetch the business info if linking (not unlinking)
+    if (businessId) {
+      try {
+        const businessRes = await fetch(`/api/crm/businesses/${businessId}`);
+        const businessData = await businessRes.json();
+        if (businessData.business) {
+          setLinkedBusinesses(prev => ({ ...prev, [businessId]: businessData.business }));
+        }
+      } catch (err) {
+        console.error('Error fetching linked business:', err);
+      }
+    }
+  }
+
+  // Open link modal for a site
+  function openLinkModal(site) {
+    setSiteToLink(site);
+    setShowLinkModal(true);
+  }
+
   if (authLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -282,6 +367,8 @@ export default function SEODashboardPage() {
                 isSelected={selectedSite?.id === site.id}
                 onClick={() => setSelectedSite(site)}
                 onRemove={() => handleRemoveSite(site.id)}
+                onLinkBusiness={() => openLinkModal(site)}
+                linkedBusiness={site.business_id ? linkedBusinesses[site.business_id] : null}
               />
             ))}
           </div>
@@ -300,6 +387,35 @@ export default function SEODashboardPage() {
                         <p className="text-gray-500 text-xs mt-1">
                           Last synced: {new Date(selectedSite.last_sync_at).toLocaleString()}
                         </p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-3">
+                      {/* Linked Business Badge */}
+                      {selectedSite.business_id && linkedBusinesses[selectedSite.business_id] ? (
+                        <button
+                          onClick={() => openLinkModal(selectedSite)}
+                          className="flex items-center gap-2 px-3 py-2 bg-teal-900/30 border border-teal-700/50 rounded-lg hover:bg-teal-900/50 transition-colors"
+                        >
+                          <svg className="w-4 h-4 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                          </svg>
+                          <span className="text-teal-300 text-sm">
+                            {linkedBusinesses[selectedSite.business_id].name}
+                          </span>
+                          <svg className="w-3 h-3 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                          </svg>
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => openLinkModal(selectedSite)}
+                          className="flex items-center gap-2 px-3 py-2 border border-dashed border-gray-600 rounded-lg text-gray-400 hover:border-teal-500 hover:text-teal-400 transition-colors"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                          </svg>
+                          <span className="text-sm">Link to Business</span>
+                        </button>
                       )}
                     </div>
                   </div>
@@ -411,6 +527,18 @@ export default function SEODashboardPage() {
           availableSites={availableSites}
           onAdd={handleAddSite}
           onClose={() => setShowAddModal(false)}
+        />
+      )}
+
+      {/* Link to Business Modal */}
+      {showLinkModal && siteToLink && (
+        <LinkToBusinessModal
+          site={siteToLink}
+          onLink={handleLinkSite}
+          onClose={() => {
+            setShowLinkModal(false);
+            setSiteToLink(null);
+          }}
         />
       )}
     </div>

@@ -11,10 +11,12 @@ export async function GET(request) {
     const stats = await getPipelineStats()
 
     // Get leads grouped by stage for kanban view
+    // Exclude clients (is_client = true) - they should be in the Clients section, not pipeline
     const { data: leads, error } = await supabase
       .from('crm_leads')
-      .select('id, email, full_name, company, phone, score, stage, source, created_at, last_activity_at')
+      .select('id, email, full_name, company, phone, score, stage, source, created_at, last_activity_at, is_client')
       .not('status', 'in', '("archived","unqualified")')
+      .or('is_client.is.null,is_client.eq.false')
       .order('score', { ascending: false })
 
     if (error) throw error
