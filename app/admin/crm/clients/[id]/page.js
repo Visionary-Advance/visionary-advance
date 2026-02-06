@@ -396,7 +396,23 @@ export default function ClientDetailPage({ params }) {
                     {client.company && (
                       <div>
                         <dt className="text-xs text-[#a1a1aa]">Company</dt>
-                        <dd className="mt-1 text-[#fafafa]">{client.company}</dd>
+                        <dd className="mt-1">
+                          {client.website ? (
+                            <a
+                              href={client.website.startsWith('http') ? client.website : `https://${client.website}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[#008070] hover:underline inline-flex items-center gap-1"
+                            >
+                              {client.company}
+                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                              </svg>
+                            </a>
+                          ) : (
+                            <span className="text-[#fafafa]">{client.company}</span>
+                          )}
+                        </dd>
                       </div>
                     )}
                     {client.business_type && (

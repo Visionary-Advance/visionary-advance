@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAdminAuth } from '@/Components/Admin/AdminAuthProvider';
 import ProjectWidgets from '@/Components/CRM/Dashboard/ProjectWidgets';
+import TasksWidget from '@/Components/CRM/Dashboard/TasksWidget';
 
 export default function CRMDashboardPage() {
   const { user, loading: authLoading } = useAdminAuth();
@@ -153,10 +154,19 @@ export default function CRMDashboardPage() {
         </div>
       </div>
 
-      {/* Project Widgets */}
-      <div className="mb-8">
-        <h2 className="text-lg font-semibold text-white mb-4">Project Overview</h2>
-        <ProjectWidgets />
+      {/* Tasks Widget and Project Widgets in 2-column layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+        {/* Tasks Widget - Left Column */}
+        <div className="lg:col-span-1">
+          <h2 className="text-lg font-semibold text-white mb-4">My Tasks</h2>
+          <TasksWidget />
+        </div>
+
+        {/* Project Widgets - Right Columns */}
+        <div className="lg:col-span-2">
+          <h2 className="text-lg font-semibold text-white mb-4">Project Overview</h2>
+          <ProjectWidgets />
+        </div>
       </div>
     </div>
   );

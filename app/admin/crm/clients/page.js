@@ -22,7 +22,7 @@ export default function ClientsPage() {
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [creating, setCreating] = useState(false)
   const [newClient, setNewClient] = useState({
-    first_name: '', last_name: '', email: '', phone: '', website: '', business_id: '', role: '',
+    first_name: '', last_name: '', email: '', phone: '', business_id: '', role: '',
   })
   const [businesses, setBusinesses] = useState([])
   const [loadingBusinesses, setLoadingBusinesses] = useState(false)
@@ -116,7 +116,7 @@ export default function ClientsPage() {
       if (data.error) throw new Error(data.error)
 
       setShowCreateModal(false)
-      setNewClient({ first_name: '', last_name: '', email: '', phone: '', website: '', business_id: '', role: '' })
+      setNewClient({ first_name: '', last_name: '', email: '', phone: '', business_id: '', role: '' })
       router.push(`/admin/crm/clients/${data.client.id}`)
     } catch (err) {
       alert(err.message)
@@ -355,17 +355,6 @@ export default function ClientsPage() {
                   placeholder="e.g. Owner, Project Manager"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-[#a1a1aa]">Website</label>
-                <input
-                  type="url"
-                  value={newClient.website}
-                  onChange={(e) => setNewClient(prev => ({ ...prev, website: e.target.value }))}
-                  className="mt-1 w-full rounded-lg border border-[#262626] bg-[#171717] px-3 py-2 text-sm text-[#fafafa] focus:border-[#008070] focus:outline-none"
-                  placeholder="https://example.com"
-                />
-              </div>
-
               {/* Business Dropdown */}
               <div>
                 <div className="flex items-center justify-between">
