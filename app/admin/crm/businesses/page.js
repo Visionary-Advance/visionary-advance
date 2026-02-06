@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import IndustrySelect from '@/Components/IndustrySelect'
 
 export default function BusinessesPage() {
   const [businesses, setBusinesses] = useState([])
@@ -183,13 +184,12 @@ export default function BusinessesPage() {
                 <label className="block text-sm font-medium text-[#a1a1aa]">
                   Industry
                 </label>
-                <input
-                  type="text"
-                  value={newBusiness.industry}
-                  onChange={(e) => setNewBusiness(prev => ({ ...prev, industry: e.target.value }))}
-                  className="mt-1 w-full rounded-lg border border-[#262626] bg-[#171717] px-3 py-2 text-sm text-[#fafafa] focus:border-[#008070] focus:outline-none"
-                  placeholder="Construction"
-                />
+                <div className="mt-1">
+                  <IndustrySelect
+                    value={newBusiness.industry}
+                    onChange={(val) => setNewBusiness(prev => ({ ...prev, industry: val }))}
+                  />
+                </div>
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <button

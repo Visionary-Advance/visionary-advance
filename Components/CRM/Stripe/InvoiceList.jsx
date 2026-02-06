@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import InvoiceCard from './InvoiceCard'
 
-export default function InvoiceList({ leadId, limit = 5, showTotals = true }) {
+export default function InvoiceList({ leadId, businessId, limit = 5, showTotals = true }) {
   const [invoices, setInvoices] = useState([])
   const [totals, setTotals] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -11,13 +11,17 @@ export default function InvoiceList({ leadId, limit = 5, showTotals = true }) {
   const [error, setError] = useState(null)
   const [expanded, setExpanded] = useState(false)
 
+  const fetchUrl = businessId
+    ? `/api/crm/businesses/${businessId}/invoices`
+    : `/api/crm/leads/${leadId}/stripe`
+
   useEffect(() => {
     fetchInvoices()
-  }, [leadId])
+  }, [leadId, businessId])
 
   const fetchInvoices = async () => {
     try {
-      const res = await fetch(`/api/crm/leads/${leadId}/stripe`)
+      const res = await fetch(fetchUrl)
       if (!res.ok) throw new Error('Failed to fetch invoices')
       const data = await res.json()
       setInvoices(data.invoices || [])
@@ -35,13 +39,22 @@ export default function InvoiceList({ leadId, limit = 5, showTotals = true }) {
   const handleSync = async () => {
     setSyncing(true)
     try {
-      const res = await fetch(`/api/crm/leads/${leadId}/stripe/sync`, {
-        method: 'POST',
-      })
-      if (!res.ok) throw new Error('Failed to sync')
-      const data = await res.json()
-      setInvoices(data.invoices || [])
-      setTotals(data.totals || null)
+      if (businessId) {
+        // For business, just re-fetch (sync happens automatically per-contact)
+        const res = await fetch(fetchUrl)
+        if (!res.ok) throw new Error('Failed to sync')
+        const data = await res.json()
+        setInvoices(data.invoices || [])
+        setTotals(data.totals || null)
+      } else {
+        const res = await fetch(`/api/crm/leads/${leadId}/stripe/sync`, {
+          method: 'POST',
+        })
+        if (!res.ok) throw new Error('Failed to sync')
+        const data = await res.json()
+        setInvoices(data.invoices || [])
+        setTotals(data.totals || null)
+      }
     } catch (err) {
       alert(err.message)
     } finally {

@@ -42,8 +42,8 @@ export async function PATCH(request, { params }) {
 
     // Fields that can be updated
     const allowedFields = [
-      'first_name', 'last_name', 'full_name', 'phone', 'company', 'website',
-      'status', 'business_type', 'project_type', 'budget_range', 'timeline',
+      'email', 'first_name', 'last_name', 'full_name', 'phone', 'company', 'website',
+      'status', 'source', 'business_type', 'project_type', 'budget_range', 'timeline',
       'tags', 'score', 'score_breakdown', 'form_data',
       'hubspot_contact_id', 'hubspot_deal_id', 'hubspot_sync_status',
       'last_contacted_at', 'is_duplicate',

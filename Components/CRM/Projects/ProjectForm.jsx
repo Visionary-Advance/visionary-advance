@@ -10,7 +10,7 @@ const STATUS_OPTIONS = [
   { value: 'cancelled', label: 'Cancelled' },
 ]
 
-export default function ProjectForm({ leadId, project, onSave, onCancel }) {
+export default function ProjectForm({ leadId, businessId, contacts, project, onSave, onCancel }) {
   const [form, setForm] = useState({
     name: project?.name || '',
     description: project?.description || '',
@@ -19,6 +19,7 @@ export default function ProjectForm({ leadId, project, onSave, onCancel }) {
     start_date: project?.start_date || '',
     target_end_date: project?.target_end_date || '',
     tags: project?.tags?.join(', ') || '',
+    contact_id: contacts?.length === 1 ? contacts[0].id : '',
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -49,10 +50,21 @@ export default function ProjectForm({ leadId, project, onSave, onCancel }) {
         tags: form.tags ? form.tags.split(',').map(t => t.trim()).filter(Boolean) : [],
       }
 
+      if (businessId) {
+        if (!form.contact_id) {
+          setError('Please select a contact')
+          setLoading(false)
+          return
+        }
+        payload.contact_id = form.contact_id
+      }
+
       const isEdit = !!project?.id
       const url = isEdit
         ? `/api/crm/projects/${project.id}`
-        : `/api/crm/leads/${leadId}/projects`
+        : businessId
+          ? `/api/crm/businesses/${businessId}/projects`
+          : `/api/crm/leads/${leadId}/projects`
 
       const res = await fetch(url, {
         method: isEdit ? 'PATCH' : 'POST',
@@ -79,6 +91,29 @@ export default function ProjectForm({ leadId, project, onSave, onCancel }) {
       {error && (
         <div className="rounded-lg bg-red-500/10 p-3 text-sm text-red-400">
           {error}
+        </div>
+      )}
+
+      {/* Contact Selector (business mode) */}
+      {businessId && contacts && contacts.length > 1 && (
+        <div>
+          <label className="block text-sm text-[#a1a1aa] mb-1">
+            Contact <span className="text-red-400">*</span>
+          </label>
+          <select
+            name="contact_id"
+            value={form.contact_id}
+            onChange={handleChange}
+            className="w-full rounded-lg border border-[#262626] bg-[#171717] px-3 py-2 text-sm text-[#fafafa] focus:border-[#008070] focus:outline-none focus:ring-1 focus:ring-[#008070]"
+            required
+          >
+            <option value="">Select a contact...</option>
+            {contacts.map(c => (
+              <option key={c.id} value={c.id}>
+                {c.full_name || c.email}
+              </option>
+            ))}
+          </select>
         </div>
       )}
 

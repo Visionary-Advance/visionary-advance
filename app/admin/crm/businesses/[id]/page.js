@@ -3,6 +3,11 @@
 import { useState, useEffect, use } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import IndustrySelect from '@/Components/IndustrySelect'
+import InvoiceList from '@/Components/CRM/Stripe/InvoiceList'
+import ProjectCard from '@/Components/CRM/Projects/ProjectCard'
+import ProjectForm from '@/Components/CRM/Projects/ProjectForm'
+import ProposalCard from '@/Components/CRM/Proposals/ProposalCard'
 
 export default function BusinessDetailPage({ params }) {
   const { id } = use(params)
@@ -19,9 +24,16 @@ export default function BusinessDetailPage({ params }) {
   const [searchLeads, setSearchLeads] = useState('')
   const [loadingLeads, setLoadingLeads] = useState(false)
   const [selectedRecipients, setSelectedRecipients] = useState([])
+  const [projects, setProjects] = useState([])
+  const [proposals, setProposals] = useState([])
+  const [devopsSites, setDevopsSites] = useState([])
+  const [showProjectForm, setShowProjectForm] = useState(false)
 
   useEffect(() => {
     fetchBusiness()
+    fetchProjects()
+    fetchProposals()
+    fetchDevOpsSites()
   }, [id])
 
   const fetchBusiness = async () => {
@@ -38,6 +50,47 @@ export default function BusinessDetailPage({ params }) {
     } finally {
       setLoading(false)
     }
+  }
+
+  const fetchProjects = async () => {
+    try {
+      const res = await fetch(`/api/crm/businesses/${id}/projects`)
+      if (res.ok) {
+        const data = await res.json()
+        setProjects(data.projects || [])
+      }
+    } catch (err) {
+      console.error('Failed to fetch projects:', err)
+    }
+  }
+
+  const fetchProposals = async () => {
+    try {
+      const res = await fetch(`/api/crm/businesses/${id}/proposals`)
+      if (res.ok) {
+        const data = await res.json()
+        setProposals(data.proposals || [])
+      }
+    } catch (err) {
+      console.error('Failed to fetch proposals:', err)
+    }
+  }
+
+  const fetchDevOpsSites = async () => {
+    try {
+      const res = await fetch(`/api/crm/businesses/${id}/devops`)
+      if (res.ok) {
+        const data = await res.json()
+        setDevopsSites(data.sites || [])
+      }
+    } catch (err) {
+      console.error('Failed to fetch DevOps sites:', err)
+    }
+  }
+
+  const handleProjectCreated = (project) => {
+    setProjects(prev => [project, ...prev])
+    setShowProjectForm(false)
   }
 
   const handleSave = async () => {
@@ -277,12 +330,13 @@ export default function BusinessDetailPage({ params }) {
               <div>
                 <dt className="text-xs text-[#a1a1aa]">Industry</dt>
                 {editing ? (
-                  <input
-                    type="text"
-                    value={editData.industry ?? business.industry ?? ''}
-                    onChange={(e) => setEditData(prev => ({ ...prev, industry: e.target.value }))}
-                    className="mt-1 w-full rounded border border-[#262626] bg-[#171717] px-2 py-1 text-sm text-[#fafafa] focus:border-[#008070] focus:outline-none"
-                  />
+                  <div className="mt-1">
+                    <IndustrySelect
+                      value={editData.industry ?? business.industry ?? ''}
+                      onChange={(val) => setEditData(prev => ({ ...prev, industry: val }))}
+                      className="w-full rounded border border-[#262626] bg-[#171717] px-2 py-1 text-sm text-[#fafafa] focus:border-[#008070] focus:outline-none"
+                    />
+                  </div>
                 ) : (
                   <dd className="mt-1 text-[#fafafa]">{business.industry || '-'}</dd>
                 )}
@@ -440,6 +494,130 @@ export default function BusinessDetailPage({ params }) {
         </div>
       </div>
 
+      {/* Business Operations */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        {/* Invoices */}
+        <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+          <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
+            Invoices
+          </h2>
+          <InvoiceList businessId={id} limit={5} showTotals={true} />
+        </div>
+
+        {/* Projects */}
+        <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
+              Projects
+            </h2>
+            <button
+              onClick={() => setShowProjectForm(true)}
+              className="text-sm text-[#008070] hover:text-[#006b5d]"
+            >
+              + New
+            </button>
+          </div>
+          {projects.length === 0 ? (
+            <p className="text-sm text-[#a1a1aa] text-center py-4">No projects yet</p>
+          ) : (
+            <div className="space-y-2">
+              {projects.slice(0, 5).map(project => (
+                <Link
+                  key={project.id}
+                  href={`/admin/crm/projects/${project.id}`}
+                  className="block"
+                >
+                  <ProjectCard project={project} compact />
+                </Link>
+              ))}
+              {projects.length > 5 && (
+                <p className="text-center text-sm text-[#a1a1aa] pt-2">
+                  +{projects.length - 5} more
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Proposals */}
+        <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
+              Proposals
+            </h2>
+          </div>
+          {proposals.length === 0 ? (
+            <p className="text-sm text-[#a1a1aa] text-center py-4">No proposals yet</p>
+          ) : (
+            <div className="space-y-2">
+              {proposals.slice(0, 5).map(proposal => (
+                <ProposalCard
+                  key={proposal.id}
+                  proposal={proposal}
+                  compact
+                />
+              ))}
+              {proposals.length > 5 && (
+                <p className="text-center text-sm text-[#a1a1aa] pt-2">
+                  +{proposals.length - 5} more
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Hosting / DevOps */}
+        <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+          <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
+            Hosting
+          </h2>
+          {devopsSites.length === 0 ? (
+            <p className="text-sm text-[#a1a1aa] text-center py-4">No hosting sites linked</p>
+          ) : (
+            <div className="space-y-3">
+              {devopsSites.map((site) => (
+                <Link
+                  key={site.id}
+                  href={`/admin/devops/sites/${site.id}`}
+                  className="block rounded-lg bg-[#171717] p-3 hover:bg-[#262626] transition-colors"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-[#fafafa] truncate">{site.name}</span>
+                    <DevOpsStatusBadge status={site.status} />
+                  </div>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-[#a1a1aa]">
+                      {site.latestCheck?.response_time_ms ? `${site.latestCheck.response_time_ms}ms` : 'N/A'}
+                    </span>
+                    {site.openIncidentCount > 0 && (
+                      <span className="flex items-center gap-1 text-red-400">
+                        <AlertIcon className="h-3 w-3" />
+                        {site.openIncidentCount}
+                      </span>
+                    )}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Project Form Modal */}
+      {showProjectForm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-lg rounded-xl border border-[#262626] bg-[#0a0a0a] p-6 max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg font-semibold text-[#fafafa] mb-4">Create Project</h3>
+            <ProjectForm
+              businessId={id}
+              contacts={business.contacts}
+              onSave={handleProjectCreated}
+              onCancel={() => setShowProjectForm(false)}
+            />
+          </div>
+        </div>
+      )}
+
       {/* Add Contact Modal */}
       {showAddContactModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
@@ -517,6 +695,32 @@ function XIcon({ className }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+    </svg>
+  )
+}
+
+function DevOpsStatusBadge({ status }) {
+  const configs = {
+    healthy: { label: 'Healthy', bg: 'bg-emerald-500/10', text: 'text-emerald-400', ring: 'ring-emerald-500/20' },
+    degraded: { label: 'Degraded', bg: 'bg-amber-500/10', text: 'text-amber-400', ring: 'ring-amber-500/20' },
+    down: { label: 'Down', bg: 'bg-red-500/10', text: 'text-red-400', ring: 'ring-red-500/20' },
+    unknown: { label: 'Unknown', bg: 'bg-gray-500/10', text: 'text-gray-400', ring: 'ring-gray-500/20' },
+  }
+
+  const config = configs[status] || configs.unknown
+
+  return (
+    <span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${config.bg} ${config.text} ${config.ring}`}>
+      <span className={`h-1.5 w-1.5 rounded-full ${status === 'healthy' ? 'bg-emerald-400' : status === 'degraded' ? 'bg-amber-400' : status === 'down' ? 'bg-red-400' : 'bg-gray-400'}`} />
+      {config.label}
+    </span>
+  )
+}
+
+function AlertIcon({ className }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
     </svg>
   )
 }
