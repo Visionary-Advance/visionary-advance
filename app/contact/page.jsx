@@ -14,6 +14,7 @@ import {
   Heart,
   Globe
 } from "lucide-react";
+import { useRecaptcha } from '@/lib/useRecaptcha';
 
 
 
@@ -33,6 +34,7 @@ export default function ContactPage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState('idle'); // 'idle' | 'success' | 'error'
+  const { executeRecaptcha } = useRecaptcha();
 
   const handleInputChange = (e) => {
     setFormData({
@@ -47,12 +49,15 @@ export default function ContactPage() {
     setSubmitStatus('idle');
 
     try {
+      // Get reCAPTCHA token
+      const recaptchaToken = await executeRecaptcha('contact_form');
+
       const response = await fetch('/api/send-email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, recaptchaToken }),
       });
 
       if (response.ok) {

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { Send } from 'lucide-react'
 import { trackLeadFormSubmit, trackLeadFormError } from '@/lib/analytics'
+import { useRecaptcha } from '@/lib/useRecaptcha'
 
 const businessTypes = [
   'Contractor',
@@ -26,6 +27,7 @@ export default function SystemsLeadForm() {
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitStatus, setSubmitStatus] = useState('idle')
+  const { executeRecaptcha } = useRecaptcha()
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
@@ -41,6 +43,9 @@ export default function SystemsLeadForm() {
     setSubmitStatus('idle')
 
     try {
+      // Get reCAPTCHA token
+      const recaptchaToken = await executeRecaptcha('systems_lead')
+
       const response = await fetch('/api/leads', {
         method: 'POST',
         headers: {
@@ -49,6 +54,7 @@ export default function SystemsLeadForm() {
         body: JSON.stringify({
           ...formData,
           page_path: pathname,
+          recaptchaToken,
         }),
       })
 

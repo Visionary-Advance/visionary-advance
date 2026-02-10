@@ -2,6 +2,7 @@
 import { NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 import { Resend } from 'resend'
+import { requireRecaptcha } from '@/lib/recaptcha'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -122,7 +123,17 @@ function checkRateLimit(key) {
 
 export async function POST(request) {
   try {
-    const { url } = await request.json()
+    const body = await request.json()
+    const { url } = body
+
+    // Verify reCAPTCHA
+    const recaptchaError = await requireRecaptcha(body, 'website_audit')
+    if (recaptchaError) {
+      return NextResponse.json(
+        { error: recaptchaError.error },
+        { status: recaptchaError.status }
+      )
+    }
 
     if (!url) {
       return NextResponse.json(

@@ -2,6 +2,7 @@ import { DM_Sans, Instrument_Sans } from "next/font/google";
 import "./globals.css";
 import ConditionalLayout from "@/Components/ConditionalLayout";
 import Script from "next/script";
+import ReCaptchaScript from "@/Components/ReCaptchaScript";
 
 const dmSansReg = DM_Sans({
   variable: 'dm-sans-regular',
@@ -126,6 +127,7 @@ export default function RootLayout({ children }) {
             </Script>
           </>
         )}
+        <ReCaptchaScript />
         <ConditionalLayout>
           {children}
         </ConditionalLayout>

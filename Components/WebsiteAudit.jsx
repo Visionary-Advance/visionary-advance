@@ -2,6 +2,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRecaptcha } from '@/lib/useRecaptcha'
 
 export default function WebsiteAudit() {
   const [url, setUrl] = useState('')
@@ -12,6 +13,7 @@ export default function WebsiteAudit() {
   const [emailSending, setEmailSending] = useState(false)
   const [emailSent, setEmailSent] = useState(false)
   const [emailError, setEmailError] = useState(null)
+  const { executeRecaptcha } = useRecaptcha()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -20,12 +22,15 @@ export default function WebsiteAudit() {
     setResults(null)
 
     try {
+      // Get reCAPTCHA token
+      const recaptchaToken = await executeRecaptcha('website_audit')
+
       const response = await fetch('/api/lighthouse-audit', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ url }),
+        body: JSON.stringify({ url, recaptchaToken }),
       })
 
       const data = await response.json()
@@ -50,6 +55,9 @@ export default function WebsiteAudit() {
     setEmailError(null)
 
     try {
+      // Get reCAPTCHA token
+      const recaptchaToken = await executeRecaptcha('audit_email')
+
       const response = await fetch('/api/send-audit-email', {
         method: 'POST',
         headers: {
@@ -58,7 +66,8 @@ export default function WebsiteAudit() {
         body: JSON.stringify({
           email,
           url: results.url,
-          results: results
+          results: results,
+          recaptchaToken
         }),
       })
 

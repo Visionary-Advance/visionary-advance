@@ -5,6 +5,7 @@
 
 import { useState } from 'react';
 import { ArrowRight, CheckCircle } from 'lucide-react';
+import { useRecaptcha } from '@/lib/useRecaptcha';
 
 const CTA_VARIANTS = {
   'web-design': {
@@ -37,6 +38,7 @@ export default function BlogCTA({ variant = 'default', categories = [] }) {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState('idle'); // idle, loading, success, error
   const [errorMessage, setErrorMessage] = useState('');
+  const { executeRecaptcha } = useRecaptcha();
 
   // Determine variant based on categories
   let ctaVariant = CTA_VARIANTS.default;
@@ -65,10 +67,13 @@ export default function BlogCTA({ variant = 'default', categories = [] }) {
       return;
     }
 
-    // TODO: Add HubSpot integration here when ready
-    // For now, just simulate a successful submission
     try {
-      // Simulate API call
+      // Get reCAPTCHA token
+      const recaptchaToken = await executeRecaptcha('blog_cta');
+
+      // TODO: Add HubSpot integration here when ready
+      // For now, just simulate a successful submission
+      // When ready, include recaptchaToken in the API call
       await new Promise(resolve => setTimeout(resolve, 1000));
 
       setStatus('success');

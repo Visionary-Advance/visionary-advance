@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { createOrUpdateLead } from '@/lib/crm'
 import { getUTMFromRequest } from '@/lib/utm'
+import { requireRecaptcha } from '@/lib/recaptcha'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -208,6 +209,15 @@ export async function POST(request) {
     const body = await request.json()
     const { email, url, results } = body
     const utmParams = getUTMFromRequest(request)
+
+    // Verify reCAPTCHA
+    const recaptchaError = await requireRecaptcha(body, 'audit_email')
+    if (recaptchaError) {
+      return NextResponse.json(
+        { error: recaptchaError.error },
+        { status: recaptchaError.status }
+      )
+    }
 
     if (!email || !url || !results) {
       return NextResponse.json(

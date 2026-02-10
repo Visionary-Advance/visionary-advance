@@ -2,12 +2,22 @@ import { Resend } from 'resend';
 import { NextResponse } from 'next/server';
 import { createOrUpdateLead } from '@/lib/crm';
 import { getUTMFromRequest } from '@/lib/utm';
+import { requireRecaptcha } from '@/lib/recaptcha';
 
 export async function POST(request) {
   try {
     const body = await request.json();
     const { name, company, email, phone, website, message } = body;
     const utmParams = getUTMFromRequest(request);
+
+    // Verify reCAPTCHA
+    const recaptchaError = await requireRecaptcha(body, 'construction_contact');
+    if (recaptchaError) {
+      return NextResponse.json(
+        { error: recaptchaError.error },
+        { status: recaptchaError.status }
+      );
+    }
 
     // Check for Resend API key
     if (!process.env.RESEND_API_KEY) {

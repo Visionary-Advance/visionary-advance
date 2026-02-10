@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Send } from 'lucide-react'
+import { useRecaptcha } from '@/lib/useRecaptcha'
 
 const projectTypes = [
   'Website Design',
@@ -34,6 +35,7 @@ export default function ContactForm() {
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitStatus, setSubmitStatus] = useState('idle')
+  const { executeRecaptcha } = useRecaptcha()
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
@@ -49,12 +51,15 @@ export default function ContactForm() {
     setSubmitStatus('idle')
 
     try {
+      // Get reCAPTCHA token
+      const recaptchaToken = await executeRecaptcha('contact_form')
+
       const response = await fetch('/api/send-email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, recaptchaToken }),
       })
 
       if (response.ok) {

@@ -173,6 +173,10 @@ The app uses a conditional layout system via `Components/ConditionalLayout.jsx`:
 - `SUPABASE_CRM_SERVICE_KEY` (Optional: CRM service role key for server-side operations)
 - `ADMIN_EMAILS` (Comma-separated list of allowed admin email addresses)
 
+**reCAPTCHA v3** (spam protection):
+- `NEXT_PUBLIC_RECAPTCHA_SITE_KEY` (Client-side site key)
+- `RECAPTCHA_SECRET_KEY` (Server-side secret key)
+
 **Optional**:
 - `PAGESPEED_API_KEY` (Google PageSpeed API, falls back to anonymous if not set)
 
@@ -236,6 +240,12 @@ The admin section is protected with Supabase Auth:
 7. **SEO Metadata**: Root layout includes comprehensive Open Graph, Twitter Cards, and robots directives
 
 8. **Error Handling**: API routes should return descriptive JSON errors with appropriate status codes
+
+9. **reCAPTCHA v3**: All public forms are protected with Google reCAPTCHA v3
+   - Client-side: `useRecaptcha()` hook from `lib/useRecaptcha.js`
+   - Server-side: `requireRecaptcha()` from `lib/recaptcha.js`
+   - Score threshold: 0.5 (configurable in `lib/recaptcha.js`)
+   - Gracefully skips verification if keys not configured (for development)
 
 ## Business Context
 - **Primary Service**: Web design/development for construction companies

@@ -6,6 +6,7 @@ import Script from 'next/script'
 import WebsiteAudit from '@/Components/WebsiteAudit'
 import ConstructionHeader from '@/Components/ConstructionHeader'
 import ConstructionFooter from '@/Components/ConstructionFooter'
+import { useRecaptcha } from '@/lib/useRecaptcha'
 
 export default function LandingPage() {
   // Structured Data for SEO
@@ -159,18 +160,22 @@ export default function LandingPage() {
     message: ''
   })
   const [status, setStatus] = useState('idle')
+  const { executeRecaptcha } = useRecaptcha()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setStatus('loading')
 
     try {
+      // Get reCAPTCHA token
+      const recaptchaToken = await executeRecaptcha('construction_contact')
+
       const response = await fetch('/api/send', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, recaptchaToken }),
       })
 
       if (response.ok) {

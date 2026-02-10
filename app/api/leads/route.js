@@ -5,11 +5,21 @@ import { NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { createOrUpdateLead } from '@/lib/crm'
 import { getUTMFromRequest } from '@/lib/utm'
+import { requireRecaptcha } from '@/lib/recaptcha'
 
 export async function POST(request) {
   try {
     const body = await request.json()
     const utmParams = getUTMFromRequest(request)
+
+    // Verify reCAPTCHA
+    const recaptchaError = await requireRecaptcha(body, 'systems_lead')
+    if (recaptchaError) {
+      return NextResponse.json(
+        { error: recaptchaError.error },
+        { status: recaptchaError.status }
+      )
+    }
 
     // Check for Resend API key
     if (!process.env.RESEND_API_KEY) {
