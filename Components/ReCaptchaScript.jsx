@@ -6,7 +6,7 @@
 import Script from 'next/script'
 
 export default function ReCaptchaScript() {
-  const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY
+  const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_KEY
 
   if (!siteKey) {
     return null

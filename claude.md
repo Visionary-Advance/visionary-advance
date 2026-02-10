@@ -174,7 +174,7 @@ The app uses a conditional layout system via `Components/ConditionalLayout.jsx`:
 - `ADMIN_EMAILS` (Comma-separated list of allowed admin email addresses)
 
 **reCAPTCHA v3** (spam protection):
-- `NEXT_PUBLIC_RECAPTCHA_SITE_KEY` (Client-side site key)
+- `NEXT_PUBLIC_RECAPTCHA_KEY` (Client-side site key)
 - `RECAPTCHA_SECRET_KEY` (Server-side secret key)
 
 **Optional**:
