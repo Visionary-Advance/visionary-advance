@@ -11,8 +11,9 @@ export default function ConditionalLayout({ children }) {
   const isLandingPage = pathname === '/construction-websites';
   const isAdminPage = pathname?.startsWith('/admin');
   const isLoginPage = pathname === '/login';
+  const isAuditPage = pathname === '/audit';
 
-  const hideLayout = isLandingPage || isAdminPage || isLoginPage;
+  const hideLayout = isLandingPage || isAdminPage || isLoginPage || isAuditPage;
 
   return (
     <>
