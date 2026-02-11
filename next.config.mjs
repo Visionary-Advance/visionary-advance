@@ -10,6 +10,20 @@ const nextConfig = {
       },
     ],
   },
+
+  // Performance optimizations
+  compress: true,
+
+  experimental: {
+    optimizeCss: true,
+  },
+
+  // Reduce unused JS by enabling modularized imports
+  modularizeImports: {
+    'framer-motion': {
+      transform: 'framer-motion/{{member}}',
+    },
+  },
 };
 
 export default nextConfig;

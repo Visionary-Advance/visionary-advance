@@ -98,38 +98,21 @@ export default function RootLayout({ children }) {
       <body
         className={`${instSans.variable} ${dmSansReg.variable} ${dmSansBold.variable} antialiased`}
       >
-        {/* Google Ads Conversion Tracking */}
+        {/* Google Tag Manager - Single script for Ads + GA4 */}
         <Script
           async
           src="https://www.googletagmanager.com/gtag/js?id=AW-17658795216"
           strategy="lazyOnload"
         />
-        <Script id="google-ads-init" strategy="lazyOnload">
+        <Script id="gtag-init" strategy="lazyOnload">
           {`
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
             gtag('config', 'AW-17658795216');
+            ${process.env.NEXT_PUBLIC_GA_ID ? `gtag('config', '${process.env.NEXT_PUBLIC_GA_ID}');` : ''}
           `}
         </Script>
-        {/* GA4 Analytics */}
-        {process.env.NEXT_PUBLIC_GA_ID && (
-          <>
-            <Script
-              async
-              src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID}`}
-              strategy="lazyOnload"
-            />
-            <Script id="ga4-init" strategy="lazyOnload">
-              {`
-                window.dataLayer = window.dataLayer || [];
-                function gtag(){dataLayer.push(arguments);}
-                gtag('js', new Date());
-                gtag('config', '${process.env.NEXT_PUBLIC_GA_ID}');
-              `}
-            </Script>
-          </>
-        )}
         <ReCaptchaScript />
         <ConditionalLayout>
           {children}
