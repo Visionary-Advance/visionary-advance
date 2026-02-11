@@ -154,7 +154,7 @@ export default function AuditPage() {
       {/* Header */}
       <header className="border-b border-gray-800">
         <div className="max-w-7xl mx-auto px-5 py-1 flex items-center justify-between">
-          <Link href="/" className="hover:opacity-80 transition-opacity">
+          <Link href="/" className="hover:opacity-80 transition-opacity" aria-label="Visionary Advance - Go to homepage">
             <Image
               src="/Img/VA_Logo_Long.png"
               alt="Visionary Advance"

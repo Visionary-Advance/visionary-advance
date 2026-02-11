@@ -10,7 +10,7 @@ export default function ConstructionFooter() {
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col items-center space-y-8">
           {/* Logo */}
-          <Link href="/">
+          <Link href="/" aria-label="Visionary Advance - Go to homepage">
             <Image
               className="w-40 cursor-pointer"
               src="/Img/VaLogo_Large.png"
