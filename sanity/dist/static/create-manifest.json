@@ -1,0 +1,20 @@
+{
+  "version": 3,
+  "createdAt": "2026-02-11T02:06:09.971Z",
+  "workspaces": [
+    {
+      "name": "visionary-advance-blog",
+      "title": "Visionary Advance Blog",
+      "basePath": "/",
+      "projectId": "g84uoyk7",
+      "dataset": "production",
+      "icon": null,
+      "mediaLibrary": {
+        "enabled": false
+      },
+      "schema": "7763b266.create-schema.json",
+      "tools": "d8640c31.create-tools.json"
+    }
+  ],
+  "studioVersion": "5.7.0"
+}

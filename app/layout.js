@@ -8,19 +8,22 @@ const dmSansReg = DM_Sans({
   variable: 'dm-sans-regular',
   subsets:['latin'],
   weight:['400'],
-  style:['normal', 'italic']
+  style:['normal', 'italic'],
+  display: 'swap',
 })
 const dmSansBold = DM_Sans({
   variable:'dm-sans-bold',
   subsets:['latin'],
   weight:['700'],
-  style:['normal', 'italic']
+  style:['normal', 'italic'],
+  display: 'swap',
 })
 const instSans = Instrument_Sans({
-  variable:'dm-sans-bold',
+  variable:'inst-sans',
   subsets:['latin'],
   weight:['700'],
-  style:['normal', 'italic']
+  style:['normal', 'italic'],
+  display: 'swap',
 })
 
 export const metadata = {
@@ -99,9 +102,9 @@ export default function RootLayout({ children }) {
         <Script
           async
           src="https://www.googletagmanager.com/gtag/js?id=AW-17658795216"
-          strategy="afterInteractive"
+          strategy="lazyOnload"
         />
-        <Script id="google-ads-init" strategy="afterInteractive">
+        <Script id="google-ads-init" strategy="lazyOnload">
           {`
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
@@ -115,9 +118,9 @@ export default function RootLayout({ children }) {
             <Script
               async
               src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID}`}
-              strategy="afterInteractive"
+              strategy="lazyOnload"
             />
-            <Script id="ga4-init" strategy="afterInteractive">
+            <Script id="ga4-init" strategy="lazyOnload">
               {`
                 window.dataLayer = window.dataLayer || [];
                 function gtag(){dataLayer.push(arguments);}

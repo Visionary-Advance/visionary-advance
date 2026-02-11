@@ -23,7 +23,18 @@
       "Bash(npm --version)",
       "Bash(node:*)",
       "Bash(npm ls:*)",
-      "Bash(npx eslint:*)"
+      "Bash(npx eslint:*)",
+      "mcp__Sanity__get_document",
+      "Bash(npx sanity@latest schema deploy:*)",
+      "mcp__Sanity__get_schema",
+      "mcp__Sanity__query_documents",
+      "mcp__Sanity__list_workspace_schemas",
+      "mcp__Sanity__create_documents_from_json",
+      "mcp__Sanity__patch_document_from_markdown",
+      "mcp__Sanity__create_documents_from_markdown",
+      "mcp__Sanity__patch_document_from_json",
+      "mcp__Sanity__generate_image",
+      "mcp__Sanity__publish_documents"
     ],
     "deny": [],
     "ask": []
