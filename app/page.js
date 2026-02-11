@@ -15,12 +15,13 @@ import {
 } from "lucide-react";
 import Image from 'next/image';
 
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import Footer from '@/Components/Footer';
-import DarkVeil from '@/Components/DarkVeil';
-import SplitText from '@/Components/SplitText';
 import SquareOAuthButton from '@/Components/SquareOAuthButton';
 import CTA from '@/Components/CTA';
+
+const DarkVeil = dynamic(() => import('@/Components/DarkVeil'), { ssr: false });
 
 const PlaceholderImage = ({ className = "" }) => (
   <div
@@ -56,20 +57,9 @@ export default function LandingPage() {
           <div className="lg:max-w-4xl w-full mt-16 mx-auto justify-center -translate-y-1/2 top-1/2 absolute left-1/2 -translate-x-1/2 space-y-5">
             <div className="space-y-6 ">
               
-              <SplitText
-  text="Custom Websites, SEO & Business Systems Built Around How You Work"
-  className="pb-2 font-anton text-5xl lg:text-6xl text-white leading-tight tracking-tight lg:max-w-4xl mx-auto"
-  delay={100}
-  duration={0.7}
-  ease="power3.out"
-  splitType="words"
-  from={{ opacity: 0, y: 40 }}
-  to={{ opacity: 1, y: 0 }}
-  threshold={0.1}
-  rootMargin="-100px"
-  textAlign="center"
-
-/>
+              <h1 className="pb-2 font-anton text-5xl lg:text-6xl text-white leading-tight tracking-tight lg:max-w-4xl mx-auto animate-fade-up">
+                Custom Websites, SEO &amp; Business Systems Built Around How You Work
+              </h1>
 
 <p className="text-lg md:text-xl">We design modern, SEO-driven websites and custom business systems from dashboards to inventory built around your workflow, not the other way around. Serving Eugene, Lane County & Oregon businesses.</p>
 
@@ -96,19 +86,9 @@ export default function LandingPage() {
           <div className="max-w-6xl mx-auto">
             <div className="text-center space-y-4 mb-12 md:mb-16">
               <p className="font-manrope font-semibold text-[#008070]">The Gap</p>
-              <SplitText
-                text="Built in Eugene. Designed for Real Businesses."
-                className="font-anton text-3xl md:text-4xl lg:text-5xl text-white leading-tight tracking-tight max-w-4xl mx-auto"
-                delay={100}
-                duration={0.7}
-                ease="power3.out"
-                splitType="words"
-                from={{ opacity: 0, y: 40 }}
-                to={{ opacity: 1, y: 0 }}
-                threshold={0.1}
-                rootMargin="-100px"
-                textAlign="center"
-              />
+              <h2 className="font-anton text-3xl md:text-4xl lg:text-5xl text-white leading-tight tracking-tight max-w-4xl mx-auto animate-fade-up">
+                Built in Eugene. Designed for Real Businesses.
+              </h2>
               <p className="font-manrope text-base md:text-lg text-gray-300 max-w-3xl mx-auto">
                 No templates. No bloated platforms. Just custom solutions that fit how your business already operates.
               </p>
@@ -164,20 +144,9 @@ export default function LandingPage() {
             <div className="text-center space-y-4 mb-12 md:mb-16">
             <p className="font-manrope font-semibold text-[#008070]">The Solution</p>
 
-             <SplitText
-  text="Websites & Systems That Match How You Work"
-  className=" font-anton text-3xl md:text-4xl lg:text-5xl text-white leading-tight tracking-tight max-w-4xl mx-auto"
-  delay={100}
-  duration={0.7}
-  ease="power3.out"
-  splitType="words"
-  from={{ opacity: 0, y: 40 }}
-  to={{ opacity: 1, y: 0 }}
-  threshold={0.1}
-  rootMargin="-100px"
-  textAlign="center"
-
-/>
+             <h2 className="font-anton text-3xl md:text-4xl lg:text-5xl text-white leading-tight tracking-tight max-w-4xl mx-auto animate-fade-up">
+               Websites &amp; Systems That Match How You Work
+             </h2>
 <p className='font-manrope text-base md:text-lg text-gray-300 max-w-3xl mx-auto'>We build custom websites and business systems for professionals who take their operations seriously. Your experience, reputation, and workflow deserve more than templates — they deserve solutions built specifically for you.</p>
 
               
@@ -261,20 +230,9 @@ SEO isn’t about traffic — it’s about alignment. We build SEO into the foun
             <div className="flex-1 space-y-8 order-2 lg:order-1">
               <div className="space-y-6 text-left">
                 <p className="font-manrope font-semibold text-[#008070]">Built to Represent You</p>
-                  <SplitText
-  text="A Digital Presence That Matches How You Work"
-  className="pb-2 font-anton text-3xl text-left md:text-4xl lg:text-6xl text-white leading-tight tracking-tight max-w-4xl mx-auto"
-  delay={100}
-  duration={0.7}
-  ease="power3.out"
-  splitType="words"
-  from={{ opacity: 0, y: 40 }}
-  to={{ opacity: 1, y: 0 }}
-  threshold={0.1}
-  rootMargin="-100px"
-  textAlign="left"
-
-/>
+                  <h2 className="pb-2 font-anton text-3xl text-left md:text-4xl lg:text-6xl text-white leading-tight tracking-tight max-w-4xl mx-auto animate-fade-up">
+                    A Digital Presence That Matches How You Work
+                  </h2>
 
 <p className='font-manrope text-left text-base md:text-lg text-gray-300 max-w-3xl mx-auto'>We build custom websites and business systems for professionals who take pride in their craft. Your experience, precision, and operational standards deserve a digital presence that reflects the same level of quality.</p>
 
@@ -518,33 +476,6 @@ Your digital presence should work as a filter — drawing in clients who value p
        
       </div>
 
-      <style jsx>{`
-        @keyframes scroll-left {
-          0% {
-            transform: translateX(0);
-          }
-          100% {
-            transform: translateX(-50%);
-          }
-        }
-
-        @keyframes scroll-right {
-          0% {
-            transform: translateX(-50%);
-          }
-          100% {
-            transform: translateX(0);
-          }
-        }
-
-        .animate-scroll-left {
-          animation: scroll-left 40s linear infinite;
-        }
-
-        .animate-scroll-right {
-          animation: scroll-right 40s linear infinite;
-        }
-      `}</style>
     </>
   );
 }

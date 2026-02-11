@@ -63,26 +63,6 @@ export default function BlogHero({ post }) {
 
         {/* Meta Info */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 text-gray-300 font-manrope">
-          {/* Author */}
-          {author && (
-            <div className="flex items-center gap-3">
-              {author.image?.asset && (
-                <div className="relative w-10 h-10 rounded-full overflow-hidden">
-                  <Image
-                    src={urlForImage(author.image).width(40).height(40).url()}
-                    alt={author.name}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-              )}
-              <span className="text-white font-semibold">{author.name}</span>
-            </div>
-          )}
-
-          {/* Separator */}
-          <span className="hidden sm:inline text-gray-500">•</span>
-
           {/* Date */}
           <time dateTime={publishedAt}>{formattedDate}</time>
 

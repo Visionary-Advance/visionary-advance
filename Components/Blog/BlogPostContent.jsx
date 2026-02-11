@@ -1,3 +1,5 @@
+'use client';
+
 // Components/Blog/BlogPostContent.jsx
 // Portable text renderer for blog post content
 

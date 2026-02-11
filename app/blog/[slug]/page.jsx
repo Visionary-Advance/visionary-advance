@@ -30,7 +30,7 @@ export async function generateMetadata({ params }) {
     };
   }
 
-  const ogImage = post.seo?.ogImage || post.mainImage;
+  const ogImage = (post.seo?.ogImage?.asset ? post.seo.ogImage : null) || (post.mainImage?.asset ? post.mainImage : null);
   const ogImageUrl = ogImage ? urlForImage(ogImage).width(1200).height(630).url() : null;
 
   return {
@@ -71,7 +71,7 @@ export default async function BlogPostPage({ params }) {
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
     headline: post.title,
-    image: post.mainImage ? urlForImage(post.mainImage).width(1200).height(630).url() : undefined,
+    image: post.mainImage?.asset ? urlForImage(post.mainImage).width(1200).height(630).url() : undefined,
     datePublished: post.publishedAt,
     dateModified: post._updatedAt,
     author: post.author
@@ -147,34 +147,6 @@ export default async function BlogPostPage({ params }) {
             )}
           </div>
         </div>
-
-        {/* Author Bio */}
-        {post.author && (
-          <section className="max-w-4xl mx-auto px-4 md:px-8 pb-16">
-            <div className="bg-black/30 border border-white/10 rounded-xl p-8">
-              <h3 className="font-anton text-xl text-white mb-4">About the Author</h3>
-              <div className="flex items-start gap-4">
-                {post.author.image?.asset && (
-                  <img
-                    src={urlForImage(post.author.image).width(80).height(80).url()}
-                    alt={post.author.name}
-                    className="w-16 h-16 rounded-full"
-                  />
-                )}
-                <div>
-                  <h4 className="font-manrope font-bold text-white text-lg mb-2">
-                    {post.author.name}
-                  </h4>
-                  {post.author.bio && (
-                    <p className="font-manrope text-gray-300 text-sm">
-                      {post.author.bio}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-          </section>
-        )}
 
         {/* Lead Capture CTA */}
         <section className="max-w-4xl mx-auto px-4 md:px-8 pb-16">

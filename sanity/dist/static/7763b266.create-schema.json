@@ -1,0 +1,1318 @@
+[
+  {
+    "fields": [
+      {
+        "name": "language",
+        "type": "string"
+      },
+      {
+        "name": "filename",
+        "type": "string"
+      },
+      {
+        "name": "code",
+        "type": "text"
+      },
+      {
+        "of": [
+          {
+            "type": "number",
+            "title": "Highlighted line"
+          }
+        ],
+        "name": "highlightedLines",
+        "type": "array",
+        "title": "Highlighted lines"
+      }
+    ],
+    "name": "code",
+    "type": "object"
+  },
+  {
+    "fields": [
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "name",
+        "type": "string"
+      },
+      {
+        "options": {
+          "source": "name",
+          "maxLength": 96
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "custom"
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "slug",
+        "type": "slug"
+      },
+      {
+        "options": {
+          "hotspot": true
+        },
+        "fields": [
+          {
+            "description": "Important for SEO and accessibility",
+            "name": "alt",
+            "type": "string",
+            "title": "Alt text"
+          }
+        ],
+        "name": "image",
+        "type": "image",
+        "title": "Profile Image"
+      },
+      {
+        "rows": 4,
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "max",
+                "constraint": 500
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "bio",
+        "type": "text"
+      },
+      {
+        "name": "email",
+        "type": "string"
+      },
+      {
+        "fields": [
+          {
+            "validation": [
+              {
+                "rules": [
+                  {
+                    "flag": "uri",
+                    "constraint": {
+                      "options": {
+                        "scheme": [
+                          "/^http$/",
+                          "/^https$/"
+                        ],
+                        "allowRelative": false,
+                        "relativeOnly": false,
+                        "allowCredentials": false
+                      }
+                    }
+                  }
+                ],
+                "level": "error"
+              }
+            ],
+            "name": "linkedin",
+            "type": "url",
+            "title": "LinkedIn"
+          },
+          {
+            "validation": [
+              {
+                "rules": [
+                  {
+                    "flag": "uri",
+                    "constraint": {
+                      "options": {
+                        "scheme": [
+                          "/^http$/",
+                          "/^https$/"
+                        ],
+                        "allowRelative": false,
+                        "relativeOnly": false,
+                        "allowCredentials": false
+                      }
+                    }
+                  }
+                ],
+                "level": "error"
+              }
+            ],
+            "name": "twitter",
+            "type": "url",
+            "title": "Twitter/X"
+          },
+          {
+            "validation": [
+              {
+                "rules": [
+                  {
+                    "flag": "uri",
+                    "constraint": {
+                      "options": {
+                        "scheme": [
+                          "/^http$/",
+                          "/^https$/"
+                        ],
+                        "allowRelative": false,
+                        "relativeOnly": false,
+                        "allowCredentials": false
+                      }
+                    }
+                  }
+                ],
+                "level": "error"
+              }
+            ],
+            "name": "website",
+            "type": "url"
+          }
+        ],
+        "name": "socialLinks",
+        "type": "object"
+      }
+    ],
+    "name": "author",
+    "type": "document"
+  },
+  {
+    "of": [
+      {
+        "marks": {
+          "annotations": [
+            {
+              "fields": [
+                {
+                  "validation": [
+                    {
+                      "rules": [
+                        {
+                          "flag": "uri",
+                          "constraint": {
+                            "options": {
+                              "scheme": [
+                                "/^http$/",
+                                "/^https$/",
+                                "/^mailto$/",
+                                "/^tel$/"
+                              ],
+                              "allowRelative": false,
+                              "relativeOnly": false,
+                              "allowCredentials": false
+                            }
+                          }
+                        }
+                      ],
+                      "level": "error"
+                    }
+                  ],
+                  "name": "href",
+                  "type": "url",
+                  "title": "URL"
+                },
+                {
+                  "initialValue": true,
+                  "name": "openInNewTab",
+                  "type": "boolean",
+                  "title": "Open in new tab"
+                }
+              ],
+              "name": "link",
+              "type": "object"
+            },
+            {
+              "fields": [
+                {
+                  "options": {
+                    "list": [
+                      {
+                        "title": "Yellow",
+                        "value": "#fef3c7"
+                      },
+                      {
+                        "title": "Green",
+                        "value": "#d1fae5"
+                      },
+                      {
+                        "title": "Blue",
+                        "value": "#dbeafe"
+                      },
+                      {
+                        "title": "Pink",
+                        "value": "#fce7f3"
+                      }
+                    ]
+                  },
+                  "name": "color",
+                  "type": "string"
+                }
+              ],
+              "name": "highlight",
+              "type": "object"
+            }
+          ],
+          "decorators": [
+            {
+              "value": "strong",
+              "title": "Strong"
+            },
+            {
+              "value": "em",
+              "title": "Emphasis"
+            },
+            {
+              "value": "code",
+              "title": "Code"
+            },
+            {
+              "value": "underline",
+              "title": "Underline"
+            },
+            {
+              "value": "strike-through",
+              "title": "Strike"
+            }
+          ]
+        },
+        "lists": [
+          {
+            "value": "bullet",
+            "title": "Bullet"
+          },
+          {
+            "value": "number",
+            "title": "Numbered"
+          }
+        ],
+        "styles": [
+          {
+            "value": "normal",
+            "title": "Normal"
+          },
+          {
+            "value": "h2",
+            "title": "H2"
+          },
+          {
+            "value": "h3",
+            "title": "H3"
+          },
+          {
+            "value": "h4",
+            "title": "H4"
+          },
+          {
+            "value": "blockquote",
+            "title": "Quote"
+          }
+        ],
+        "of": [],
+        "type": "block"
+      },
+      {
+        "options": {
+          "hotspot": true
+        },
+        "fields": [
+          {
+            "validation": [
+              {
+                "rules": [
+                  {
+                    "flag": "presence",
+                    "constraint": "required"
+                  }
+                ],
+                "level": "error"
+              }
+            ],
+            "description": "Important for SEO and accessibility",
+            "name": "alt",
+            "type": "string",
+            "title": "Alt text"
+          },
+          {
+            "name": "caption",
+            "type": "string"
+          },
+          {
+            "description": "Photo credit or source",
+            "name": "attribution",
+            "type": "string"
+          }
+        ],
+        "type": "image"
+      },
+      {
+        "options": {
+          "language": "javascript",
+          "languageAlternatives": [
+            {
+              "title": "JavaScript",
+              "value": "javascript"
+            },
+            {
+              "title": "TypeScript",
+              "value": "typescript"
+            },
+            {
+              "title": "JSX",
+              "value": "jsx"
+            },
+            {
+              "title": "HTML",
+              "value": "html"
+            },
+            {
+              "title": "CSS",
+              "value": "css"
+            },
+            {
+              "title": "Python",
+              "value": "python"
+            },
+            {
+              "title": "Bash",
+              "value": "bash"
+            },
+            {
+              "title": "JSON",
+              "value": "json"
+            },
+            {
+              "title": "SQL",
+              "value": "sql"
+            }
+          ],
+          "withFilename": true
+        },
+        "type": "code",
+        "name": "codeBlock"
+      },
+      {
+        "fields": [
+          {
+            "options": {
+              "list": [
+                {
+                  "title": "Info",
+                  "value": "info"
+                },
+                {
+                  "title": "Warning",
+                  "value": "warning"
+                },
+                {
+                  "title": "Success",
+                  "value": "success"
+                },
+                {
+                  "title": "Tip",
+                  "value": "tip"
+                }
+              ]
+            },
+            "initialValue": "info",
+            "name": "type",
+            "type": "string"
+          },
+          {
+            "name": "title",
+            "type": "string"
+          },
+          {
+            "rows": 3,
+            "name": "content",
+            "type": "text"
+          }
+        ],
+        "type": "object",
+        "name": "callout"
+      },
+      {
+        "fields": [
+          {
+            "of": [
+              {
+                "options": {
+                  "hotspot": true
+                },
+                "fields": [
+                  {
+                    "validation": [
+                      {
+                        "rules": [
+                          {
+                            "flag": "presence",
+                            "constraint": "required"
+                          }
+                        ],
+                        "level": "error"
+                      }
+                    ],
+                    "name": "alt",
+                    "type": "string",
+                    "title": "Alt text"
+                  },
+                  {
+                    "name": "caption",
+                    "type": "string"
+                  }
+                ],
+                "type": "image"
+              }
+            ],
+            "name": "images",
+            "type": "array"
+          },
+          {
+            "options": {
+              "list": [
+                {
+                  "title": "2 Columns",
+                  "value": "two-columns"
+                },
+                {
+                  "title": "3 Columns",
+                  "value": "three-columns"
+                },
+                {
+                  "title": "Carousel",
+                  "value": "carousel"
+                }
+              ]
+            },
+            "initialValue": "two-columns",
+            "name": "layout",
+            "type": "string"
+          }
+        ],
+        "type": "object",
+        "name": "imageGallery"
+      },
+      {
+        "fields": [
+          {
+            "initialValue": "Ready to get started?",
+            "name": "title",
+            "type": "string"
+          },
+          {
+            "rows": 2,
+            "name": "description",
+            "type": "text"
+          },
+          {
+            "options": {
+              "list": [
+                {
+                  "title": "Website Audit",
+                  "value": "audit"
+                },
+                {
+                  "title": "Free Consultation",
+                  "value": "consultation"
+                },
+                {
+                  "title": "Download Guide",
+                  "value": "download"
+                },
+                {
+                  "title": "Contact Us",
+                  "value": "contact"
+                }
+              ]
+            },
+            "initialValue": "audit",
+            "name": "ctaType",
+            "type": "string",
+            "title": "CTA Type"
+          },
+          {
+            "initialValue": "Get Your Free Audit",
+            "name": "buttonText",
+            "type": "string"
+          }
+        ],
+        "type": "object",
+        "name": "embeddedCTA"
+      },
+      {
+        "fields": [
+          {
+            "validation": [
+              {
+                "rules": [
+                  {
+                    "flag": "uri",
+                    "constraint": {
+                      "options": {
+                        "scheme": [
+                          "/^https$/"
+                        ],
+                        "allowRelative": false,
+                        "relativeOnly": false,
+                        "allowCredentials": false
+                      }
+                    }
+                  }
+                ],
+                "level": "error"
+              }
+            ],
+            "description": "YouTube or Vimeo URL",
+            "name": "url",
+            "type": "url",
+            "title": "Video URL"
+          },
+          {
+            "name": "caption",
+            "type": "string"
+          }
+        ],
+        "type": "object",
+        "name": "videoEmbed"
+      },
+      {
+        "fields": [
+          {
+            "rows": 3,
+            "validation": [
+              {
+                "rules": [
+                  {
+                    "flag": "presence",
+                    "constraint": "required"
+                  }
+                ],
+                "level": "error"
+              }
+            ],
+            "name": "quote",
+            "type": "text"
+          },
+          {
+            "name": "author",
+            "type": "string"
+          },
+          {
+            "name": "role",
+            "type": "string",
+            "title": "Role/Title"
+          }
+        ],
+        "type": "object",
+        "name": "quote",
+        "title": "Pull Quote"
+      }
+    ],
+    "name": "blockContent",
+    "type": "array"
+  },
+  {
+    "fields": [
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "title",
+        "type": "string"
+      },
+      {
+        "options": {
+          "source": "title",
+          "maxLength": 96
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "custom"
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "slug",
+        "type": "slug"
+      },
+      {
+        "rows": 3,
+        "name": "description",
+        "type": "text"
+      },
+      {
+        "placeholder": "hammer",
+        "description": "Lucide icon name (e.g., \"hammer\", \"code\", \"trending-up\")",
+        "name": "icon",
+        "type": "string"
+      },
+      {
+        "placeholder": "#008070",
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "regex",
+                "constraint": {
+                  "pattern": "/^#[0-9A-Fa-f]{6}$/",
+                  "name": "hex color",
+                  "invert": false
+                }
+              }
+            ],
+            "level": "error",
+            "message": "Must be a valid hex color (e.g., #008070)"
+          }
+        ],
+        "description": "Hex color code for category badge",
+        "name": "color",
+        "type": "string",
+        "title": "Badge Color"
+      },
+      {
+        "options": {
+          "collapsible": true,
+          "collapsed": true
+        },
+        "fields": [
+          {
+            "validation": [
+              {
+                "rules": [
+                  {
+                    "flag": "max",
+                    "constraint": 60
+                  }
+                ],
+                "level": "error"
+              }
+            ],
+            "name": "metaTitle",
+            "type": "string"
+          },
+          {
+            "rows": 2,
+            "validation": [
+              {
+                "rules": [
+                  {
+                    "flag": "max",
+                    "constraint": 160
+                  }
+                ],
+                "level": "error"
+              }
+            ],
+            "name": "metaDescription",
+            "type": "text"
+          },
+          {
+            "options": {
+              "hotspot": true
+            },
+            "description": "Recommended size: 1200x630",
+            "name": "ogImage",
+            "type": "image",
+            "title": "Open Graph Image"
+          }
+        ],
+        "name": "seo",
+        "type": "object",
+        "title": "SEO Settings"
+      }
+    ],
+    "name": "category",
+    "type": "document"
+  },
+  {
+    "fields": [
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              },
+              {
+                "flag": "max",
+                "constraint": 100
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "title",
+        "type": "string"
+      },
+      {
+        "options": {
+          "source": "title",
+          "maxLength": 96
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "custom"
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "slug",
+        "type": "slug"
+      },
+      {
+        "rows": 3,
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              },
+              {
+                "flag": "max",
+                "constraint": 160
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "description": "Short summary (max 160 chars for meta description)",
+        "name": "excerpt",
+        "type": "text"
+      },
+      {
+        "options": {
+          "hotspot": true
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "fields": [
+          {
+            "validation": [
+              {
+                "rules": [
+                  {
+                    "flag": "presence",
+                    "constraint": "required"
+                  }
+                ],
+                "level": "error"
+              }
+            ],
+            "description": "Important for SEO and accessibility",
+            "name": "alt",
+            "type": "string",
+            "title": "Alt text"
+          },
+          {
+            "name": "caption",
+            "type": "string"
+          },
+          {
+            "description": "Photo credit or source",
+            "name": "attribution",
+            "type": "string"
+          }
+        ],
+        "name": "mainImage",
+        "type": "image"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "body",
+        "type": "blockContent"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "to": [
+          {
+            "type": "author"
+          }
+        ],
+        "name": "author",
+        "type": "reference"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              },
+              {
+                "flag": "min",
+                "constraint": 1
+              },
+              {
+                "flag": "max",
+                "constraint": 3
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "of": [
+          {
+            "to": [
+              {
+                "type": "category"
+              }
+            ],
+            "type": "reference",
+            "title": "Reference to category"
+          }
+        ],
+        "name": "categories",
+        "type": "array"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "max",
+                "constraint": 10
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "of": [
+          {
+            "to": [
+              {
+                "type": "tag"
+              }
+            ],
+            "type": "reference",
+            "title": "Reference to tag"
+          }
+        ],
+        "name": "tags",
+        "type": "array"
+      },
+      {
+        "description": "If this post is part of a series",
+        "to": [
+          {
+            "type": "series"
+          }
+        ],
+        "name": "series",
+        "type": "reference"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "custom"
+              },
+              {
+                "flag": "min",
+                "constraint": 0
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "description": "Position in series (1, 2, 3, etc.)",
+        "hidden": "conditional",
+        "name": "seriesOrder",
+        "type": "number",
+        "title": "Order in Series"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "max",
+                "constraint": 3
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "description": "Manually select related posts (max 3)",
+        "of": [
+          {
+            "to": [
+              {
+                "type": "post"
+              }
+            ],
+            "type": "reference",
+            "title": "Reference to blog post"
+          }
+        ],
+        "name": "relatedPosts",
+        "type": "array"
+      },
+      {
+        "initialValue": false,
+        "description": "Display on homepage or blog hero section",
+        "name": "featured",
+        "type": "boolean",
+        "title": "Featured Post"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "publishedAt",
+        "type": "datetime"
+      },
+      {
+        "options": {
+          "collapsible": true,
+          "collapsed": false
+        },
+        "fields": [
+          {
+            "validation": [
+              {
+                "rules": [
+                  {
+                    "flag": "max",
+                    "constraint": 60
+                  }
+                ],
+                "level": "error"
+              }
+            ],
+            "description": "Override default title (max 60 chars)",
+            "name": "metaTitle",
+            "type": "string"
+          },
+          {
+            "rows": 2,
+            "validation": [
+              {
+                "rules": [
+                  {
+                    "flag": "max",
+                    "constraint": 160
+                  }
+                ],
+                "level": "error"
+              }
+            ],
+            "description": "Override excerpt (max 160 chars)",
+            "name": "metaDescription",
+            "type": "text"
+          },
+          {
+            "options": {
+              "hotspot": true
+            },
+            "description": "Social media share image (1200x630 recommended)",
+            "name": "ogImage",
+            "type": "image",
+            "title": "Open Graph Image"
+          },
+          {
+            "validation": [
+              {
+                "rules": [
+                  {
+                    "flag": "max",
+                    "constraint": 10
+                  }
+                ],
+                "level": "error"
+              }
+            ],
+            "description": "SEO keywords (press enter after each)",
+            "of": [
+              {
+                "type": "string"
+              }
+            ],
+            "name": "keywords",
+            "type": "array"
+          },
+          {
+            "validation": [
+              {
+                "rules": [
+                  {
+                    "flag": "uri",
+                    "constraint": {
+                      "options": {
+                        "scheme": [
+                          "/^http$/",
+                          "/^https$/"
+                        ],
+                        "allowRelative": false,
+                        "relativeOnly": false,
+                        "allowCredentials": false
+                      }
+                    }
+                  }
+                ],
+                "level": "error"
+              }
+            ],
+            "description": "Use if this content was published elsewhere first",
+            "name": "canonicalUrl",
+            "type": "url",
+            "title": "Canonical URL"
+          }
+        ],
+        "name": "seo",
+        "type": "object",
+        "title": "SEO Settings"
+      }
+    ],
+    "name": "post",
+    "type": "document",
+    "title": "Blog Post"
+  },
+  {
+    "fields": [
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "title",
+        "type": "string"
+      },
+      {
+        "options": {
+          "source": "title",
+          "maxLength": 96
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "custom"
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "slug",
+        "type": "slug"
+      },
+      {
+        "rows": 4,
+        "name": "description",
+        "type": "text"
+      },
+      {
+        "options": {
+          "hotspot": true
+        },
+        "fields": [
+          {
+            "validation": [
+              {
+                "rules": [
+                  {
+                    "flag": "presence",
+                    "constraint": "required"
+                  }
+                ],
+                "level": "error"
+              }
+            ],
+            "name": "alt",
+            "type": "string",
+            "title": "Alt text"
+          }
+        ],
+        "name": "coverImage",
+        "type": "image"
+      },
+      {
+        "options": {
+          "collapsible": true,
+          "collapsed": true
+        },
+        "fields": [
+          {
+            "validation": [
+              {
+                "rules": [
+                  {
+                    "flag": "max",
+                    "constraint": 60
+                  }
+                ],
+                "level": "error"
+              }
+            ],
+            "name": "metaTitle",
+            "type": "string"
+          },
+          {
+            "rows": 2,
+            "validation": [
+              {
+                "rules": [
+                  {
+                    "flag": "max",
+                    "constraint": 160
+                  }
+                ],
+                "level": "error"
+              }
+            ],
+            "name": "metaDescription",
+            "type": "text"
+          },
+          {
+            "options": {
+              "hotspot": true
+            },
+            "description": "Recommended size: 1200x630",
+            "name": "ogImage",
+            "type": "image",
+            "title": "Open Graph Image"
+          }
+        ],
+        "name": "seo",
+        "type": "object",
+        "title": "SEO Settings"
+      }
+    ],
+    "name": "series",
+    "type": "document"
+  },
+  {
+    "fields": [
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "title",
+        "type": "string"
+      },
+      {
+        "options": {
+          "source": "title",
+          "maxLength": 96
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "custom"
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "slug",
+        "type": "slug"
+      },
+      {
+        "rows": 2,
+        "name": "description",
+        "type": "text"
+      }
+    ],
+    "name": "tag",
+    "type": "document"
+  }
+]
