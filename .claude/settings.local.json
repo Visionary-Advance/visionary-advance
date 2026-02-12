@@ -35,7 +35,10 @@
       "mcp__Sanity__create_documents_from_markdown",
       "mcp__Sanity__patch_document_from_json",
       "mcp__Sanity__generate_image",
-      "mcp__Sanity__publish_documents"
+      "mcp__Sanity__publish_documents",
+      "Bash(find \"C:\\\\Users\\\\brand\\\\websites\\\\va3\\\\app\" -type d -name \"\\(*\")",
+      "Bash(find \"C:\\\\Users\\\\brand\\\\websites\\\\va3\\\\app\" -type d -name \"\\(\\\\*\")",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []

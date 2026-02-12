@@ -90,11 +90,64 @@ export const metadata = {
   },
 };
 
+// Organization and LocalBusiness structured data for SEO
+const organizationSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'LocalBusiness',
+  '@id': 'https://visionaryadvance.com/#organization',
+  name: 'Visionary Advance',
+  url: 'https://visionaryadvance.com',
+  logo: 'https://visionaryadvance.com/VALogo.png',
+  image: 'https://visionaryadvance.com/Img/VaLogo_Large.png',
+  description: 'Custom-built websites, dashboards, and business systems designed around how you work. Serving Eugene, Lane County & Oregon businesses.',
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: 'Eugene',
+    addressRegion: 'OR',
+    addressCountry: 'US',
+  },
+  areaServed: [
+    { '@type': 'City', name: 'Eugene' },
+    { '@type': 'AdministrativeArea', name: 'Lane County' },
+    { '@type': 'State', name: 'Oregon' },
+  ],
+  priceRange: '$$',
+  serviceType: ['Web Design', 'Web Development', 'SEO', 'Custom Business Systems'],
+  sameAs: [
+    // Add your social profiles here
+    // 'https://www.linkedin.com/company/visionary-advance',
+    // 'https://twitter.com/visionaryadvance',
+  ],
+};
+
+const websiteSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  '@id': 'https://visionaryadvance.com/#website',
+  url: 'https://visionaryadvance.com',
+  name: 'Visionary Advance',
+  publisher: { '@id': 'https://visionaryadvance.com/#organization' },
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: 'https://visionaryadvance.com/blog?q={search_term_string}',
+    'query-input': 'required name=search_term_string',
+  },
+};
+
 export default function RootLayout({ children }) {
-  
+
   return (
     <html lang="en">
-      
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+        />
+      </head>
       <body
         className={`${instSans.variable} ${dmSansReg.variable} ${dmSansBold.variable} antialiased`}
       >
