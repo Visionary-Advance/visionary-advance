@@ -100,6 +100,3 @@
 
   Category: Business Systems
 
-  ---
-  Copy this into Sanity Studio, set the publish date to tomorrow at 12:00 PM PST, and add a featured image. Want me to suggest any changes or expand 
-  on any section?
