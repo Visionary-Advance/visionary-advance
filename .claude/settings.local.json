@@ -37,7 +37,10 @@
       "mcp__Sanity__generate_image",
       "mcp__Sanity__publish_documents",
       "mcp__Sanity__search_docs",
-      "mcp__Sanity__read_docs"
+      "mcp__Sanity__read_docs",
+      "Bash(find \"C:\\\\Users\\\\brand\\\\websites\\\\va3\\\\app\" -type d -name \"\\(*\")",
+      "Bash(find \"C:\\\\Users\\\\brand\\\\websites\\\\va3\\\\app\" -type d -name \"\\(\\\\*\")",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []

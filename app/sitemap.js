@@ -6,16 +6,27 @@ import { getAllPosts, getAllCategories, getAllTags, getAllSeries } from '@/lib/s
 export default async function sitemap() {
   const baseUrl = 'https://visionaryadvance.com';
 
-  // Fetch all blog content
-  const [posts, categories, tags, series] = await Promise.all([
-    getAllPosts(),
-    getAllCategories(),
-    getAllTags(),
-    getAllSeries(),
-  ]);
+  // Fetch all blog content with error handling
+  let posts = [];
+  let categories = [];
+  let tags = [];
+  let series = [];
+
+  try {
+    [posts, categories, tags, series] = await Promise.all([
+      getAllPosts(),
+      getAllCategories(),
+      getAllTags(),
+      getAllSeries(),
+    ]);
+  } catch (error) {
+    console.error('Failed to fetch blog content for sitemap:', error);
+    // Continue with empty arrays - static routes will still be included
+  }
 
   // Static routes
   const staticRoutes = [
+    // Core pages
     {
       url: baseUrl,
       lastModified: new Date(),
@@ -35,23 +46,36 @@ export default async function sitemap() {
       priority: 0.8,
     },
     {
-      url: `${baseUrl}/blog`,
-      lastModified: new Date(),
-      changeFrequency: 'daily',
-      priority: 0.9,
-    },
-    {
       url: `${baseUrl}/contact`,
       lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/audit`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.8,
+    },
+    // Blog
+    {
+      url: `${baseUrl}/blog`,
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.9,
     },
     // Landing pages
     {
       url: `${baseUrl}/construction-websites`,
       lastModified: new Date(),
       changeFrequency: 'weekly',
-      priority: 0.8,
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/eugene-web-design`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.9,
     },
     // Custom systems pages
     {
@@ -84,12 +108,18 @@ export default async function sitemap() {
       changeFrequency: 'weekly',
       priority: 0.7,
     },
-    // Location pages
+    // Legal pages
     {
-      url: `${baseUrl}/eugene-web-design`,
+      url: `${baseUrl}/privacy-policy`,
       lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.9,
+      changeFrequency: 'yearly',
+      priority: 0.3,
+    },
+    {
+      url: `${baseUrl}/terms-of-service`,
+      lastModified: new Date(),
+      changeFrequency: 'yearly',
+      priority: 0.3,
     },
   ];
 

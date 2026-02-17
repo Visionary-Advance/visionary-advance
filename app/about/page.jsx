@@ -183,11 +183,7 @@ We work with professionals who don’t cut corners — and neither do we. Every 
                   priority
                 />
               </div>
-              <div className="absolute -bottom-6 -left-6 bg-[#191E1E] p-6 rounded-xl border border-[#008070]/30 max-w-xs">
-                <p className="font-manrope text-sm text-gray-300 italic">
-                  "Your business deserves tools that match how you work."
-                </p>
-              </div>
+              
             </div>
           </div>
         </div>
