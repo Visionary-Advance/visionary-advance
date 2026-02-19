@@ -265,7 +265,7 @@ Your digital presence should work as a filter — drawing in clients who value p
               </div>
             </div>
 
-            <div className="flex-1 order-1 lg:order-2">
+            <div className="flex-1 w-full order-1 lg:order-2">
               <div className="relative w-full h-80 md:h-[640px]">
                 <Image
                   src='/Img/Work.jpg'
