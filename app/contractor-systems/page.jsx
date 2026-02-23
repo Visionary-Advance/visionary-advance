@@ -49,7 +49,7 @@ export default function ContractorSystemsPage() {
             We do the opposite.
           </p>
           <p className="font-manrope text-lg text-gray-300 max-w-3xl mb-4">
-            Visionary Advance builds custom contractor systems that match how your business already operates — from job tracking to inventory to reporting — all in one secure dashboard.
+            Visionary Advance builds custom contractor systems that match how your business already operates,from job tracking to inventory to reporting,all in one secure dashboard.
           </p>
           <p className="font-manrope text-lg text-gray-400 mb-8">
             Built in Eugene. Designed for real contractors.
@@ -194,7 +194,7 @@ export default function ContractorSystemsPage() {
             Local Trust
           </h2>
           <p className="font-manrope text-lg text-gray-300">
-            We work with Eugene and Lane County contractors who need systems that work in the real world — not Silicon Valley demos.
+            We work with Eugene and Lane County contractors who need systems that work in the real world,not Silicon Valley demos.
           </p>
         </div>
       </section>

@@ -551,7 +551,7 @@ function ProjectIcon({ className }) {
 
 function ChangeIndicator({ value, suffix = '%', inverted = false }) {
   if (value === null || value === undefined) {
-    return <span className="text-gray-500">—</span>;
+    return <span className="text-gray-500">-</span>;
   }
 
   const isPositive = inverted ? value > 0 : value > 0;

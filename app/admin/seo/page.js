@@ -7,6 +7,7 @@ import SEOSiteCard from '@/Components/Admin/SEO/SEOSiteCard';
 import SEOAnalyticsChart from '@/Components/Admin/SEO/SEOAnalyticsChart';
 import AddSiteModal from '@/Components/Admin/SEO/AddSiteModal';
 import SEOReportPanel from '@/Components/Admin/SEO/SEOReportPanel';
+import SEOPlanView from '@/Components/Admin/SEO/SEOPlanView';
 import LinkToBusinessModal from '@/Components/Admin/SEO/LinkToBusinessModal';
 
 export default function SEODashboardPage() {
@@ -25,6 +26,7 @@ export default function SEODashboardPage() {
   const [linkedBusinesses, setLinkedBusinesses] = useState({});
   const [error, setError] = useState(null);
   const [googleConnected, setGoogleConnected] = useState(false);
+  const [activeTab, setActiveTab] = useState('dashboard');
 
   // Check Google connection status
   useEffect(() => {
@@ -421,95 +423,128 @@ export default function SEODashboardPage() {
                   </div>
                 </div>
 
-                {/* Analytics Overview */}
-                {analytics && (
+                {/* Tab Navigation */}
+                <div className="flex border-b border-[#262626]">
+                  {[
+                    { id: 'dashboard', label: 'Dashboard' },
+                    { id: 'plan', label: 'Plan' },
+                    { id: 'reports', label: 'Reports' }
+                  ].map(tab => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`px-4 py-2.5 text-sm font-medium transition-colors relative ${
+                        activeTab === tab.id
+                          ? 'text-teal-400'
+                          : 'text-gray-400 hover:text-white'
+                      }`}
+                    >
+                      {tab.label}
+                      {activeTab === tab.id && (
+                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-teal-400" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Dashboard Tab */}
+                {activeTab === 'dashboard' && (
                   <>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <MetricCard
-                        label="Total Clicks"
-                        value={analytics.totalClicks?.toLocaleString() || '0'}
-                        trend={null}
-                      />
-                      <MetricCard
-                        label="Total Impressions"
-                        value={analytics.totalImpressions?.toLocaleString() || '0'}
-                        trend={null}
-                      />
-                      <MetricCard
-                        label="Avg. CTR"
-                        value={((analytics.avgCtr || 0) * 100).toFixed(2) + '%'}
-                        trend={null}
-                      />
-                      <MetricCard
-                        label="Avg. Position"
-                        value={(analytics.avgPosition || 0).toFixed(1)}
-                        trend={null}
-                      />
-                    </div>
-
-                    {/* Traffic Chart */}
-                    <div className="bg-[#0a0a0a] rounded-lg border border-[#262626] p-6">
-                      <h3 className="text-lg font-semibold text-white mb-4">Traffic (Last 28 Days)</h3>
-                      <SEOAnalyticsChart data={analytics.dailyData || []} />
-                    </div>
-
-                    {/* Top Queries & Pages */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="bg-[#0a0a0a] rounded-lg border border-[#262626] p-6">
-                        <h3 className="text-lg font-semibold text-white mb-4">Top Queries</h3>
-                        <div className="space-y-3">
-                          {(analytics.topQueries || []).slice(0, 10).map((q, i) => (
-                            <div key={i} className="flex items-center justify-between text-sm">
-                              <span className="text-gray-300 truncate flex-1 mr-4">{q.query}</span>
-                              <div className="flex gap-4 text-gray-400">
-                                <span>{q.clicks} clicks</span>
-                              </div>
-                            </div>
-                          ))}
-                          {(!analytics.topQueries || analytics.topQueries.length === 0) && (
-                            <p className="text-gray-500 text-sm">No query data available</p>
-                          )}
+                    {analytics ? (
+                      <>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                          <MetricCard
+                            label="Total Clicks"
+                            value={analytics.totalClicks?.toLocaleString() || '0'}
+                            trend={null}
+                          />
+                          <MetricCard
+                            label="Total Impressions"
+                            value={analytics.totalImpressions?.toLocaleString() || '0'}
+                            trend={null}
+                          />
+                          <MetricCard
+                            label="Avg. CTR"
+                            value={((analytics.avgCtr || 0) * 100).toFixed(2) + '%'}
+                            trend={null}
+                          />
+                          <MetricCard
+                            label="Avg. Position"
+                            value={(analytics.avgPosition || 0).toFixed(1)}
+                            trend={null}
+                          />
                         </div>
-                      </div>
 
-                      <div className="bg-[#0a0a0a] rounded-lg border border-[#262626] p-6">
-                        <h3 className="text-lg font-semibold text-white mb-4">Top Pages</h3>
-                        <div className="space-y-3">
-                          {(analytics.topPages || []).slice(0, 10).map((p, i) => (
-                            <div key={i} className="flex items-center justify-between text-sm">
-                              <span className="text-gray-300 truncate flex-1 mr-4">
-                                {new URL(p.page).pathname || '/'}
-                              </span>
-                              <div className="flex gap-4 text-gray-400">
-                                <span>{p.clicks} clicks</span>
-                              </div>
-                            </div>
-                          ))}
-                          {(!analytics.topPages || analytics.topPages.length === 0) && (
-                            <p className="text-gray-500 text-sm">No page data available</p>
-                          )}
+                        {/* Traffic Chart */}
+                        <div className="bg-[#0a0a0a] rounded-lg border border-[#262626] p-6">
+                          <h3 className="text-lg font-semibold text-white mb-4">Traffic (Last 28 Days)</h3>
+                          <SEOAnalyticsChart data={analytics.dailyData || []} />
                         </div>
-                      </div>
-                    </div>
 
-                    {/* SEO Reports */}
-                    <SEOReportPanel site={selectedSite} userEmail={user?.email} />
+                        {/* Top Queries & Pages */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div className="bg-[#0a0a0a] rounded-lg border border-[#262626] p-6">
+                            <h3 className="text-lg font-semibold text-white mb-4">Top Queries</h3>
+                            <div className="space-y-3">
+                              {(analytics.topQueries || []).slice(0, 10).map((q, i) => (
+                                <div key={i} className="flex items-center justify-between text-sm">
+                                  <span className="text-gray-300 truncate flex-1 mr-4">{q.query}</span>
+                                  <div className="flex gap-4 text-gray-400">
+                                    <span>{q.clicks} clicks</span>
+                                  </div>
+                                </div>
+                              ))}
+                              {(!analytics.topQueries || analytics.topQueries.length === 0) && (
+                                <p className="text-gray-500 text-sm">No query data available</p>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="bg-[#0a0a0a] rounded-lg border border-[#262626] p-6">
+                            <h3 className="text-lg font-semibold text-white mb-4">Top Pages</h3>
+                            <div className="space-y-3">
+                              {(analytics.topPages || []).slice(0, 10).map((p, i) => (
+                                <div key={i} className="flex items-center justify-between text-sm">
+                                  <span className="text-gray-300 truncate flex-1 mr-4">
+                                    {new URL(p.page).pathname || '/'}
+                                  </span>
+                                  <div className="flex gap-4 text-gray-400">
+                                    <span>{p.clicks} clicks</span>
+                                  </div>
+                                </div>
+                              ))}
+                              {(!analytics.topPages || analytics.topPages.length === 0) && (
+                                <p className="text-gray-500 text-sm">No page data available</p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="bg-[#0a0a0a] rounded-lg border border-[#262626] p-8 text-center">
+                        <div className="text-gray-400 mb-4">
+                          No analytics data cached yet. Click "Sync Data" to fetch data from Search Console.
+                        </div>
+                        <button
+                          onClick={handleSync}
+                          disabled={syncing}
+                          className="bg-teal-500 hover:bg-teal-600 text-white px-6 py-2 rounded-lg transition-colors disabled:opacity-50"
+                        >
+                          {syncing ? 'Syncing...' : 'Sync Now'}
+                        </button>
+                      </div>
+                    )}
                   </>
                 )}
 
-                {!analytics && (
-                  <div className="bg-[#0a0a0a] rounded-lg border border-[#262626] p-8 text-center">
-                    <div className="text-gray-400 mb-4">
-                      No analytics data cached yet. Click "Sync Data" to fetch data from Search Console.
-                    </div>
-                    <button
-                      onClick={handleSync}
-                      disabled={syncing}
-                      className="bg-teal-500 hover:bg-teal-600 text-white px-6 py-2 rounded-lg transition-colors disabled:opacity-50"
-                    >
-                      {syncing ? 'Syncing...' : 'Sync Now'}
-                    </button>
-                  </div>
+                {/* Plan Tab */}
+                {activeTab === 'plan' && (
+                  <SEOPlanView site={selectedSite} />
+                )}
+
+                {/* Reports Tab */}
+                {activeTab === 'reports' && (
+                  <SEOReportPanel site={selectedSite} userEmail={user?.email} />
                 )}
               </div>
             ) : (

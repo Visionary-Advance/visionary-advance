@@ -46,7 +46,7 @@ export default function ServicesPage() {
     {
       icon: <Database className="w-12 h-12" />,
       title: "Custom Business Systems",
-      description: "Dashboards, inventory systems, job tracking, and internal tools built around how your business actually operates — not platforms you have to adapt to.",
+      description: "Dashboards, inventory systems, job tracking, and internal tools built around how your business actually operates,not platforms you have to adapt to.",
       features: [
         "Custom Dashboards & Analytics",
         "Inventory & Warehouse Systems",
@@ -61,7 +61,7 @@ export default function ServicesPage() {
     {
       icon: <Search className="w-12 h-12" />,
       title: "SEO & Visibility",
-      description: "Strategic SEO that positions you in front of the right clients — the ones searching for expertise and quality, not the lowest price.",
+      description: "Strategic SEO that positions you in front of the right clients,the ones searching for expertise and quality, not the lowest price.",
       features: [
         "Local SEO (Eugene & Oregon)",
         "Technical SEO Architecture",
@@ -76,7 +76,7 @@ export default function ServicesPage() {
     {
       icon: <Server className="w-12 h-12" />,
       title: "Hosting & Support",
-      description: "Reliable infrastructure and ongoing support so your website and systems perform consistently — without you having to think about it.",
+      description: "Reliable infrastructure and ongoing support so your website and systems perform consistently,without you having to think about it.",
       features: [
         "99.9% Uptime Guarantee",
         "Security & SSL Certificates",
@@ -94,7 +94,7 @@ export default function ServicesPage() {
     {
       number: "01",
       title: "Discovery & Planning",
-      description: "We start by understanding your business, your workflow, and what you actually need — not what we want to sell you.",
+      description: "We start by understanding your business, your workflow, and what you actually need,not what we want to sell you.",
       icon: <Search className="w-8 h-8" />
     },
     {
@@ -126,12 +126,12 @@ export default function ServicesPage() {
     {
       icon: <Shield className="w-8 h-8" />,
       title: "Secure by Default",
-      description: "Security built into every layer — not added as an afterthought. Your data and your clients' data protected properly."
+      description: "Security built into every layer,not added as an afterthought. Your data and your clients' data protected properly."
     },
     {
       icon: <Search className="w-8 h-8" />,
       title: "Found by the Right Clients",
-      description: "SEO that positions you in front of people searching for quality and expertise — not bargain hunters looking for the lowest price."
+      description: "SEO that positions you in front of people searching for quality and expertise,not bargain hunters looking for the lowest price."
     },
     {
       icon: <Users className="w-8 h-8" />,
@@ -141,7 +141,7 @@ export default function ServicesPage() {
     {
       icon: <TrendingUp className="w-8 h-8" />,
       title: "Built to Scale",
-      description: "Systems designed with growth in mind. What we build today should support your business for years — not need replacing in six months."
+      description: "Systems designed with growth in mind. What we build today should support your business for years,not need replacing in six months."
     },
     {
       icon: <CheckCircle className="w-8 h-8" />,
@@ -170,7 +170,7 @@ export default function ServicesPage() {
                 We build custom websites and business systems for professionals who take their operations seriously. No templates. No bloated platforms. Just solutions designed specifically for your business and workflow.
               </p>
               <p className="font-manrope text-lg text-gray-400 max-w-3xl leading-relaxed">
-                Based in Eugene, serving Lane County and Oregon businesses — from custom websites and SEO to dashboards, inventory systems, and internal tools that match how you actually operate.
+                Based in Eugene, serving Lane County and Oregon businesses,from custom websites and SEO to dashboards, inventory systems, and internal tools that match how you actually operate.
               </p>
             </div>
           </div>
@@ -186,7 +186,7 @@ export default function ServicesPage() {
               Custom Solutions for Real Operations
             </h2>
             <p className="font-manrope text-lg text-gray-300 max-w-3xl mx-auto">
-              Everything we build is designed to support how your business actually works — not force you into someone else's workflow.
+              Everything we build is designed to support how your business actually works,not force you into someone else's workflow.
             </p>
           </div>
 
@@ -235,7 +235,7 @@ export default function ServicesPage() {
               Designed for Serious Operators
             </h2>
             <p className="font-manrope text-lg text-gray-300 max-w-3xl mx-auto">
-              We partner with businesses that care how things are built. If you value precision, reliability, and long-term thinking — you'll feel at home here.
+              We partner with businesses that care how things are built. If you value precision, reliability, and long-term thinking,you'll feel at home here.
             </p>
           </div>
 

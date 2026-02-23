@@ -169,31 +169,31 @@ export default function AdminDashboard() {
           <div className="mt-4 grid gap-6 sm:grid-cols-5">
             <div>
               <p className="text-3xl font-semibold text-[#fafafa]">
-                {statsLoading ? '—' : stats?.overview?.totalLeads || 0}
+                {statsLoading ? '-' : stats?.overview?.totalLeads || 0}
               </p>
               <p className="mt-1 text-sm text-[#525252]">Total Leads</p>
             </div>
             <div>
               <p className="text-3xl font-semibold text-[#fafafa]">
-                {statsLoading ? '—' : stats?.overview?.leadsThisWeek || 0}
+                {statsLoading ? '-' : stats?.overview?.leadsThisWeek || 0}
               </p>
               <p className="mt-1 text-sm text-[#525252]">New This Week</p>
             </div>
             <div>
               <p className="text-3xl font-semibold text-[#fafafa]">
-                {statsLoading ? '—' : stats?.overview?.activePipeline || 0}
+                {statsLoading ? '-' : stats?.overview?.activePipeline || 0}
               </p>
               <p className="mt-1 text-sm text-[#525252]">In Pipeline</p>
             </div>
             <div>
               <p className="text-3xl font-semibold text-[#10b981]">
-                {statsLoading ? '—' : stats?.overview?.wonCount || 0}
+                {statsLoading ? '-' : stats?.overview?.wonCount || 0}
               </p>
               <p className="mt-1 text-sm text-[#525252]">Won Deals</p>
             </div>
             <div>
               <p className="text-3xl font-semibold text-[#fafafa]">
-                {statsLoading ? '—' : `${stats?.overview?.conversionRate || 0}%`}
+                {statsLoading ? '-' : `${stats?.overview?.conversionRate || 0}%`}
               </p>
               <p className="mt-1 text-sm text-[#525252]">Win Rate</p>
             </div>

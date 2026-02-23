@@ -46,7 +46,7 @@ export default function WarehouseInventorySystemsPage() {
             Spreadsheets break when warehouses grow.
           </p>
           <p className="font-manrope text-lg text-gray-300 max-w-3xl mb-8">
-            We build custom inventory and warehouse management systems that give you real-time visibility into stock, movement, and performance — all from one dashboard.
+            We build custom inventory and warehouse management systems that give you real-time visibility into stock, movement, and performance,all from one dashboard.
           </p>
           <SystemsCTA
             variant="hero"

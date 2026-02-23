@@ -43,7 +43,7 @@ export default function CustomDashboardsAnalyticsPage() {
             Custom Dashboards & Analytics Built for Your Business
           </h1>
           <p className="font-manrope text-xl text-gray-300 mb-4">
-            We build dashboards that show what matters — job status, inventory, performance, and ROI — in one place.
+            We build dashboards that show what matters,job status, inventory, performance, and ROI,in one place.
           </p>
           <p className="font-manrope text-xl text-[#008070] mb-8">
             No guessing. No spreadsheet chaos. Just clarity.
@@ -67,7 +67,7 @@ export default function CustomDashboardsAnalyticsPage() {
               <span className="text-[#008070] text-2xl">•</span>
               <div>
                 <h3 className="font-semibold text-white mb-1">Role-Based Dashboards</h3>
-                <p className="text-gray-400">Each team member sees exactly what they need — owners get the big picture, managers get operational details, staff get their tasks.</p>
+                <p className="text-gray-400">Each team member sees exactly what they need,owners get the big picture, managers get operational details, staff get their tasks.</p>
               </div>
             </div>
             <div className="bg-white/5 border border-white/10 rounded-xl p-6 flex items-start gap-4">

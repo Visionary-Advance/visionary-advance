@@ -67,7 +67,7 @@ export default function SystemForgeOverview() {
               <div>
                 <p className="text-sm text-[#a1a1aa]">{stat.label}</p>
                 <p className="text-2xl font-semibold text-[#fafafa]">
-                  {loading ? '—' : stat.value}
+                  {loading ? '-' : stat.value}
                 </p>
               </div>
             </div>

@@ -46,7 +46,7 @@ export default function CustomCmsDevelopmentPage() {
             If WordPress or off-the-shelf CMS platforms don&apos;t fit your workflow, we build a custom CMS tailored to your operation.
           </p>
           <p className="font-manrope text-lg text-[#008070] mb-8">
-            Manage data, users, workflows, and content securely — without unnecessary complexity.
+            Manage data, users, workflows, and content securely,without unnecessary complexity.
           </p>
           <SystemsCTA
             variant="hero"
@@ -74,7 +74,7 @@ export default function CustomCmsDevelopmentPage() {
               <span className="text-[#008070] text-2xl">•</span>
               <div>
                 <h3 className="font-semibold text-white mb-1">Role-Based Permissions</h3>
-                <p className="text-gray-400">Control who sees what. Admins, editors, viewers — each with appropriate access levels.</p>
+                <p className="text-gray-400">Control who sees what. Admins, editors, viewers,each with appropriate access levels.</p>
               </div>
             </div>
             <div className="bg-white/5 border border-white/10 rounded-xl p-6 flex items-start gap-4">
@@ -113,7 +113,7 @@ export default function CustomCmsDevelopmentPage() {
               Off-the-shelf platforms like WordPress are great for blogs and simple websites. But when you need to manage internal data, workflows, or custom content structures, they fall short.
             </p>
             <p>
-              A custom CMS means you get exactly what you need — no bloated plugins, no fighting against the platform, no security headaches from outdated themes.
+              A custom CMS means you get exactly what you need,no bloated plugins, no fighting against the platform, no security headaches from outdated themes.
             </p>
             <p className="text-[#008070]">
               Just a clean, fast, secure system built around how your team actually works.

@@ -5,12 +5,19 @@ import { getAllPosts, getAllCategories, getFeaturedPosts, generateBreadcrumbSche
 import BlogPostCard from '@/Components/Blog/BlogPostCard';
 
 export const metadata = {
-  title: 'Blog | Visionary Advance',
-  description: 'Insights on web design, SEO, and digital marketing for construction companies and contractors.',
+  title: 'Web Design & Development Blog',
+  description: 'Tips on web design, SEO, and custom business systems from a Eugene, OR dev team. Practical guides for growing your online presence.',
+  alternates: {
+    canonical: 'https://visionaryadvance.com/blog',
+  },
   openGraph: {
-    title: 'Blog | Visionary Advance',
-    description: 'Insights on web design, SEO, and digital marketing for construction companies and contractors.',
+    title: 'Web Design & Development Blog | Visionary Advance',
+    description: 'Tips on web design, SEO, and custom business systems from a Eugene, OR dev team. Practical guides for growing your online presence.',
     type: 'website',
+  },
+  twitter: {
+    title: 'Web Design & Development Blog | Visionary Advance',
+    description: 'Tips on web design, SEO, and custom business systems from a Eugene, OR dev team. Practical guides for growing your online presence.',
   },
 };
 

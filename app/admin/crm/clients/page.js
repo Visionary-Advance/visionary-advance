@@ -420,7 +420,7 @@ export default function ClientsPage() {
                     ) : (
                       businesses.map((biz) => (
                         <option key={biz.id} value={biz.id}>
-                          {biz.name}{biz.industry ? ` — ${biz.industry}` : ''}
+                          {biz.name}{biz.industry ? ` -${biz.industry}` : ''}
                         </option>
                       ))
                     )}

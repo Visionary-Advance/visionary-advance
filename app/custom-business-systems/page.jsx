@@ -42,10 +42,10 @@ export default function CustomBusinessSystemsPage() {
             Custom Business Systems Built Around Your Workflow
           </h1>
           <p className="font-manrope text-xl md:text-2xl text-[#008070] mb-6">
-            Custom systems built around your workflow — not platforms you have to adapt to.
+            Custom systems built around your workflow,not platforms you have to adapt to.
           </p>
           <p className="font-manrope text-lg text-gray-300 max-w-3xl mb-8">
-            We design custom dashboards, inventory systems, and internal software that fits your business — not the other way around. Built in Eugene, serving Lane County and Oregon.
+            We design custom dashboards, inventory systems, and internal software that fits your business,not the other way around. Built in Eugene, serving Lane County and Oregon.
           </p>
           <SystemsCTA
             variant="hero"
@@ -170,7 +170,7 @@ export default function CustomBusinessSystemsPage() {
             Built in Eugene, Designed for Real Business
           </h2>
           <p className="font-manrope text-lg text-gray-300 mb-8">
-            We work with Eugene and Lane County businesses who need systems that work in the real world. Modern frameworks, custom code, secure dashboards — all built with SEO in mind so your clients can find you.
+            We work with Eugene and Lane County businesses who need systems that work in the real world. Modern frameworks, custom code, secure dashboards,all built with SEO in mind so your clients can find you.
           </p>
         </div>
       </section>

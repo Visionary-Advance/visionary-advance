@@ -147,7 +147,7 @@ export default function LandingPage() {
              <h2 className="font-anton text-3xl md:text-4xl lg:text-5xl text-white leading-tight tracking-tight max-w-4xl mx-auto animate-fade-up">
                Websites &amp; Systems That Match How You Work
              </h2>
-<p className='font-manrope text-base md:text-lg text-gray-300 max-w-3xl mx-auto'>We build custom websites and business systems for professionals who take their operations seriously. Your experience, reputation, and workflow deserve more than templates — they deserve solutions built specifically for you.</p>
+<p className='font-manrope text-base md:text-lg text-gray-300 max-w-3xl mx-auto'>We build custom websites and business systems for professionals who take their operations seriously. Your experience, reputation, and workflow deserve more than templates,they deserve solutions built specifically for you.</p>
 
               
             </div>
@@ -187,7 +187,7 @@ Every interaction, every detail, every decision is intentional. We design websit
                     Found By The Right Clients
                   </h3>
                   <p className="font-manrope text-gray-300">
-SEO isn’t about traffic — it’s about alignment. We build SEO into the foundation so the right clients find you first: the ones who value expertise, professionalism, and long-term partnerships.                  </p>
+SEO isn’t about traffic,it’s about alignment. We build SEO into the foundation so the right clients find you first: the ones who value expertise, professionalism, and long-term partnerships.                  </p>
                 </div>
               </div>
 
@@ -244,7 +244,7 @@ SEO isn’t about traffic — it’s about alignment. We build SEO into the foun
                     Attract the Right Opportunities
                   </h3>
                   <p className="font-manrope text-gray-300">
-Your digital presence should work as a filter — drawing in clients who value professionalism and pushing away those who don’t.                  </p>
+Your digital presence should work as a filter,drawing in clients who value professionalism and pushing away those who don’t.                  </p>
                 </div>
                 <div className="space-y-4">
                   <h3 className="font-anton text-xl text-white">Stand Out for the Right Reasons</h3>
@@ -314,7 +314,7 @@ Your digital presence should work as a filter — drawing in clients who value p
                     Found by Clients Who Value Quality
                   </h3>
                   <p className="font-manrope text-gray-300">
-                   SEO isn’t about being everywhere — it’s about showing up where it matters. We position you in front of clients actively searching for expertise, professionalism, and long-term quality, not the lowest price.
+                   SEO isn’t about being everywhere,it’s about showing up where it matters. We position you in front of clients actively searching for expertise, professionalism, and long-term quality, not the lowest price.
                   </p>
                 </div>
                 <a href="/contact" className="text-white hover:text-gray-300 flex items-center gap-2 p-0 transition-colors">
@@ -330,7 +330,7 @@ Your digital presence should work as a filter — drawing in clients who value p
                     Reliability You Can Count On
                   </h3>
                   <p className="font-manrope text-gray-300">
-                    Fast load times, secure architecture, and modern technology built to last. Your website and systems should perform reliably year after year — without constant fixes or compromises.
+                    Fast load times, secure architecture, and modern technology built to last. Your website and systems should perform reliably year after year,without constant fixes or compromises.
                   </p>
                 </div>
                 <a href="/about" className="text-white hover:text-gray-300 flex items-center gap-2 p-0 transition-colors">

@@ -28,11 +28,14 @@ const instSans = Instrument_Sans({
 
 export const metadata = {
   metadataBase: new URL('https://visionaryadvance.com'),
+  alternates: {
+    canonical: 'https://visionaryadvance.com',
+  },
   title: {
-    default: "Custom Business Systems & SEO Web Design | Eugene, OR – Visionary Advance",
+    default: "Visionary Advance | Custom Business Systems & SEO Web Design | Eugene, OR",
     template: "%s | Visionary Advance"
   },
-  description: "Custom-built websites, dashboards, and business systems designed around how you work. Serving Eugene & Lane County businesses.",
+  description: "Custom-built websites, dashboards, and business systems designed around how you work. Serving Eugene, Lane County & Oregon businesses.",
   keywords: "custom business systems, Eugene web design, contractor management systems, warehouse inventory systems, custom dashboards, custom CMS, Lane County web development, Oregon web design, SEO services",
   authors: [{ name: "Visionary Advance" }],
   creator: "Visionary Advance",
@@ -43,7 +46,7 @@ export const metadata = {
     type: 'website',
     locale: 'en_US',
     url: 'https://visionaryadvance.com',
-    title: 'Custom Websites & Business Systems | Eugene, OR – Visionary Advance',
+    title: 'Visionary Advance | Custom Business Systems & SEO Web Design | Eugene, OR',
     description: 'Custom-built websites, dashboards, and business systems designed around how you work. Serving Eugene, Lane County & Oregon businesses.',
     siteName: 'Visionary Advance',
     images: [
@@ -59,8 +62,8 @@ export const metadata = {
   // Twitter Card
   twitter: {
     card: 'summary_large_image',
-    title: 'Custom Websites & Business Systems | Eugene, OR',
-    description: 'Custom-built websites, dashboards, and business systems designed around how you work. Serving Eugene & Lane County.',
+    title: 'Visionary Advance | Custom Business Systems & SEO Web Design | Eugene, OR',
+    description: 'Custom-built websites, dashboards, and business systems designed around how you work. Serving Eugene, Lane County & Oregon businesses.',
     creator: '@visionaryadvance',
     images: ['https://visionaryadvance.com/Img/VaLogo_Large.png'],
   },

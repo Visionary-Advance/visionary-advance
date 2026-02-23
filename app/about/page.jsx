@@ -101,7 +101,7 @@ export default function AboutPage() {
               <p className="font-manrope text-xl text-gray-300 max-w-3xl leading-relaxed">
 We build websites and internal systems for professionals who value clarity, performance, and long-term reliability. No templates. No shortcuts. Everything is designed to support how your business actually works.              </p>
               <p className="font-manrope text-lg text-gray-400 max-w-3xl leading-relaxed">
-Based in Eugene, Oregon, Visionary Advance partners with local and regional businesses to create digital infrastructure — from websites to dashboards — that positions them as confident, capable leaders in their market.              </p>
+Based in Eugene, Oregon, Visionary Advance partners with local and regional businesses to create digital infrastructure,from websites to dashboards,that positions them as confident, capable leaders in their market.              </p>
             </div>
 
             {/* Hero Stats Grid */}
@@ -133,9 +133,9 @@ Based in Eugene, Oregon, Visionary Advance partners with local and regional busi
                  Quality Is the Baseline
                 </h2>
                 <p className="font-manrope text-lg text-gray-300 leading-relaxed">
-We work with professionals who don’t cut corners — and neither do we. Every website and system we build is approached with the same level of care, precision, and intentionality you bring to your own work.                </p>
+We work with professionals who don’t cut corners,and neither do we. Every website and system we build is approached with the same level of care, precision, and intentionality you bring to your own work.                </p>
                 <p className="font-manrope text-lg text-gray-300 leading-relaxed">
-                  Our focus isn't on being the cheapest or the fastest—it's on being the best choice for businesses that value expertise, reliability, and long-term results.
+                  Our focus isn't on being the cheapest or the fastest, it's on being the best choice for businesses that value expertise, reliability, and long-term results.
                 </p>
               </div>
 
@@ -217,7 +217,7 @@ No templates. No pre-packaged solutions. Everything we build is tailored to your
               </div>
               <h3 className="font-anton text-2xl text-white mb-4">Built With Purpose</h3>
               <p className="font-manrope text-gray-300 leading-relaxed">
-Design is just one layer. Strategy, structure, and performance come first — ensuring your digital presence actually works for your business.              </p>
+Design is just one layer. Strategy, structure, and performance come first,ensuring your digital presence actually works for your business.              </p>
             </div>
 
             <div className="p-8 bg-[#191E1E] rounded-2xl border border-white/10">
@@ -235,7 +235,7 @@ We prioritize clarity, structure, and long-term outcomes over rushing to launch.
               </div>
               <h3 className="font-anton text-2xl text-white mb-4">Long-Term Systems, Not Short-Term Fixes</h3>
               <p className="font-manrope text-gray-300 leading-relaxed">
-We build with growth and longevity in mind — not temporary solutions that need to be replaced in a year.              </p>
+We build with growth and longevity in mind,not temporary solutions that need to be replaced in a year.              </p>
             </div>
           </div>
         </div>
@@ -263,7 +263,7 @@ We build with growth and longevity in mind — not temporary solutions that need
                 <div className="text-sm font-manrope text-[#008070] font-semibold">PHASE 01</div>
                 <h3 className="font-anton text-2xl text-white">Discovery & Strategy</h3>
                 <p className="font-manrope text-gray-300">
-                  We begin by understanding your business, your market, and your goals. This isn't about what we want to build—it's about what you need to succeed.
+                  We begin by understanding your business, your market, and your goals. This isn't about what we want to build, it's about what you need to succeed.
                 </p>
               </div>
             </div>

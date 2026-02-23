@@ -57,7 +57,7 @@ export async function POST(request) {
       is_client: true,
       client_since: now,
       last_activity_at: now,
-      // No score, no source — those are lead-specific
+      // No score, no source,those are lead-specific
     }
 
     const { data: client, error: insertError } = await supabase

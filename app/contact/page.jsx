@@ -97,8 +97,8 @@ export default function ContactPage() {
       icon: <Phone className="w-6 h-6" />,
       title: "Call Us",
       description: "Mon-Fri, 9am-6pm PST",
-      contact: "541-868-7019",
-      action: "tel:+15418687019",
+      contact: "541-321-0468",
+      action: "tel:+15413210468",
       color: "text-[#008070]"
     }
   ];
@@ -128,7 +128,7 @@ export default function ContactPage() {
   const faqs = [
     {
       question: "How long does a typical project take?",
-      answer: "Websites typically take 4-8 weeks. Custom systems and dashboards vary based on complexity — we'll give you a clear timeline after understanding your requirements."
+      answer: "Websites typically take 4-8 weeks. Custom systems and dashboards vary based on complexity,we'll give you a clear timeline after understanding your requirements."
     },
     {
       question: "Do you work with businesses outside Oregon?",
@@ -136,11 +136,11 @@ export default function ContactPage() {
     },
     {
       question: "What's the difference between a website and a custom system?",
-      answer: "A website is your public-facing presence. Custom systems are internal tools — dashboards, inventory tracking, job management — built around how your team actually works."
+      answer: "A website is your public-facing presence. Custom systems are internal tools,dashboards, inventory tracking, job management,built around how your team actually works."
     },
     {
       question: "Do you use templates?",
-      answer: "No. Everything we build is custom — designed and coded specifically for your business, your workflow, and your goals."
+      answer: "No. Everything we build is custom,designed and coded specifically for your business, your workflow, and your goals."
     }
   ];
 
@@ -162,7 +162,7 @@ export default function ContactPage() {
                 Let's Talk About What You Need
               </h1>
               <p className="font-manrope text-xl text-gray-300 max-w-3xl leading-relaxed">
-                Whether it's a new website, a custom dashboard, or a system to streamline your operations — we'll start by understanding how your business actually works.
+                Whether it's a new website, a custom dashboard, or a system to streamline your operations,we'll start by understanding how your business actually works.
               </p>
               <p className="font-manrope text-lg text-gray-400 max-w-3xl leading-relaxed">
                 Based in Eugene, serving Lane County and Oregon. We work with businesses that take their operations seriously and want solutions built specifically for them.
@@ -389,7 +389,7 @@ export default function ContactPage() {
                   <h3 className="font-anton text-xl text-white">What to Expect</h3>
                 </div>
                 <p className="font-manrope text-gray-300 mb-4">
-                  We respond to all inquiries within 24 hours. No sales pitch — just a straightforward conversation about what you need.
+                  We respond to all inquiries within 24 hours. No sales pitch,just a straightforward conversation about what you need.
                 </p>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
@@ -434,7 +434,7 @@ export default function ContactPage() {
                     <span className="font-anton text-[#008070] text-sm mt-1">03</span>
                     <div>
                       <p className="font-manrope text-gray-300 text-sm">
-                        <strong className="text-white">Clear proposal:</strong> Scope, timeline, and pricing — no surprises
+                        <strong className="text-white">Clear proposal:</strong> Scope, timeline, and pricing,no surprises
                       </p>
                     </div>
                   </div>
@@ -472,7 +472,7 @@ export default function ContactPage() {
 
           <div className="text-center mt-12">
             <p className="font-manrope text-gray-300 mb-4">
-              Have a different question? Just ask — we're happy to answer.
+              Have a different question? Just ask,we're happy to answer.
             </p>
             <a href="mailto:info@visionaryadvance.com" className="inline-flex items-center gap-2 text-[#008070] hover:text-white transition-colors font-manrope font-semibold">
               Email us directly

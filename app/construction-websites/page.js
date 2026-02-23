@@ -459,7 +459,7 @@ export default function LandingPage() {
                 Professional construction websites typically cost between $3,000 to $10,000 for a custom design, depending on features and complexity. This includes mobile-responsive design, SEO optimization, project galleries, contact forms, and content management systems. Monthly maintenance and SEO services usually range from $500 to $2,000 per month.
               </p>
               <p className="text-gray-600 leading-relaxed">
-                The investment pays for itself quickly—most construction companies see a 3x return on investment within the first year through increased lead generation and higher-quality project inquiries.
+                The investment pays for itself quickly, most construction companies see a 3x return on investment within the first year through increased lead generation and higher-quality project inquiries.
               </p>
             </div>
 
