@@ -30,6 +30,7 @@ export default function ClientDetailPage({ params }) {
   const [editData, setEditData] = useState({})
   const [savingEdit, setSavingEdit] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [financeData, setFinanceData] = useState(null)
 
   useEffect(() => {
     fetchClient()
@@ -50,6 +51,23 @@ export default function ClientDetailPage({ params }) {
 
       setClient(data)
       setActivities(data.activities || [])
+
+      // Fetch linked finance income entries
+      try {
+        const finRes = await fetch(`/api/finance/income?client_id=${id}&limit=10`)
+        if (finRes.ok) {
+          const finData = await finRes.json()
+          const entries = finData.entries || []
+          const totalEarned = entries.reduce((sum, e) => sum + parseFloat(e.amount), 0)
+          setFinanceData({
+            entries,
+            totalEarned: Math.round(totalEarned * 100) / 100,
+            paymentCount: finData.pagination?.total || entries.length,
+          })
+        }
+      } catch (finErr) {
+        console.error('Error fetching finance data:', finErr)
+      }
     } catch (err) {
       setError(err.message)
     } finally {
@@ -495,6 +513,54 @@ export default function ClientDetailPage({ params }) {
               )}
             </dl>
           </div>
+
+          {/* Finance Summary */}
+          {financeData && financeData.entries.length > 0 && (
+            <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+              <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
+                Finance
+              </h2>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-[#a1a1aa]">Total Earned</span>
+                  <span className="text-sm font-semibold text-emerald-400">
+                    {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(financeData.totalEarned)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-[#a1a1aa]">Payments</span>
+                  <span className="text-sm text-[#fafafa]">{financeData.paymentCount}</span>
+                </div>
+                <div className="border-t border-[#262626] pt-3">
+                  <p className="mb-2 text-xs font-medium text-[#525252]">Recent Payments</p>
+                  <div className="space-y-2">
+                    {financeData.entries.slice(0, 5).map((entry) => (
+                      <Link
+                        key={entry.id}
+                        href={`/admin/finance/income/${entry.id}`}
+                        className="flex items-center justify-between rounded-lg bg-[#171717] px-3 py-2 text-sm hover:bg-[#262626] transition-colors"
+                      >
+                        <span className="text-emerald-400 font-medium">
+                          {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(entry.amount)}
+                        </span>
+                        <span className="text-xs text-[#525252]">
+                          {new Date(entry.date_paid + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                        </span>
+                      </Link>
+                    ))}
+                  </div>
+                  {financeData.paymentCount > 5 && (
+                    <Link
+                      href={`/admin/finance/income?client_id=${id}`}
+                      className="mt-2 block text-center text-xs text-[#008070] hover:underline"
+                    >
+                      View all {financeData.paymentCount} payments
+                    </Link>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Activity Timeline */}
