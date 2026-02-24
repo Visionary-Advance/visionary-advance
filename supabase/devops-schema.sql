@@ -156,3 +156,22 @@ COMMENT ON COLUMN devops_sites.sla_target IS 'Target uptime percentage (default 
 COMMENT ON COLUMN devops_sites.current_status IS 'Denormalized status, updated on each health check';
 COMMENT ON COLUMN devops_sites.current_status_since IS 'When the current status was first recorded';
 COMMENT ON COLUMN devops_sites.crm_lead_id IS 'Link to CRM lead for notifications';
+
+-- ============================================
+-- Migration: Add repeated alert tracking to incidents
+-- Run this section on existing databases
+-- ============================================
+
+ALTER TABLE devops_incidents
+ADD COLUMN IF NOT EXISTS alerts_sent INTEGER DEFAULT 0,
+ADD COLUMN IF NOT EXISTS max_alerts INTEGER DEFAULT 5,
+ADD COLUMN IF NOT EXISTS last_alert_at TIMESTAMPTZ;
+
+-- Index for the alert queue query (find incidents needing follow-up alerts)
+CREATE INDEX IF NOT EXISTS idx_incidents_alert_queue
+  ON devops_incidents(status, alerts_sent, last_alert_at)
+  WHERE status != 'resolved';
+
+COMMENT ON COLUMN devops_incidents.alerts_sent IS 'Number of Slack alerts sent for this incident';
+COMMENT ON COLUMN devops_incidents.max_alerts IS 'Maximum alerts to send (default 5)';
+COMMENT ON COLUMN devops_incidents.last_alert_at IS 'Timestamp of last alert sent, used for spacing';
