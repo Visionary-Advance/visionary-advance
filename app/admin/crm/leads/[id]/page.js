@@ -44,6 +44,7 @@ export default function LeadDetailPage({ params }) {
   const [editing, setEditing] = useState(false)
   const [editData, setEditData] = useState({})
   const [savingEdit, setSavingEdit] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     fetchLead()
@@ -119,6 +120,20 @@ export default function LeadDetailPage({ params }) {
   const handlePinToggle = (updatedActivity) => {
     // Refresh activities to get proper sort order
     fetchLead()
+  }
+
+  const handleDeleteLead = async () => {
+    if (!confirm('Are you sure you want to permanently delete this lead? This cannot be undone.')) return
+
+    setDeleting(true)
+    try {
+      const res = await fetch(`/api/crm/leads/${id}?permanent=true`, { method: 'DELETE' })
+      if (!res.ok) throw new Error('Failed to delete lead')
+      router.push('/admin/crm/leads')
+    } catch (err) {
+      alert(err.message)
+      setDeleting(false)
+    }
   }
 
   const handleSaveEdit = async () => {
@@ -268,12 +283,21 @@ export default function LeadDetailPage({ params }) {
               </button>
             </>
           ) : (
-            <button
-              onClick={() => { setEditData({}); setEditing(true) }}
-              className="rounded-lg border border-[#262626] bg-[#171717] px-4 py-2 text-sm text-[#fafafa] hover:bg-[#262626]"
-            >
-              Edit
-            </button>
+            <>
+              <button
+                onClick={() => { setEditData({}); setEditing(true) }}
+                className="rounded-lg border border-[#262626] bg-[#171717] px-4 py-2 text-sm text-[#fafafa] hover:bg-[#262626]"
+              >
+                Edit
+              </button>
+              <button
+                onClick={handleDeleteLead}
+                disabled={deleting}
+                className="rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-2 text-sm text-red-400 hover:bg-red-500/20 disabled:opacity-50"
+              >
+                {deleting ? 'Deleting...' : 'Delete'}
+              </button>
+            </>
           )}
         </div>
       </div>

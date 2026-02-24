@@ -2,7 +2,7 @@
 // Generate and list SEO reports
 
 import { NextResponse } from 'next/server';
-import { generateReport, getReports, getReportById, deleteReport } from '@/lib/seo-reports';
+import { generateReport, getReports, getAllReports, getReportById, deleteReport } from '@/lib/seo-reports';
 import { getSiteById } from '@/lib/search-console';
 
 export async function GET(request) {
@@ -20,7 +20,9 @@ export async function GET(request) {
     }
 
     if (!siteId) {
-      return NextResponse.json({ error: 'siteId is required' }, { status: 400 });
+      const limit = parseInt(searchParams.get('limit') || '20', 10);
+      const reports = await getAllReports(limit);
+      return NextResponse.json({ reports });
     }
 
     const reports = await getReports(siteId);

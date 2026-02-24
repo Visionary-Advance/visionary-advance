@@ -3,12 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAdminAuth } from '@/Components/Admin/AdminAuthProvider';
-import SEOSiteCard from '@/Components/Admin/SEO/SEOSiteCard';
-import SEOAnalyticsChart from '@/Components/Admin/SEO/SEOAnalyticsChart';
 import AddSiteModal from '@/Components/Admin/SEO/AddSiteModal';
-import SEOReportPanel from '@/Components/Admin/SEO/SEOReportPanel';
-import SEOPlanView from '@/Components/Admin/SEO/SEOPlanView';
-import LinkToBusinessModal from '@/Components/Admin/SEO/LinkToBusinessModal';
 
 export default function SEODashboardPage() {
   const { user, loading: authLoading } = useAdminAuth();
@@ -16,267 +11,92 @@ export default function SEODashboardPage() {
 
   const [sites, setSites] = useState([]);
   const [availableSites, setAvailableSites] = useState([]);
-  const [selectedSite, setSelectedSite] = useState(null);
-  const [analytics, setAnalytics] = useState(null);
+  const [recentReports, setRecentReports] = useState([]);
+  const [aggregateMetrics, setAggregateMetrics] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [syncing, setSyncing] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [showLinkModal, setShowLinkModal] = useState(false);
-  const [siteToLink, setSiteToLink] = useState(null);
-  const [linkedBusinesses, setLinkedBusinesses] = useState({});
-  const [error, setError] = useState(null);
   const [googleConnected, setGoogleConnected] = useState(false);
-  const [activeTab, setActiveTab] = useState('dashboard');
 
-  // Check Google connection status
+  // Check Google connection
   useEffect(() => {
     if (!user?.email) return;
-
-    async function checkGoogle() {
-      try {
-        const res = await fetch(`/api/auth/google/status?email=${encodeURIComponent(user.email)}`);
-        const data = await res.json();
-        setGoogleConnected(data.connected);
-      } catch (err) {
-        console.error('Error checking Google status:', err);
-      }
-    }
-    checkGoogle();
+    fetch(`/api/auth/google/status?email=${encodeURIComponent(user.email)}`)
+      .then(r => r.json())
+      .then(data => setGoogleConnected(data.connected))
+      .catch(() => {});
   }, [user?.email]);
 
-  // Fetch sites
+  // Fetch all data
   useEffect(() => {
     if (!user?.email || !googleConnected) return;
 
-    async function fetchSites() {
+    async function fetchData() {
       setLoading(true);
       try {
-        const res = await fetch(`/api/seo/sites?email=${encodeURIComponent(user.email)}&includeAvailable=true`);
-        const data = await res.json();
+        const [sitesRes, reportsRes] = await Promise.all([
+          fetch(`/api/seo/sites?email=${encodeURIComponent(user.email)}&includeAvailable=true`),
+          fetch('/api/seo/reports?limit=5')
+        ]);
 
-        if (data.error) {
-          setError(data.error);
-          return;
-        }
+        const sitesData = await sitesRes.json();
+        const reportsData = await reportsRes.json();
 
-        setSites(data.sites || []);
-        setAvailableSites(data.availableSites || []);
+        const fetchedSites = sitesData.sites || [];
+        setSites(fetchedSites);
+        setAvailableSites(sitesData.availableSites || []);
+        setRecentReports(reportsData.reports || []);
 
-        // Log any errors fetching available sites
-        if (data.availableSitesError) {
-          console.error('Error fetching available sites:', data.availableSitesError);
-        }
+        // Fetch aggregate analytics across all sites
+        if (fetchedSites.length > 0) {
+          const analyticsResults = await Promise.all(
+            fetchedSites.map(s =>
+              fetch(`/api/seo/analytics?siteId=${s.id}&days=28`)
+                .then(r => r.json())
+                .catch(() => null)
+            )
+          );
 
-        // Auto-select first site if none selected
-        if (data.sites?.length > 0 && !selectedSite) {
-          setSelectedSite(data.sites[0]);
+          let totalClicks = 0;
+          let totalImpressions = 0;
+          let sitesWithData = 0;
+
+          analyticsResults.forEach(data => {
+            if (data && !data.error) {
+              totalClicks += data.totalClicks || 0;
+              totalImpressions += data.totalImpressions || 0;
+              if (data.totalClicks || data.totalImpressions) sitesWithData++;
+            }
+          });
+
+          setAggregateMetrics({ totalClicks, totalImpressions, sitesWithData });
         }
       } catch (err) {
-        setError(err.message);
+        console.error('Error fetching dashboard data:', err);
       } finally {
         setLoading(false);
       }
     }
-
-    fetchSites();
+    fetchData();
   }, [user?.email, googleConnected]);
 
-  // Fetch analytics when site is selected
-  useEffect(() => {
-    if (!selectedSite?.id) {
-      setAnalytics(null);
-      return;
-    }
-
-    async function fetchAnalytics() {
-      try {
-        const res = await fetch(`/api/seo/analytics?siteId=${selectedSite.id}&days=28`);
-        const data = await res.json();
-
-        if (data.error) {
-          console.error('Error fetching analytics:', data.error);
-          return;
-        }
-
-        setAnalytics(data);
-      } catch (err) {
-        console.error('Error fetching analytics:', err);
-      }
-    }
-
-    fetchAnalytics();
-  }, [selectedSite?.id]);
-
-  // Fetch linked businesses info for sites
-  useEffect(() => {
-    if (!sites || sites.length === 0) return;
-
-    async function fetchLinkedBusinesses() {
-      const businessesToFetch = sites
-        .filter(s => s.business_id && !linkedBusinesses[s.business_id])
-        .map(s => s.business_id);
-
-      if (businessesToFetch.length === 0) return;
-
-      try {
-        // Fetch each business's basic info
-        const businessPromises = businessesToFetch.map(businessId =>
-          fetch(`/api/crm/businesses/${businessId}`).then(r => r.json())
-        );
-
-        const businessResults = await Promise.all(businessPromises);
-        const newLinkedBusinesses = { ...linkedBusinesses };
-
-        businessResults.forEach(result => {
-          if (result.business) {
-            newLinkedBusinesses[result.business.id] = result.business;
-          }
-        });
-
-        setLinkedBusinesses(newLinkedBusinesses);
-      } catch (err) {
-        console.error('Error fetching linked businesses:', err);
-      }
-    }
-
-    fetchLinkedBusinesses();
-  }, [sites]);
-
-  // Sync data
-  async function handleSync() {
-    if (!selectedSite?.id) return;
-
-    setSyncing(true);
-    try {
-      const res = await fetch('/api/seo/sync', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ siteId: selectedSite.id, type: 'all', days: 28 })
-      });
-
-      const data = await res.json();
-      if (data.error) {
-        alert('Sync failed: ' + data.error);
-        return;
-      }
-
-      // Refresh analytics
-      const analyticsRes = await fetch(`/api/seo/analytics?siteId=${selectedSite.id}&days=28`);
-      const analyticsData = await analyticsRes.json();
-      setAnalytics(analyticsData);
-
-      alert('Sync complete!');
-    } catch (err) {
-      alert('Sync failed: ' + err.message);
-    } finally {
-      setSyncing(false);
-    }
-  }
-
-  // Add site
+  // Add site handler
   async function handleAddSite(siteUrl, displayName) {
-    try {
-      const res = await fetch('/api/seo/sites', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          siteUrl,
-          googleEmail: user.email,
-          displayName
-        })
-      });
-
-      const data = await res.json();
-      if (data.error) {
-        throw new Error(data.error);
-      }
-
-      // Refresh sites list
-      const sitesRes = await fetch(`/api/seo/sites?email=${encodeURIComponent(user.email)}&includeAvailable=true`);
-      const sitesData = await sitesRes.json();
-      setSites(sitesData.sites || []);
-      setAvailableSites(sitesData.availableSites || []);
-
-      // Select the new site
-      setSelectedSite(data.site);
-      setShowAddModal(false);
-
-      // Trigger initial sync
-      setTimeout(() => {
-        handleSync();
-      }, 500);
-    } catch (err) {
-      throw err;
-    }
-  }
-
-  // Remove site
-  async function handleRemoveSite(siteId) {
-    if (!confirm('Are you sure you want to remove this site?')) return;
-
-    try {
-      const res = await fetch(`/api/seo/sites?id=${siteId}`, { method: 'DELETE' });
-      const data = await res.json();
-
-      if (data.error) {
-        alert('Failed to remove site: ' + data.error);
-        return;
-      }
-
-      // Refresh sites
-      setSites(sites.filter(s => s.id !== siteId));
-      if (selectedSite?.id === siteId) {
-        setSelectedSite(sites.find(s => s.id !== siteId) || null);
-      }
-    } catch (err) {
-      alert('Failed to remove site: ' + err.message);
-    }
-  }
-
-  // Link site to business
-  async function handleLinkSite(businessId) {
-    if (!siteToLink) return;
-
-    const res = await fetch(`/api/seo/sites?id=${siteToLink.id}`, {
-      method: 'PATCH',
+    const res = await fetch('/api/seo/sites', {
+      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ business_id: businessId })
+      body: JSON.stringify({ siteUrl, googleEmail: user.email, displayName })
     });
-
     const data = await res.json();
+    if (data.error) throw new Error(data.error);
 
-    if (data.error) {
-      throw new Error(data.error);
-    }
+    const sitesRes = await fetch(`/api/seo/sites?email=${encodeURIComponent(user.email)}&includeAvailable=true`);
+    const sitesData = await sitesRes.json();
+    setSites(sitesData.sites || []);
+    setAvailableSites(sitesData.availableSites || []);
+    setShowAddModal(false);
 
-    // Update local state
-    setSites(sites.map(s =>
-      s.id === siteToLink.id ? { ...s, business_id: businessId } : s
-    ));
-
-    // Update selected site if it was the one linked
-    if (selectedSite?.id === siteToLink.id) {
-      setSelectedSite({ ...selectedSite, business_id: businessId });
-    }
-
-    // Fetch the business info if linking (not unlinking)
-    if (businessId) {
-      try {
-        const businessRes = await fetch(`/api/crm/businesses/${businessId}`);
-        const businessData = await businessRes.json();
-        if (businessData.business) {
-          setLinkedBusinesses(prev => ({ ...prev, [businessId]: businessData.business }));
-        }
-      } catch (err) {
-        console.error('Error fetching linked business:', err);
-      }
-    }
-  }
-
-  // Open link modal for a site
-  function openLinkModal(site) {
-    setSiteToLink(site);
-    setShowLinkModal(true);
+    // Navigate to the new site
+    if (data.site?.id) router.push(`/admin/seo/sites/${data.site.id}`);
   }
 
   if (authLoading) {
@@ -312,6 +132,15 @@ export default function SEODashboardPage() {
         <h1 className="text-2xl font-bold text-white">SEO Dashboard</h1>
         <div className="flex gap-3">
           <button
+            onClick={() => router.push('/admin/seo/sites')}
+            className="bg-[#171717] hover:bg-[#262626] border border-[#262626] text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
+            </svg>
+            View All Sites
+          </button>
+          <button
             onClick={() => setShowAddModal(true)}
             className="bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2"
           >
@@ -320,236 +149,145 @@ export default function SEODashboardPage() {
             </svg>
             Add Site
           </button>
-          {selectedSite && (
-            <button
-              onClick={handleSync}
-              disabled={syncing}
-              className="bg-[#171717] hover:bg-[#262626] border border-[#262626] text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50"
-            >
-              <svg className={`w-5 h-5 ${syncing ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-              {syncing ? 'Syncing...' : 'Sync Data'}
-            </button>
-          )}
         </div>
       </div>
-
-      {error && (
-        <div className="bg-red-900/50 border border-red-700 text-red-200 px-4 py-3 rounded-lg mb-6">
-          {error}
-        </div>
-      )}
 
       {loading ? (
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-400"></div>
         </div>
       ) : sites.length === 0 ? (
-        <div className="bg-[#0a0a0a] rounded-lg border border-[#262626] p-8 text-center">
-          <div className="text-gray-400 mb-4">
-            No sites added yet. Add a site from your Search Console to get started.
-          </div>
+        <div className="bg-[#0a0a0a] rounded-lg border border-[#262626] p-12 text-center">
+          <svg className="w-16 h-16 text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+          </svg>
+          <h2 className="text-xl font-semibold text-white mb-2">Get Started with SEO Tracking</h2>
+          <p className="text-gray-400 mb-6">Add your first site from Google Search Console to start monitoring performance.</p>
           <button
             onClick={() => setShowAddModal(true)}
-            className="bg-teal-500 hover:bg-teal-600 text-white px-6 py-2 rounded-lg transition-colors"
+            className="bg-teal-500 hover:bg-teal-600 text-white px-6 py-2.5 rounded-lg transition-colors"
           >
             Add Your First Site
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Sites Sidebar */}
-          <div className="lg:col-span-1 space-y-4">
-            <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Your Sites</h2>
-            {sites.map(site => (
-              <SEOSiteCard
-                key={site.id}
-                site={site}
-                isSelected={selectedSite?.id === site.id}
-                onClick={() => setSelectedSite(site)}
-                onRemove={() => handleRemoveSite(site.id)}
-                onLinkBusiness={() => openLinkModal(site)}
-                linkedBusiness={site.business_id ? linkedBusinesses[site.business_id] : null}
-              />
-            ))}
+        <div className="space-y-6">
+          {/* Aggregate Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-[#0a0a0a] rounded-lg border border-[#262626] p-5">
+              <p className="text-gray-400 text-sm mb-1">Total Sites</p>
+              <p className="text-3xl font-bold text-white">{sites.length}</p>
+              <p className="text-gray-500 text-xs mt-1">
+                {aggregateMetrics?.sitesWithData || 0} with data
+              </p>
+            </div>
+            <div className="bg-[#0a0a0a] rounded-lg border border-[#262626] p-5">
+              <p className="text-gray-400 text-sm mb-1">Total Clicks (28d)</p>
+              <p className="text-3xl font-bold text-white">
+                {(aggregateMetrics?.totalClicks || 0).toLocaleString()}
+              </p>
+              <p className="text-gray-500 text-xs mt-1">Across all sites</p>
+            </div>
+            <div className="bg-[#0a0a0a] rounded-lg border border-[#262626] p-5">
+              <p className="text-gray-400 text-sm mb-1">Total Impressions (28d)</p>
+              <p className="text-3xl font-bold text-white">
+                {(aggregateMetrics?.totalImpressions || 0).toLocaleString()}
+              </p>
+              <p className="text-gray-500 text-xs mt-1">Across all sites</p>
+            </div>
           </div>
 
-          {/* Main Content */}
-          <div className="lg:col-span-3">
-            {selectedSite ? (
-              <div className="space-y-6">
-                {/* Site Header */}
-                <div className="bg-[#0a0a0a] rounded-lg border border-[#262626] p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h2 className="text-xl font-bold text-white">{selectedSite.display_name}</h2>
-                      <p className="text-gray-400 text-sm">{selectedSite.site_url}</p>
-                      {selectedSite.last_sync_at && (
-                        <p className="text-gray-500 text-xs mt-1">
-                          Last synced: {new Date(selectedSite.last_sync_at).toLocaleString()}
-                        </p>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-3">
-                      {/* Linked Business Badge */}
-                      {selectedSite.business_id && linkedBusinesses[selectedSite.business_id] ? (
-                        <button
-                          onClick={() => openLinkModal(selectedSite)}
-                          className="flex items-center gap-2 px-3 py-2 bg-teal-900/30 border border-teal-700/50 rounded-lg hover:bg-teal-900/50 transition-colors"
-                        >
-                          <svg className="w-4 h-4 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                          </svg>
-                          <span className="text-teal-300 text-sm">
-                            {linkedBusinesses[selectedSite.business_id].name}
-                          </span>
-                          <svg className="w-3 h-3 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                          </svg>
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => openLinkModal(selectedSite)}
-                          className="flex items-center gap-2 px-3 py-2 border border-dashed border-gray-600 rounded-lg text-gray-400 hover:border-teal-500 hover:text-teal-400 transition-colors"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                          </svg>
-                          <span className="text-sm">Link to Business</span>
-                        </button>
-                      )}
-                    </div>
+          {/* Sites Quick List */}
+          <div className="bg-[#0a0a0a] rounded-lg border border-[#262626]">
+            <div className="flex items-center justify-between p-4 border-b border-[#262626]">
+              <h2 className="text-lg font-semibold text-white">Your Sites</h2>
+              <button
+                onClick={() => router.push('/admin/seo/sites')}
+                className="text-sm text-teal-400 hover:text-teal-300 transition-colors"
+              >
+                View All
+              </button>
+            </div>
+            <div className="divide-y divide-[#262626]">
+              {sites.map(site => (
+                <button
+                  key={site.id}
+                  onClick={() => router.push(`/admin/seo/sites/${site.id}`)}
+                  className="w-full flex items-center justify-between p-4 hover:bg-[#171717] transition-colors text-left"
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white font-medium truncate">{site.display_name}</p>
+                    <p className="text-gray-500 text-sm truncate">{site.site_url}</p>
                   </div>
-                </div>
-
-                {/* Tab Navigation */}
-                <div className="flex border-b border-[#262626]">
-                  {[
-                    { id: 'dashboard', label: 'Dashboard' },
-                    { id: 'plan', label: 'Plan' },
-                    { id: 'reports', label: 'Reports' }
-                  ].map(tab => (
-                    <button
-                      key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
-                      className={`px-4 py-2.5 text-sm font-medium transition-colors relative ${
-                        activeTab === tab.id
-                          ? 'text-teal-400'
-                          : 'text-gray-400 hover:text-white'
-                      }`}
-                    >
-                      {tab.label}
-                      {activeTab === tab.id && (
-                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-teal-400" />
-                      )}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Dashboard Tab */}
-                {activeTab === 'dashboard' && (
-                  <>
-                    {analytics ? (
-                      <>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                          <MetricCard
-                            label="Total Clicks"
-                            value={analytics.totalClicks?.toLocaleString() || '0'}
-                            trend={null}
-                          />
-                          <MetricCard
-                            label="Total Impressions"
-                            value={analytics.totalImpressions?.toLocaleString() || '0'}
-                            trend={null}
-                          />
-                          <MetricCard
-                            label="Avg. CTR"
-                            value={((analytics.avgCtr || 0) * 100).toFixed(2) + '%'}
-                            trend={null}
-                          />
-                          <MetricCard
-                            label="Avg. Position"
-                            value={(analytics.avgPosition || 0).toFixed(1)}
-                            trend={null}
-                          />
-                        </div>
-
-                        {/* Traffic Chart */}
-                        <div className="bg-[#0a0a0a] rounded-lg border border-[#262626] p-6">
-                          <h3 className="text-lg font-semibold text-white mb-4">Traffic (Last 28 Days)</h3>
-                          <SEOAnalyticsChart data={analytics.dailyData || []} />
-                        </div>
-
-                        {/* Top Queries & Pages */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          <div className="bg-[#0a0a0a] rounded-lg border border-[#262626] p-6">
-                            <h3 className="text-lg font-semibold text-white mb-4">Top Queries</h3>
-                            <div className="space-y-3">
-                              {(analytics.topQueries || []).slice(0, 10).map((q, i) => (
-                                <div key={i} className="flex items-center justify-between text-sm">
-                                  <span className="text-gray-300 truncate flex-1 mr-4">{q.query}</span>
-                                  <div className="flex gap-4 text-gray-400">
-                                    <span>{q.clicks} clicks</span>
-                                  </div>
-                                </div>
-                              ))}
-                              {(!analytics.topQueries || analytics.topQueries.length === 0) && (
-                                <p className="text-gray-500 text-sm">No query data available</p>
-                              )}
-                            </div>
-                          </div>
-
-                          <div className="bg-[#0a0a0a] rounded-lg border border-[#262626] p-6">
-                            <h3 className="text-lg font-semibold text-white mb-4">Top Pages</h3>
-                            <div className="space-y-3">
-                              {(analytics.topPages || []).slice(0, 10).map((p, i) => (
-                                <div key={i} className="flex items-center justify-between text-sm">
-                                  <span className="text-gray-300 truncate flex-1 mr-4">
-                                    {new URL(p.page).pathname || '/'}
-                                  </span>
-                                  <div className="flex gap-4 text-gray-400">
-                                    <span>{p.clicks} clicks</span>
-                                  </div>
-                                </div>
-                              ))}
-                              {(!analytics.topPages || analytics.topPages.length === 0) && (
-                                <p className="text-gray-500 text-sm">No page data available</p>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </>
+                  <div className="flex items-center gap-3 ml-4">
+                    {site.last_sync_at ? (
+                      <span className="text-gray-500 text-xs">
+                        Synced {formatTimeAgo(site.last_sync_at)}
+                      </span>
                     ) : (
-                      <div className="bg-[#0a0a0a] rounded-lg border border-[#262626] p-8 text-center">
-                        <div className="text-gray-400 mb-4">
-                          No analytics data cached yet. Click "Sync Data" to fetch data from Search Console.
-                        </div>
-                        <button
-                          onClick={handleSync}
-                          disabled={syncing}
-                          className="bg-teal-500 hover:bg-teal-600 text-white px-6 py-2 rounded-lg transition-colors disabled:opacity-50"
-                        >
-                          {syncing ? 'Syncing...' : 'Sync Now'}
-                        </button>
-                      </div>
+                      <span className="text-gray-600 text-xs">Not synced</span>
                     )}
-                  </>
-                )}
+                    <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
 
-                {/* Plan Tab */}
-                {activeTab === 'plan' && (
-                  <SEOPlanView site={selectedSite} />
-                )}
-
-                {/* Reports Tab */}
-                {activeTab === 'reports' && (
-                  <SEOReportPanel site={selectedSite} userEmail={user?.email} />
-                )}
+          {/* Recent Reports */}
+          <div className="bg-[#0a0a0a] rounded-lg border border-[#262626]">
+            <div className="flex items-center justify-between p-4 border-b border-[#262626]">
+              <h2 className="text-lg font-semibold text-white">Recent Reports</h2>
+              <button
+                onClick={() => router.push('/admin/seo/reports')}
+                className="text-sm text-teal-400 hover:text-teal-300 transition-colors"
+              >
+                View All
+              </button>
+            </div>
+            {recentReports.length === 0 ? (
+              <div className="p-6 text-center text-gray-400">
+                <p>No reports generated yet.</p>
+                <p className="text-sm mt-1">Generate reports from individual site pages.</p>
               </div>
             ) : (
-              <div className="bg-[#0a0a0a] rounded-lg border border-[#262626] p-8 text-center">
-                <p className="text-gray-400">Select a site to view analytics</p>
+              <div className="divide-y divide-[#262626]">
+                {recentReports.map(report => {
+                  const currentMonth = report.month_comparison?.currentMonth?.name;
+                  const previousMonth = report.month_comparison?.previousMonth?.name;
+                  const period = currentMonth && previousMonth
+                    ? `${currentMonth} vs ${previousMonth}`
+                    : formatDateRange(report.start_date, report.end_date);
+                  const siteName = report.site?.display_name || report.site?.site_url || 'Unknown';
+
+                  return (
+                    <button
+                      key={report.id}
+                      onClick={() => router.push(`/admin/seo/sites/${report.site_id}?tab=reports`)}
+                      className="w-full flex items-center justify-between p-4 hover:bg-[#171717] transition-colors text-left"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white font-medium">{siteName}</p>
+                        <p className="text-gray-500 text-sm">{period}</p>
+                      </div>
+                      <div className="flex items-center gap-3 ml-4">
+                        <span className="text-gray-400 text-sm">
+                          {report.total_clicks?.toLocaleString() || 0} clicks
+                        </span>
+                        {report.status === 'sent' ? (
+                          <span className="text-xs bg-green-900/50 text-green-300 px-2 py-0.5 rounded">Sent</span>
+                        ) : (
+                          <span className="text-xs bg-gray-700 text-gray-300 px-2 py-0.5 rounded">Draft</span>
+                        )}
+                        <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             )}
           </div>
@@ -564,32 +302,27 @@ export default function SEODashboardPage() {
           onClose={() => setShowAddModal(false)}
         />
       )}
-
-      {/* Link to Business Modal */}
-      {showLinkModal && siteToLink && (
-        <LinkToBusinessModal
-          site={siteToLink}
-          onLink={handleLinkSite}
-          onClose={() => {
-            setShowLinkModal(false);
-            setSiteToLink(null);
-          }}
-        />
-      )}
     </div>
   );
 }
 
-function MetricCard({ label, value, trend }) {
-  return (
-    <div className="bg-[#0a0a0a] rounded-lg border border-[#262626] p-4">
-      <p className="text-gray-400 text-sm mb-1">{label}</p>
-      <p className="text-2xl font-bold text-white">{value}</p>
-      {trend !== null && (
-        <p className={`text-sm ${trend >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-          {trend >= 0 ? '+' : ''}{trend}% vs last period
-        </p>
-      )}
-    </div>
-  );
+function formatTimeAgo(dateString) {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now - date;
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMins / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffMins < 1) return 'just now';
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  return `${diffDays}d ago`;
+}
+
+function formatDateRange(startDate, endDate) {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  const options = { month: 'short', day: 'numeric' };
+  return `${start.toLocaleDateString('en-US', options)} - ${end.toLocaleDateString('en-US', options)}`;
 }
