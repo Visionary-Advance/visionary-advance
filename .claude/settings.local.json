@@ -42,7 +42,8 @@
       "Bash(find \"C:\\\\Users\\\\brand\\\\websites\\\\va3\\\\app\" -type d -name \"\\(\\\\*\")",
       "Bash(find:*)",
       "Bash(grep -r \"visionaryadvance.com\" \"/home/brandon/Desktop/Visionary Advance/GitHub/visionary-advance/app/\" --include=\"*.js\" --include=\"*.jsx\" 2>/dev/null | head -20)",
-      "Bash(grep -r \"canonical\" \"/home/brandon/Desktop/Visionary Advance/GitHub/visionary-advance/app/\" --include=\"*.js\" --include=\"*.jsx\" 2>/dev/null | grep -i \"layout\\\\|page\" | head -15)"
+      "Bash(grep -r \"canonical\" \"/home/brandon/Desktop/Visionary Advance/GitHub/visionary-advance/app/\" --include=\"*.js\" --include=\"*.jsx\" 2>/dev/null | grep -i \"layout\\\\|page\" | head -15)",
+      "Bash(find /c/Users/brand/websites/visionary-advance/supabase -type f -name \"*.sql\" | xargs grep -l \"stripe\\\\|invoice\" 2>/dev/null)"
     ],
     "deny": [],
     "ask": []

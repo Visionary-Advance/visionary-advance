@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react'
 import { formatCurrency, EXPENSE_CATEGORIES } from '@/lib/finance'
 import { format } from 'date-fns'
 import ExpenseForm from '@/Components/Admin/Finance/ExpenseForm'
+import CSVImportModal from '@/Components/Admin/Finance/CSVImportModal'
 import CategoryBadge from '@/Components/Admin/Finance/CategoryBadge'
 import CategoryPieChart from '@/Components/Admin/Finance/CategoryPieChart'
 
@@ -15,10 +16,12 @@ export default function ExpensesPage() {
   const [month, setMonth] = useState('')
   const [category, setCategory] = useState('')
   const [showForm, setShowForm] = useState(false)
+  const [showImport, setShowImport] = useState(false)
   const [editEntry, setEditEntry] = useState(null)
   const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0 })
   const [deleteConfirm, setDeleteConfirm] = useState(null)
   const [categoryData, setCategoryData] = useState([])
+  const [yearTotal, setYearTotal] = useState(0)
 
   const fetchEntries = async (page = 1) => {
     try {
@@ -45,6 +48,7 @@ export default function ExpensesPage() {
       if (res.ok) {
         const data = await res.json()
         setCategoryData(data.byCategory || [])
+        setYearTotal(data.overview?.ytdExpenses || 0)
       }
     } catch (err) {
       console.error('Error fetching categories:', err)
@@ -85,8 +89,6 @@ export default function ExpensesPage() {
     fetchCategoryBreakdown()
   }
 
-  const totalForView = entries.reduce((sum, e) => sum + parseFloat(e.amount), 0)
-
   return (
     <div>
       {/* Header */}
@@ -95,12 +97,20 @@ export default function ExpensesPage() {
           <h1 className="text-2xl font-semibold text-[#fafafa]">Expenses</h1>
           <p className="mt-1 text-[#a1a1aa]">Categorize expenses by IRS Schedule C</p>
         </div>
-        <button
-          onClick={() => setShowForm(true)}
-          className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 transition-colors"
-        >
-          + Add Expense
-        </button>
+        <div className="flex gap-3">
+          <button
+            onClick={() => setShowImport(true)}
+            className="rounded-lg border border-[#262626] px-4 py-2 text-sm font-medium text-[#a1a1aa] hover:bg-[#171717] hover:text-[#fafafa] transition-colors"
+          >
+            Import CSV
+          </button>
+          <button
+            onClick={() => setShowForm(true)}
+            className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 transition-colors"
+          >
+            + Add Expense
+          </button>
+        </div>
       </div>
 
       {/* Category Pie Chart */}
@@ -149,8 +159,8 @@ export default function ExpensesPage() {
       <div className="mb-6 rounded-xl border border-[#262626] bg-[#0a0a0a] p-4">
         <div className="flex gap-8">
           <div>
-            <p className="text-sm text-[#a1a1aa]">Showing</p>
-            <p className="text-xl font-semibold text-red-400">{formatCurrency(totalForView)}</p>
+            <p className="text-sm text-[#a1a1aa]">{year} Total</p>
+            <p className="text-xl font-semibold text-red-400">{formatCurrency(yearTotal)}</p>
           </div>
           <div>
             <p className="text-sm text-[#a1a1aa]">Entries</p>
@@ -275,6 +285,14 @@ export default function ExpensesPage() {
         onClose={handleFormClose}
         onSave={handleSave}
         entry={editEntry}
+      />
+
+      {/* CSV Import Modal */}
+      <CSVImportModal
+        isOpen={showImport}
+        onClose={() => setShowImport(false)}
+        onComplete={handleSave}
+        type="expenses"
       />
 
       {/* Delete Confirmation */}

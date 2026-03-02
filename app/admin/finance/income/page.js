@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { formatCurrency, PAYMENT_METHODS } from '@/lib/finance'
 import { format } from 'date-fns'
 import IncomeForm from '@/Components/Admin/Finance/IncomeForm'
+import CSVImportModal from '@/Components/Admin/Finance/CSVImportModal'
 
 export default function IncomePage() {
   const [entries, setEntries] = useState([])
@@ -14,6 +15,7 @@ export default function IncomePage() {
   const [month, setMonth] = useState('')
   const [search, setSearch] = useState('')
   const [showForm, setShowForm] = useState(false)
+  const [showImport, setShowImport] = useState(false)
   const [editEntry, setEditEntry] = useState(null)
   const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0 })
   const [deleteConfirm, setDeleteConfirm] = useState(null)
@@ -75,12 +77,20 @@ export default function IncomePage() {
           <h1 className="text-2xl font-semibold text-[#fafafa]">Income Tracker</h1>
           <p className="mt-1 text-[#a1a1aa]">Track payments from clients</p>
         </div>
-        <button
-          onClick={() => setShowForm(true)}
-          className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 transition-colors"
-        >
-          + Add Income
-        </button>
+        <div className="flex gap-3">
+          <button
+            onClick={() => setShowImport(true)}
+            className="rounded-lg border border-[#262626] px-4 py-2 text-sm font-medium text-[#a1a1aa] hover:bg-[#171717] hover:text-[#fafafa] transition-colors"
+          >
+            Import CSV
+          </button>
+          <button
+            onClick={() => setShowForm(true)}
+            className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 transition-colors"
+          >
+            + Add Income
+          </button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -233,6 +243,14 @@ export default function IncomePage() {
         onClose={handleFormClose}
         onSave={() => fetchEntries(pagination.page)}
         entry={editEntry}
+      />
+
+      {/* CSV Import Modal */}
+      <CSVImportModal
+        isOpen={showImport}
+        onClose={() => setShowImport(false)}
+        onComplete={() => fetchEntries(1)}
+        type="income"
       />
 
       {/* Delete Confirmation */}
