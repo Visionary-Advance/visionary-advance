@@ -9,8 +9,11 @@ import { urlForImage } from '@/lib/sanity';
 import { X } from 'lucide-react';
 
 export default function ImageGallery({ value }) {
-  const { images = [], caption } = value;
+  const { images: rawImages = [], caption } = value;
   const [lightboxImage, setLightboxImage] = useState(null);
+
+  // Filter out images without valid assets
+  const images = rawImages.filter((img) => img?.asset);
 
   if (images.length === 0) return null;
 
