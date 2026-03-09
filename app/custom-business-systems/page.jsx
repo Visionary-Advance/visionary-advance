@@ -175,6 +175,73 @@ export default function CustomBusinessSystemsPage() {
         </div>
       </section>
 
+      {/* Benefits Section */}
+      <section className="py-16 md:py-24 px-4 md:px-16 bg-[#0a0a0a]">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="font-anton text-3xl md:text-4xl text-white mb-12 text-center">
+            Benefits of Custom Business Systems
+          </h2>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="bg-white/5 border border-white/10 rounded-xl p-8">
+              <div className="w-12 h-12 bg-[#008070]/20 rounded-lg flex items-center justify-center mb-4">
+                <svg className="w-6 h-6 text-[#008070]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+              <h3 className="font-anton text-xl text-white mb-3">Increased Efficiency</h3>
+              <p className="font-manrope text-gray-400 text-sm">
+                Eliminate redundant steps and manual processes. A custom system automates the workflows you repeat every day, freeing your team to focus on the work that actually grows your business.
+              </p>
+            </div>
+
+            <div className="bg-white/5 border border-white/10 rounded-xl p-8">
+              <div className="w-12 h-12 bg-[#008070]/20 rounded-lg flex items-center justify-center mb-4">
+                <svg className="w-6 h-6 text-[#008070]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h3 className="font-anton text-xl text-white mb-3">Reduced Errors</h3>
+              <p className="font-manrope text-gray-400 text-sm">
+                Stop relying on spreadsheets and manual data entry. Custom-built validation, automated calculations, and centralized data ensure accuracy across your entire operation.
+              </p>
+            </div>
+
+            <div className="bg-white/5 border border-white/10 rounded-xl p-8">
+              <div className="w-12 h-12 bg-[#008070]/20 rounded-lg flex items-center justify-center mb-4">
+                <svg className="w-6 h-6 text-[#008070]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                </svg>
+              </div>
+              <h3 className="font-anton text-xl text-white mb-3">Scalability</h3>
+              <p className="font-manrope text-gray-400 text-sm">
+                Off-the-shelf software hits limits as you grow. Custom systems are designed to scale with your business, adding new features and capacity when you need them without starting over.
+              </p>
+            </div>
+
+            <div className="bg-white/5 border border-white/10 rounded-xl p-8">
+              <div className="w-12 h-12 bg-[#008070]/20 rounded-lg flex items-center justify-center mb-4">
+                <svg className="w-6 h-6 text-[#008070]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+              </div>
+              <h3 className="font-anton text-xl text-white mb-3">Competitive Advantage</h3>
+              <p className="font-manrope text-gray-400 text-sm">
+                While competitors wrestle with generic tools, your team operates on systems built for exactly how you work. That operational edge translates directly to faster delivery and better client experiences.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-12 text-center">
+            <Link
+              href="/contact"
+              className="inline-flex items-center gap-2 bg-[#008070] hover:bg-[#006b5d] text-white px-8 py-4 rounded transition-colors font-manrope font-semibold text-lg"
+            >
+              Request a Free Consultation
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <SystemsCTA
         title="Ready to Simplify Your Operations?"

@@ -167,11 +167,11 @@ export default function EugeneWebDesignPage() {
             </div>
 
             <h1 className="font-anton text-4xl md:text-5xl lg:text-6xl text-white leading-tight mb-6">
-              Eugene Web Design & Development
+              Expert Eugene Oregon Web Design & Development Services
             </h1>
 
             <p className="font-manrope text-xl md:text-2xl text-gray-300 max-w-3xl mb-6">
-              Custom websites, web hosting, and business systems built for Lane County businesses. No templates. No shortcuts. Built around how you work.
+              Custom websites, <Link href="/services" className="text-[#008070] hover:underline">Eugene web hosting</Link>, and business systems built for Lane County businesses. No templates. No shortcuts. Built around how you work.
             </p>
 
             <p className="font-manrope text-lg text-gray-400 max-w-3xl mb-8">
@@ -191,6 +191,22 @@ export default function EugeneWebDesignPage() {
               >
                 View Our Services
               </Link>
+            </div>
+
+            {/* Why Choose Section */}
+            <div className="mt-16 pt-16 border-t border-white/10">
+              <h2 className="font-anton text-3xl md:text-4xl text-white mb-6">
+                Why Choose Visionary Advance for Your Eugene Web Design?
+              </h2>
+              <p className="font-manrope text-lg text-gray-300 mb-4">
+                As a locally based Eugene, Oregon web design company, Visionary Advance understands the unique needs of businesses in the Eugene-Springfield metro area and throughout Lane County. We combine deep knowledge of the local market with modern web development expertise to deliver websites that actually drive results for your business.
+              </p>
+              <p className="font-manrope text-lg text-gray-300 mb-4">
+                Unlike national agencies or offshore teams, we offer face-to-face collaboration, same-day communication, and a hands-on approach to every project. From local SEO strategies that put your business in front of Eugene customers to performance-optimized code that keeps your site loading fast, every detail is tailored to help you compete and grow in the Oregon market.
+              </p>
+              <p className="font-manrope text-lg text-gray-300">
+                Whether you're a startup in the Whiteaker neighborhood, a contractor serving Lane County, or an established business on Willamette Street, our custom web design and development services are built to match your goals, your audience, and your budget. No cookie-cutter templates, no generic solutions, just expert Eugene web design crafted around how you work.
+              </p>
             </div>
           </div>
         </section>
@@ -474,7 +490,7 @@ export default function EugeneWebDesignPage() {
                 <Server className="w-8 h-8 text-[#008070] mb-4" />
                 <h3 className="font-anton text-xl text-white mb-3">Hosting You Can Trust</h3>
                 <p className="font-manrope text-gray-300">
-                  Our eugene web hosting is managed, monitored, and optimized. You get 99.9% uptime, daily backups, and SSL,all included so you never worry about downtime.
+                  Our <Link href="/services" className="text-[#008070] hover:underline">Eugene web hosting</Link> is managed, monitored, and optimized. You get 99.9% uptime, daily backups, and SSL,all included so you never worry about downtime.
                 </p>
               </div>
 

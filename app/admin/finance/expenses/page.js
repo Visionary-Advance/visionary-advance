@@ -8,6 +8,7 @@ import ExpenseForm from '@/Components/Admin/Finance/ExpenseForm'
 import CSVImportModal from '@/Components/Admin/Finance/CSVImportModal'
 import CategoryBadge from '@/Components/Admin/Finance/CategoryBadge'
 import CategoryPieChart from '@/Components/Admin/Finance/CategoryPieChart'
+import MonthlyExpenseSummary from '@/Components/Admin/Finance/MonthlyExpenseSummary'
 
 export default function ExpensesPage() {
   const [entries, setEntries] = useState([])
@@ -22,6 +23,8 @@ export default function ExpensesPage() {
   const [deleteConfirm, setDeleteConfirm] = useState(null)
   const [categoryData, setCategoryData] = useState([])
   const [yearTotal, setYearTotal] = useState(0)
+  const [view, setView] = useState('transactions') // 'transactions' | 'monthly'
+  const [monthlyData, setMonthlyData] = useState([])
 
   const fetchEntries = async (page = 1) => {
     try {
@@ -49,6 +52,7 @@ export default function ExpensesPage() {
         const data = await res.json()
         setCategoryData(data.byCategory || [])
         setYearTotal(data.overview?.ytdExpenses || 0)
+        setMonthlyData(data.monthly || [])
       }
     } catch (err) {
       console.error('Error fetching categories:', err)
@@ -97,7 +101,30 @@ export default function ExpensesPage() {
           <h1 className="text-2xl font-semibold text-[#fafafa]">Expenses</h1>
           <p className="mt-1 text-[#a1a1aa]">Categorize expenses by IRS Schedule C</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex items-center gap-3">
+          {/* View Toggle */}
+          <div className="flex rounded-lg border border-[#262626] overflow-hidden">
+            <button
+              onClick={() => setView('transactions')}
+              className={`px-3 py-2 text-sm font-medium transition-colors ${
+                view === 'transactions'
+                  ? 'bg-[#262626] text-[#fafafa]'
+                  : 'text-[#a1a1aa] hover:bg-[#171717] hover:text-[#fafafa]'
+              }`}
+            >
+              Transactions
+            </button>
+            <button
+              onClick={() => setView('monthly')}
+              className={`px-3 py-2 text-sm font-medium transition-colors ${
+                view === 'monthly'
+                  ? 'bg-[#262626] text-[#fafafa]'
+                  : 'text-[#a1a1aa] hover:bg-[#171717] hover:text-[#fafafa]'
+              }`}
+            >
+              Monthly
+            </button>
+          </div>
           <button
             onClick={() => setShowImport(true)}
             className="rounded-lg border border-[#262626] px-4 py-2 text-sm font-medium text-[#a1a1aa] hover:bg-[#171717] hover:text-[#fafafa] transition-colors"
@@ -113,16 +140,7 @@ export default function ExpensesPage() {
         </div>
       </div>
 
-      {/* Category Pie Chart */}
-      {categoryData.length > 0 && (
-        <div className="mb-8 rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
-          <h2 className="text-lg font-semibold text-[#fafafa]">Spending by Category</h2>
-          <p className="mt-1 text-sm text-[#525252]">{year} expense distribution</p>
-          <CategoryPieChart data={categoryData} />
-        </div>
-      )}
-
-      {/* Filters */}
+      {/* Year Filter (shared across both views) */}
       <div className="mb-6 flex flex-wrap gap-3">
         <select
           value={year}
@@ -133,150 +151,173 @@ export default function ExpensesPage() {
             <option key={y} value={y}>{y}</option>
           ))}
         </select>
-        <select
-          value={month}
-          onChange={(e) => setMonth(e.target.value)}
-          className="rounded-lg border border-[#262626] bg-[#171717] px-3 py-2 text-sm text-[#fafafa] focus:border-emerald-500 focus:outline-none"
-        >
-          <option value="">All Months</option>
-          {['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'].map((m, i) => (
-            <option key={i+1} value={i+1}>{m}</option>
-          ))}
-        </select>
-        <select
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          className="rounded-lg border border-[#262626] bg-[#171717] px-3 py-2 text-sm text-[#fafafa] focus:border-emerald-500 focus:outline-none"
-        >
-          <option value="">All Categories</option>
-          {Object.entries(EXPENSE_CATEGORIES).map(([key, { label }]) => (
-            <option key={key} value={key}>{label}</option>
-          ))}
-        </select>
-      </div>
-
-      {/* Running Total */}
-      <div className="mb-6 rounded-xl border border-[#262626] bg-[#0a0a0a] p-4">
-        <div className="flex gap-8">
-          <div>
-            <p className="text-sm text-[#a1a1aa]">{year} Total</p>
-            <p className="text-xl font-semibold text-red-400">{formatCurrency(yearTotal)}</p>
-          </div>
-          <div>
-            <p className="text-sm text-[#a1a1aa]">Entries</p>
-            <p className="text-xl font-semibold text-[#fafafa]">{pagination.total}</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Table */}
-      {loading ? (
-        <div className="flex items-center justify-center py-16">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-emerald-500 border-t-transparent" />
-        </div>
-      ) : entries.length === 0 ? (
-        <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] py-16 text-center">
-          <p className="text-[#525252]">No expense entries found</p>
-          <button
-            onClick={() => setShowForm(true)}
-            className="mt-4 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 transition-colors"
-          >
-            Add Your First Expense
-          </button>
-        </div>
-      ) : (
-        <div className="overflow-x-auto rounded-xl border border-[#262626]">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-[#262626] bg-[#0a0a0a]">
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-[#525252]">Description</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-[#525252]">Amount</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-[#525252]">Date</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-[#525252]">Category</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-[#525252]">Receipt</th>
-                <th className="px-4 py-3 text-right text-xs font-medium uppercase text-[#525252]">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#262626]">
-              {entries.map((entry) => (
-                <tr key={entry.id} className="bg-[#0a0a0a] hover:bg-[#171717] transition-colors">
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-[#fafafa]">{entry.description}</span>
-                      {entry.is_recurring && (
-                        <span className="rounded-full bg-blue-500/20 px-2 py-0.5 text-xs text-blue-400">
-                          recurring
-                        </span>
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-sm font-semibold text-red-400">{formatCurrency(entry.amount)}</td>
-                  <td className="px-4 py-3 text-sm text-[#a1a1aa]">
-                    {format(new Date(entry.date + 'T00:00:00'), 'MMM d, yyyy')}
-                  </td>
-                  <td className="px-4 py-3">
-                    <CategoryBadge category={entry.category} size="sm" />
-                  </td>
-                  <td className="px-4 py-3">
-                    {entry.receipt_url ? (
-                      <a
-                        href={entry.receipt_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm text-emerald-400 hover:text-emerald-300 underline"
-                      >
-                        View
-                      </a>
-                    ) : (
-                      <span className="text-sm text-[#525252]">-</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <div className="flex justify-end gap-2">
-                      <button
-                        onClick={() => handleEdit(entry)}
-                        className="rounded px-2 py-1 text-xs text-[#a1a1aa] hover:bg-[#262626] hover:text-[#fafafa] transition-colors"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => setDeleteConfirm(entry.id)}
-                        className="rounded px-2 py-1 text-xs text-red-400 hover:bg-red-500/20 transition-colors"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </td>
-                </tr>
+        {view === 'transactions' && (
+          <>
+            <select
+              value={month}
+              onChange={(e) => setMonth(e.target.value)}
+              className="rounded-lg border border-[#262626] bg-[#171717] px-3 py-2 text-sm text-[#fafafa] focus:border-emerald-500 focus:outline-none"
+            >
+              <option value="">All Months</option>
+              {['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'].map((m, i) => (
+                <option key={i+1} value={i+1}>{m}</option>
               ))}
-            </tbody>
-          </table>
-        </div>
+            </select>
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="rounded-lg border border-[#262626] bg-[#171717] px-3 py-2 text-sm text-[#fafafa] focus:border-emerald-500 focus:outline-none"
+            >
+              <option value="">All Categories</option>
+              {Object.entries(EXPENSE_CATEGORIES).map(([key, { label }]) => (
+                <option key={key} value={key}>{label}</option>
+              ))}
+            </select>
+          </>
+        )}
+      </div>
+
+      {/* Monthly Summary View */}
+      {view === 'monthly' && (
+        <MonthlyExpenseSummary monthly={monthlyData} yearTotal={yearTotal} />
       )}
 
-      {/* Pagination */}
-      {pagination.totalPages > 1 && (
-        <div className="mt-4 flex items-center justify-between">
-          <p className="text-sm text-[#525252]">
-            Page {pagination.page} of {pagination.totalPages}
-          </p>
-          <div className="flex gap-2">
-            <button
-              disabled={pagination.page <= 1}
-              onClick={() => fetchEntries(pagination.page - 1)}
-              className="rounded-lg border border-[#262626] px-3 py-1.5 text-sm text-[#a1a1aa] hover:bg-[#171717] disabled:opacity-50 transition-colors"
-            >
-              Previous
-            </button>
-            <button
-              disabled={pagination.page >= pagination.totalPages}
-              onClick={() => fetchEntries(pagination.page + 1)}
-              className="rounded-lg border border-[#262626] px-3 py-1.5 text-sm text-[#a1a1aa] hover:bg-[#171717] disabled:opacity-50 transition-colors"
-            >
-              Next
-            </button>
+      {/* Transactions View */}
+      {view === 'transactions' && (
+        <>
+          {/* Category Pie Chart */}
+          {categoryData.length > 0 && (
+            <div className="mb-8 rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+              <h2 className="text-lg font-semibold text-[#fafafa]">Spending by Category</h2>
+              <p className="mt-1 text-sm text-[#525252]">{year} expense distribution</p>
+              <CategoryPieChart data={categoryData} />
+            </div>
+          )}
+
+          {/* Running Total */}
+          <div className="mb-6 rounded-xl border border-[#262626] bg-[#0a0a0a] p-4">
+            <div className="flex gap-8">
+              <div>
+                <p className="text-sm text-[#a1a1aa]">{year} Total</p>
+                <p className="text-xl font-semibold text-red-400">{formatCurrency(yearTotal)}</p>
+              </div>
+              <div>
+                <p className="text-sm text-[#a1a1aa]">Entries</p>
+                <p className="text-xl font-semibold text-[#fafafa]">{pagination.total}</p>
+              </div>
+            </div>
           </div>
-        </div>
+
+          {/* Table */}
+          {loading ? (
+            <div className="flex items-center justify-center py-16">
+              <div className="h-8 w-8 animate-spin rounded-full border-2 border-emerald-500 border-t-transparent" />
+            </div>
+          ) : entries.length === 0 ? (
+            <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] py-16 text-center">
+              <p className="text-[#525252]">No expense entries found</p>
+              <button
+                onClick={() => setShowForm(true)}
+                className="mt-4 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 transition-colors"
+              >
+                Add Your First Expense
+              </button>
+            </div>
+          ) : (
+            <div className="overflow-x-auto rounded-xl border border-[#262626]">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-[#262626] bg-[#0a0a0a]">
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-[#525252]">Description</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-[#525252]">Amount</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-[#525252]">Date</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-[#525252]">Category</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-[#525252]">Receipt</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium uppercase text-[#525252]">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#262626]">
+                  {entries.map((entry) => (
+                    <tr key={entry.id} className="bg-[#0a0a0a] hover:bg-[#171717] transition-colors">
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium text-[#fafafa]">{entry.description}</span>
+                          {entry.is_recurring && (
+                            <span className="rounded-full bg-blue-500/20 px-2 py-0.5 text-xs text-blue-400">
+                              recurring
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-sm font-semibold text-red-400">{formatCurrency(entry.amount)}</td>
+                      <td className="px-4 py-3 text-sm text-[#a1a1aa]">
+                        {format(new Date(entry.date + 'T00:00:00'), 'MMM d, yyyy')}
+                      </td>
+                      <td className="px-4 py-3">
+                        <CategoryBadge category={entry.category} size="sm" />
+                      </td>
+                      <td className="px-4 py-3">
+                        {entry.receipt_url ? (
+                          <a
+                            href={entry.receipt_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm text-emerald-400 hover:text-emerald-300 underline"
+                          >
+                            View
+                          </a>
+                        ) : (
+                          <span className="text-sm text-[#525252]">-</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <div className="flex justify-end gap-2">
+                          <button
+                            onClick={() => handleEdit(entry)}
+                            className="rounded px-2 py-1 text-xs text-[#a1a1aa] hover:bg-[#262626] hover:text-[#fafafa] transition-colors"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => setDeleteConfirm(entry.id)}
+                            className="rounded px-2 py-1 text-xs text-red-400 hover:bg-red-500/20 transition-colors"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* Pagination */}
+          {pagination.totalPages > 1 && (
+            <div className="mt-4 flex items-center justify-between">
+              <p className="text-sm text-[#525252]">
+                Page {pagination.page} of {pagination.totalPages}
+              </p>
+              <div className="flex gap-2">
+                <button
+                  disabled={pagination.page <= 1}
+                  onClick={() => fetchEntries(pagination.page - 1)}
+                  className="rounded-lg border border-[#262626] px-3 py-1.5 text-sm text-[#a1a1aa] hover:bg-[#171717] disabled:opacity-50 transition-colors"
+                >
+                  Previous
+                </button>
+                <button
+                  disabled={pagination.page >= pagination.totalPages}
+                  onClick={() => fetchEntries(pagination.page + 1)}
+                  className="rounded-lg border border-[#262626] px-3 py-1.5 text-sm text-[#a1a1aa] hover:bg-[#171717] disabled:opacity-50 transition-colors"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       {/* Expense Form Modal */}

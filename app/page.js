@@ -79,7 +79,17 @@ export default function LandingPage() {
 
 
 
-        {/* <iframe width="100%" height="640" frameBorder="0" allow="xr-spatial-tracking; gyroscope; accelerometer" allowFullScreen scrolling="yes" src="https://kuula.co/share/collection/7HFB6?logo=0&info=0&fs=0&vr=0&sd=1&thumbs=1"></iframe> */}
+        {/* Comprehensive Services Section */}
+        <section className="px-4 md:px-16 py-16 md:py-24 relative">
+          <div className="max-w-6xl mx-auto text-center">
+            <h2 className="font-anton text-3xl md:text-4xl lg:text-5xl text-white leading-tight tracking-tight max-w-4xl mx-auto mb-6">
+              Comprehensive Web Development & Design Services
+            </h2>
+            <p className="font-manrope text-base md:text-lg text-gray-300 max-w-3xl mx-auto">
+              At Visionary Advance, our web development process is built around your business, not the other way around. As an experienced website designer, we craft custom business systems, high-performance websites, and internal tools that streamline your operations and strengthen your online presence. Whether you need a brand-new site, a custom dashboard, or a complete digital overhaul, every solution is purpose-built to help your business grow.
+            </p>
+          </div>
+        </section>
 
         {/* Problem/Gap Section */}
         <section className="px-4 md:px-16 py-16 md:py-24 relative bg-white/5">
@@ -330,7 +340,7 @@ Your digital presence should work as a filter,drawing in clients who value profe
                     Reliability You Can Count On
                   </h3>
                   <p className="font-manrope text-gray-300">
-                    Fast load times, secure architecture, and modern technology built to last. Your website and systems should perform reliably year after year,without constant fixes or compromises.
+                    Fast load times, secure architecture, and modern technology built to last. Our <a href="/services" className="text-[#008070] hover:underline">Eugene web hosting</a> and custom-built systems perform reliably year after year,without constant fixes or compromises.
                   </p>
                 </div>
                 <a href="/about" className="text-white hover:text-gray-300 flex items-center gap-2 p-0 transition-colors">

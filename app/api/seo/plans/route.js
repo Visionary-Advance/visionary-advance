@@ -4,7 +4,7 @@
 import { NextResponse } from 'next/server';
 import { getPlans, getActivePlan, createPlan } from '@/lib/seo-plans';
 import { getSiteById, getCachedAnalytics, getDetailedAnalytics } from '@/lib/search-console';
-import { generateSEOPlan } from '@/lib/claude-seo';
+import { generateSEOPlan } from '@/lib/gemini-seo';
 
 export async function GET(request) {
   try {

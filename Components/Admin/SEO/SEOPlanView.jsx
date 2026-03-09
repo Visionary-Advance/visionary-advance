@@ -284,6 +284,45 @@ export default function SEOPlanView({ site }) {
             </ul>
           </div>
         )}
+
+        {/* Keyword Strategy */}
+        {activePlan.keyword_strategy && (
+          <div className="mt-4 pt-4 border-t border-[#262626]">
+            <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Keyword Strategy</h4>
+            <div className="space-y-2">
+              {activePlan.keyword_strategy.primary_keywords?.length > 0 && (
+                <div>
+                  <span className="text-gray-500 text-xs">Primary: </span>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {activePlan.keyword_strategy.primary_keywords.map((kw, i) => (
+                      <span key={i} className="text-xs bg-teal-500/20 text-teal-300 px-2 py-0.5 rounded-full">{kw}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {activePlan.keyword_strategy.secondary_keywords?.length > 0 && (
+                <div>
+                  <span className="text-gray-500 text-xs">Secondary: </span>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {activePlan.keyword_strategy.secondary_keywords.map((kw, i) => (
+                      <span key={i} className="text-xs bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-full">{kw}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {activePlan.keyword_strategy.long_tail_opportunities?.length > 0 && (
+                <div>
+                  <span className="text-gray-500 text-xs">Long-Tail: </span>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {activePlan.keyword_strategy.long_tail_opportunities.map((kw, i) => (
+                      <span key={i} className="text-xs bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded-full">{kw}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Filter Bar */}
@@ -494,6 +533,39 @@ function TaskCard({ task, onToggle, isExpanded, onExpand, onSaveNotes }) {
                   </li>
                 ))}
               </ul>
+            </div>
+          )}
+
+          {/* Target Keywords */}
+          {task.target_keywords?.length > 0 && (
+            <div className="mb-3">
+              <p className="text-gray-500 text-xs mb-1">Target Keywords:</p>
+              <div className="flex flex-wrap gap-1">
+                {task.target_keywords.map((kw, i) => (
+                  <span key={i} className="text-xs bg-teal-500/20 text-teal-300 px-2 py-0.5 rounded-full">{kw}</span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Claude Code Prompt */}
+          {task.claude_code_prompt && (
+            <div className="mb-3">
+              <div className="flex items-center justify-between mb-1">
+                <p className="text-gray-500 text-xs">Claude Code Prompt:</p>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(task.claude_code_prompt);
+                  }}
+                  className="text-xs text-teal-400 hover:text-teal-300 transition-colors flex items-center gap-1"
+                >
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                  Copy
+                </button>
+              </div>
+              <pre className="text-xs bg-[#171717] text-gray-300 px-3 py-2 rounded-lg border border-[#262626] whitespace-pre-wrap break-words">{task.claude_code_prompt}</pre>
             </div>
           )}
 

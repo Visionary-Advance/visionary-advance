@@ -35,7 +35,7 @@ export const metadata = {
     default: "Visionary Advance | Custom Business Systems & SEO Web Design | Eugene, OR",
     template: "%s | Visionary Advance"
   },
-  description: "Custom-built websites, dashboards, and business systems designed around how you work. Serving Eugene, Lane County & Oregon businesses.",
+  description: "Visionary Advance offers expert web development, custom business systems, and website design services. Empower your business with a high-performing online presence. Contact us for a free consultation!",
   keywords: "custom business systems, Eugene web design, contractor management systems, warehouse inventory systems, custom dashboards, custom CMS, Lane County web development, Oregon web design, SEO services",
   authors: [{ name: "Visionary Advance" }],
   creator: "Visionary Advance",
@@ -47,7 +47,7 @@ export const metadata = {
     locale: 'en_US',
     url: 'https://visionaryadvance.com',
     title: 'Visionary Advance | Custom Business Systems & SEO Web Design | Eugene, OR',
-    description: 'Custom-built websites, dashboards, and business systems designed around how you work. Serving Eugene, Lane County & Oregon businesses.',
+    description: 'Visionary Advance offers expert web development, custom business systems, and website design services. Empower your business with a high-performing online presence. Contact us for a free consultation!',
     siteName: 'Visionary Advance',
     images: [
       {
@@ -63,7 +63,7 @@ export const metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Visionary Advance | Custom Business Systems & SEO Web Design | Eugene, OR',
-    description: 'Custom-built websites, dashboards, and business systems designed around how you work. Serving Eugene, Lane County & Oregon businesses.',
+    description: 'Visionary Advance offers expert web development, custom business systems, and website design services. Empower your business with a high-performing online presence. Contact us for a free consultation!',
     creator: '@visionaryadvance',
     images: ['https://visionaryadvance.com/Img/VaLogo_Large.png'],
   },
