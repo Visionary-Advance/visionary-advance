@@ -1,5 +1,6 @@
 'use client'
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import {
   Monitor,
   Code,
@@ -31,6 +32,7 @@ export default function ServicesPage() {
     {
       icon: <Palette className="w-12 h-12" />,
       title: "Custom Websites",
+      href: "/custom-websites",
       description: "No templates. No page builders. Every website is designed and coded specifically for your business, your workflow, and how you serve your clients.",
       features: [
         "Custom Design & Development",
@@ -46,6 +48,7 @@ export default function ServicesPage() {
     {
       icon: <Database className="w-12 h-12" />,
       title: "Custom Business Systems",
+      href: "/custom-business-systems",
       description: "Dashboards, inventory systems, job tracking, and internal tools built around how your business actually operates,not platforms you have to adapt to.",
       features: [
         "Custom Dashboards & Analytics",
@@ -61,6 +64,7 @@ export default function ServicesPage() {
     {
       icon: <Search className="w-12 h-12" />,
       title: "SEO & Visibility",
+      href: "/seo-services",
       description: "Strategic SEO that positions you in front of the right clients,the ones searching for expertise and quality, not the lowest price.",
       features: [
         "Local SEO (Eugene & Oregon)",
@@ -76,6 +80,7 @@ export default function ServicesPage() {
     {
       icon: <Server className="w-12 h-12" />,
       title: "Hosting & Support",
+      href: "/hosting",
       description: "Reliable infrastructure and ongoing support so your website and systems perform consistently,without you having to think about it.",
       features: [
         "99.9% Uptime Guarantee",
@@ -217,9 +222,9 @@ export default function ServicesPage() {
                   ))}
                 </ul>
 
-                <button className={`${service.color} hover:text-white hover:bg-current hover:bg-opacity-10 px-4 py-2 rounded-lg font-manrope font-semibold border border-current transition-all duration-300 group-hover:translate-x-1`}>
+                <Link href={service.href} className={`${service.color} hover:text-white hover:bg-current hover:bg-opacity-10 px-4 py-2 rounded-lg font-manrope font-semibold border border-current transition-all duration-300 group-hover:translate-x-1 inline-block`}>
                   Learn More <ArrowRight className="w-4 h-4 inline ml-2" />
-                </button>
+                </Link>
               </div>
             ))}
           </div>

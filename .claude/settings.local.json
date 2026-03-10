@@ -47,7 +47,9 @@
       "Bash(npm:*)",
       "WebFetch(domain:ai.google.dev)",
       "mcp__gemini-content__rewrite_for_seo",
-      "Bash(tasklist:*)"
+      "Bash(tasklist:*)",
+      "mcp__gemini-content__generate_blog_outline",
+      "mcp__gemini-content__write_meta_description"
     ],
     "deny": [],
     "ask": []

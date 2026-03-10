@@ -2,7 +2,7 @@ import Link from 'next/link'
 import SchemaJsonLd from '@/Components/SchemaJsonLd'
 import SystemsCTA from '@/Components/SystemsCTA'
 import SystemsLeadForm from '@/Components/SystemsLeadForm'
-import { generateLocalBusinessSchema, SYSTEMS_PAGE_META } from '@/lib/seo'
+import { generateServiceSchema, SYSTEMS_PAGE_META } from '@/lib/seo'
 
 export const metadata = {
   title: SYSTEMS_PAGE_META.customBusinessSystems.title,
@@ -25,9 +25,10 @@ export const metadata = {
   },
 }
 
-const schema = generateLocalBusinessSchema({
-  pageName: 'Custom Business Systems',
-  pageUrl: `https://visionaryadvance.com${SYSTEMS_PAGE_META.customBusinessSystems.path}`,
+const schema = generateServiceSchema({
+  serviceName: 'Custom Business Systems',
+  description: SYSTEMS_PAGE_META.customBusinessSystems.description,
+  url: `https://visionaryadvance.com${SYSTEMS_PAGE_META.customBusinessSystems.path}`,
 })
 
 export default function CustomBusinessSystemsPage() {
@@ -39,13 +40,13 @@ export default function CustomBusinessSystemsPage() {
       <section className="min-h-[70vh] flex items-center pt-32 pb-16 px-4 md:px-16 bg-gradient-to-b from-[#191E1E] to-[#0a0a0a]">
         <div className="max-w-6xl mx-auto">
           <h1 className="font-anton text-4xl md:text-5xl lg:text-6xl text-white mb-6">
-            Custom Business Systems Built Around Your Workflow
+            Custom Business Systems Built Around How You Actually Work
           </h1>
-          <p className="font-manrope text-xl md:text-2xl text-[#008070] mb-6">
-            Custom systems built around your workflow,not platforms you have to adapt to.
+          <p className="font-manrope text-xl text-gray-300 mb-4">
+            Most software forces you to change your workflow. We build systems that match it&mdash;dashboards, inventory tracking, job management, and internal tools designed for your operation.
           </p>
-          <p className="font-manrope text-lg text-gray-300 max-w-3xl mb-8">
-            We design custom dashboards, inventory systems, and internal software that fits your business,not the other way around. Built in Eugene, serving Lane County and Oregon.
+          <p className="font-manrope text-lg text-[#008070] mb-8">
+            Based in Eugene. Designed for businesses that outgrew spreadsheets.
           </p>
           <SystemsCTA
             variant="hero"
@@ -55,61 +56,130 @@ export default function CustomBusinessSystemsPage() {
         </div>
       </section>
 
-      {/* What We Build Section */}
+      {/* The Problem Section */}
+      <section className="py-16 md:py-24 px-4 md:px-16">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="font-anton text-3xl md:text-4xl text-white mb-8">
+            The Problem
+          </h2>
+          <ul className="space-y-4 font-manrope text-gray-300">
+            <li className="flex items-start gap-3">
+              <span className="text-[#008070] mt-1">&bull;</span>
+              Your team juggles five different tools that don&apos;t talk to each other
+            </li>
+            <li className="flex items-start gap-3">
+              <span className="text-[#008070] mt-1">&bull;</span>
+              Critical data lives in spreadsheets that only one person understands
+            </li>
+            <li className="flex items-start gap-3">
+              <span className="text-[#008070] mt-1">&bull;</span>
+              You have no real-time visibility into operations or profitability
+            </li>
+            <li className="flex items-start gap-3">
+              <span className="text-[#008070] mt-1">&bull;</span>
+              You&apos;re paying for bloated software with features you&apos;ll never use
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      {/* The Solution Section */}
+      <section className="py-16 md:py-24 px-4 md:px-16 bg-[#0a0a0a]">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="font-anton text-3xl md:text-4xl text-white mb-4">
+            The Solution
+          </h2>
+          <p className="font-manrope text-xl text-[#008070] mb-8">
+            One System. Your Workflow. Zero Compromise.
+          </p>
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="bg-white/5 border border-white/10 rounded-xl p-6">
+              <h3 className="font-semibold text-white mb-2">Custom Dashboards</h3>
+              <p className="text-gray-400 text-sm">Real-time visibility into the metrics that matter to your business.</p>
+            </div>
+            <div className="bg-white/5 border border-white/10 rounded-xl p-6">
+              <h3 className="font-semibold text-white mb-2">Inventory &amp; Warehouse Systems</h3>
+              <p className="text-gray-400 text-sm">Track stock, orders, and logistics with precision.</p>
+            </div>
+            <div className="bg-white/5 border border-white/10 rounded-xl p-6">
+              <h3 className="font-semibold text-white mb-2">Job Tracking &amp; Management</h3>
+              <p className="text-gray-400 text-sm">Monitor projects, tasks, and team performance in one place.</p>
+            </div>
+            <div className="bg-white/5 border border-white/10 rounded-xl p-6">
+              <h3 className="font-semibold text-white mb-2">Client Portals</h3>
+              <p className="text-gray-400 text-sm">Give your clients secure access to project status, documents, and communication.</p>
+            </div>
+            <div className="bg-white/5 border border-white/10 rounded-xl p-6">
+              <h3 className="font-semibold text-white mb-2">API Integrations</h3>
+              <p className="text-gray-400 text-sm">Connect your existing tools into one unified system.</p>
+            </div>
+            <div className="bg-white/5 border border-white/10 rounded-xl p-6">
+              <h3 className="font-semibold text-white mb-2">Role-Based Access</h3>
+              <p className="text-gray-400 text-sm">Each team member sees exactly what they need, nothing more.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* System Types Section */}
       <section className="py-16 md:py-24 px-4 md:px-16">
         <div className="max-w-6xl mx-auto">
           <h2 className="font-anton text-3xl md:text-4xl text-white mb-12 text-center">
-            What We Build
+            Explore Our Systems
           </h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-2 gap-8">
             <Link href="/contractor-systems" className="group">
-              <div className="bg-white/5 border border-white/10 rounded-xl p-6 h-full hover:border-[#008070]/50 transition-colors">
-                <h3 className="font-anton text-xl text-white mb-3 group-hover:text-[#008070] transition-colors">
+              <div className="bg-white/5 border border-white/10 rounded-xl p-8 h-full hover:border-[#008070]/50 transition-colors">
+                <h3 className="font-anton text-2xl text-white mb-3 group-hover:text-[#008070] transition-colors">
                   Contractor Systems
                 </h3>
-                <p className="font-manrope text-gray-400 text-sm">
-                  Job tracking, labor management, inventory, and reporting designed for contractors.
+                <p className="font-manrope text-gray-400 mb-4">
+                  Job tracking, labor management, inventory, and reporting built for contractors.
                 </p>
+                <span className="font-manrope text-[#008070] font-semibold">Learn More &rarr;</span>
               </div>
             </Link>
 
             <Link href="/warehouse-inventory-systems" className="group">
-              <div className="bg-white/5 border border-white/10 rounded-xl p-6 h-full hover:border-[#008070]/50 transition-colors">
-                <h3 className="font-anton text-xl text-white mb-3 group-hover:text-[#008070] transition-colors">
-                  Warehouse & Inventory
+              <div className="bg-white/5 border border-white/10 rounded-xl p-8 h-full hover:border-[#008070]/50 transition-colors">
+                <h3 className="font-anton text-2xl text-white mb-3 group-hover:text-[#008070] transition-colors">
+                  Warehouse &amp; Inventory Systems
                 </h3>
-                <p className="font-manrope text-gray-400 text-sm">
-                  Real-time inventory tracking, stock alerts, and warehouse dashboards.
+                <p className="font-manrope text-gray-400 mb-4">
+                  Real-time inventory dashboards and warehouse management.
                 </p>
+                <span className="font-manrope text-[#008070] font-semibold">Learn More &rarr;</span>
               </div>
             </Link>
 
             <Link href="/custom-dashboards-analytics" className="group">
-              <div className="bg-white/5 border border-white/10 rounded-xl p-6 h-full hover:border-[#008070]/50 transition-colors">
-                <h3 className="font-anton text-xl text-white mb-3 group-hover:text-[#008070] transition-colors">
-                  Custom Dashboards
+              <div className="bg-white/5 border border-white/10 rounded-xl p-8 h-full hover:border-[#008070]/50 transition-colors">
+                <h3 className="font-anton text-2xl text-white mb-3 group-hover:text-[#008070] transition-colors">
+                  Custom Dashboards &amp; Analytics
                 </h3>
-                <p className="font-manrope text-gray-400 text-sm">
-                  Analytics and reporting dashboards that show exactly what matters to you.
+                <p className="font-manrope text-gray-400 mb-4">
+                  Role-based analytics and KPI tracking for your operation.
                 </p>
+                <span className="font-manrope text-[#008070] font-semibold">Learn More &rarr;</span>
               </div>
             </Link>
 
             <Link href="/custom-cms-development" className="group">
-              <div className="bg-white/5 border border-white/10 rounded-xl p-6 h-full hover:border-[#008070]/50 transition-colors">
-                <h3 className="font-anton text-xl text-white mb-3 group-hover:text-[#008070] transition-colors">
-                  Custom CMS
+              <div className="bg-white/5 border border-white/10 rounded-xl p-8 h-full hover:border-[#008070]/50 transition-colors">
+                <h3 className="font-anton text-2xl text-white mb-3 group-hover:text-[#008070] transition-colors">
+                  Custom CMS Development
                 </h3>
-                <p className="font-manrope text-gray-400 text-sm">
-                  Secure, scalable content management systems tailored to your workflow.
+                <p className="font-manrope text-gray-400 mb-4">
+                  Internal content management with custom fields and permissions.
                 </p>
+                <span className="font-manrope text-[#008070] font-semibold">Learn More &rarr;</span>
               </div>
             </Link>
           </div>
         </div>
       </section>
 
-      {/* Why Custom Section */}
+      {/* Why Custom Wins Section */}
       <section className="py-16 md:py-24 px-4 md:px-16 bg-[#0a0a0a]">
         <div className="max-w-6xl mx-auto">
           <h2 className="font-anton text-3xl md:text-4xl text-white mb-12 text-center">
@@ -117,23 +187,23 @@ export default function CustomBusinessSystemsPage() {
           </h2>
           <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             <div className="bg-white/5 border border-white/10 rounded-xl p-8">
-              <h3 className="font-anton text-xl text-gray-400 mb-4">Off-the-shelf Software</h3>
+              <h3 className="font-anton text-xl text-gray-400 mb-4">Off-the-shelf SaaS</h3>
               <ul className="space-y-3 font-manrope text-gray-400">
                 <li className="flex items-start gap-3">
                   <span className="text-red-400">-</span>
-                  Forces you into new workflows
+                  Forces new workflows on your team
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-red-400">-</span>
-                  Monthly fees that never end
+                  Monthly fees for features you don&apos;t use
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-red-400">-</span>
-                  Limited customization options
+                  Limited customization and reporting
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-red-400">-</span>
-                  Hard to scale with your business
+                  Your data lives on someone else&apos;s terms
                 </li>
               </ul>
             </div>
@@ -147,15 +217,15 @@ export default function CustomBusinessSystemsPage() {
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-[#008070]">+</span>
-                  One system, not five tools
+                  One system replaces five disconnected tools
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-[#008070]">+</span>
-                  Fully custom dashboards and reports
+                  Fully custom dashboards and reporting
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-[#008070]">+</span>
-                  Scales as you grow
+                  You own everything we build
                 </li>
               </ul>
             </div>
@@ -167,84 +237,17 @@ export default function CustomBusinessSystemsPage() {
       <section className="py-16 md:py-24 px-4 md:px-16">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="font-anton text-3xl md:text-4xl text-white mb-6">
-            Built in Eugene, Designed for Real Business
+            Local Trust
           </h2>
-          <p className="font-manrope text-lg text-gray-300 mb-8">
-            We work with Eugene and Lane County businesses who need systems that work in the real world. Modern frameworks, custom code, secure dashboards,all built with SEO in mind so your clients can find you.
+          <p className="font-manrope text-lg text-gray-300">
+            We work with Eugene and Lane County businesses who need systems that work in the real world. If your operation has outgrown spreadsheets and generic software, we build what comes next&mdash;custom tools designed for how your team actually works.
           </p>
-        </div>
-      </section>
-
-      {/* Benefits Section */}
-      <section className="py-16 md:py-24 px-4 md:px-16 bg-[#0a0a0a]">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="font-anton text-3xl md:text-4xl text-white mb-12 text-center">
-            Benefits of Custom Business Systems
-          </h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div className="bg-white/5 border border-white/10 rounded-xl p-8">
-              <div className="w-12 h-12 bg-[#008070]/20 rounded-lg flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-[#008070]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-              <h3 className="font-anton text-xl text-white mb-3">Increased Efficiency</h3>
-              <p className="font-manrope text-gray-400 text-sm">
-                Eliminate redundant steps and manual processes. A custom system automates the workflows you repeat every day, freeing your team to focus on the work that actually grows your business.
-              </p>
-            </div>
-
-            <div className="bg-white/5 border border-white/10 rounded-xl p-8">
-              <div className="w-12 h-12 bg-[#008070]/20 rounded-lg flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-[#008070]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <h3 className="font-anton text-xl text-white mb-3">Reduced Errors</h3>
-              <p className="font-manrope text-gray-400 text-sm">
-                Stop relying on spreadsheets and manual data entry. Custom-built validation, automated calculations, and centralized data ensure accuracy across your entire operation.
-              </p>
-            </div>
-
-            <div className="bg-white/5 border border-white/10 rounded-xl p-8">
-              <div className="w-12 h-12 bg-[#008070]/20 rounded-lg flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-[#008070]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
-                </svg>
-              </div>
-              <h3 className="font-anton text-xl text-white mb-3">Scalability</h3>
-              <p className="font-manrope text-gray-400 text-sm">
-                Off-the-shelf software hits limits as you grow. Custom systems are designed to scale with your business, adding new features and capacity when you need them without starting over.
-              </p>
-            </div>
-
-            <div className="bg-white/5 border border-white/10 rounded-xl p-8">
-              <div className="w-12 h-12 bg-[#008070]/20 rounded-lg flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-[#008070]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
-              </div>
-              <h3 className="font-anton text-xl text-white mb-3">Competitive Advantage</h3>
-              <p className="font-manrope text-gray-400 text-sm">
-                While competitors wrestle with generic tools, your team operates on systems built for exactly how you work. That operational edge translates directly to faster delivery and better client experiences.
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-12 text-center">
-            <Link
-              href="/contact"
-              className="inline-flex items-center gap-2 bg-[#008070] hover:bg-[#006b5d] text-white px-8 py-4 rounded transition-colors font-manrope font-semibold text-lg"
-            >
-              Request a Free Consultation
-            </Link>
-          </div>
         </div>
       </section>
 
       {/* CTA Section */}
       <SystemsCTA
-        title="Ready to Simplify Your Operations?"
+        title="Let&apos;s Map Your Workflow"
         text="Free system consultation. No pressure. Just clarity."
         buttonText="Map My Workflow"
         scrollTarget="lead-form"
