@@ -36,8 +36,9 @@ export async function POST(request) {
     // Determine which paths to revalidate based on content type
     switch (_type) {
       case 'post':
-        // Revalidate blog listing
+        // Revalidate blog listing and sitemap
         paths.push('/blog');
+        paths.push('/sitemap.xml');
 
         // Revalidate the specific post page if slug exists
         if (slug?.current) {
