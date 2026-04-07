@@ -1,7 +1,8 @@
 // app/sitemap.js
-// Dynamic sitemap generation for Next.js
 
 import { getAllPosts, getAllCategories, getAllTags, getAllSeries } from '@/lib/sanity';
+import { servicesData } from '@/lib/services-data';
+import { portfolioProjects } from '@/lib/works-data';
 
 export default async function sitemap() {
   const baseUrl = 'https://visionaryadvance.com';
@@ -21,12 +22,10 @@ export default async function sitemap() {
     ]);
   } catch (error) {
     console.error('Failed to fetch blog content for sitemap:', error);
-    // Continue with empty arrays - static routes will still be included
   }
 
   // Static routes
   const staticRoutes = [
-    // Core pages
     {
       url: baseUrl,
       lastModified: new Date(),
@@ -57,77 +56,37 @@ export default async function sitemap() {
       changeFrequency: 'monthly',
       priority: 0.8,
     },
-    // Blog
     {
       url: `${baseUrl}/blog`,
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 0.9,
     },
-    // Landing pages
     {
-      url: `${baseUrl}/construction-websites`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/eugene-web-design`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.9,
-    },
-    // Custom systems pages
-    {
-      url: `${baseUrl}/custom-business-systems`,
+      url: `${baseUrl}/works`,
       lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 0.8,
     },
-    {
-      url: `${baseUrl}/contractor-systems`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/warehouse-inventory-systems`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/custom-dashboards-analytics`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/custom-cms-development`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.7,
-    },
-    // Service pages
-    {
-      url: `${baseUrl}/custom-websites`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/seo-services`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/hosting`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.8,
-    },
+    
   ];
+
+  // Service detail routes
+  const serviceRoutes = Object.keys(servicesData).map((slug) => ({
+    url: `${baseUrl}/services/${slug}`,
+    lastModified: new Date(),
+    changeFrequency: 'monthly',
+    priority: 0.8,
+  }));
+
+  // Works/project detail routes
+  const worksRoutes = portfolioProjects
+    .map((project) => ({
+      url: `${baseUrl}/works/${project.slug}`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    }));
 
   // Blog post routes
   const postRoutes = posts.map((post) => ({
@@ -163,6 +122,8 @@ export default async function sitemap() {
 
   return [
     ...staticRoutes,
+    ...serviceRoutes,
+    ...worksRoutes,
     ...postRoutes,
     ...categoryRoutes,
     ...tagRoutes,

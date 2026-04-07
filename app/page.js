@@ -1,491 +1,363 @@
 'use client'
-import React from 'react';
-import {
-  ChevronRight,
-  Star,
-  Globe,
-  Smartphone,
-  BarChart3,
-  Eye,
-  SearchX,
-  MessageCircleX,
-  ShieldCheck,
-  Search,
-  Award,
-} from "lucide-react";
-import Image from 'next/image';
 
-import dynamic from 'next/dynamic';
-import Link from 'next/link';
-import Footer from '@/Components/Footer';
-import SquareOAuthButton from '@/Components/SquareOAuthButton';
-import CTA from '@/Components/CTA';
+import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
+import { ChevronRight, Globe, LayoutDashboard, Search, Wrench } from 'lucide-react'
+import Image from 'next/image'
+import Link from 'next/link'
+import ServicesAccordion from '@/Components/Home/ServicesAccordion'
+import PricingSection from '@/Components/Home/PricingSection'
+import TestimonialsCarousel from '@/Components/Home/TestimonialsCarousel'
+import CTA from '@/Components/CTA'
+import ScrollReveal from '@/Components/Home/ScrollReveal'
+import { client } from '@/sanity/lib/client'
 
-const DarkVeil = dynamic(() => import('@/Components/DarkVeil'), { ssr: false });
-
-const PlaceholderImage = ({ className = "" }) => (
-  <div
-    className={`bg-gray-300 rounded-2xl flex items-center justify-center ${className}`}
-  >
-    <div className="w-16 h-16 bg-gray-400 rounded-lg opacity-50"></div>
-  </div>
-);
-
-
-
-export default function LandingPage() {
+function PillBadge({ text, filled = false }) {
   return (
-    <>
-      {/* Dark Veil Background Animation */}
-      <div className='absolute top-0 overflow-x-hidden left-0 w-full h-full z-0 pointer-events-none' style={{minHeight: '100vh'}}>
-        <DarkVeil 
-          hueShift={53}
-          noiseIntensity={0.02}
-          scanlineIntensity={0.1}
-          speed={0.6}
-          scanlineFrequency={0.1}
-          warpAmount={0.5}
-          resolutionScale={1}
-        />
-      </div>
-      
-      <div className="min-h-screen bg-transparent  text-white relative z-10">
-        {/* Glass Navigation Header */}
-        
-        {/* Hero Section */}
-        <section className="min-h-screen  text-center relative">
-          <div className="lg:max-w-4xl w-full mt-16 mx-auto justify-center -translate-y-1/2 top-1/2 absolute left-1/2 -translate-x-1/2 space-y-5">
-            <div className="space-y-6 ">
-              
-              <h1 className="pb-2 font-anton text-5xl lg:text-6xl text-white leading-tight tracking-tight lg:max-w-4xl mx-auto animate-fade-up">
-                Custom Websites, SEO &amp; Business Systems Built Around How You Work
-              </h1>
+    <span
+      className={`inline-flex items-center gap-3 rounded-full px-7 py-3 font-manrope font-bold text-base ${
+        filled
+          ? 'bg-[#008070] border border-[#008070] text-white'
+          : 'border border-gray-300 text-gray-700'
+      }`}
+    >
+      <span
+        className={`w-3.5 h-3.5 rounded-full ${
+          filled ? 'bg-white' : 'bg-[#008070]'
+        }`}
+      />
+      {text}
+    </span>
+  )
+}
 
-<p className="text-lg md:text-xl">We design modern, SEO-driven websites and custom business systems from dashboards to inventory built around your workflow, not the other way around. Serving Eugene, Lane County & Oregon businesses.</p>
+import { portfolioProjects, worksData } from '@/lib/works-data'
 
-          
+const categoryIcons = {
+  Website: Globe,
+  Dashboard: LayoutDashboard,
+  SEO: Search,
+  Systems: Wrench,
+}
+
+function ProjectCard({ project }) {
+  const Icon = categoryIcons[project.category] ?? Globe
+  const data = worksData[project.slug]
+  const gallery = data?.gallery
+  const isFull = project.span === 'full'
+
+  return (
+    <Link href={`/works/${project.slug}`} className="group block">
+      <div className="relative h-60 md:h-80 bg-gray-200 rounded-xl overflow-hidden">
+        {gallery ? (
+          isFull ? (
+            <div className="absolute inset-0 grid grid-cols-3 gap-1">
+              <div className="relative">
+                <Image src={gallery[0]} alt={project.name} fill className="object-cover" sizes="33vw" />
+              </div>
+              <div className="relative">
+                <Image src={gallery[2]} alt={project.name} fill className="object-cover" sizes="33vw" />
+              </div>
+              <div className="relative">
+                <Image src={gallery[3]} alt={project.name} fill className="object-cover" sizes="33vw" />
+              </div>
             </div>
+          ) : (
+            <Image src={gallery[2]} alt={project.name} fill className="object-cover" sizes="(max-width: 768px) 100vw, 50vw" />
+          )
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center text-gray-400 font-manrope">
+            Project Screenshot
+          </div>
+        )}
+        {/* Category overlay top-left — text + icon only, no background */}
+        <div className="absolute top-4 left-4 flex items-center gap-2 text-white drop-shadow-md">
+          <Icon className="w-5 h-5" />
+          <span className="font-manrope font-bold text-lg">{project.category}</span>
+        </div>
+      </div>
+      {/* Name tag — turns teal on hover */}
+      <div className="flex items-center justify-between px-4 py-3 mt-1 rounded-xl bg-gray-100 group-hover:bg-[#008070] transition-colors duration-200">
+        <p className="font-manrope font-bold text-lg text-gray-900 group-hover:text-white transition-colors duration-200">
+          {project.name}
+        </p>
+        <p className="font-manrope font-bold text-lg text-gray-900 group-hover:text-white transition-colors duration-200">
+          {project.year}
+        </p>
+      </div>
+    </Link>
+  )
+}
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-11/12 mx-auto">
-              <a href="/contact" className="bg-[#008070] hover:bg-[#006b5d] text-white px-6 py-3 rounded w-full sm:w-auto transition-colors text-center">
-                Map Your Workflow
-              </a>
-              <a href="/services" className="border-2 border-white text-white bg-transparent hover:bg-white hover:text-[#191E1E] px-6 py-3 rounded w-full sm:w-auto transition-colors text-center">
-                See Our Approach
-              </a>
+const BLOG_QUERY = `*[_type == "post" && publishedAt < now()] | order(publishedAt desc) [0...3] {
+  title,
+  "slug": slug.current,
+  excerpt,
+  "category": categories[0]->{ title, color },
+  "imageUrl": mainImage.asset->url,
+  "imageAlt": mainImage.alt
+}`
+
+export default function HomePage() {
+  const [blogPosts, setBlogPosts] = useState([])
+  const [marqueeReady, setMarqueeReady] = useState(false)
+
+  useEffect(() => {
+    client.fetch(BLOG_QUERY).then(setBlogPosts)
+  }, [])
+
+  return (
+    <div className="bg-white overflow-x-hidden">
+      {/* ===== SECTION 1: HERO ===== */}
+      <section className="bg-[#050505] min-h-screen relative flex flex-col">
+        {/* Gradient grid pattern background */}
+        <div className="hero-pattern" />
+
+        {/* Hero Content */}
+        <div className="relative z-10 flex-1 flex flex-col justify-center px-4 pt-28 md:pt-32 pb-8">
+          <div className="max-w-4xl mx-auto text-center space-y-6">
+            <h1 className="font-inter-display font-semibold text-5xl md:text-6xl lg:text-7xl text-white leading-tight tracking-tight">
+              Custom Websites, SEO &amp; Business Systems Built Around How You Work
+            </h1>
+            <p className="font-manrope text-lg md:text-xl text-white/85 max-w-2xl mx-auto">
+              We design modern, SEO-driven websites and custom business systems — from dashboards to inventory — built around your workflow, not the other way around.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+              <Link
+                href="/audit"
+                className="bg-[#008070] hover:bg-[#006b5d] text-white font-manrope font-bold px-8 py-4 rounded-lg w-full sm:w-auto transition-colors text-center text-lg"
+              >
+                Run an Audit
+              </Link>
+              <Link
+                href="/works"
+                className="bg-white/10 backdrop-blur border border-white/20 text-white font-manrope font-bold px-8 py-4 rounded-lg w-full sm:w-auto hover:bg-white/20 transition-colors text-center text-lg"
+              >
+                View Projects
+              </Link>
             </div>
           </div>
-        </section>
+        </div>
+
+        {/* V-shaped image row (desktop) / scrolling marquee (mobile) */}
+        {/* Desktop: static V layout */}
+        <div className="relative z-10 w-[80%] mx-auto mb-8 hidden md:block">
+          <div className="flex items-end justify-center gap-4">
+            <motion.div initial={{ opacity: 0, y: 80 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.2, ease: 'easeOut' }} className="relative w-1/5 h-80 rounded-xl overflow-hidden flex-shrink-0">
+              <Image src="/Img/Design.jpg" alt="Web design" fill className="object-cover" sizes="20vw" />
+            </motion.div>
+            <motion.div initial={{ opacity: 0, y: 80 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.35, ease: 'easeOut' }} className="relative w-1/5 h-64 rounded-xl overflow-hidden flex-shrink-0">
+              <Image src="/Img/Clients.jpg" alt="Client work" fill className="object-cover" sizes="20vw" />
+            </motion.div>
+            <motion.div initial={{ opacity: 0, y: 80 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.5, ease: 'easeOut' }} className="relative w-1/5 h-52 rounded-xl overflow-hidden flex-shrink-0">
+              <Image src="/Img/coding.jpg" alt="Development" fill className="object-cover" sizes="20vw" />
+            </motion.div>
+            <motion.div initial={{ opacity: 0, y: 80 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.35, ease: 'easeOut' }} className="relative w-1/5 h-64 rounded-xl overflow-hidden flex-shrink-0">
+              <Image src="/Img/communication.jpg" alt="Communication" fill className="object-cover" sizes="20vw" />
+            </motion.div>
+            <motion.div initial={{ opacity: 0, y: 80 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.2, ease: 'easeOut' }} className="relative w-1/5 h-80 rounded-xl overflow-hidden flex-shrink-0">
+              <Image src="/Img/Work.jpg" alt="Our work" fill className="object-cover" sizes="20vw" />
+            </motion.div>
+          </div>
+        </div>
+
+        {/* Mobile: scrolling marquee with staggered fade-up */}
+        <div className="relative z-10 w-full overflow-hidden mb-8 md:hidden">
+          <div className={`flex gap-4 ${marqueeReady ? 'animate-marquee' : ''}`}>
+            {[
+              '/Img/Design.jpg', '/Img/Clients.jpg', '/Img/coding.jpg', '/Img/communication.jpg', '/Img/Work.jpg',
+              '/Img/Design.jpg', '/Img/Clients.jpg', '/Img/coding.jpg', '/Img/communication.jpg', '/Img/Work.jpg',
+            ].map((src, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 60 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.4 + i * 0.07, ease: 'easeOut' }}
+                onAnimationComplete={i === 9 ? () => setMarqueeReady(true) : undefined}
+                className="relative h-48 w-48 flex-shrink-0 rounded-xl overflow-hidden"
+              >
+                <Image src={src} alt="" fill className="object-cover" sizes="192px" />
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ===== SECTION 2: ABOUT ===== */}
+      <section className="bg-white py-20 md:py-28 px-4 md:px-16">
+        <div className="max-w-6xl ml-0 mr-auto">
+          {/* Image collage grid */}
 
 
+          {/* About content */}
+          <div className="max-w-7xl mr-auto ml-0">
+            <PillBadge text="About Us" />
+            <ScrollReveal
+              baseColor="rgb(200, 200, 200)"
+              revealColor="rgb(23, 23, 23)"
+              containerClassName="mt-6"
+              textClassName="font-inter-display font-semibold"
+            >
+              At Visionary Advance, our web development process is built around your business — not the other way around. As an experienced website designer, we craft custom business systems, high-performance websites, and internal tools that streamline your operations and strengthen your online
+            </ScrollReveal>
+          </div>
+        <div className="grid md:grid-cols-3 gap-4 md:gap-6 mb-12">
+            <div className="relative h-60 md:h-80 rounded-xl overflow-hidden">
+              <Image
+                src="/Img/Design.jpg"
+                alt="Custom web design services"
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 50vw"
+              />
+            </div>
+            <div className="relative h-60 md:h-80 rounded-xl overflow-hidden">
+              <Image
+                src="/Img/Brandon_Headshot_Square.jpg"
+                alt="Business systems and tools"
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 50vw"
+              />
+            </div>
+            <div className="relative h-60 md:h-80 rounded-xl overflow-hidden flex flex-col justify-start items-start md:justify-end p-4">
+              <p className="text-black font-inter-display font-semibold text-xl mb-3">
+                Get to know more about what drives us
+              </p> 
+              <Link
+                href="/about"
+                className="bg-[#008070] hover:bg-[#006b5d] text-white font-manrope font-bold px-8 py-4 rounded-lg transition-colors text-center text-lg"
+              >
+                About Us
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
 
-        {/* Comprehensive Services Section */}
-        <section className="px-4 md:px-16 py-16 md:py-24 relative">
-          <div className="max-w-6xl mx-auto text-center">
-            <h2 className="font-anton text-3xl md:text-4xl lg:text-5xl text-white leading-tight tracking-tight max-w-4xl mx-auto mb-6">
-              Comprehensive Web Development & Design Services
-            </h2>
-            <p className="font-manrope text-base md:text-lg text-gray-300 max-w-3xl mx-auto">
-              At Visionary Advance, our web development process is built around your business, not the other way around. As an experienced website designer, we craft custom business systems, high-performance websites, and internal tools that streamline your operations and strengthen your online presence. Whether you need a brand-new site, a custom dashboard, or a complete digital overhaul, every solution is purpose-built to help your business grow.
+      {/* ===== SECTION 3: SERVICES INFO ===== */}
+      <div className="-translate-y-16 md:-translate-y-0">
+      <section className="bg-white -translate-y-16 pb-16 md:pt-4 px-4 md:px-16">
+        <div className="max-w-6xl mx-auto">
+          
+
+          <div className="flex flex-col items-center text-center gap-6">
+            <PillBadge text="Services" />
+            <p className="font-inter-display font-semibold text-black text-base md:text-2xl max-w-3xl leading-relaxed">
+              We build custom websites and business systems for professionals who take their operations seriously. Your experience, reputation, and workflow deserve more than templates — they deserve solutions built specifically for you.
             </p>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Problem/Gap Section */}
-        <section className="px-4 md:px-16 py-16 md:py-24 relative bg-white/5">
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center space-y-4 mb-12 md:mb-16">
-              <p className="font-manrope font-semibold text-[#008070]">The Gap</p>
-              <h2 className="font-anton text-3xl md:text-4xl lg:text-5xl text-white leading-tight tracking-tight max-w-4xl mx-auto animate-fade-up">
-                Built in Eugene. Designed for Real Businesses.
-              </h2>
-              <p className="font-manrope text-base md:text-lg text-gray-300 max-w-3xl mx-auto">
-                No templates. No bloated platforms. Just custom solutions that fit how your business already operates.
-              </p>
-            </div>
+      {/* ===== SECTION 4: SERVICES ACCORDION ===== */}
+      <section className="bg-white pb-16 md:pb-24 px-4 md:px-16">
+        <ServicesAccordion />
+      </section>
+      </div>
 
-            <div className="space-y-8 md:grid md:grid-cols-2 lg:grid-cols-4 md:gap-8 md:space-y-0">
-              <div className="space-y-4 p-6 bg-white/5 rounded-lg border border-white/10">
-                <Eye className="w-10 h-10 text-[#008070]" />
-                <h3 className="font-anton text-xl text-white">
-                  First Impressions Still Decide
-                </h3>
-                <p className="font-manrope text-gray-300">
-                 When potential clients search your business, your website sets expectations instantly. An outdated or generic site signals outdated systems, even if your work is excellent.
-                </p>
-              </div>
-
-              <div className="space-y-4 p-6 bg-white/5 rounded-lg border border-white/10">
-                <SearchX className="w-10 h-10 text-[#008070]" />
-                <h3 className="font-anton text-xl text-white">
-                 Invisible to the Right Buyers
-                </h3>
-                <p className="font-manrope text-gray-300">
-                 Your best work doesn't matter if it isn't found. Without SEO built into your website, competitors win visibility simply by showing up first.
-                </p>
-              </div>
-
-              <div className="space-y-4 p-6 bg-white/5 rounded-lg border border-white/10">
-                <MessageCircleX className="w-10 h-10 text-[#008070]" />
-                <h3 className="font-anton text-xl text-white">
-                  The Wrong Message
-                </h3>
-                <p className="font-manrope text-gray-300">
-                 Template sites and DIY builds don't reflect premium services. When your website undersells you, high-value clients never reach out.
-                </p>
-              </div>
-
-              <div className="space-y-4 p-6 bg-white/5 rounded-lg border border-white/10">
-                <ShieldCheck className="w-10 h-10 text-[#008070]" />
-                <h3 className="font-anton text-xl text-white">
-                  Your Reputation, Online
-                </h3>
-                <p className="font-manrope text-gray-300">
-                  You don't cut corners for clients. Your website and systems shouldn't either. Your digital presence is part of how you deliver trust.
-                </p>
-              </div>
-            </div>
+      {/* ===== SECTION 5: PORTFOLIO ===== */}
+      <section className="bg-white -trans md:py-24 px-4 md:px-16">
+        <div className="max-w-6xl mx-auto">
+          <div className="mb-10">
+            <PillBadge text="Our Works" />
           </div>
-        </section>
 
-        {/* Services Section */}
-        <section className="px-4 md:px-16 py-16 relative">
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center space-y-4 mb-12 md:mb-16">
-            <p className="font-manrope font-semibold text-[#008070]">The Solution</p>
-
-             <h2 className="font-anton text-3xl md:text-4xl lg:text-5xl text-white leading-tight tracking-tight max-w-4xl mx-auto animate-fade-up">
-               Websites &amp; Systems That Match How You Work
-             </h2>
-<p className='font-manrope text-base md:text-lg text-gray-300 max-w-3xl mx-auto'>We build custom websites and business systems for professionals who take their operations seriously. Your experience, reputation, and workflow deserve more than templates,they deserve solutions built specifically for you.</p>
-
-              
+          <div className="space-y-6">
+            {/* Row 1: Two projects side by side */}
+            <div className="grid md:grid-cols-2 gap-6">
+              {portfolioProjects.slice(0, 2).map((project, i) => (
+                <ProjectCard key={i} project={project} />
+              ))}
             </div>
 
-            <div className="space-y-12 md:grid md:grid-cols-3 md:gap-12 md:space-y-0 mb-12 md:mb-16">
-              <div className="text-center space-y-6 md:space-y-8">
-                <div className="relative w-full h-48 md:h-60">
-                  <Image
-                    src='/Img/Design.jpg'
-                    alt="Design that reflects professional standards"
-                    fill
-                    className="rounded-lg object-cover"
-                    sizes="(max-width: 768px) 100vw, 33vw"
-                  />
-                </div>
-                <div className="space-y-4 md:space-y-6">
-                  <h3 className="font-anton text-2xl md:text-3xl text-white leading-tight">
-                    Design That Reflects Your Standards
-                  </h3>
-                  <p className="font-manrope text-gray-300">
-Every interaction, every detail, every decision is intentional. We design websites and dashboards that reflect the level of quality you deliver. No shortcuts, no recycled layouts, no compromises.                  </p>
-                </div>
-              </div>
+            {/* Row 2: Full width */}
+            <ProjectCard project={portfolioProjects[2]} />
 
-              <div className="text-center space-y-6 md:space-y-8">
-                <div className="relative w-full h-48 md:h-60">
-                  <Image
-                    src='/Img/Clients.jpg'
-                    alt="SEO strategy to be found by the right clients"
-                    fill
-                    className="rounded-lg object-cover"
-                    sizes="(max-width: 768px) 100vw, 33vw"
-                  />
-                </div>
-                <div className="space-y-4 md:space-y-6">
-                  <h3 className="font-anton text-2xl md:text-3xl text-white leading-tight">
-                    Found By The Right Clients
-                  </h3>
-                  <p className="font-manrope text-gray-300">
-SEO isn’t about traffic,it’s about alignment. We build SEO into the foundation so the right clients find you first: the ones who value expertise, professionalism, and long-term partnerships.                  </p>
-                </div>
-              </div>
-
-              <div className="text-center space-y-6 md:space-y-8">
-                <div className="relative w-full h-48 md:h-60">
-                  <Image
-                    src='/Img/communication.jpg'
-                    alt="High-performance websites built to last"
-                    fill
-                    className="rounded-lg object-cover"
-                    sizes="(max-width: 768px) 100vw, 33vw"
-                  />
-                </div>
-                <div className="space-y-4 md:space-y-6">
-                  <h3 className="font-anton text-2xl md:text-3xl text-white leading-tight">
-                   Built To Perform. Built To Scale.
-                  </h3>
-                  <p className="font-manrope text-gray-300">
-                   Fast, secure, and engineered for long-term performance. From modern websites to internal systems, everything we build is designed to scale as your business grows, not hold it back.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 md:gap-6">
-              <a href="/services" className="border-2 border-white text-white bg-transparent hover:bg-white hover:text-[#191E1E] px-6 py-3 rounded w-full sm:w-auto transition-colors text-center">
-                See Our Approach
-              </a>
-              <a href="/contact" className="text-white hover:text-gray-300 flex items-center gap-2 w-full sm:w-auto justify-center transition-colors">
-                Start Your Project
-                <ChevronRight className="w-4 h-4" />
-              </a>
-            </div>
-          </div>
-        </section>
-
-        {/* Split Content Section */}
-        <section className="px-4 md:px-16 py-16 md:py-28 relative bg-white/5">
-          <div className="max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
-            <div className="flex-1 space-y-8 order-2 lg:order-1">
-              <div className="space-y-6 text-left">
-                <p className="font-manrope font-semibold text-[#008070]">Built to Represent You</p>
-                  <h2 className="pb-2 font-anton text-3xl text-left md:text-4xl lg:text-6xl text-white leading-tight tracking-tight max-w-4xl mx-auto animate-fade-up">
-                    A Digital Presence That Matches How You Work
-                  </h2>
-
-<p className='font-manrope text-left text-base md:text-lg text-gray-300 max-w-3xl mx-auto'>We build custom websites and business systems for professionals who take pride in their craft. Your experience, precision, and operational standards deserve a digital presence that reflects the same level of quality.</p>
-
-              </div>
-
-              <div className="space-y-6 md:grid md:grid-cols-2 md:gap-8 md:space-y-0">
-                <div className="space-y-4">
-                  <h3 className="font-anton text-xl text-white">
-                    Attract the Right Opportunities
-                  </h3>
-                  <p className="font-manrope text-gray-300">
-Your digital presence should work as a filter,drawing in clients who value professionalism and pushing away those who don’t.                  </p>
-                </div>
-                <div className="space-y-4">
-                  <h3 className="font-anton text-xl text-white">Stand Out for the Right Reasons</h3>
-                  <p className="font-manrope text-gray-300">
-                    When potential clients search, your website should immediately communicate trust, quality, and capability.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex flex-col sm:flex-row items-start gap-4 md:gap-6">
-                <a href="/contact" className="bg-[#008070] hover:bg-[#006b5d] text-white px-6 py-3 rounded w-full sm:w-auto transition-colors text-center">
-                  Elevate Your Presence
-                </a>
-                <a href="/services" className="text-white hover:text-gray-300 flex items-center gap-2 w-full sm:w-auto justify-center transition-colors">
-                  See Our Approach
-                  <ChevronRight className="w-4 h-4" />
-                </a>
-              </div>
-            </div>
-
-            <div className="flex-1 w-full order-1 lg:order-2">
-              <div className="relative w-full h-80 md:h-[640px]">
-                <Image
-                  src='/Img/Work.jpg'
-                  alt="Digital presence that matches your craftsmanship"
-                  fill
-                  className="rounded-2xl object-cover"
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                  priority
-                />
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Web Hosting Section */}
-        <section className="px-4 md:px-16 py-16 md:py-28 relative">
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center space-y-4 mb-12 md:mb-16">
-              <p className="font-manrope font-semibold text-[#008070]">Built to Perform</p>
-              <h2 className="font-anton text-3xl md:text-4xl lg:text-5xl text-white leading-tight tracking-tight max-w-3xl mx-auto">
-                A Digital Presence Built for Real Operations
-              </h2>
-            </div>
-
-            <div className="space-y-12 md:grid md:grid-cols-3 md:gap-12 md:space-y-0">
-              <div className="space-y-6 md:space-y-8">
-                <div className="space-y-4 md:space-y-6">
-                  <Globe className="w-12 h-12 text-[#008070]" />
-                  <h3 className="font-anton text-xl md:text-2xl text-white leading-tight">
-                    Precision in Every Detail
-                  </h3>
-                  <p className="font-manrope text-gray-300">
-                   Every line of code, every interaction, every system is built with intention. From public-facing websites to internal dashboards, everything we create is designed to perform as precisely as you run your business.
-                  </p>
-                </div>
-                <a href="/services" className="text-white hover:text-gray-300 flex items-center gap-2 p-0 transition-colors">
-                  See Our Approach
-                  <ChevronRight className="w-4 h-4" />
-                </a>
-              </div>
-
-              <div className="space-y-6 md:space-y-8">
-                <div className="space-y-4 md:space-y-6">
-                  <Search className="w-12 h-12 text-[#008070]" />
-                  <h3 className="font-anton text-xl md:text-2xl text-white leading-tight">
-                    Found by Clients Who Value Quality
-                  </h3>
-                  <p className="font-manrope text-gray-300">
-                   SEO isn’t about being everywhere,it’s about showing up where it matters. We position you in front of clients actively searching for expertise, professionalism, and long-term quality, not the lowest price.
-                  </p>
-                </div>
-                <a href="/contact" className="text-white hover:text-gray-300 flex items-center gap-2 p-0 transition-colors">
-                  Start Your Project
-                  <ChevronRight className="w-4 h-4" />
-                </a>
-              </div>
-
-              <div className="space-y-6 md:space-y-8">
-                <div className="space-y-4 md:space-y-6">
-                  <Award className="w-12 h-12 text-[#008070]" />
-                  <h3 className="font-anton text-xl md:text-2xl text-white leading-tight">
-                    Reliability You Can Count On
-                  </h3>
-                  <p className="font-manrope text-gray-300">
-                    Fast load times, secure architecture, and modern technology built to last. Our <a href="/services" className="text-[#008070] hover:underline">Eugene web hosting</a> and custom-built systems perform reliably year after year,without constant fixes or compromises.
-                  </p>
-                </div>
-                <a href="/about" className="text-white hover:text-gray-300 flex items-center gap-2 p-0 transition-colors">
-                  Learn More
-                  <ChevronRight className="w-4 h-4" />
-                </a>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Testimonials Section */}
-        {/* <section className="px-4 md:px-16 py-16 md:py-28 relative">
-          <div className="max-w-6xl mx-auto">
-            <div className="mb-12 md:mb-20">
-              <h2 className="font-anton text-3xl md:text-4xl lg:text-5xl text-white leading-tight tracking-tight mb-6">
-                Client Feedback
-              </h2>
-              <p className="font-manrope text-base md:text-lg text-white">
-                Their commitment to community is truly inspiring.
-              </p>
-            </div>
-
-            <div className="space-y-12 md:grid md:grid-cols-3 md:gap-8 md:space-y-0">
-              {[
-                {
-                  quote: "Working with them transformed our online presence!",
-                  name: "Alice Johnson",
-                  role: "CEO, Local Co.",
-                },
-                {
-                  quote: "Their support has been invaluable to our growth!",
-                  name: "Mark Smith",
-                  role: "Founder, Tech Hub",
-                },
-                {
-                  quote: "A fantastic partner in building our community!",
-                  name: "Emily Davis",
-                  role: "Director, Art Space",
-                },
-              ].map((testimonial, i) => (
-                <div key={i} className="space-y-6 md:space-y-8">
-                  <StarRating />
-                  <blockquote className="font-anton text-lg md:text-xl text-white leading-relaxed">
-                    "{testimonial.quote}"
-                  </blockquote>
-                  <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 bg-gray-400 rounded-full"></div>
-                    <div>
-                      <p className="font-manrope font-semibold text-white">
-                        {testimonial.name}
-                      </p>
-                      <p className="font-manrope text-white">
-                        {testimonial.role}
-                      </p>
-                    </div>
-                  </div>
-                </div>
+            {/* Row 3: Two projects side by side */}
+            <div className="grid md:grid-cols-2 gap-6">
+              {portfolioProjects.slice(3, 5).map((project, i) => (
+                <ProjectCard key={i} project={project} />
               ))}
             </div>
           </div>
-        </section> */}
+        </div>
+      </section>
 
-        {/* Custom Systems Section */}
-        <section className="px-4 md:px-16 py-16 md:py-28 relative bg-white/5">
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center space-y-4 mb-12 md:mb-16">
-              <p className="font-manrope font-semibold text-[#008070]">Custom Systems</p>
-              <h2 className="font-anton text-3xl md:text-4xl lg:text-5xl text-white leading-tight tracking-tight max-w-4xl mx-auto">
-                Custom Systems Built Around Your Workflow
+      {/* ===== SECTION 6: TESTIMONIALS ===== */}
+      <section className="bg-white py-16 md:py-24 px-4 md:px-16">
+        <div className="max-w-6xl mx-auto mb-4 flex justify-center">
+          <PillBadge text="Testimonials" />
+        </div>
+        <div className="px-0 md:px-16">
+          <TestimonialsCarousel />
+        </div>
+      </section>
+
+      {/* ===== SECTION 7: PRICING ===== */}
+      <PricingSection />
+
+    
+
+      {/* ===== SECTION 9: BLOG / INSIGHTS ===== */}
+      <section className="bg-white py-16 md:py-24 px-4 md:px-16">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-10">
+            <div>
+              <PillBadge text="Our Blog" />
+              <h2 className="font-anton text-3xl md:text-4xl text-gray-900 tracking-tight mt-4">
+                Insights
               </h2>
-              <p className="font-manrope text-lg md:text-xl text-[#008070] max-w-3xl mx-auto">
-                Not platforms you have to adapt to.
-              </p>
-              <p className="font-manrope text-base md:text-lg text-gray-300 max-w-3xl mx-auto">
-                Built in Eugene, serving Lane County + Oregon. Modern frameworks, custom code, secure dashboards.
-              </p>
             </div>
-
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-              <Link href="/contractor-systems" className="group">
-                <div className="bg-white/5 border border-white/10 rounded-xl p-6 h-full hover:border-[#008070]/50 transition-colors">
-                  <h3 className="font-anton text-xl text-white mb-3 group-hover:text-[#008070] transition-colors">
-                    Contractor Systems
-                  </h3>
-                  <p className="font-manrope text-gray-400 text-sm">
-                    Job tracking, labor management, inventory, and reporting designed for contractors.
-                  </p>
-                </div>
-              </Link>
-
-              <Link href="/warehouse-inventory-systems" className="group">
-                <div className="bg-white/5 border border-white/10 rounded-xl p-6 h-full hover:border-[#008070]/50 transition-colors">
-                  <h3 className="font-anton text-xl text-white mb-3 group-hover:text-[#008070] transition-colors">
-                    Warehouse & Inventory
-                  </h3>
-                  <p className="font-manrope text-gray-400 text-sm">
-                    Real-time inventory tracking, stock alerts, and warehouse dashboards.
-                  </p>
-                </div>
-              </Link>
-
-              <Link href="/custom-dashboards-analytics" className="group">
-                <div className="bg-white/5 border border-white/10 rounded-xl p-6 h-full hover:border-[#008070]/50 transition-colors">
-                  <h3 className="font-anton text-xl text-white mb-3 group-hover:text-[#008070] transition-colors">
-                    Custom Dashboards
-                  </h3>
-                  <p className="font-manrope text-gray-400 text-sm">
-                    Analytics and reporting dashboards that show exactly what matters.
-                  </p>
-                </div>
-              </Link>
-
-              <Link href="/custom-cms-development" className="group">
-                <div className="bg-white/5 border border-white/10 rounded-xl p-6 h-full hover:border-[#008070]/50 transition-colors">
-                  <h3 className="font-anton text-xl text-white mb-3 group-hover:text-[#008070] transition-colors">
-                    Custom CMS
-                  </h3>
-                  <p className="font-manrope text-gray-400 text-sm">
-                    Secure, scalable content management tailored to your workflow.
-                  </p>
-                </div>
-              </Link>
-            </div>
-
-            <div className="text-center">
-              <Link
-                href="/custom-business-systems"
-                className="inline-flex items-center gap-2 bg-[#008070] hover:bg-[#006b5d] text-white px-6 py-3 rounded transition-colors"
-              >
-                Explore Custom Business Systems
-                <ChevronRight className="w-4 h-4" />
-              </Link>
-            </div>
+            <p className="font-manrope text-gray-500 text-sm md:text-base max-w-xs mt-4 md:mt-0">
+              Practical advice on web design, SEO, and building systems that work for your business.
+            </p>
           </div>
-        </section>
 
-        {/* CTA Section */}
-      <CTA />
-       
-       
+          <div className="grid md:grid-cols-3 gap-6 md:gap-8">
+            {blogPosts.map((post, i) => (
+              <Link key={i} href={`/blog/${post.slug}`} className="group block">
+                <div className="relative h-48 bg-gray-200 rounded-xl overflow-hidden mb-4">
+                  {post.imageUrl && (
+                    <Image
+                      src={post.imageUrl}
+                      alt={post.imageAlt || post.title}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                    />
+                  )}
+                </div>
+                {post.category && (
+                  <span
+                    className="inline-block text-white font-manrope font-bold text-xs px-4 py-1.5 rounded-md mb-3"
+                    style={{ backgroundColor: post.category.color || '#008070' }}
+                  >
+                    {post.category.title}
+                  </span>
+                )}
+                <h3 className="font-anton text-xl md:text-2xl text-gray-900 mb-2 tracking-tight group-hover:text-[#008070] transition-colors">
+                  {post.title}
+                </h3>
+                <p className="font-manrope text-gray-500 text-sm leading-relaxed line-clamp-3">
+                  {post.excerpt}
+                </p>
+              </Link>
+            ))}
+          </div>
 
-       
-      </div>
+          <div className="flex justify-center mt-12">
+            <Link
+              href="/blog"
+              className="inline-flex items-center gap-2 bg-[#008070] hover:bg-[#006b5d] text-white font-manrope font-bold text-lg px-8 py-4 rounded-lg transition-colors"
+            >
+              View All Posts
+              <ChevronRight className="w-5 h-5" />
+            </Link>
+          </div>
+        </div>
+      </section>
 
-    </>
-  );
+    </div>
+  )
 }

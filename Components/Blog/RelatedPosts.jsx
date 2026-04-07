@@ -10,7 +10,7 @@ export default function RelatedPosts({ posts }) {
 
   return (
     <section className="max-w-7xl mx-auto px-4 md:px-8 py-16">
-      <h2 className="font-anton text-3xl md:text-4xl text-white mb-8">
+      <h2 className="font-inter-display font-bold text-3xl md:text-4xl text-gray-900 mb-8">
         Related Articles
       </h2>
 

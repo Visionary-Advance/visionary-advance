@@ -11,13 +11,13 @@ export default function ConditionalLayout({ children }) {
   const isLandingPage = pathname === '/construction-websites';
   const isAdminPage = pathname?.startsWith('/admin');
   const isLoginPage = pathname === '/login';
-  const isAuditPage = pathname === '/audit';
+  const isHomePage = pathname === '/';
 
-  const hideLayout = isLandingPage || isAdminPage || isLoginPage || isAuditPage;
+  const hideLayout = isLandingPage || isAdminPage || isLoginPage;
 
   return (
     <>
-      {!hideLayout && <Header />}
+      {!hideLayout && <Header variant={isHomePage ? 'dark' : 'light'} />}
       {children}
       {!hideLayout && <Footer variant="default" />}
     </>

@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
+    "@gsap/react": "^2.1.2",
     "@octokit/rest": "^22.0.1",
     "@portabletext/react": "^6.0.0",
     "@react-email/render": "^1.4.0",
