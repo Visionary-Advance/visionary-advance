@@ -63,7 +63,8 @@
       "Bash(gh search:*)",
       "WebFetch(domain:raw.githubusercontent.com)",
       "mcp__plugin_figma_figma__get_screenshot",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "mcp__Sanity__add_cors_origin"
     ],
     "deny": [],
     "ask": []

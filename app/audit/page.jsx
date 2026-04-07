@@ -8,16 +8,16 @@ import SplitText from '@/Components/SplitText'
 import { motion, AnimatePresence } from 'framer-motion'
 
 const tips = [
-  { title: 'Optimize Your Images', description: 'Compress images and use modern formats like WebP to reduce load times by up to 80%.' },
-  { title: 'Enable Browser Caching', description: 'Set proper cache headers so returning visitors load your site almost instantly.' },
-  { title: 'Minimize HTTP Requests', description: 'Combine CSS/JS files and use sprites to reduce the number of server requests per page.' },
-  { title: 'Use a Content Delivery Network', description: 'A CDN serves your content from servers closest to your visitors, cutting load times dramatically.' },
-  { title: 'Prioritize Above-the-Fold Content', description: 'Load what users see first — defer everything else. First impressions happen in under 3 seconds.' },
-  { title: 'Write Descriptive Meta Tags', description: 'Unique title tags and meta descriptions on every page improve click-through rates from search results.' },
-  { title: 'Make Your Site Mobile-First', description: 'Over 60% of web traffic is mobile. Google ranks mobile-friendly sites higher in search results.' },
-  { title: 'Add Alt Text to Every Image', description: 'Alt text improves accessibility and gives search engines context about your images.' },
-  { title: 'Reduce Server Response Time', description: 'Aim for under 200ms. Upgrade hosting, use server-side caching, and optimize database queries.' },
-  { title: 'Implement Structured Data', description: 'Schema markup helps search engines understand your content and can earn you rich snippets in results.' },
+  { title: 'Keep Your Website Updated', description: 'Outdated content tells visitors (and Google) that your business isn\'t active. Review your site at least once a month.' },
+  { title: 'Make Sure Your Phone Number Is Clickable', description: 'On mobile, visitors should be able to tap your number to call instantly. A small change that drives real leads.' },
+  { title: 'Add Your Business to Google Maps', description: 'A Google Business Profile is free and puts you in front of local customers searching for your services.' },
+  { title: 'Use Real Photos of Your Work', description: 'Stock photos feel generic. Showing real projects builds trust and helps potential clients see what you actually deliver.' },
+  { title: 'Write a Clear Description of What You Do', description: 'Visitors decide in seconds whether to stay. Make sure your homepage clearly explains who you are and what you offer.' },
+  { title: 'Make Your Site Mobile-Friendly', description: 'Over 60% of web traffic is mobile. If your site is hard to use on a phone, you\'re losing customers.' },
+  { title: 'Add Customer Reviews to Your Site', description: 'Social proof is powerful. Featuring real testimonials helps new visitors trust your business faster.' },
+  { title: 'Include a Clear Call to Action', description: 'Every page should tell the visitor what to do next — call, fill out a form, or request a quote.' },
+  { title: 'Check Your Site Speed', description: 'Slow websites lose visitors. If your site takes more than 3 seconds to load, people will leave before they see it.' },
+  { title: 'Make Sure Your Contact Info Is Easy to Find', description: 'Don\'t make people hunt for your email, phone, or address. Put it in the header, footer, and on a dedicated page.' },
 ]
 
 export default function AuditPage() {
@@ -169,7 +169,7 @@ export default function AuditPage() {
     useEffect(() => {
       const interval = setInterval(() => {
         setTipIndex((prev) => (prev + 1) % tips.length)
-      }, 5000)
+      }, 8000)
       return () => clearInterval(interval)
     }, [])
 
@@ -335,7 +335,7 @@ export default function AuditPage() {
                   {results.opportunities.performance.map((opportunity, index) => (
                     <div
                       key={index}
-                      className="bg-orange-50 border border-orange-200 p-5 rounded-xl"
+                      className="bg-orange-50 border border-orange-200 p-5 rounded-xl overflow-hidden"
                     >
                       <div className="flex justify-between items-start mb-2 flex-wrap gap-2">
                         <h4 className="font-manrope font-bold text-orange-700">{opportunity.title}</h4>
@@ -345,7 +345,7 @@ export default function AuditPage() {
                           </span>
                         )}
                       </div>
-                      <p className="text-sm font-manrope text-gray-500">{opportunity.description}</p>
+                      <p className="text-sm font-manrope text-gray-500 break-words">{opportunity.description}</p>
                     </div>
                   ))}
                 </div>
@@ -360,10 +360,10 @@ export default function AuditPage() {
                   {results.opportunities.seo.map((issue, index) => (
                     <div
                       key={index}
-                      className="bg-red-50 border border-red-200 p-5 rounded-xl"
+                      className="bg-red-50 border border-red-200 p-5 rounded-xl overflow-hidden"
                     >
                       <h4 className="font-manrope font-bold text-red-700 mb-2">{issue.title}</h4>
-                      <p className="text-sm font-manrope text-gray-500">{issue.description}</p>
+                      <p className="text-sm font-manrope text-gray-500 break-words">{issue.description}</p>
                     </div>
                   ))}
                 </div>
