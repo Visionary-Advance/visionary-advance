@@ -119,7 +119,7 @@ export default async function BlogPostPage({ params }) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
 
-      <main className="min-h-screen pt-28 bg-[#191E1E]">
+      <main className="min-h-screen pt-28 bg-white">
         {/* Hero */}
         <BlogHero post={post} />
 
@@ -131,7 +131,7 @@ export default async function BlogPostPage({ params }) {
               <BlogPostContent body={post.body} />
 
               {/* Social Share */}
-              <div className="mt-12 pt-8 border-t border-white/10">
+              <div className="mt-12 pt-8 border-t border-gray-200">
                 <SocialShare
                   title={post.title}
                   url={`https://visionaryadvance.com/blog/${post.slug.current}`}

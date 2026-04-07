@@ -49,7 +49,21 @@
       "mcp__gemini-content__rewrite_for_seo",
       "Bash(tasklist:*)",
       "mcp__gemini-content__generate_blog_outline",
-      "mcp__gemini-content__write_meta_description"
+      "mcp__gemini-content__write_meta_description",
+      "Bash(git checkout:*)",
+      "mcp__plugin_figma_figma__get_design_context",
+      "mcp__plugin_figma_figma__get_metadata",
+      "WebFetch(domain:scalient.webflow.io)",
+      "WebFetch(domain:webflow.com)",
+      "WebFetch(domain:cdn.prod.website-files.com)",
+      "WebFetch(domain:www.reactbits.dev)",
+      "Bash(gh api:*)",
+      "Bash(python3 -c \"import sys,json; [print\\(i['path']\\) for i in json.load\\(sys.stdin\\).get\\('tree',[]\\) if 'scroll' in i['path'].lower\\(\\) or 'ScrollReveal' in i['path']]\")",
+      "Bash(python3 -c \" import sys, json data = json.load\\(sys.stdin\\) for item in data.get\\('tree', []\\): if 'croll' in item['path'] and item['type'] == 'blob': print\\(item['path']\\) \")",
+      "Bash(gh search:*)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "mcp__plugin_figma_figma__get_screenshot",
+      "Bash(grep:*)"
     ],
     "deny": [],
     "ask": []

@@ -1,13 +1,9 @@
 'use client';
 
-// Components/Blog/BlogPostContent.jsx
-// Portable text renderer for blog post content
-
 import { PortableText } from '@portabletext/react';
 import Image from 'next/image';
 import { urlForImage } from '@/lib/sanity';
 
-// Import custom PortableText components
 import CodeBlock from './PortableText/CodeBlock';
 import Callout from './PortableText/Callout';
 import ImageGallery from './PortableText/ImageGallery';
@@ -15,31 +11,30 @@ import VideoEmbed from './PortableText/VideoEmbed';
 import Quote from './PortableText/Quote';
 import EmbeddedCTA from './PortableText/EmbeddedCTA';
 
-// Custom components for portable text blocks
 const components = {
   block: {
     h2: ({ children }) => (
-      <h2 className="font-anton text-3xl md:text-4xl text-white mt-12 mb-6 scroll-mt-24" id={children?.toString().toLowerCase().replace(/\s+/g, '-')}>
+      <h2 className="font-inter-display font-bold text-3xl md:text-4xl text-gray-900 mt-12 mb-6 scroll-mt-24" id={children?.toString().toLowerCase().replace(/\s+/g, '-')}>
         {children}
       </h2>
     ),
     h3: ({ children }) => (
-      <h3 className="font-anton text-2xl md:text-3xl text-white mt-10 mb-5 scroll-mt-24" id={children?.toString().toLowerCase().replace(/\s+/g, '-')}>
+      <h3 className="font-inter-display font-bold text-2xl md:text-3xl text-gray-900 mt-10 mb-5 scroll-mt-24" id={children?.toString().toLowerCase().replace(/\s+/g, '-')}>
         {children}
       </h3>
     ),
     h4: ({ children }) => (
-      <h4 className="font-manrope font-bold text-xl md:text-2xl text-white mt-8 mb-4 scroll-mt-24">
+      <h4 className="font-manrope font-bold text-xl md:text-2xl text-gray-900 mt-8 mb-4 scroll-mt-24">
         {children}
       </h4>
     ),
     normal: ({ children }) => (
-      <p className="font-manrope text-lg text-gray-300 mb-6 leading-relaxed">
+      <p className="font-manrope text-lg text-gray-700 mb-6 leading-relaxed">
         {children}
       </p>
     ),
     blockquote: ({ children }) => (
-      <blockquote className="border-l-4 border-[#008070] pl-6 py-2 my-8 italic text-gray-200 bg-white/5 rounded-r">
+      <blockquote className="border-l-4 border-[#008070] pl-6 py-2 my-8 italic text-gray-600 bg-gray-50 rounded-r">
         {children}
       </blockquote>
     ),
@@ -47,12 +42,12 @@ const components = {
 
   list: {
     bullet: ({ children }) => (
-      <ul className="list-disc list-inside space-y-2 mb-6 text-gray-300 font-manrope text-lg ml-4">
+      <ul className="list-disc list-inside space-y-2 mb-6 text-gray-700 font-manrope text-lg ml-4">
         {children}
       </ul>
     ),
     number: ({ children }) => (
-      <ol className="list-decimal list-inside space-y-2 mb-6 text-gray-300 font-manrope text-lg ml-4">
+      <ol className="list-decimal list-inside space-y-2 mb-6 text-gray-700 font-manrope text-lg ml-4">
         {children}
       </ol>
     ),
@@ -69,11 +64,11 @@ const components = {
 
   marks: {
     strong: ({ children }) => (
-      <strong className="font-bold text-white">{children}</strong>
+      <strong className="font-bold text-gray-900">{children}</strong>
     ),
     em: ({ children }) => <em className="italic">{children}</em>,
     code: ({ children }) => (
-      <code className="bg-white/10 text-[#008070] px-2 py-1 rounded font-mono text-sm">
+      <code className="bg-gray-100 text-[#008070] px-2 py-1 rounded font-mono text-sm">
         {children}
       </code>
     ),
@@ -117,7 +112,7 @@ const components = {
             />
           </div>
           {(value.caption || value.attribution) && (
-            <figcaption className="text-sm text-gray-400 mt-3 text-center font-manrope">
+            <figcaption className="text-sm text-gray-500 mt-3 text-center font-manrope">
               {value.caption}
               {value.attribution && (
                 <span className="block text-xs mt-1">
@@ -141,7 +136,7 @@ const components = {
 
 export default function BlogPostContent({ body }) {
   return (
-    <article className="prose prose-invert prose-lg max-w-none">
+    <article className="prose prose-lg max-w-none">
       <PortableText value={body} components={components} />
     </article>
   );

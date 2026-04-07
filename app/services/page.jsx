@@ -1,342 +1,209 @@
 'use client'
-import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
-import {
-  Monitor,
-  Code,
-  Server,
-  Shield,
-    Zap,
-  Users,
-  Smartphone,
-  Search,
-  BarChart3,
-  CheckCircle,
-  ArrowRight,
-  Clock,
-  Heart,
-  Globe,
-  Wrench,
-  Database,
-  Lock,
-  TrendingUp,
-  Eye,
-  Palette,
-  Coffee
-} from "lucide-react";
-import CTA from '@/Components/CTA';
 
+import { useState } from 'react'
+import Link from 'next/link'
+import Image from 'next/image'
+import { Plus, Minus, ArrowUpRight } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import SplitText from '@/Components/SplitText'
+
+const services = [
+  {
+    title: 'Web Design',
+    slug: 'web-design',
+    snippet:
+      'Every detail is intentional. We design websites that reflect the level of quality you deliver — no templates, no recycled layouts, no shortcuts.',
+    tags: ['Custom Design', 'UI/UX', 'Mobile-First', 'Branding'],
+    image: '/Img/Design.jpg',
+  },
+  {
+    title: 'SEO & Visibility',
+    slug: 'seo',
+    snippet:
+      "SEO isn't about traffic — it's about alignment. We build search visibility that puts you in front of the right clients: the ones who value expertise over the lowest price.",
+    tags: ['Local SEO', 'Technical SEO', 'Google Business', 'Content'],
+    image: '/Img/Clients.jpg',
+  },
+  {
+    title: 'Web Development',
+    slug: 'web-design',
+    snippet:
+      'Fast, secure, and engineered for long-term performance. From marketing sites to fully custom web apps, everything we build is designed to scale.',
+    tags: ['Next.js', 'Performance', 'CMS', 'Integrations'],
+    image: '/Img/coding.jpg',
+  },
+  {
+    title: 'Business Systems',
+    slug: 'business-systems',
+    snippet:
+      'Custom dashboards, inventory tools, job tracking, and client portals — built around how your business actually operates, not the other way around.',
+    tags: ['Dashboards', 'Automation', 'Custom Tools', 'APIs'],
+    image: '/Img/communication.jpg',
+  },
+]
+
+const stats = [
+  { value: '<2s', label: 'Load Times' },
+  { value: '100%', label: 'Custom built — no templates' },
+  { value: '4 wk', label: 'Avg. launch time' },
+  { value: '5★', label: 'Client satisfaction' },
+]
 
 export default function ServicesPage() {
-  const services = [
-    {
-      icon: <Palette className="w-12 h-12" />,
-      title: "Custom Websites",
-      href: "/custom-websites",
-      description: "No templates. No page builders. Every website is designed and coded specifically for your business, your workflow, and how you serve your clients.",
-      features: [
-        "Custom Design & Development",
-        "SEO Built Into the Foundation",
-        "Mobile-First Architecture",
-        "Fast Load Times & Performance",
-        "Easy Content Management"
-      ],
-      color: "text-[#008070]",
-      bgColor: "bg-[#008070]/10",
-      borderColor: "border-[#008070]/20"
-    },
-    {
-      icon: <Database className="w-12 h-12" />,
-      title: "Custom Business Systems",
-      href: "/custom-business-systems",
-      description: "Dashboards, inventory systems, job tracking, and internal tools built around how your business actually operates,not platforms you have to adapt to.",
-      features: [
-        "Custom Dashboards & Analytics",
-        "Inventory & Warehouse Systems",
-        "Job Tracking & Labor Management",
-        "Client Portals & Reporting",
-        "API Integrations"
-      ],
-      color: "text-[#008070]",
-      bgColor: "bg-[#008070]/10",
-      borderColor: "border-[#008070]/20"
-    },
-    {
-      icon: <Search className="w-12 h-12" />,
-      title: "SEO & Visibility",
-      href: "/seo-services",
-      description: "Strategic SEO that positions you in front of the right clients,the ones searching for expertise and quality, not the lowest price.",
-      features: [
-        "Local SEO (Eugene & Oregon)",
-        "Technical SEO Architecture",
-        "Content Strategy",
-        "Google Business Optimization",
-        "Ongoing Visibility Improvements"
-      ],
-      color: "text-[#008070]",
-      bgColor: "bg-[#008070]/10",
-      borderColor: "border-[#008070]/20"
-    },
-    {
-      icon: <Server className="w-12 h-12" />,
-      title: "Hosting & Support",
-      href: "/hosting",
-      description: "Reliable infrastructure and ongoing support so your website and systems perform consistently,without you having to think about it.",
-      features: [
-        "99.9% Uptime Guarantee",
-        "Security & SSL Certificates",
-        "Automated Daily Backups",
-        "Performance Monitoring",
-        "Priority Technical Support"
-      ],
-      color: "text-[#008070]",
-      bgColor: "bg-[#008070]/10",
-      borderColor: "border-[#008070]/20"
-    }
-  ];
-
-  const processSteps = [
-    {
-      number: "01",
-      title: "Discovery & Planning",
-      description: "We start by understanding your business, your workflow, and what you actually need,not what we want to sell you.",
-      icon: <Search className="w-8 h-8" />
-    },
-    {
-      number: "02",
-      title: "Design & Architecture",
-      description: "Custom design and system architecture built specifically for how your business operates. No templates, no shortcuts.",
-      icon: <Eye className="w-8 h-8" />
-    },
-    {
-      number: "03",
-      title: "Build & Test",
-      description: "Clean, efficient code with rigorous testing. Everything is built to perform reliably under real-world conditions.",
-      icon: <Code className="w-8 h-8" />
-    },
-    {
-      number: "04",
-      title: "Launch & Support",
-      description: "Smooth deployment with ongoing support. We're invested in your success beyond launch day.",
-      icon: <CheckCircle className="w-8 h-8" />
-    }
-  ];
-
-  const whyChooseUs = [
-    {
-      icon: <Zap className="w-8 h-8" />,
-      title: "Built for Performance",
-      description: "Fast load times, clean code, and modern architecture. Everything we build is engineered to perform reliably under real-world conditions."
-    },
-    {
-      icon: <Shield className="w-8 h-8" />,
-      title: "Secure by Default",
-      description: "Security built into every layer,not added as an afterthought. Your data and your clients' data protected properly."
-    },
-    {
-      icon: <Search className="w-8 h-8" />,
-      title: "Found by the Right Clients",
-      description: "SEO that positions you in front of people searching for quality and expertise,not bargain hunters looking for the lowest price."
-    },
-    {
-      icon: <Users className="w-8 h-8" />,
-      title: "Direct Communication",
-      description: "Work directly with the people building your systems. No account managers, no outsourcing, no telephone games."
-    },
-    {
-      icon: <TrendingUp className="w-8 h-8" />,
-      title: "Built to Scale",
-      description: "Systems designed with growth in mind. What we build today should support your business for years,not need replacing in six months."
-    },
-    {
-      icon: <CheckCircle className="w-8 h-8" />,
-      title: "Clear Process, Reliable Results",
-      description: "Disciplined approach. Clear communication. Commitments honored. We operate the way you'd expect a serious partner to operate."
-    }
-  ];
+  const [openIndex, setOpenIndex] = useState(0)
 
   return (
-    <div className="min-h-screen pt-20 bg-[#191E1E] text-white">
-     
+    <div className="bg-white min-h-screen">
 
-      {/* Hero Section */}
-      <section className="px-4 md:px-16 py-16 md:py-20">
-        <div className="max-w-6xl mx-auto">
-          <div className="space-y-8">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-1 bg-[#008070]"></div>
-              <span className="font-manrope text-[#008070] font-semibold">Our Services</span>
-            </div>
-            <div className="space-y-6">
-              <h1 className="font-anton text-4xl md:text-5xl lg:text-6xl text-white leading-tight tracking-tight">
-                Websites & Systems Built Around How You Work
-              </h1>
-              <p className="font-manrope text-xl text-gray-300 max-w-3xl leading-relaxed">
-                We build custom websites and business systems for professionals who take their operations seriously. No templates. No bloated platforms. Just solutions designed specifically for your business and workflow.
+      {/* ===== HERO ===== */}
+      <section className="px-4 md:px-16 pt-36 md:pt-44 pb-20 md:pb-28">
+        <span className="inline-flex items-center gap-2 border border-gray-300 rounded-full px-5 py-2 font-manrope font-bold text-sm text-gray-700 mb-6">
+          <span className="w-2.5 h-2.5 rounded-full bg-[#008070]" />
+          What We Do
+        </span>
+        <SplitText
+          text="Built for how you actually work"
+          tag="h1"
+          splitType="chars"
+          duration={0.25}
+          delay={30}
+          ease="power3.out"
+          from={{ opacity: 0, y: 40 }}
+          to={{ opacity: 1, y: 0 }}
+          threshold={0.2}
+          rootMargin="0px"
+          textAlign="left"
+          className="font-inter-display font-bold text-[clamp(48px,7vw,96px)] text-black leading-none tracking-tight mb-6"
+        />
+        <p className="max-w-7xl text-[clamp(1.1rem,2.5vw,2rem)] leading-snug font-semibold font-inter-display text-black">
+          At Visionary Advance, our web development process is built around your business — not the other way around. As an experienced website designer, we craft custom business systems, high-performance websites, and internal tools that streamline your operations and strengthen your online presence.
+        </p>
+      </section>
+
+      {/* ===== STATS ROW ===== */}
+      <section className="px-4 md:px-16 pb-16 md:pb-20">
+        <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 border-t border-b border-gray-100 py-10">
+          {stats.map((stat) => (
+            <div key={stat.label}>
+              <p className="font-inter-display font-bold text-[clamp(32px,4vw,48px)] text-black leading-none">
+                {stat.value}
               </p>
-              <p className="font-manrope text-lg text-gray-400 max-w-3xl leading-relaxed">
-                Based in Eugene, serving Lane County and Oregon businesses,from custom websites and SEO to dashboards, inventory systems, and internal tools that match how you actually operate.
-              </p>
+              <p className="font-manrope text-sm text-gray-500 mt-1">{stat.label}</p>
             </div>
-          </div>
+          ))}
         </div>
       </section>
 
-      {/* Services Grid */}
-      <section className="px-4 md:px-16 py-16 md:py-28">
+      {/* ===== SERVICES ACCORDION ===== */}
+      <section className="px-4 md:px-16 pb-20 md:pb-28">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center space-y-6 mb-16">
-            <p className="font-manrope font-semibold text-[#008070]">What We Build</p>
-            <h2 className="font-anton text-3xl md:text-5xl text-white leading-tight">
-              Custom Solutions for Real Operations
-            </h2>
-            <p className="font-manrope text-lg text-gray-300 max-w-3xl mx-auto">
-              Everything we build is designed to support how your business actually works,not force you into someone else's workflow.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {services.map((service, index) => (
-              <div 
-                key={index} 
-                className={`p-8 rounded-2xl border ${service.borderColor} ${service.bgColor} hover:border-opacity-50 transition-all duration-300 group`}
-              >
-                <div className={`${service.color} mb-6`}>
-                  {service.icon}
-                </div>
-                
-                <h3 className="font-anton text-2xl md:text-3xl text-white mb-4">
-                  {service.title}
-                </h3>
-
-                <p className="font-manrope text-gray-300 mb-6">
-                  {service.description}
-                </p>
-
-                <ul className="space-y-3 mb-6">
-                  {service.features.map((feature, idx) => (
-                    <li key={idx} className="flex items-center gap-3">
-                      <CheckCircle className={`w-5 h-5 ${service.color} flex-shrink-0`} />
-                      <span className="font-manrope text-gray-300">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                <Link href={service.href} className={`${service.color} hover:text-white hover:bg-current hover:bg-opacity-10 px-4 py-2 rounded-lg font-manrope font-semibold border border-current transition-all duration-300 group-hover:translate-x-1 inline-block`}>
-                  Learn More <ArrowRight className="w-4 h-4 inline ml-2" />
-                </Link>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Why Choose Us */}
-      <section className="px-4 md:px-16 py-16 md:py-28 bg-black/20">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center space-y-6 mb-16">
-            <p className="font-manrope font-semibold text-[#008070]">How We Work</p>
-            <h2 className="font-anton text-3xl md:text-5xl text-white leading-tight">
-              Designed for Serious Operators
-            </h2>
-            <p className="font-manrope text-lg text-gray-300 max-w-3xl mx-auto">
-              We partner with businesses that care how things are built. If you value precision, reliability, and long-term thinking,you'll feel at home here.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {whyChooseUs.map((reason, index) => (
-              <div key={index} className="text-center p-6 rounded-2xl bg-[#191E1E] border border-white/10 hover:border-[#008070]/50 transition-colors">
-                <div className="text-[#008070] mb-4 flex justify-center">
-                  {reason.icon}
-                </div>
-                <h3 className="font-anton text-xl text-white mb-3">
-                  {reason.title}
-                </h3>
-                <p className="font-manrope text-gray-300">
-                  {reason.description}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Process Section */}
-      <section className="px-4 md:px-16 py-16 md:py-28">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center space-y-6 mb-16">
-            <p className="font-manrope font-semibold text-[#008070]">Our Process</p>
-            <h2 className="font-anton text-3xl md:text-5xl text-white leading-tight">
-              Built on Precision and Partnership
-            </h2>
-            <p className="font-manrope text-lg text-gray-300 max-w-3xl mx-auto">
-              Quality doesn't happen by accident. It's the result of a disciplined approach where every detail is considered and every decision is intentional.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {processSteps.map((step, index) => (
-              <div key={index} className="relative">
-                <div className="text-center">
-                  <div className="w-20 h-20 bg-[#008070] rounded-full flex items-center justify-center mx-auto mb-6">
-                    {step.icon}
+          {services.map((service, index) => {
+            const isOpen = openIndex === index
+            return (
+              <div key={service.title}>
+                <div className="border-t border-gray-200" />
+                <button
+                  onClick={() => setOpenIndex(isOpen ? -1 : index)}
+                  className="w-full flex items-center justify-between py-6 md:py-8 cursor-pointer group text-left"
+                >
+                  <div className="flex items-center gap-4 md:gap-6">
+                    <div
+                      className={`w-10 h-10 md:w-11 md:h-11 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${
+                        isOpen
+                          ? 'bg-[#008070] text-white'
+                          : 'border-2 border-[#008070] text-gray-900'
+                      }`}
+                    >
+                      {isOpen ? <Minus className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
+                    </div>
+                    <h2 className="font-anton text-3xl md:text-5xl text-gray-900 tracking-tight">
+                      {service.title}
+                    </h2>
                   </div>
-                  
-                  <div className="absolute -top-4 -left-0 w-12 h-12 bg-[#191E1E] border-2 border-[#008070] rounded-full flex items-center justify-center">
-                    <span className="font-anton text-[#008070] text-sm">{step.number}</span>
-                  </div>
+                  <span className={`font-manrope text-sm font-bold transition-colors hidden md:block ${isOpen ? 'text-[#008070]' : 'text-gray-400 group-hover:text-[#008070]'}`}>
+                    {isOpen ? 'Close' : 'Expand'}
+                  </span>
+                </button>
 
-                  <h3 className="font-anton text-xl text-white mb-4">
-                    {step.title}
-                  </h3>
-
-                  <p className="font-manrope text-gray-300">
-                    {step.description}
-                  </p>
-                </div>
-
-                {index < processSteps.length - 1 && (
-                  <div className="hidden lg:block absolute top-10 -right-4 w-8 h-0.5 bg-[#008070]"></div>
-                )}
+                <AnimatePresence initial={false}>
+                  {isOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3, ease: 'easeInOut' }}
+                      className="overflow-hidden"
+                    >
+                      <div className="pb-10 md:pb-14 flex flex-col md:flex-row gap-8 md:gap-12 pl-14 md:pl-[68px]">
+                        {/* Text + tags + CTA */}
+                        <div className="flex-1 space-y-6">
+                          <p className="font-manrope text-gray-600 text-base md:text-lg leading-relaxed max-w-xl">
+                            {service.snippet}
+                          </p>
+                          <div className="flex flex-wrap gap-3">
+                            {service.tags.map((tag) => (
+                              <span
+                                key={tag}
+                                className="bg-[#008070] text-white font-manrope font-bold text-sm px-5 py-2 rounded-full"
+                              >
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                          <Link
+                            href={`/services/${service.slug}`}
+                            className="inline-flex items-center gap-2 font-manrope font-bold text-[#008070] hover:text-[#006b5d] transition-colors"
+                          >
+                            View full service <ArrowUpRight className="w-4 h-4" />
+                          </Link>
+                        </div>
+                        {/* Image */}
+                        <div className="relative w-full md:w-80 h-56 md:h-64 flex-shrink-0">
+                          <Image
+                            src={service.image}
+                            alt={service.title}
+                            fill
+                            className="rounded-xl object-cover"
+                            sizes="(max-width: 768px) 100vw, 320px"
+                          />
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
-            ))}
+            )
+          })}
+          <div className="border-t border-gray-200" />
+        </div>
+      </section>
+
+      {/* ===== CTA ===== */}
+      <section className="px-4 md:px-16 py-20 md:py-28 bg-[#050505]">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row md:items-end md:justify-between gap-8">
+          <div>
+            <p className="font-manrope font-bold text-[#008070] mb-3">Ready to build?</p>
+            <h2 className="font-inter-display font-bold text-[clamp(36px,5vw,64px)] text-white leading-tight max-w-xl">
+              Let's talk about what you actually need
+            </h2>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-4 flex-shrink-0">
+            <Link
+              href="/contact"
+              className="inline-flex items-center justify-center gap-2 bg-[#008070] hover:bg-[#006b5d] text-white font-manrope font-bold text-lg px-8 py-4 rounded-lg transition-colors"
+            >
+              Contact Now
+            </Link>
+            <Link
+              href="/audit"
+              className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-manrope font-bold text-lg px-8 py-4 rounded-lg transition-colors"
+            >
+              Free Website Audit
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* Technologies Section */}
-      {/* <section className="px-4 md:px-16 py-16 md:py-28 bg-black/20">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center space-y-6 mb-16">
-            <p className="font-manrope font-semibold text-[#008070]">Our Stack</p>
-            <h2 className="font-anton text-3xl md:text-5xl text-white leading-tight">
-              Built With Modern Technology
-            </h2>
-            <p className="font-manrope text-lg text-white max-w-3xl mx-auto">
-              We use the latest and greatest tools to ensure your website is fast, secure, and future-proof.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8">
-            {[
-              "React", "Next.js", "TypeScript", "Tailwind CSS", 
-              "Node.js", "PostgreSQL", "AWS", "Vercel",
-              "Figma", "Git", "Docker", "Cloudflare"
-            ].map((tech, index) => (
-              <div key={index} className="text-center p-4 rounded-lg bg-[#191E1E] border border-white/10 hover:border-[#008070]/50 transition-colors">
-                <div className="w-12 h-12 bg-gray-300 rounded-lg mx-auto mb-3"></div>
-                <p className="font-manrope text-white text-sm">{tech}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section> */}
-
-      {/* CTA Section */}
-    <CTA />
-
-     
     </div>
-  );
+  )
 }

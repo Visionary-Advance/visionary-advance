@@ -1,168 +1,109 @@
-import Image from 'next/image';
+'use client'
 
-export default function Footer({ variant = "default" }) {
-  const getNewsletterText = () => {
-    switch (variant) {
-      case "about":
-        return "Subscribe to our newsletter for the latest updates, terrible puns, and occasional insights about web development.";
-      case "services":
-        return "Subscribe to our newsletter for web development tips, industry insights, and the occasional tech joke.";
-      case "contact":
-        return "Subscribe to our newsletter for web development tips, project showcases, and the occasional behind-the-scenes story.";
-      default:
-        return "Subscribe to our newsletter for the latest updates on features and releases.";
+import { useState } from 'react'
+import Image from 'next/image'
+import Link from 'next/link'
+
+const navLinks = [
+  { label: 'Home', href: '/' },
+  { label: 'About', href: '/about' },
+  { label: 'Services', href: '/services' },
+  { label: 'Works', href: '/works' },
+  { label: 'Blog', href: '/blog' },
+  { label: 'Contact', href: '/contact' },
+]
+
+export default function Footer() {
+  const [email, setEmail] = useState('')
+  const [status, setStatus] = useState(null) // 'sending' | 'success' | 'error'
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setStatus('sending')
+
+    try {
+      const res = await fetch('/api/newsletter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      })
+
+      if (!res.ok) throw new Error()
+      setStatus('success')
+      setEmail('')
+    } catch {
+      setStatus('error')
     }
-  };
-
-  // const getCopyrightText = () => {
-  //   switch (variant) {
-  //     case "about":
-  //       return "© 2025 Visionary Advance. All rights reserved. No coffee was harmed in the making of this website.";
-  //     case "services":
-  //       return "© 2025 Visionary Advance. All rights reserved. Building the web, one pixel at a time.";
-  //     case "contact":
-  //       return "© 2025 Visionary Advance. All rights reserved. Let's build something amazing together.";
-  //     default:
-  //       return "© 2025 Visionary Advance. All rights reserved.";
-  //   }
-  // };
-
-  // const getConnectTitle = () => {
-  //   switch (variant) {
-  //     case "about":
-  //       return "Follow Our Chaos";
-  //     case "services":
-  //     case "contact":
-  //       return "Connect With Us";
-  //     default:
-  //       return "Follow Us";
-  //   }
-  // };
-
-  // const getButtonText = () => {
-  //   switch (variant) {
-  //     case "about":
-  //       return "Join the Fun";
-  //     default:
-  //       return "Join";
-  //   }
-  // };
-
-  // const getServicesLinks = () => {
-  //   if (variant === "services") {
-  //     return [
-  //       "Web Design",
-  //       "Web Development", 
-  //       "Web Maintenance",
-  //       "Web Hosting",
-  //       "SEO Optimization",
-  //     ];
-  //   }
-  //   return [
-  //     "About Us",
-  //     "Our Services", 
-  //     variant === "contact" ? "Portfolio" : "Contact Us",
-  //     variant === "contact" ? "Blog" : "Blog Posts",
-  //     "Support Center",
-  //   ];
-  // };
-
-  const quickLinks = [
-    {name: "About Us", link: "/about"},
-    {name: "Our Services", link: "/services"},
-    {name: "Contact Us", link: "/contact"},
-    {name: "Blog", link: "/blog"},
-  ]
-
-  const serviceLinks = [
-    {name: "Eugene Web Design", link: "/eugene-web-design"},
-    {name: "Custom Business Systems", link: "/custom-business-systems"},
-    {name: "Contractor Systems", link: "/contractor-systems"},
-    {name: "Custom Dashboards", link: "/custom-dashboards-analytics"},
-  ]
-
-  const getSocialPlatforms = () => {
-    if (variant === "services" || variant === "contact") {
-      return ["Facebook", "Instagram", "X", "LinkedIn", "GitHub"];
-    }
-    if (variant === "about") {
-      return ["Facebook", "Instagram", "X", "LinkedIn", "TikTok"];
-    }
-    return ["Facebook", "Instagram", "X", "LinkedIn", "YouTube"];
-  };
-
-
-  const links = [
-    {name:"Privacy Policy", link:"/privacy-policy"}
-  ]
-
-  const date = new Date().getFullYear();
+  }
 
   return (
-    <footer className="px-4 md:px-16 py-16 md:py-20 bg-[#000606]">
+    <footer className="bg-black py-12 md:py-16 px-4 md:px-16">
       <div className="max-w-6xl mx-auto">
-        <div className="space-y-12 lg:grid lg:grid-cols-4 lg:gap-16 lg:space-y-0 mb-16 md:mb-20">
-          {/* Newsletter */}
-          <div className="lg:col-span-2 space-y-6">
-           <Image className="w-20" src="/Img/VALogo.png" alt="Visionary Advance Logo" width={80} height={80} quality={100} />
-
+        <div className="grid md:grid-cols-3 gap-12 md:gap-16">
+          {/* Left: Logo + Newsletter */}
+          <div className="md:col-span-2 space-y-6">
+            <Image
+              src="/Img/VA_Logo_Long.png"
+              alt="Visionary Advance"
+              width={220}
+              height={72}
+              className="h-16 w-auto"
+            />
+            <h3 className="font-manrope font-semibold text-2xl md:text-3xl text-white max-w-xs">
+              Sign up for our newsletter Today
+            </h3>
+            {status === 'success' ? (
+              <p className="font-manrope text-[#008070] text-sm">Thanks for subscribing!</p>
+            ) : (
+              <form onSubmit={handleSubmit} className="flex max-w-sm">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Your Email"
+                  required
+                  disabled={status === 'sending'}
+                  className="flex-1 bg-white/10 border-none rounded-l-md px-4 py-2.5 font-manrope text-sm text-white placeholder-white/50 focus:outline-none focus:ring-1 focus:ring-[#008070] disabled:opacity-50"
+                />
+                <button
+                  type="submit"
+                  disabled={status === 'sending'}
+                  className="bg-white text-black font-manrope font-semibold text-sm px-5 py-2.5 rounded-r-md hover:bg-gray-200 transition-colors cursor-pointer disabled:opacity-50"
+                >
+                  {status === 'sending' ? 'Sending...' : 'Subscribe'}
+                </button>
+              </form>
+            )}
+            {status === 'error' && (
+              <p className="font-manrope text-red-400 text-sm">Something went wrong. Please try again.</p>
+            )}
           </div>
 
-          {/* Quick Links */}
-          <div className="space-y-4">
-            <h3 className="font-manrope font-semibold text-white">Quick Links</h3>
-            <div className="space-y-2">
-              {quickLinks.map((item) => (
-                <a
-                  key={item.link}
-                  href={item.link}
-                  className="block font-manrope text-sm text-white hover:text-gray-300 transition-colors py-2"
+          {/* Right: Resources */}
+          <div>
+            <p className="font-manrope font-bold text-sm text-white/50 mb-4">
+              Resources
+            </p>
+            <nav className="flex flex-col gap-2">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="font-manrope text-white/50 hover:text-white transition-colors text-sm"
                 >
-                  {item.name}
-                </a>
+                  {link.label}
+                </Link>
               ))}
-            </div>
-          </div>
-
-          {/* Services */}
-          <div className="space-y-4">
-            <h3 className="font-manrope font-semibold text-white">Services</h3>
-            <div className="space-y-2">
-              {serviceLinks.map((item) => (
-                <a
-                  key={item.link}
-                  href={item.link}
-                  className="block font-manrope text-sm text-white hover:text-gray-300 transition-colors py-2"
-                >
-                  {item.name}
-                </a>
-              ))}
-            </div>
+            </nav>
           </div>
         </div>
 
-        {/* Footer Bottom */}
-        <div className="border-t-2 border-white pt-6 md:pt-8">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-            <p className="font-manrope text-sm text-white">
-             © <span>{date} </span> Visionary Advance. All rights reserved.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
-              {links.map(
-                (links) => (
-                  <a
-                    key={links.link}
-                    href={links.link}
-                    className="font-manrope text-sm text-white underline hover:text-gray-300 transition-colors"
-                  >
-                    {links.name}
-                  </a>
-                ),
-              )}
-            </div>
-          </div>
+        <div className="border-t border-white/10 mt-12 pt-6">
+          <p className="font-manrope text-white/30 text-sm">
+            &copy; {new Date().getFullYear()} Visionary Advance. All rights reserved.
+          </p>
         </div>
       </div>
     </footer>
-  );
+  )
 }

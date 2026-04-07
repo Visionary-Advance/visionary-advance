@@ -1,6 +1,3 @@
-// Components/Blog/TableOfContents.jsx
-// Table of contents with sticky sidebar navigation
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -21,7 +18,6 @@ export default function TableOfContents({ headings = [] }) {
       { rootMargin: '-80px 0px -80% 0px' }
     );
 
-    // Observe all headings
     headings.forEach(({ id }) => {
       const element = document.getElementById(id);
       if (element) {
@@ -36,11 +32,11 @@ export default function TableOfContents({ headings = [] }) {
 
   return (
     <nav className="hidden lg:block">
-      <div className="sticky top-24 bg-black/30 border border-white/10 rounded-xl p-6 max-h-[calc(100vh-8rem)] overflow-y-auto">
+      <div className="sticky top-24 bg-gray-50 border border-gray-200 rounded-xl p-6 max-h-[calc(100vh-8rem)] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center gap-2 mb-4 pb-4 border-b border-white/10">
+        <div className="flex items-center gap-2 mb-4 pb-4 border-b border-gray-200">
           <List size={20} className="text-[#008070]" />
-          <h3 className="font-anton text-lg text-white">Table of Contents</h3>
+          <h3 className="font-inter-display font-bold text-lg text-gray-900">Table of Contents</h3>
         </div>
 
         {/* Links */}
@@ -51,8 +47,8 @@ export default function TableOfContents({ headings = [] }) {
                 href={`#${id}`}
                 className={`block font-manrope text-sm py-2 px-3 rounded-lg transition-all ${
                   activeId === id
-                    ? 'text-white bg-[#008070]/20 border-l-2 border-[#008070]'
-                    : 'text-gray-400 hover:text-white hover:bg-white/5'
+                    ? 'text-[#008070] bg-[#008070]/10 border-l-2 border-[#008070]'
+                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100'
                 }`}
               >
                 {text}

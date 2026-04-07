@@ -26,6 +26,7 @@ const instSans = Instrument_Sans({
   display: 'swap',
 })
 
+
 export const metadata = {
   metadataBase: new URL('https://visionaryadvance.com'),
   alternates: {
