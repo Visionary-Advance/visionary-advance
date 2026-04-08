@@ -7,24 +7,40 @@ Allow: /
 
 # Disallow admin and API routes
 Disallow: /api/
+Disallow: /admin/
+Disallow: /login
 Disallow: /connect-square/
-
-# Disallow Square callback pages (OAuth flows)
+Disallow: /connect-jobber/
+Disallow: /connect-facebook/
 Disallow: /square/
 
-# Disallow privacy and terms pages
-Disallow: /privacy-policy
-Disallow: /terms-of-service
+# Explicitly allow AI crawlers
+User-agent: GPTBot
+Allow: /
 
-# Allow construction-websites landing page (high priority)
-Allow: /construction-websites
+User-agent: ChatGPT-User
+Allow: /
 
-# Sitemap location
-Sitemap: https://visionaryadvance.com/sitemap.xml
+User-agent: ClaudeBot
+Allow: /
 
-# Crawl-delay for specific bots (optional)
+User-agent: Claude-Web
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: GoogleOther
+Allow: /
+
 User-agent: Googlebot
 Crawl-delay: 0
 
 User-agent: Bingbot
 Crawl-delay: 0
+
+# Sitemap and LLMs file
+Sitemap: https://visionaryadvance.com/sitemap.xml
