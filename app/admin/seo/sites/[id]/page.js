@@ -7,6 +7,8 @@ import SEOAnalyticsChart from '@/Components/Admin/SEO/SEOAnalyticsChart';
 import SEOPlanView from '@/Components/Admin/SEO/SEOPlanView';
 import SEOReportPanel from '@/Components/Admin/SEO/SEOReportPanel';
 import LinkToBusinessModal from '@/Components/Admin/SEO/LinkToBusinessModal';
+import KeywordsTab from '@/Components/Admin/SEO/KeywordsTab';
+import { PLAN_TIERS, PLAN_TIER_LABELS } from '@/lib/seo-tiers';
 
 export default function SiteDetailPage({ params }) {
   const { id } = use(params);
@@ -91,6 +93,25 @@ export default function SiteDetailPage({ params }) {
     }
   }
 
+  // Update plan tier
+  async function handleTierChange(tier) {
+    if (!site) return;
+    const previous = site.plan_tier;
+    setSite({ ...site, plan_tier: tier });
+    try {
+      const res = await fetch(`/api/seo/sites?id=${site.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan_tier: tier }),
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+    } catch (err) {
+      setSite({ ...site, plan_tier: previous });
+      alert('Failed to update plan tier: ' + err.message);
+    }
+  }
+
   // Link site to business
   async function handleLinkSite(businessId) {
     if (!site) return;
@@ -158,6 +179,18 @@ export default function SiteDetailPage({ params }) {
             )}
           </div>
           <div className="flex items-center gap-3">
+            {/* Plan tier selector */}
+            <select
+              value={site.plan_tier || 'basic'}
+              onChange={(e) => handleTierChange(e.target.value)}
+              className="bg-[#171717] border border-[#262626] text-white text-sm rounded-lg px-3 py-2 hover:border-teal-500/50 focus:border-teal-500 focus:outline-none"
+              title="Plan tier"
+            >
+              {PLAN_TIERS.map((t) => (
+                <option key={t} value={t}>{PLAN_TIER_LABELS[t]} Plan</option>
+              ))}
+            </select>
+
             {/* Linked Business Badge */}
             {site.business_id && linkedBusiness ? (
               <button
@@ -203,6 +236,7 @@ export default function SiteDetailPage({ params }) {
       <div className="flex border-b border-[#262626] mb-6">
         {[
           { id: 'dashboard', label: 'Dashboard' },
+          { id: 'keywords', label: 'Keywords' },
           { id: 'plan', label: 'Plan' },
           { id: 'reports', label: 'Reports' }
         ].map(tab => (
@@ -290,6 +324,9 @@ export default function SiteDetailPage({ params }) {
           )}
         </div>
       )}
+
+      {/* Keywords Tab */}
+      {activeTab === 'keywords' && <KeywordsTab siteId={site.id} />}
 
       {/* Plan Tab */}
       {activeTab === 'plan' && <SEOPlanView site={site} />}

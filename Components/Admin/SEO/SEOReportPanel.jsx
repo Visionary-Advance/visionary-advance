@@ -237,6 +237,7 @@ function ReportView({ report, site, onBack, onSend, onDelete }) {
   const monthComparison = report.month_comparison;
   const currentMonth = monthComparison?.currentMonth;
   const previousMonth = monthComparison?.previousMonth;
+  const trackedKeywords = report.tracked_keywords || [];
 
   const priorityColors = {
     high: 'border-red-500 bg-red-500/10',
@@ -403,6 +404,53 @@ function ReportView({ report, site, onBack, onSend, onDelete }) {
           </tbody>
         </table>
       </div>
+
+      {/* Tracked Keywords */}
+      {trackedKeywords.length > 0 && (
+        <div className="bg-gray-700 rounded-lg overflow-hidden mb-6">
+          <div className="px-4 py-3 border-b border-gray-600">
+            <h4 className="text-lg font-semibold text-white">Tracked Keywords</h4>
+            <p className="text-xs text-gray-400 mt-0.5">Performance for the keywords we're targeting for you</p>
+          </div>
+          <table className="w-full">
+            <thead>
+              <tr>
+                <th className="px-4 py-2.5 text-left text-gray-400 text-xs font-medium uppercase tracking-wider">Keyword</th>
+                <th className="px-4 py-2.5 text-center bg-teal-600/40 text-white text-xs font-medium uppercase tracking-wider">{currentMonth?.name || 'Current'}</th>
+                <th className="px-4 py-2.5 text-center bg-gray-600/40 text-gray-200 text-xs font-medium uppercase tracking-wider">{previousMonth?.name || 'Previous'}</th>
+                <th className="px-4 py-2.5 text-center text-gray-400 text-xs font-medium uppercase tracking-wider">Δ</th>
+                <th className="px-4 py-2.5 text-center text-gray-400 text-xs font-medium uppercase tracking-wider">Target</th>
+                <th className="px-4 py-2.5 text-center text-gray-400 text-xs font-medium uppercase tracking-wider">Clicks</th>
+                <th className="px-4 py-2.5 text-center text-gray-400 text-xs font-medium uppercase tracking-wider">Impr.</th>
+              </tr>
+            </thead>
+            <tbody>
+              {trackedKeywords.map((kw) => {
+                const cur = kw.current?.position;
+                const prev = kw.previous?.position;
+                const delta = kw.positionDelta;
+                const fmt = (v) => (v === null || v === undefined ? '—' : v.toFixed(1));
+                const deltaEl = delta === null || delta === undefined
+                  ? <span className="text-gray-500">—</span>
+                  : Math.abs(delta) < 0.05
+                    ? <span className="text-gray-400 tabular-nums">0</span>
+                    : <span className={`tabular-nums font-medium ${delta > 0 ? 'text-green-400' : 'text-red-400'}`}>{delta > 0 ? '▲' : '▼'} {Math.abs(delta).toFixed(1)}</span>;
+                return (
+                  <tr key={kw.id || kw.keyword} className="border-t border-gray-600">
+                    <td className="px-4 py-3 text-gray-200">{kw.keyword}</td>
+                    <td className="px-4 py-3 text-center text-white font-semibold tabular-nums">{fmt(cur)}</td>
+                    <td className="px-4 py-3 text-center text-gray-400 tabular-nums">{fmt(prev)}</td>
+                    <td className="px-4 py-3 text-center">{deltaEl}</td>
+                    <td className="px-4 py-3 text-center text-gray-400 tabular-nums">{kw.target_position ?? '—'}</td>
+                    <td className="px-4 py-3 text-center text-gray-300 tabular-nums">{kw.current?.clicks ?? '—'}</td>
+                    <td className="px-4 py-3 text-center text-gray-300 tabular-nums">{kw.current?.impressions ?? '—'}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {/* SEO Plan */}
       {seoPlan ? (
