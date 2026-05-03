@@ -132,7 +132,7 @@ export default function BusinessDetailPage({ params }) {
   const searchAvailableLeads = async (query) => {
     setLoadingLeads(true)
     try {
-      const params = new URLSearchParams({ search: query, limit: '20' })
+      const params = new URLSearchParams({ search: query, limit: '20', type: 'all' })
       const res = await fetch(`/api/crm/leads?${params}`)
       const data = await res.json()
 
