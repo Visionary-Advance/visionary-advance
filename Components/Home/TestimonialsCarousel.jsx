@@ -7,14 +7,35 @@ const testimonials = [
   {
     quote:
       'Visionary Advance created two websites for me. I had an excellent experience working with this website design company! From start to finish, their team was professional, responsive, and incredibly easy to work with. They really took the time to understand my business and brought my vision to life with a clean, modern, and user-friendly design.',
-    name: 'Stephanie Foxx',
+    name: 'Stephanie F.',
     role: 'PatRick Environmental',
     rating: 5,
   },
   {
     quote:
       'A huge thank you to Brandon for setting up my business website! The Visionary Advance team truly focused on our branding and company values. They truly put care into their work. I highly recommend.',
-    name: 'Anallely Sanchez-Hernandez',
+    name: 'Anallely S.',
+    role: 'Xocolate Coffee Co.',
+    rating: 5,
+  },
+  {
+    quote:
+      'Visionary Advance does fantastic work! If you need a website developer in Eugene, Oregon, he knows how to take a site and turn it into something clean, modern, and actually easy to use. He stayed on top of communication the whole time and was quick to respond whenever we needed something. Solid experience all around, definitely recommend.',
+    name: 'Rian A.',
+    role: 'Sales and Marketing Consultant',
+    rating: 5,
+  },
+  {
+    quote:
+      'Working with Brandon at Visionary Advance was a great experience from start to finish. As a window coverings company in Lane County, Oregon, we needed a website that looked professional and actually converted, and he delivered.   If you’re in Eugene, Springfield, or anywhere in Lane County looking for a reliable website developer, I highly recommend Visionary Advance.',
+    name: 'Thomas T.',
+    role: 'UC Blinds',
+    rating: 5,
+  },
+  {
+    quote:
+      'Absolutely thrilled to have Visionary Advance help us build a website. Brandon was efficient and professional. He went above and beyond to work with our demands. Thank you!',
+    name: 'Emma S.',
     role: 'Xocolate Coffee Co.',
     rating: 5,
   },

@@ -120,7 +120,7 @@ export default function AboutPage() {
             className="space-y-5"
           >
             <h2 className="font-inter-display font-bold text-2xl md:text-[32px] text-black leading-snug">
-              Built by someone who's been in the trenches
+              Built by someone who wants you to succeed
             </h2>
             <p className="font-inter-display text-lg md:text-xl text-black/75 leading-relaxed">
               Visionary Advance was founded on a simple belief: businesses that do great work

@@ -46,7 +46,7 @@ const projectPlans = [
   {
     name: 'Custom',
     price: "Let's Talk",
-    priceSub: 'Project based pricing',
+    priceSub: 'Tailored pricing',
     delivery: 'Timeline Scoped per Project',
     features: [
       'Everything in Growth',
@@ -276,6 +276,11 @@ export default function PricingSection() {
               <p className={`font-manrope font-bold text-xl mb-1 ${plan.highlight ? 'text-white' : 'text-white/50'}`}>
                 {plan.name}
               </p>
+              {activeTab === 'projects' && plan.priceSub && (
+                <p className="font-manrope text-base text-white/50 mb-1">
+                  {plan.priceSub}:
+                </p>
+              )}
               <div className="flex items-end gap-1 mb-1">
                 <p className="font-anton text-4xl text-white leading-none">
                   {plan.price}
