@@ -68,7 +68,36 @@ export default async function sitemap() {
       changeFrequency: 'weekly',
       priority: 0.8,
     },
-    
+    {
+      url: `${baseUrl}/construction-website-design`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/small-business-website-design`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/law-firm-web-design`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/responsive-web-design-services`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/ecommerce-web-design-agency`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.9,
+    },
   ];
 
   // Service detail routes

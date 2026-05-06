@@ -66,7 +66,11 @@
       "Bash(grep:*)",
       "mcp__Sanity__add_cors_origin",
       "Bash(git ls-tree:*)",
-      "Bash(git check-ignore *)"
+      "Bash(git check-ignore *)",
+      "mcp__ahrefs__doc",
+      "mcp__ahrefs__keywords-explorer-matching-terms",
+      "mcp__ahrefs__render-data-table",
+      "mcp__Sanity__whoami"
     ],
     "deny": [],
     "ask": []
