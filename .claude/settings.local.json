@@ -70,7 +70,11 @@
       "mcp__ahrefs__doc",
       "mcp__ahrefs__keywords-explorer-matching-terms",
       "mcp__ahrefs__render-data-table",
-      "mcp__Sanity__whoami"
+      "mcp__Sanity__whoami",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\brand\\\\websites\\\\visionary-advance\" -Directory)",
+      "Bash(Select-Object Name)",
+      "Bash(python *)",
+      "Bash(py --version)"
     ],
     "deny": [],
     "ask": []
