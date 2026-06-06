@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import { Check, Mail, RefreshCw } from 'lucide-react'
 import { useRecaptcha } from '@/lib/useRecaptcha'
+import { trackAuditEmailSubmit } from '@/lib/analytics'
 
 function ScoreCircle({ score, label }) {
   const circumference = 2 * Math.PI * 42
@@ -87,6 +88,7 @@ export default function AuditResultPanel({ results, onReset }) {
       }
 
       setSent(true)
+      trackAuditEmailSubmit(results.url)
     } catch (err) {
       console.error(err)
       setEmailError('Something went wrong. Please try again.')

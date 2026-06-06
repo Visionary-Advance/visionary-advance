@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Send, Check } from 'lucide-react'
 import { motion, useReducedMotion } from 'framer-motion'
 import { useRecaptcha } from '@/lib/useRecaptcha'
+import { trackLeadFormSubmit, trackLeadFormError } from '@/lib/analytics'
 
 const businessTypes = [
   'Service business',
@@ -55,6 +56,7 @@ export default function EugeneContactSection({ content }) {
 
       if (response.ok) {
         setStatus('success')
+        trackLeadFormSubmit('/eugene-web-design', formData.projectType)
         setFormData({
           firstName: '',
           lastName: '',
@@ -67,10 +69,12 @@ export default function EugeneContactSection({ content }) {
         })
       } else {
         setStatus('error')
+        trackLeadFormError('/eugene-web-design', `HTTP ${response.status}`)
       }
     } catch (err) {
       console.error(err)
       setStatus('error')
+      trackLeadFormError('/eugene-web-design', err?.message || 'network_error')
     } finally {
       setIsSubmitting(false)
     }

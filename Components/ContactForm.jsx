@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Send } from 'lucide-react'
 import { useRecaptcha } from '@/lib/useRecaptcha'
+import { trackLeadFormSubmit, trackLeadFormError } from '@/lib/analytics'
 
 const projectTypes = [
   'Website Design',
@@ -64,6 +65,7 @@ export default function ContactForm() {
 
       if (response.ok) {
         setSubmitStatus('success')
+        trackLeadFormSubmit('/contact', formData.projectType)
         setFormData({
           firstName: '',
           lastName: '',
@@ -76,9 +78,11 @@ export default function ContactForm() {
         })
       } else {
         setSubmitStatus('error')
+        trackLeadFormError('/contact', `HTTP ${response.status}`)
       }
     } catch (error) {
       setSubmitStatus('error')
+      trackLeadFormError('/contact', error?.message || 'network_error')
     } finally {
       setIsSubmitting(false)
     }

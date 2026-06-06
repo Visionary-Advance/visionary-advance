@@ -85,14 +85,13 @@ export async function POST(request) {
     // 2. CRM lead (non-blocking)
     const [firstName, ...rest] = name.trim().split(' ')
     createOrUpdateLead({
-      firstName,
-      lastName: rest.join(' ') || '',
+      first_name: firstName,
+      last_name: rest.join(' ') || '',
       email,
-      phone: '',
-      company: '',
-      message: message || '',
       source: 'contact_form',
-      projectType: 'Discovery Call',
+      conversion_page: '/contact',
+      project_type: 'Discovery Call',
+      form_data: { message: message || '' },
     }).catch((err) => console.error('[booking/create] CRM error:', err))
 
     // 3. Confirmation email to client

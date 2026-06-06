@@ -3,6 +3,7 @@
 
 import { useState } from 'react'
 import { useRecaptcha } from '@/lib/useRecaptcha'
+import { trackAuditSubmit, trackAuditEmailSubmit } from '@/lib/analytics'
 
 export default function WebsiteAudit() {
   const [url, setUrl] = useState('')
@@ -41,6 +42,7 @@ export default function WebsiteAudit() {
       }
 
       setResults(data)
+      trackAuditSubmit(url)
     } catch (err) {
       setError('Something went wrong. Please try again.')
       console.error(err)
@@ -79,6 +81,7 @@ export default function WebsiteAudit() {
       }
 
       setEmailSent(true)
+      trackAuditEmailSubmit(results?.url || url)
     } catch (err) {
       setEmailError('Something went wrong. Please try again.')
       console.error(err)

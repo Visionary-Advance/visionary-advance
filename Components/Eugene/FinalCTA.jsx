@@ -1,11 +1,14 @@
 'use client'
 
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { Phone, Mail, ArrowRight } from 'lucide-react'
 import { motion, useReducedMotion } from 'framer-motion'
+import { trackPhoneClick, trackEmailClick } from '@/lib/analytics'
 
 export default function FinalCTA({ content }) {
   const prefersReducedMotion = useReducedMotion()
+  const pathname = usePathname()
 
   return (
     <section className="relative bg-[#050505] overflow-hidden py-20 md:py-28 px-4 md:px-16">
@@ -46,6 +49,7 @@ export default function FinalCTA({ content }) {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-10 mt-10 pt-8 border-t border-white/10">
           <a
             href={content.phoneHref}
+            onClick={() => trackPhoneClick(pathname)}
             className="group inline-flex items-center gap-2.5 font-manrope text-white/80 hover:text-white transition-colors"
           >
             <span className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-[#008070]/15 border border-[#008070]/30 group-hover:bg-[#008070]/25 transition-colors">
@@ -55,6 +59,7 @@ export default function FinalCTA({ content }) {
           </a>
           <a
             href={content.emailHref}
+            onClick={() => trackEmailClick(pathname)}
             className="group inline-flex items-center gap-2.5 font-manrope text-white/80 hover:text-white transition-colors"
           >
             <span className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-[#008070]/15 border border-[#008070]/30 group-hover:bg-[#008070]/25 transition-colors">

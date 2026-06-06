@@ -1,9 +1,9 @@
 import { DM_Sans, Instrument_Sans } from "next/font/google";
 import "./globals.css";
 import ConditionalLayout from "@/Components/ConditionalLayout";
-import Script from "next/script";
 import ReCaptchaScript from "@/Components/ReCaptchaScript";
 import AEOStructuredData from "@/Components/AEOStructuredData";
+import Analytics from "@/Components/Analytics";
 
 const dmSansReg = DM_Sans({
   variable: 'dm-sans-regular',
@@ -105,21 +105,8 @@ export default function RootLayout({ children }) {
       <body
         className={`${instSans.variable} ${dmSansReg.variable} ${dmSansBold.variable} antialiased`}
       >
-        {/* Google Tag Manager - Single script for Ads + GA4 */}
-        <Script
-          async
-          src="https://www.googletagmanager.com/gtag/js?id=AW-17658795216"
-          strategy="lazyOnload"
-        />
-        <Script id="gtag-init" strategy="lazyOnload">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'AW-17658795216');
-            ${process.env.NEXT_PUBLIC_GA_ID ? `gtag('config', '${process.env.NEXT_PUBLIC_GA_ID}');` : ''}
-          `}
-        </Script>
+        {/* Google Ads + GA4 — gated to public pages only (see Components/Analytics.jsx) */}
+        <Analytics />
         <ReCaptchaScript />
         <ConditionalLayout>
           {children}

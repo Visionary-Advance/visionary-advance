@@ -6,6 +6,7 @@ import { motion, useReducedMotion } from 'framer-motion'
 import Link from 'next/link'
 import { ArrowRight, MapPin, Search } from 'lucide-react'
 import { useRecaptcha } from '@/lib/useRecaptcha'
+import { trackAuditSubmit } from '@/lib/analytics'
 import AuditResultPanel from './AuditResultPanel'
 
 const DarkVeil = dynamic(() => import('@/Components/DarkVeil'), {
@@ -44,6 +45,7 @@ export default function EugeneHero({ content }) {
       }
 
       setResults(data)
+      trackAuditSubmit(url)
       requestAnimationFrame(() => {
         document.getElementById('audit-results')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
       })

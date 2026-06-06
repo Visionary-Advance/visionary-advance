@@ -74,7 +74,16 @@
       "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\brand\\\\websites\\\\visionary-advance\" -Directory)",
       "Bash(Select-Object Name)",
       "Bash(python *)",
-      "Bash(py --version)"
+      "Bash(py --version)",
+      "mcp__ahrefs__management-projects",
+      "mcp__ahrefs__gsc-pages",
+      "mcp__ahrefs__gsc-keywords",
+      "mcp__google-analytics__get_account_summaries",
+      "mcp__google-analytics__run_report",
+      "mcp__google-analytics__run_realtime_report",
+      "mcp__gsc__list_sites",
+      "mcp__gsc__search_analytics",
+      "mcp__gsc__detect_quick_wins"
     ],
     "deny": [],
     "ask": []

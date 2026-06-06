@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Send, CheckCircle, ArrowRight, Calendar, MessageSquare, Clock, Mail, Phone, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useRecaptcha } from '@/lib/useRecaptcha'
+import { trackLeadFormSubmit, trackLeadFormError, trackEvent } from '@/lib/analytics'
 import SplitText from '@/Components/SplitText'
 import FAQ from '@/Components/FAQ'
 
@@ -230,8 +231,16 @@ export default function ContactPage() {
       if (!res.ok) throw new Error(data.error || 'Something went wrong')
       setBookingResult(data.booking)
       setBookingStep('success')
+      trackEvent('book_call_submit', {
+        page_path: '/contact',
+        meeting_type: bookingData.meetingType,
+      })
     } catch (err) {
       setBookingError(err.message)
+      trackEvent('book_call_error', {
+        page_path: '/contact',
+        error_message: err?.message || 'network_error',
+      })
     } finally {
       setBookingLoading(false)
     }
@@ -249,9 +258,15 @@ export default function ContactPage() {
         body: JSON.stringify({ ...formData, recaptchaToken }),
       })
       setSubmitStatus(res.ok ? 'success' : 'error')
-      if (res.ok) setFormData({ firstName: '', lastName: '', email: '', phone: '', company: '', projectType: '', timeline: '', message: '' })
-    } catch {
+      if (res.ok) {
+        trackLeadFormSubmit('/contact', formData.projectType)
+        setFormData({ firstName: '', lastName: '', email: '', phone: '', company: '', projectType: '', timeline: '', message: '' })
+      } else {
+        trackLeadFormError('/contact', `HTTP ${res.status}`)
+      }
+    } catch (err) {
       setSubmitStatus('error')
+      trackLeadFormError('/contact', err?.message || 'network_error')
     } finally {
       setIsSubmitting(false)
     }
