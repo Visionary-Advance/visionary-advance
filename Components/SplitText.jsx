@@ -1,10 +1,11 @@
 'use client'
 
-import { useRef, useEffect, useState } from 'react'
+import { useRef, useEffect, useState, useContext } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { SplitText as GSAPSplitText } from 'gsap/SplitText'
 import { useGSAP } from '@gsap/react'
+import { A11yContext } from './Accessibility/A11yProvider'
 
 gsap.registerPlugin(ScrollTrigger, GSAPSplitText, useGSAP)
 
@@ -28,6 +29,12 @@ const SplitText = ({
   const onCompleteRef = useRef(onLetterAnimationComplete)
   const [fontsLoaded, setFontsLoaded] = useState(false)
 
+  // Respect the accessibility "Stop animations" toggle (and OS reduced-motion,
+  // which the provider mirrors into this setting). When on, render the title
+  // statically instead of running the GSAP character reveal.
+  const a11y = useContext(A11yContext)
+  const reduceMotion = a11y?.settings?.stopAnimations ?? false
+
   useEffect(() => {
     onCompleteRef.current = onLetterAnimationComplete
   }, [onLetterAnimationComplete])
@@ -49,6 +56,13 @@ const SplitText = ({
       if (el._rbsplitInstance) {
         try { el._rbsplitInstance.revert() } catch (_) {}
         el._rbsplitInstance = null
+      }
+
+      // Reduced motion: skip the split/reveal entirely and show the text
+      // immediately in its final state.
+      if (reduceMotion) {
+        gsap.set(el, { clearProps: 'opacity,transform' })
+        return
       }
 
       const startPct = (1 - threshold) * 100
@@ -118,7 +132,7 @@ const SplitText = ({
       dependencies: [
         text, delay, duration, ease, splitType,
         JSON.stringify(from), JSON.stringify(to),
-        threshold, rootMargin, fontsLoaded,
+        threshold, rootMargin, fontsLoaded, reduceMotion,
       ],
       scope: ref,
     }

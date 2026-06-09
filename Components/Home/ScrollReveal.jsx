@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect, useRef, useMemo } from 'react'
+import { useEffect, useRef, useMemo, useContext } from 'react'
+import { A11yContext } from '../Accessibility/A11yProvider'
 
 export default function ScrollReveal({
   children,
@@ -15,6 +16,11 @@ export default function ScrollReveal({
   const targetProgress = useRef(0)
   const rafId = useRef(null)
 
+  // Respect the accessibility "Stop animations" toggle: when on, show the text
+  // fully revealed and skip the scroll-linked fill loop entirely.
+  const a11y = useContext(A11yContext)
+  const reduceMotion = a11y?.settings?.stopAnimations ?? false
+
   const wordGroups = useMemo(() => {
     const text = typeof children === 'string' ? children : ''
     return text.split(/(\s+)/).filter(Boolean).map((segment) => ({
@@ -28,6 +34,16 @@ export default function ScrollReveal({
   }, [wordGroups])
 
   useEffect(() => {
+    // Reduced motion: paint every character in the revealed color once, no RAF.
+    if (reduceMotion) {
+      charRefs.current.forEach((span) => {
+        if (span) {
+          span.style.backgroundImage = `linear-gradient(to right, ${revealColor} 100%, ${baseColor} 100%)`
+        }
+      })
+      return
+    }
+
     const render = () => {
       const el = containerRef.current
       const spans = charRefs.current
@@ -93,7 +109,7 @@ export default function ScrollReveal({
     return () => {
       if (rafId.current) cancelAnimationFrame(rafId.current)
     }
-  }, [baseColor, revealColor, totalCharCount])
+  }, [baseColor, revealColor, totalCharCount, reduceMotion])
 
   let charIndex = 0
 

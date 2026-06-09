@@ -565,3 +565,129 @@ body {
     border-left: #202020 1px solid;
   }
 }
+
+/* ============================================================
+   Accessibility widget
+   Classes are toggled on <html> (global tools) or on #a11y-root
+   (content/color adjustments, so the widget itself is unaffected).
+   ============================================================ */
+
+/* --- Content: fonts --- */
+/* Comic Sans / Comic Neue are recommended dyslexia-friendly fallbacks.
+   To use true OpenDyslexic, drop the woff2 in /public/fonts and add an
+   @font-face for "OpenDyslexic" — it's already first in this stack. */
+#a11y-root.a11y-dyslexia,
+#a11y-root.a11y-dyslexia * {
+  font-family: "OpenDyslexic", "Comic Sans MS", "Comic Neue", cursive !important;
+}
+#a11y-root.a11y-readable,
+#a11y-root.a11y-readable * {
+  font-family: Verdana, Tahoma, Arial, sans-serif !important;
+}
+
+/* --- Content: spacing --- */
+#a11y-root.a11y-line-height :where(p, li, a, span, h1, h2, h3, h4, h5, h6, td, th, blockquote, dd, dt, label) {
+  line-height: var(--a11y-line-height, 1.6) !important;
+}
+#a11y-root.a11y-letter-spacing :where(p, li, a, span, h1, h2, h3, h4, h5, h6, td, th, blockquote, dd, dt, label) {
+  letter-spacing: var(--a11y-letter-spacing, 0.06em) !important;
+  word-spacing: var(--a11y-letter-spacing, 0.06em) !important;
+}
+
+/* --- Content: highlighting --- */
+#a11y-root.a11y-links :where(a) {
+  text-decoration: underline !important;
+  text-underline-offset: 2px !important;
+  outline: 1px dashed currentColor;
+  outline-offset: 2px;
+}
+#a11y-root.a11y-headings :where(h1, h2, h3, h4, h5, h6) {
+  outline: 2px solid #008070 !important;
+  outline-offset: 3px;
+}
+
+/* --- Content: hide media --- */
+#a11y-root.a11y-hide-images :where(img, picture, video, svg, [role="img"]) {
+  visibility: hidden !important;
+}
+
+/* --- Color: forced contrast themes --- */
+#a11y-root.a11y-contrast-dark,
+#a11y-root.a11y-contrast-dark :where(section, div, header, footer, main, article, aside, nav) {
+  background-color: #000 !important;
+  background-image: none !important;
+  color: #fff !important;
+}
+#a11y-root.a11y-contrast-dark :where(p, span, li, h1, h2, h3, h4, h5, h6, td, th, label, strong, em) {
+  color: #fff !important;
+}
+#a11y-root.a11y-contrast-dark :where(a) {
+  color: #ffeb3b !important;
+}
+#a11y-root.a11y-contrast-light,
+#a11y-root.a11y-contrast-light :where(section, div, header, footer, main, article, aside, nav) {
+  background-color: #fff !important;
+  background-image: none !important;
+  color: #000 !important;
+}
+#a11y-root.a11y-contrast-light :where(p, span, li, h1, h2, h3, h4, h5, h6, td, th, label, strong, em) {
+  color: #000 !important;
+}
+#a11y-root.a11y-contrast-light :where(a) {
+  color: #0645ad !important;
+}
+
+/* --- Tools: reduce motion (CSS animations + transitions) --- */
+html.a11y-no-motion *,
+html.a11y-no-motion *::before,
+html.a11y-no-motion *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* --- Tools: big cursor --- */
+html.a11y-big-cursor,
+html.a11y-big-cursor * {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24'%3E%3Cpath fill='%23000' stroke='%23fff' stroke-width='1.5' d='M5 2l14 11-6 .9 3.5 6.6-2.6 1.4L10.8 15 5 19z'/%3E%3C/svg%3E") 4 2, auto !important;
+}
+
+/* --- Tools: focus highlight --- */
+html.a11y-focus *:focus,
+html.a11y-focus *:focus-visible {
+  outline: 3px solid #008070 !important;
+  outline-offset: 2px !important;
+}
+
+/* --- Tools: text-to-speech active hint --- */
+body.a11y-tts-active #a11y-root :where(p, li, h1, h2, h3, h4, h5, h6, blockquote) {
+  cursor: pointer;
+}
+
+/* --- Tools: reading guide --- */
+.a11y-reading-guide {
+  position: fixed;
+  left: 0;
+  width: 100%;
+  height: 8px;
+  margin-top: -4px;
+  background: #008070;
+  opacity: 0.6;
+  pointer-events: none;
+  z-index: 9997;
+}
+
+/* --- Tools: reading mask (two dim panels, transparent strip between) --- */
+.a11y-reading-mask {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  pointer-events: none;
+  z-index: 9997;
+}
+.a11y-reading-mask-bottom {
+  height: 100vh;
+}

@@ -4,6 +4,7 @@ import ConditionalLayout from "@/Components/ConditionalLayout";
 import ReCaptchaScript from "@/Components/ReCaptchaScript";
 import AEOStructuredData from "@/Components/AEOStructuredData";
 import Analytics from "@/Components/Analytics";
+import A11yProvider from "@/Components/Accessibility/A11yProvider";
 
 const dmSansReg = DM_Sans({
   variable: 'dm-sans-regular',
@@ -102,6 +103,12 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <head>
         <AEOStructuredData />
+        {/* Apply saved accessibility prefs before paint to avoid a flash. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var s=JSON.parse(localStorage.getItem('va-a11y-settings')||'{}');var h=document.documentElement;var reduce=s.stopAnimations===true;if(s.stopAnimations===undefined&&window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches)reduce=true;window.__VA_A11Y_REDUCE__=reduce;if(s.fontScale&&s.fontScale!==1)h.style.fontSize=(s.fontScale*100)+'%';if(s.bigCursor)h.classList.add('a11y-big-cursor');if(s.highlightFocus)h.classList.add('a11y-focus');if(reduce)h.classList.add('a11y-no-motion');}catch(e){}})();`,
+          }}
+        />
       </head>
       <body
         className={`${instSans.variable} ${dmSansReg.variable} ${dmSansBold.variable} antialiased`}
@@ -109,9 +116,11 @@ export default function RootLayout({ children }) {
         {/* Google Ads + GA4 — gated to public pages only (see Components/Analytics.jsx) */}
         <Analytics />
         <ReCaptchaScript />
-        <ConditionalLayout>
-          {children}
-        </ConditionalLayout>
+        <A11yProvider>
+          <ConditionalLayout>
+            {children}
+          </ConditionalLayout>
+        </A11yProvider>
       </body>
     </html>
   );
