@@ -25,8 +25,11 @@ export async function generateMetadata({ params }) {
   const ogImageUrl = ogImage ? urlForImage(ogImage).width(1200).height(630).url() : null;
 
   return {
-    title: category.seo?.metaTitle || `${category.title} | Blog | Visionary Advance`,
-    description: category.seo?.metaDescription || category.description || `Articles about ${category.title}`,
+    title: category.seo?.metaTitle || `${category.title} | Blog`,
+    description:
+      category.seo?.metaDescription ||
+      category.description ||
+      `Read the latest articles about ${category.title} from Visionary Advance — web design, SEO, and growth tips for Eugene & Lane County businesses.`,
     keywords: category.seo?.keywords?.join(', '),
     openGraph: {
       title: category.seo?.metaTitle || category.title,

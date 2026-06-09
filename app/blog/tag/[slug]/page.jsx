@@ -21,10 +21,12 @@ export async function generateMetadata({ params }) {
     return { title: 'Tag Not Found' };
   }
 
-  const description = tag.description || `Articles tagged with ${tag.title}`;
+  const description =
+    tag.description ||
+    `Articles tagged ${tag.title} from Visionary Advance — web design, SEO, and growth tips for Eugene, Springfield & Lane County businesses.`;
 
   return {
-    title: `#${tag.title} | Blog | Visionary Advance`,
+    title: `#${tag.title} | Blog`,
     description,
     openGraph: {
       title: `#${tag.title}`,

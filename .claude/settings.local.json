@@ -83,7 +83,9 @@
       "mcp__google-analytics__run_realtime_report",
       "mcp__gsc__list_sites",
       "mcp__gsc__search_analytics",
-      "mcp__gsc__detect_quick_wins"
+      "mcp__gsc__detect_quick_wins",
+      "WebFetch(domain:home-server.tail72f081.ts.net)",
+      "mcp__ahrefs__keywords-explorer-overview"
     ],
     "deny": [],
     "ask": []

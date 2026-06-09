@@ -13,6 +13,17 @@ const navLinks = [
   { label: 'Contact', href: '/contact' },
 ]
 
+// Landing/solution pages — surfaced here so they aren't orphaned and each
+// gets a site-wide dofollow internal link (fixes Ahrefs orphan / single-inlink).
+const solutionLinks = [
+  { label: 'Eugene Web Design', href: '/eugene-web-design' },
+  { label: 'Construction Websites', href: '/construction-website-design' },
+  { label: 'Small Business Websites', href: '/small-business-website-design' },
+  { label: 'Law Firm Web Design', href: '/law-firm-web-design' },
+  { label: 'Ecommerce Web Design', href: '/ecommerce-web-design-agency' },
+  { label: 'Responsive Web Design', href: '/responsive-web-design-services' },
+]
+
 export default function Footer() {
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState(null) // 'sending' | 'success' | 'error'
@@ -39,7 +50,7 @@ export default function Footer() {
   return (
     <footer className="bg-black py-12 md:py-16 px-4 md:px-16">
       <div className="max-w-6xl mx-auto">
-        <div className="grid md:grid-cols-3 gap-12 md:gap-16">
+        <div className="grid md:grid-cols-4 gap-12 md:gap-16">
           {/* Left: Logo + Newsletter */}
           <div className="md:col-span-2 space-y-6">
             <Image
@@ -79,13 +90,31 @@ export default function Footer() {
             )}
           </div>
 
-          {/* Right: Resources */}
+          {/* Resources */}
           <div>
             <p className="font-manrope font-bold text-sm text-white/50 mb-4">
               Resources
             </p>
             <nav className="flex flex-col gap-2">
               {navLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="font-manrope text-white/50 hover:text-white transition-colors text-sm"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
+          </div>
+
+          {/* Solutions */}
+          <div>
+            <p className="font-manrope font-bold text-sm text-white/50 mb-4">
+              Solutions
+            </p>
+            <nav className="flex flex-col gap-2">
+              {solutionLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}

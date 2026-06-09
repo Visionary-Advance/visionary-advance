@@ -13,6 +13,14 @@ import EmbeddedCTA from './PortableText/EmbeddedCTA';
 
 const components = {
   block: {
+    // The page already renders the post title as the single <h1> (BlogHero).
+    // Downgrade any in-body "H1" style to an <h2> so a post body can never
+    // introduce a second page-level H1 (SEO: exactly one H1 per page).
+    h1: ({ children }) => (
+      <h2 className="font-inter-display font-bold text-3xl md:text-4xl text-gray-900 mt-12 mb-6 scroll-mt-24" id={children?.toString().toLowerCase().replace(/\s+/g, '-')}>
+        {children}
+      </h2>
+    ),
     h2: ({ children }) => (
       <h2 className="font-inter-display font-bold text-3xl md:text-4xl text-gray-900 mt-12 mb-6 scroll-mt-24" id={children?.toString().toLowerCase().replace(/\s+/g, '-')}>
         {children}

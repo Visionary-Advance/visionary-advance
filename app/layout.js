@@ -30,14 +30,15 @@ const instSans = Instrument_Sans({
 
 export const metadata = {
   metadataBase: new URL('https://visionaryadvance.com'),
-  alternates: {
-    canonical: 'https://visionaryadvance.com',
-  },
+  // NOTE: do NOT set a global `alternates.canonical` here. Next.js propagates it
+  // to every route that doesn't override it, which forces unrelated pages
+  // (e.g. /works, /works/[slug]) to canonicalize to the homepage. Each page
+  // sets its own self-referential canonical instead.
   title: {
     default: "Visionary Advance | Custom Business Systems & SEO Web Design | Eugene, OR",
     template: "%s | Visionary Advance"
   },
-  description: "Visionary Advance offers expert web development, custom business systems, and website design services. Empower your business with a high-performing online presence. Contact us for a free consultation!",
+  description: "Expert web development, custom business systems & website design in Eugene, OR. Build a high-performing online presence. Free consultation available.",
   keywords: "custom business systems, Eugene web design, contractor management systems, warehouse inventory systems, custom dashboards, custom CMS, Lane County web development, Oregon web design, SEO services",
   authors: [{ name: "Visionary Advance" }],
   creator: "Visionary Advance",
@@ -49,7 +50,7 @@ export const metadata = {
     locale: 'en_US',
     url: 'https://visionaryadvance.com',
     title: 'Visionary Advance | Custom Business Systems & SEO Web Design | Eugene, OR',
-    description: 'Visionary Advance offers expert web development, custom business systems, and website design services. Empower your business with a high-performing online presence. Contact us for a free consultation!',
+    description: 'Expert web development, custom business systems & website design in Eugene, OR. Build a high-performing online presence. Free consultation available.',
     siteName: 'Visionary Advance',
     images: [
       {
@@ -65,7 +66,7 @@ export const metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Visionary Advance | Custom Business Systems & SEO Web Design | Eugene, OR',
-    description: 'Visionary Advance offers expert web development, custom business systems, and website design services. Empower your business with a high-performing online presence. Contact us for a free consultation!',
+    description: 'Expert web development, custom business systems & website design in Eugene, OR. Build a high-performing online presence. Free consultation available.',
     creator: '@visionaryadvance',
     images: ['https://visionaryadvance.com/Img/VaLogo_Large.png'],
   },
