@@ -85,7 +85,9 @@
       "mcp__gsc__search_analytics",
       "mcp__gsc__detect_quick_wins",
       "WebFetch(domain:home-server.tail72f081.ts.net)",
-      "mcp__ahrefs__keywords-explorer-overview"
+      "mcp__ahrefs__keywords-explorer-overview",
+      "Bash(git mv *)",
+      "Bash(mv \"7tgfhxyvwkg4p8qzpbnyjzqsd9n7tbam.txt\" \"public/7tgfhxyvwkg4p8qzpbnyjzqsd9n7tbam.txt\")"
     ],
     "deny": [],
     "ask": []
