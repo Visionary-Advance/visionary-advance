@@ -109,7 +109,16 @@ export default function AboutPage() {
             transition={{ duration: 0.7, ease: 'easeOut' }}
             viewport={{ once: true, amount: 0.2 }}
           >
-            <img className="w-full h-72 md:h-[420px] object-cover rounded-lg" src="/Img/Brandon_Headshot_Square.jpg" alt="Brandon Crites" />
+            <div className="relative w-full h-72 md:h-[420px] rounded-lg overflow-hidden">
+              <Image
+                src="/Img/brandon-headshot.jpg"
+                alt="Brandon Crites"
+                fill
+                className="object-cover object-top"
+                sizes="(max-width: 768px) 100vw, 50vw"
+                quality={90}
+              />
+            </div>
           </motion.div>
 
           <motion.div

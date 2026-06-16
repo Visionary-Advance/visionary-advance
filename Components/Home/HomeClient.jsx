@@ -221,10 +221,10 @@ export default function HomeClient({ title, titleVariant }) {
             </div>
             <div className="relative h-60 md:h-80 rounded-xl overflow-hidden">
               <Image
-                src="/Img/Brandon_Headshot_Square.jpg"
-                alt="Business systems and tools"
+                src="/Img/brandon-headshot.jpg"
+                alt="Brandon Crites, founder of Visionary Advance"
                 fill
-                className="object-cover"
+                className="object-cover object-top"
                 sizes="(max-width: 768px) 100vw, 50vw"
               />
             </div>

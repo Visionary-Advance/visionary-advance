@@ -87,7 +87,9 @@
       "WebFetch(domain:home-server.tail72f081.ts.net)",
       "mcp__ahrefs__keywords-explorer-overview",
       "Bash(git mv *)",
-      "Bash(mv \"7tgfhxyvwkg4p8qzpbnyjzqsd9n7tbam.txt\" \"public/7tgfhxyvwkg4p8qzpbnyjzqsd9n7tbam.txt\")"
+      "Bash(mv \"7tgfhxyvwkg4p8qzpbnyjzqsd9n7tbam.txt\" \"public/7tgfhxyvwkg4p8qzpbnyjzqsd9n7tbam.txt\")",
+      "Bash(identify \"C:/Users/brand/websites/visionary-advance/public/Img/Brandon_image.JPG\")",
+      "Bash(cd *)"
     ],
     "deny": [],
     "ask": []
