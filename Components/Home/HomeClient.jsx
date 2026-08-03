@@ -131,12 +131,17 @@ export default function HomeClient({ title, titleVariant }) {
               We design modern, SEO-driven websites and custom business systems — from dashboards to inventory — built around your workflow, not the other way around.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-              <Link
-                href="/audit"
+              {/* Points at the app, not a page on this site. Prospects we've
+                  already built a site for get a PIN over the phone; this is
+                  where they redeem it. Plain <a> rather than next/link because
+                  it leaves this app entirely — prefetching another origin does
+                  nothing but cost a request. */}
+              <a
+                href="https://app.visionaryadvance.com/preview"
                 className="bg-[#008070] hover:bg-[#006b5d] text-white font-manrope font-bold px-8 py-4 rounded-lg w-full sm:w-auto transition-colors text-center text-lg"
               >
-                Run an Audit
-              </Link>
+                Preview your Site
+              </a>
               <Link
                 href="/works"
                 className="bg-white/10 backdrop-blur border border-white/20 text-white font-manrope font-bold px-8 py-4 rounded-lg w-full sm:w-auto hover:bg-white/20 transition-colors text-center text-lg"
