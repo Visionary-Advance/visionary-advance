@@ -32,12 +32,12 @@ const services = [
     tags: ['Next.js', 'Performance', 'Integrations'],
   },
   {
-    title: 'Systems',
-    slug: 'business-systems',
+    title: 'Digital Marketing',
+    slug: 'digital-marketing',
     description:
-      'Custom dashboards, inventory tracking, job management, and internal tools — built around your workflow, not the other way around. No bloated platforms, just solutions that fit.',
+      'Campaigns, local presence, and content that put you in front of people already searching for what you do — then tracked through to the leads they actually produce.',
     image: '/Img/communication.jpg',
-    tags: ['Dashboards', 'Automation', 'Custom Tools'],
+    tags: ['Google Ads', 'Local SEO', 'Google Business'],
   },
 ]
 

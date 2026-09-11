@@ -3,13 +3,13 @@ import { DEFAULT_OG_IMAGE } from '@/lib/seo'
 export const metadata = {
   // Shortened from "Web Design & Custom Business Systems Services | Eugene, OR"
   // so the title + brand suffix stays under the ~60 char limit.
-  title: 'Web Design & Business Systems | Eugene, OR',
+  title: 'Web Design, Digital Marketing & SEO | Eugene, OR',
   description: 'Custom websites, dashboards, SEO, and business systems built around how you work. No templates, no shortcuts. Serving Eugene, Lane County & Oregon.',
   alternates: {
     canonical: 'https://visionaryadvance.com/services',
   },
   openGraph: {
-    title: 'Web Design & Business Systems | Eugene, OR',
+    title: 'Web Design, Digital Marketing & SEO | Eugene, OR',
     description: 'Custom websites, dashboards, SEO, and business systems built around how you work. No templates, no shortcuts. Serving Eugene, Lane County & Oregon.',
     url: 'https://visionaryadvance.com/services',
     siteName: 'Visionary Advance',
@@ -19,7 +19,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Web Design & Business Systems | Eugene, OR',
+    title: 'Web Design, Digital Marketing & SEO | Eugene, OR',
     description: 'Custom websites, dashboards, SEO, and business systems built around how you work. Serving Eugene & Lane County.',
     images: [DEFAULT_OG_IMAGE],
   },

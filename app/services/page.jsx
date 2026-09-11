@@ -33,11 +33,11 @@ const services = [
     image: '/Img/coding.jpg',
   },
   {
-    title: 'Business Systems',
-    slug: 'business-systems',
+    title: 'Digital Marketing',
+    slug: 'digital-marketing',
     snippet:
-      'Custom dashboards, inventory tools, job tracking, and client portals — built around how your business actually operates, not the other way around.',
-    tags: ['Dashboards', 'Automation', 'Custom Tools', 'APIs'],
+      'Campaigns, local presence, and content that put you in front of people already searching — tracked through to the leads they actually produce.',
+    tags: ['Google Ads', 'Local SEO', 'Google Business', 'Conversion Tracking'],
     image: '/Img/communication.jpg',
   },
 ]
