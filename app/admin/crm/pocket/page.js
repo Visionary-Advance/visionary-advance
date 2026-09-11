@@ -77,7 +77,7 @@ export default function PocketInboxPage() {
   useEffect(() => {
     const fetchLeads = async () => {
       try {
-        const res = await fetch('/api/crm/leads?limit=200')
+        const res = await fetch('/api/crm/leads?type=all&limit=200')
         if (res.ok) {
           const data = await res.json()
           setLeads(data.leads || [])
@@ -88,6 +88,9 @@ export default function PocketInboxPage() {
     }
     fetchLeads()
   }, [])
+
+  const clientOptions = leads.filter((lead) => lead.is_client)
+  const leadOptions = leads.filter((lead) => !lead.is_client)
 
   const handleResync = async () => {
     setSyncing(true)
@@ -226,6 +229,7 @@ export default function PocketInboxPage() {
                           className="text-[#008070] hover:underline"
                         >
                           {rec.lead.full_name || rec.lead.email}
+                          {rec.lead.is_client ? ' (client)' : ''}
                         </Link>
                       )}
                     </div>
@@ -284,13 +288,27 @@ export default function PocketInboxPage() {
                       }
                       className="min-w-0 flex-1 rounded-lg border border-[#262626] bg-[#000000] px-3 py-2 text-sm text-[#fafafa]"
                     >
-                      <option value="">Link to a lead…</option>
-                      {leads.map((lead) => (
-                        <option key={lead.id} value={lead.id}>
-                          {lead.full_name || lead.email}
-                          {lead.company ? ` · ${lead.company}` : ''}
-                        </option>
-                      ))}
+                      <option value="">Link to a lead or client…</option>
+                      {clientOptions.length > 0 && (
+                        <optgroup label="Clients">
+                          {clientOptions.map((lead) => (
+                            <option key={lead.id} value={lead.id}>
+                              {lead.full_name || lead.email}
+                              {lead.company ? ` · ${lead.company}` : ''}
+                            </option>
+                          ))}
+                        </optgroup>
+                      )}
+                      {leadOptions.length > 0 && (
+                        <optgroup label="Leads">
+                          {leadOptions.map((lead) => (
+                            <option key={lead.id} value={lead.id}>
+                              {lead.full_name || lead.email}
+                              {lead.company ? ` · ${lead.company}` : ''}
+                            </option>
+                          ))}
+                        </optgroup>
+                      )}
                     </select>
                     <button
                       onClick={() => handleAssign(rec.id)}
