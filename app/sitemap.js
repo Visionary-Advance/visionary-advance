@@ -105,6 +105,12 @@ export default async function sitemap() {
       priority: 0.95,
     },
     {
+      url: `${baseUrl}/eugene-website-hosting`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.9,
+    },
+    {
       url: `${baseUrl}/affordable-small-business-website-design`,
       lastModified: new Date(),
       changeFrequency: 'monthly',

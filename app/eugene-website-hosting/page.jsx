@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { eugenePageContent } from '@/lib/eugene-page-content'
+import { eugeneHostingContent } from '@/lib/eugene-hosting-content'
 import EugeneHero from '@/Components/Eugene/EugeneHero'
 import LocalTrustBand from '@/Components/Eugene/LocalTrustBand'
 import ProblemsSolutions from '@/Components/Eugene/ProblemsSolutions'
@@ -11,16 +11,18 @@ import EugeneFAQ from '@/Components/Eugene/EugeneFAQ'
 import EugeneContactSection from '@/Components/Eugene/EugeneContactSection'
 import FinalCTA from '@/Components/Eugene/FinalCTA'
 
-export default function EugeneWebDesignPage() {
-  const c = eugenePageContent
+export default function EugeneWebsiteHostingPage() {
+  const c = eugeneHostingContent
 
+  // Shares the #business @id with /eugene-web-design so both pages resolve to
+  // one LocalBusiness entity rather than declaring two competing ones.
   const localBusinessSchema = {
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
-    '@id': `${c.meta.canonical}#business`,
+    '@id': 'https://visionaryadvance.com/eugene-web-design#business',
     name: 'Visionary Advance',
     image: 'https://visionaryadvance.com/Img/VaLogo_Large.png',
-    url: c.meta.canonical,
+    url: 'https://visionaryadvance.com/eugene-web-design',
     telephone: c.finalCta.phone,
     email: c.finalCta.email,
     priceRange: '$$',
@@ -42,9 +44,9 @@ export default function EugeneWebDesignPage() {
   const serviceSchema = {
     '@context': 'https://schema.org',
     '@type': 'Service',
-    name: 'Eugene Web Design',
-    serviceType: 'Web Design and Development',
-    provider: { '@id': `${c.meta.canonical}#business` },
+    name: 'Website Hosting and Maintenance in Eugene, Oregon',
+    serviceType: 'Web Hosting',
+    provider: { '@id': 'https://visionaryadvance.com/eugene-web-design#business' },
     areaServed: ['Eugene, OR', 'Springfield, OR', 'Lane County, OR'],
     description: c.meta.description,
     url: c.meta.canonical,
@@ -55,7 +57,13 @@ export default function EugeneWebDesignPage() {
     '@type': 'BreadcrumbList',
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://visionaryadvance.com' },
-      { '@type': 'ListItem', position: 2, name: 'Eugene Web Design', item: c.meta.canonical },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Eugene Web Design',
+        item: 'https://visionaryadvance.com/eugene-web-design',
+      },
+      { '@type': 'ListItem', position: 3, name: 'Website Hosting', item: c.meta.canonical },
     ],
   }
 
@@ -69,24 +77,17 @@ export default function EugeneWebDesignPage() {
     })),
   }
 
+  const schemas = [localBusinessSchema, serviceSchema, breadcrumbSchema, faqSchema]
+
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
-      />
+      {schemas.map((schema, i) => (
+        <script
+          key={i}
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+        />
+      ))}
 
       <main className="bg-[#050505]">
         <EugeneHero content={c} />
@@ -98,18 +99,21 @@ export default function EugeneWebDesignPage() {
         <EugeneTestimonials />
         <EugeneFAQ faqs={c.faqs} />
 
-        {/* Hub links to the pages that now own hosting and ecommerce, with the
-            anchor text each is targeting. */}
+        {/* Sends the hub page its link back, with the anchor text each page is
+            meant to own. */}
         <section className="bg-[#050505] border-t border-white/[0.06] px-4 md:px-16 py-12">
           <div className="max-w-6xl mx-auto">
             <p className="font-manrope text-sm text-white/50">
-              More for Eugene businesses:{' '}
-              <Link href="/eugene-website-hosting" className="text-[#10b981] hover:underline">
-                Eugene website hosting
+              Also for Eugene businesses:{' '}
+              <Link href="/eugene-web-design" className="text-[#10b981] hover:underline">
+                Eugene web design
               </Link>
               {' · '}
-              <Link href="/ecommerce-web-design-agency" className="text-[#10b981] hover:underline">
-                ecommerce web design
+              <Link
+                href="/affordable-small-business-website-design"
+                className="text-[#10b981] hover:underline"
+              >
+                affordable small business websites
               </Link>
               {' · '}
               <Link href="/services/seo" className="text-[#10b981] hover:underline">
