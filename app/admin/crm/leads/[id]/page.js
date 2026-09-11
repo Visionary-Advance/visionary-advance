@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation'
 import ScoreBadge from '@/Components/CRM/Shared/ScoreBadge'
 import StageBadge, { STAGE_CONFIG } from '@/Components/CRM/Shared/StageBadge'
 import SourceBadge from '@/Components/CRM/Shared/SourceBadge'
-import PinButton from '@/Components/CRM/Shared/PinButton'
+import ActivityRow from '@/Components/CRM/Shared/ActivityRow'
 
 const STAGES = [
   'contact',
@@ -670,35 +670,15 @@ export default function LeadDetailPage({ params }) {
                   Pinned
                 </h3>
                 {pinnedActivities.map((activity) => (
-                  <div key={activity.id} className="flex gap-4 rounded-lg bg-[#008070]/5 p-3 border border-[#008070]/20">
-                    <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#171717] text-[#a1a1aa]">
-                      {getActivityIcon(activity.type)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-4">
-                        <div>
-                          <p className="text-sm font-medium text-[#fafafa]">{activity.title}</p>
-                          {activity.description && (
-                            <p className="mt-1 text-sm text-[#a1a1aa] whitespace-pre-wrap">
-                              {activity.description}
-                            </p>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-2 flex-shrink-0">
-                          <time className="text-xs text-[#a1a1aa]">
-                            {formatDate(activity.created_at)}
-                          </time>
-                          {pinnableTypes.includes(activity.type) && (
-                            <PinButton
-                              activityId={activity.id}
-                              isPinned={activity.is_pinned}
-                              onToggle={handlePinToggle}
-                            />
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  <ActivityRow
+                    key={activity.id}
+                    activity={activity}
+                    icon={getActivityIcon(activity.type)}
+                    pinnable={pinnableTypes.includes(activity.type)}
+                    onPinToggle={handlePinToggle}
+                    formatDate={formatDate}
+                    highlighted
+                  />
                 ))}
               </div>
             )}
@@ -709,35 +689,14 @@ export default function LeadDetailPage({ params }) {
                 <p className="text-center text-sm text-[#a1a1aa]">No activity yet</p>
               ) : (
                 regularActivities.map((activity) => (
-                  <div key={activity.id} className="flex gap-4">
-                    <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#171717] text-[#a1a1aa]">
-                      {getActivityIcon(activity.type)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-4">
-                        <div>
-                          <p className="text-sm font-medium text-[#fafafa]">{activity.title}</p>
-                          {activity.description && (
-                            <p className="mt-1 text-sm text-[#a1a1aa] whitespace-pre-wrap">
-                              {activity.description}
-                            </p>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-2 flex-shrink-0">
-                          <time className="text-xs text-[#a1a1aa]">
-                            {formatDate(activity.created_at)}
-                          </time>
-                          {pinnableTypes.includes(activity.type) && (
-                            <PinButton
-                              activityId={activity.id}
-                              isPinned={activity.is_pinned}
-                              onToggle={handlePinToggle}
-                            />
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  <ActivityRow
+                    key={activity.id}
+                    activity={activity}
+                    icon={getActivityIcon(activity.type)}
+                    pinnable={pinnableTypes.includes(activity.type)}
+                    onPinToggle={handlePinToggle}
+                    formatDate={formatDate}
+                  />
                 ))
               )}
             </div>
