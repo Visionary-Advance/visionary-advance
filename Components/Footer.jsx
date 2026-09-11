@@ -17,8 +17,10 @@ const navLinks = [
 // gets a site-wide dofollow internal link (fixes Ahrefs orphan / single-inlink).
 const solutionLinks = [
   { label: 'Eugene Web Design', href: '/eugene-web-design' },
+  { label: 'Eugene Website Hosting', href: '/eugene-website-hosting' },
   { label: 'Construction Websites', href: '/construction-website-design' },
   { label: 'Small Business Websites', href: '/small-business-website-design' },
+  { label: 'Affordable Websites ($99/mo)', href: '/affordable-small-business-website-design' },
   { label: 'Law Firm Web Design', href: '/law-firm-web-design' },
   { label: 'Ecommerce Web Design', href: '/ecommerce-web-design-agency' },
   { label: 'Responsive Web Design', href: '/responsive-web-design-services' },

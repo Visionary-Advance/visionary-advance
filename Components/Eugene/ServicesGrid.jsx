@@ -1,7 +1,8 @@
 'use client'
 
+import Link from 'next/link'
 import { motion, useReducedMotion } from 'framer-motion'
-import { Palette, Search, Workflow, Check } from 'lucide-react'
+import { Palette, Search, Workflow, Check, ArrowRight } from 'lucide-react'
 
 const iconMap = {
   0: Palette,
@@ -92,6 +93,17 @@ export default function ServicesGrid({ content }) {
                     </li>
                   ))}
                 </ul>
+
+                {service.linkHref && (
+                  <Link
+                    href={service.linkHref}
+                    className="mt-6 inline-flex items-center gap-1.5 font-manrope font-semibold text-sm hover:gap-2.5 transition-all"
+                    style={{ color: accentFrom }}
+                  >
+                    {service.linkLabel || 'Learn more'}
+                    <ArrowRight className="w-4 h-4" />
+                  </Link>
+                )}
               </motion.article>
             )
           })}

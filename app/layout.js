@@ -36,7 +36,7 @@ export const metadata = {
   // (e.g. /works, /works/[slug]) to canonicalize to the homepage. Each page
   // sets its own self-referential canonical instead.
   title: {
-    default: "Visionary Advance | Custom Business Systems & SEO Web Design | Eugene, OR",
+    default: "Visionary Advance | Affordable Websites & Digital Marketing | Eugene, OR",
     template: "%s | Visionary Advance"
   },
   description: "Expert web development, custom business systems & website design in Eugene, OR. Build a high-performing online presence. Free consultation available.",
@@ -50,7 +50,7 @@ export const metadata = {
     type: 'website',
     locale: 'en_US',
     url: 'https://visionaryadvance.com',
-    title: 'Visionary Advance | Custom Business Systems & SEO Web Design | Eugene, OR',
+    title: 'Visionary Advance | Affordable Websites & Digital Marketing | Eugene, OR',
     description: 'Expert web development, custom business systems & website design in Eugene, OR. Build a high-performing online presence. Free consultation available.',
     siteName: 'Visionary Advance',
     images: [
@@ -58,7 +58,7 @@ export const metadata = {
         url: 'https://visionaryadvance.com/Img/VaLogo_Large.png',
         width: 1200,
         height: 630,
-        alt: 'Visionary Advance - Custom Websites & Business Systems',
+        alt: 'Visionary Advance - Affordable Websites & Digital Marketing',
       },
     ],
   },
@@ -66,7 +66,7 @@ export const metadata = {
   // Twitter Card
   twitter: {
     card: 'summary_large_image',
-    title: 'Visionary Advance | Custom Business Systems & SEO Web Design | Eugene, OR',
+    title: 'Visionary Advance | Affordable Websites & Digital Marketing | Eugene, OR',
     description: 'Expert web development, custom business systems & website design in Eugene, OR. Build a high-performing online presence. Free consultation available.',
     creator: '@visionaryadvance',
     images: ['https://visionaryadvance.com/Img/VaLogo_Large.png'],

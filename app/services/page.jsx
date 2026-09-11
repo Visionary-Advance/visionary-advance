@@ -33,11 +33,11 @@ const services = [
     image: '/Img/coding.jpg',
   },
   {
-    title: 'Business Systems',
-    slug: 'business-systems',
+    title: 'Digital Marketing',
+    slug: 'digital-marketing',
     snippet:
-      'Custom dashboards, inventory tools, job tracking, and client portals — built around how your business actually operates, not the other way around.',
-    tags: ['Dashboards', 'Automation', 'Custom Tools', 'APIs'],
+      'Campaigns, local presence, and content that put you in front of people already searching — tracked through to the leads they actually produce.',
+    tags: ['Google Ads', 'Local SEO', 'Google Business', 'Conversion Tracking'],
     image: '/Img/communication.jpg',
   },
 ]
@@ -91,6 +91,36 @@ export default function ServicesPage() {
               <p className="font-manrope text-sm text-gray-500 mt-1">{stat.label}</p>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* ===== $99/MO SUBSCRIPTION POINTER ===== */}
+      {/* The services below are project work. Owners who bounce off those price
+          points still have somewhere to go — this is the crawl path to
+          /affordable-small-business-website-design as well as the commercial one. */}
+      <section className="px-4 md:px-16 pb-16 md:pb-20">
+        <div className="max-w-6xl mx-auto bg-gray-50 border border-gray-200 rounded-2xl p-6 md:p-8 flex flex-col md:flex-row md:items-center gap-5 md:gap-8">
+          <div className="flex-1">
+            <h2 className="font-inter-display font-bold text-xl md:text-2xl text-black mb-2">
+              Not ready for a full project?
+            </h2>
+            <p className="font-manrope text-base md:text-lg text-gray-700 leading-relaxed">
+              We also build and maintain{' '}
+              <Link
+                href="/affordable-small-business-website-design"
+                className="text-[#008070] underline underline-offset-2 hover:text-[#006b5d]"
+              >
+                affordable small business websites
+              </Link>{' '}
+              for $99 a month — no setup fee, no contract, live in about a week.
+            </p>
+          </div>
+          <Link
+            href="/affordable-small-business-website-design"
+            className="bg-[#008070] hover:bg-[#006b5d] text-white font-manrope font-bold px-6 py-3 rounded-lg transition-colors text-center flex-shrink-0"
+          >
+            See Affordable Websites
+          </Link>
         </div>
       </section>
 

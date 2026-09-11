@@ -82,6 +82,18 @@ A unified CRM system with Supabase as the source of truth:
 - Sends webhook notifications for new leads and stage changes
 - Requires `DISCORD_CRM_WEBHOOK_URL` environment variable
 
+**Pocket / HeyPocket** (`lib/pocket.js`):
+- Turns recordings from the Pocket AI voice device into CRM activity
+- Base URL `https://public.heypocketai.com/api/v1`, auth `Authorization: Bearer pk_xxx`
+- `POST /api/crm/pocket/webhook` receives `summary.completed` (and summary/action-item edit events)
+- Signature: HMAC-SHA256 of `{timestamp}.{rawBody}` in `X-HeyPocket-Signature`, with `X-HeyPocket-Timestamp` (ms). The route must read `request.text()` — never `request.json()` — since the signature is over raw bytes. 5-minute replay window.
+- **Lead matching is by Pocket tag**: tag the recording with the lead's email, `lead:<uuid>`, or `crm:<value>`
+- Matched → logs a `call_summary` activity, creates `crm_tasks` from action items (`auto_task_source: 'pocket'`), pings n8n
+- Unmatched → lands in `pocket_recordings` with `status='unmatched'`, reviewable at `/admin/crm/pocket`
+- **Pocket has no `tags.updated` event**, so tagging a recording after its summary finished fires nothing. `/api/cron/pocket-sync` (every 15 min) re-checks tags on unmatched rows and pulls in recordings whose webhook never arrived; the inbox's "Re-check tags" button runs the same sweep on demand
+- Idempotent: repeat events update the existing activity and never duplicate tasks
+- Schema: `supabase/pocket-schema.sql`
+
 **UTM Tracking** (`lib/utm.js`):
 - Captures utm_source, utm_medium, utm_campaign, utm_term, utm_content
 - Extracts from URL params, cookies, and request headers
@@ -167,6 +179,10 @@ The app uses a conditional layout system via `Components/ConditionalLayout.jsx`:
 **CRM/Discord**:
 - `DISCORD_CRM_WEBHOOK_URL` (Discord webhook for lead notifications)
 
+**Pocket Integration**:
+- `POCKET_API_KEY` (Pocket Public API key, `pk_...`)
+- `POCKET_WEBHOOK_SECRET` (signing secret, shown once when creating the webhook in the Pocket app)
+
 **CRM Database** (separate Supabase instance):
 - `NEXT_PUBLIC_CRM_DB_URL` (CRM Supabase URL)
 - `NEXT_PUBLIC_CRM_DB_ANON` (CRM Supabase anon key for client-side auth)
@@ -227,6 +243,10 @@ The admin section is protected with Supabase Auth:
    - All dynamic routes have been updated to handle async params
 
 3. **Server-Side Keys**: Always use `SUPABASE_SERVICE_ROLE_KEY` in API routes (never anon key for privileged operations)
+
+3b. **Admin API auth** (`lib/admin-api-auth.js`): `requireAdmin(request)` verifies the caller's Supabase access token and checks it against `ADMIN_EMAILS`, failing closed if that var is unset. `lib/admin-auth.js` is **client-side only** and cannot protect an API route. Admin sessions are stored in localStorage (`va-admin-auth`), not cookies, so the browser must send `Authorization: Bearer <access_token>` — see `authFetch` in `app/admin/crm/pocket/page.js`.
+   - ⚠️ Only the `/api/crm/pocket/*` routes currently use this guard. The other `/api/crm/*` routes have **no server-side auth** and are publicly reachable.
+   - `verifyCronRequest(request)` is the constant-time, fail-closed replacement for the inline `authHeader !== \`Bearer ${cronSecret}\`` check. The older cron routes still use the inline version, which authenticates a literal `Bearer undefined` when `CRON_SECRET` is unset.
 
 4. **OAuth Token Pattern**: Both Square and Jobber use similar patterns:
    - Store tokens in Supabase with expiration

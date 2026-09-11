@@ -4,7 +4,7 @@
 import { useState, useEffect, use } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import PinButton from '@/Components/CRM/Shared/PinButton'
+import ActivityRow from '@/Components/CRM/Shared/ActivityRow'
 
 const ACTIVITY_TYPES = [
   { key: 'note', label: 'Note', icon: 'note' },
@@ -184,6 +184,8 @@ export default function ClientDetailPage({ params }) {
         return <VisitIcon className="h-4 w-4" />
       case 'task':
         return <TaskIcon className="h-4 w-4" />
+      case 'call_summary':
+        return <MicIcon className="h-4 w-4" />
       case 'hubspot_sync':
         return <SyncIcon className="h-4 w-4" />
       default:
@@ -193,7 +195,7 @@ export default function ClientDetailPage({ params }) {
 
   const pinnedActivities = activities.filter(a => a.is_pinned)
   const regularActivities = activities.filter(a => !a.is_pinned)
-  const pinnableTypes = ['note', 'email_sent', 'email_received', 'call', 'meeting', 'visit', 'task']
+  const pinnableTypes = ['note', 'call_summary', 'email_sent', 'email_received', 'call', 'meeting', 'visit', 'task']
 
   if (loading) {
     return (
@@ -487,6 +489,69 @@ export default function ClientDetailPage({ params }) {
             </div>
           )}
 
+          {/* Hosting */}
+          <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+            <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
+              Hosting
+            </h2>
+            {editing ? (
+              <div className="space-y-4">
+                <div>
+                  <span className="text-xs text-[#a1a1aa]">Hosting Start</span>
+                  <input
+                    type="date"
+                    value={editData.hosting_start_date ?? client.hosting_start_date ?? ''}
+                    onChange={(e) => setEditData(prev => ({ ...prev, hosting_start_date: e.target.value || null }))}
+                    className="mt-1 w-full rounded border border-[#262626] bg-[#171717] px-2 py-1 text-sm text-[#fafafa] focus:border-[#008070] focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <span className="text-xs text-[#a1a1aa]">Renewal Date</span>
+                  <input
+                    type="date"
+                    value={editData.hosting_expiry_date ?? client.hosting_expiry_date ?? ''}
+                    onChange={(e) => setEditData(prev => ({ ...prev, hosting_expiry_date: e.target.value || null }))}
+                    className="mt-1 w-full rounded border border-[#262626] bg-[#171717] px-2 py-1 text-sm text-[#fafafa] focus:border-[#008070] focus:outline-none"
+                  />
+                </div>
+                <label className="flex items-center gap-2 text-xs text-[#a1a1aa]">
+                  <input
+                    type="checkbox"
+                    checked={editData.has_website ?? client.has_website ?? false}
+                    onChange={(e) => setEditData(prev => ({ ...prev, has_website: e.target.checked }))}
+                    className="h-4 w-4 rounded border-[#262626] bg-[#171717] accent-[#008070]"
+                  />
+                  Site is live
+                </label>
+              </div>
+            ) : (
+              <dl className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <dt className="text-xs text-[#a1a1aa]">Hosting Start</dt>
+                  <dd className="text-sm text-[#fafafa]">{formatHostingDate(client.hosting_start_date)}</dd>
+                </div>
+                <div className="flex items-center justify-between">
+                  <dt className="text-xs text-[#a1a1aa]">Renewal</dt>
+                  <dd className="text-sm text-[#fafafa]">{formatHostingDate(client.hosting_expiry_date)}</dd>
+                </div>
+                {(() => {
+                  const status = renewalStatus(client.hosting_expiry_date)
+                  if (!status) return null
+                  return (
+                    <div className={`rounded-lg border px-3 py-2 text-xs ${status.className}`}>
+                      {status.label}
+                    </div>
+                  )
+                })()}
+                {!client.hosting_expiry_date && (
+                  <p className="text-xs text-[#525252]">
+                    No renewal date set. Use Edit to add one.
+                  </p>
+                )}
+              </dl>
+            )}
+          </div>
+
           {/* Metadata */}
           <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
             <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
@@ -623,35 +688,15 @@ export default function ClientDetailPage({ params }) {
                   Pinned
                 </h3>
                 {pinnedActivities.map((activity) => (
-                  <div key={activity.id} className="flex gap-4 rounded-lg bg-[#008070]/5 p-3 border border-[#008070]/20">
-                    <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#171717] text-[#a1a1aa]">
-                      {getActivityIcon(activity.type)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-4">
-                        <div>
-                          <p className="text-sm font-medium text-[#fafafa]">{activity.title}</p>
-                          {activity.description && (
-                            <p className="mt-1 text-sm text-[#a1a1aa] whitespace-pre-wrap">
-                              {activity.description}
-                            </p>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-2 flex-shrink-0">
-                          <time className="text-xs text-[#a1a1aa]">
-                            {formatDate(activity.created_at)}
-                          </time>
-                          {pinnableTypes.includes(activity.type) && (
-                            <PinButton
-                              activityId={activity.id}
-                              isPinned={activity.is_pinned}
-                              onToggle={handlePinToggle}
-                            />
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  <ActivityRow
+                    key={activity.id}
+                    activity={activity}
+                    icon={getActivityIcon(activity.type)}
+                    pinnable={pinnableTypes.includes(activity.type)}
+                    onPinToggle={handlePinToggle}
+                    formatDate={formatDate}
+                    highlighted
+                  />
                 ))}
               </div>
             )}
@@ -662,35 +707,14 @@ export default function ClientDetailPage({ params }) {
                 <p className="text-center text-sm text-[#a1a1aa]">No activity yet</p>
               ) : (
                 regularActivities.map((activity) => (
-                  <div key={activity.id} className="flex gap-4">
-                    <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#171717] text-[#a1a1aa]">
-                      {getActivityIcon(activity.type)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-4">
-                        <div>
-                          <p className="text-sm font-medium text-[#fafafa]">{activity.title}</p>
-                          {activity.description && (
-                            <p className="mt-1 text-sm text-[#a1a1aa] whitespace-pre-wrap">
-                              {activity.description}
-                            </p>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-2 flex-shrink-0">
-                          <time className="text-xs text-[#a1a1aa]">
-                            {formatDate(activity.created_at)}
-                          </time>
-                          {pinnableTypes.includes(activity.type) && (
-                            <PinButton
-                              activityId={activity.id}
-                              isPinned={activity.is_pinned}
-                              onToggle={handlePinToggle}
-                            />
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  <ActivityRow
+                    key={activity.id}
+                    activity={activity}
+                    icon={getActivityIcon(activity.type)}
+                    pinnable={pinnableTypes.includes(activity.type)}
+                    onPinToggle={handlePinToggle}
+                    formatDate={formatDate}
+                  />
                 ))
               )}
             </div>
@@ -796,6 +820,56 @@ function TaskIcon({ className }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+  )
+}
+
+// Dates are DATE columns, so pin them to local noon to dodge UTC shifting the day.
+function parseHostingDate(value) {
+  if (!value) return null
+  const parsed = new Date(`${value}T12:00:00`)
+  return Number.isNaN(parsed.getTime()) ? null : parsed
+}
+
+function formatHostingDate(value) {
+  const parsed = parseHostingDate(value)
+  if (!parsed) return '—'
+  return parsed.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+}
+
+function renewalStatus(value) {
+  const parsed = parseHostingDate(value)
+  if (!parsed) return null
+
+  const today = new Date()
+  today.setHours(12, 0, 0, 0)
+  const days = Math.round((parsed - today) / 86400000)
+
+  if (days < 0) {
+    return {
+      label: `Expired ${Math.abs(days)} day${Math.abs(days) === 1 ? '' : 's'} ago`,
+      className: 'border-red-500/30 bg-red-500/10 text-red-400',
+    }
+  }
+  if (days === 0) {
+    return { label: 'Renews today', className: 'border-red-500/30 bg-red-500/10 text-red-400' }
+  }
+  if (days <= 30) {
+    return {
+      label: `Renews in ${days} day${days === 1 ? '' : 's'}`,
+      className: 'border-amber-500/30 bg-amber-500/10 text-amber-400',
+    }
+  }
+  return {
+    label: `Renews in ${days} days`,
+    className: 'border-[#262626] bg-[#171717] text-[#a1a1aa]',
+  }
+}
+
+function MicIcon({ className }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
     </svg>
   )
 }

@@ -185,6 +185,18 @@ export default function ContactPage() {
 
   // ── Contact form state ─────────────────────────────────────────────────────
   const [formData, setFormData]     = useState({ firstName: '', lastName: '', email: '', phone: '', company: '', projectType: '', timeline: '', message: '' })
+
+  // Landing pages link here as /contact?from=<slug> so the CRM can tell which
+  // page produced the lead. Without it every submission is recorded against
+  // /contact and paid landing pages can't be measured. Read from
+  // window.location rather than useSearchParams to avoid forcing a Suspense
+  // boundary on this statically rendered page.
+  const [conversionPage, setConversionPage] = useState('/contact')
+
+  useEffect(() => {
+    const from = new URLSearchParams(window.location.search).get('from')
+    if (from && /^[a-z0-9-]{1,60}$/.test(from)) setConversionPage(`/${from}`)
+  }, [])
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitStatus, setSubmitStatus] = useState('idle')
 
@@ -255,11 +267,11 @@ export default function ContactPage() {
       const res = await fetch('/api/send-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, recaptchaToken }),
+        body: JSON.stringify({ ...formData, conversion_page: conversionPage, recaptchaToken }),
       })
       setSubmitStatus(res.ok ? 'success' : 'error')
       if (res.ok) {
-        trackLeadFormSubmit('/contact', formData.projectType)
+        trackLeadFormSubmit(conversionPage, formData.projectType)
         setFormData({ firstName: '', lastName: '', email: '', phone: '', company: '', projectType: '', timeline: '', message: '' })
       } else {
         trackLeadFormError('/contact', `HTTP ${res.status}`)

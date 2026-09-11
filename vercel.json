@@ -15,6 +15,10 @@
     {
       "path": "/api/cron/devops-alerts",
       "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/cron/pocket-sync",
+      "schedule": "*/15 * * * *"
     }
   ]
 }
