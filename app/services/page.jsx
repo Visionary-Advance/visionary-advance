@@ -94,6 +94,30 @@ export default function ServicesPage() {
         </div>
       </section>
 
+      {/* ===== $99/MO SUBSCRIPTION POINTER ===== */}
+      {/* The services below are project work. Owners who bounce off those price
+          points still have somewhere to go — this is the crawl path to
+          /99-dollar-websites as well as the commercial one. */}
+      <section className="px-4 md:px-16 pb-16 md:pb-20">
+        <div className="max-w-6xl mx-auto bg-gray-50 border border-gray-200 rounded-2xl p-6 md:p-8 flex flex-col md:flex-row md:items-center gap-5 md:gap-8">
+          <div className="flex-1">
+            <h2 className="font-inter-display font-bold text-xl md:text-2xl text-black mb-2">
+              Not ready for a full project?
+            </h2>
+            <p className="font-manrope text-base md:text-lg text-gray-700 leading-relaxed">
+              We also build and maintain small business websites for $99 a month —
+              no setup fee, no contract, live in about a week.
+            </p>
+          </div>
+          <Link
+            href="/99-dollar-websites"
+            className="bg-[#008070] hover:bg-[#006b5d] text-white font-manrope font-bold px-6 py-3 rounded-lg transition-colors text-center flex-shrink-0"
+          >
+            See $99 Websites
+          </Link>
+        </div>
+      </section>
+
       {/* ===== SERVICES ACCORDION ===== */}
       <section className="px-4 md:px-16 pb-20 md:pb-28">
         <div className="max-w-6xl mx-auto">

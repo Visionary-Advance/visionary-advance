@@ -104,6 +104,12 @@ export default async function sitemap() {
       changeFrequency: 'monthly',
       priority: 0.95,
     },
+    {
+      url: `${baseUrl}/99-dollar-websites`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.9,
+    },
   ];
 
   // Service detail routes
