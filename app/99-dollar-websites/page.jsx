@@ -120,7 +120,9 @@ export default function NinetyNineDollarWebsitesPage() {
 
       <WhyUs heading={whyUs.heading} items={whyUs.items} />
 
-      <div id="pricing">
+      {/* scroll-mt clears the fixed header — without it an #pricing jump
+          parks the header right on top of the price. */}
+      <div id="pricing" className="scroll-mt-32">
         <PriceCard {...pricing} />
       </div>
 
