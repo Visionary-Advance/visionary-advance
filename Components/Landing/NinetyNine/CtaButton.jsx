@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { trackCtaClick } from '@/lib/analytics'
 
-const PAGE_PATH = '/99-dollar-websites'
+const PAGE_PATH = '/affordable-small-business-website-design'
 
 /**
  * CTA link that reports the click to GA before navigating.
