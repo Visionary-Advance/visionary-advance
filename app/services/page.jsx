@@ -105,15 +105,21 @@ export default function ServicesPage() {
               Not ready for a full project?
             </h2>
             <p className="font-manrope text-base md:text-lg text-gray-700 leading-relaxed">
-              We also build and maintain small business websites for $99 a month —
-              no setup fee, no contract, live in about a week.
+              We also build and maintain{' '}
+              <Link
+                href="/99-dollar-websites"
+                className="text-[#008070] underline underline-offset-2 hover:text-[#006b5d]"
+              >
+                affordable small business websites
+              </Link>{' '}
+              for $99 a month — no setup fee, no contract, live in about a week.
             </p>
           </div>
           <Link
             href="/99-dollar-websites"
             className="bg-[#008070] hover:bg-[#006b5d] text-white font-manrope font-bold px-6 py-3 rounded-lg transition-colors text-center flex-shrink-0"
           >
-            See $99 Websites
+            See Affordable Websites
           </Link>
         </div>
       </section>
