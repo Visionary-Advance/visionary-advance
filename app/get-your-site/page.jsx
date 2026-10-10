@@ -201,7 +201,7 @@ export default async function GetYourSitePage() {
           </h2>
           <ol className="mt-10 grid gap-8 md:grid-cols-3">
             {[
-              ['Find your business', 'Type its name and town. Pick your listing from Google Maps.'],
+              ['Find your business, pick a style', 'Type its name and town, choose your Google listing, then pick how you want the site to feel.'],
               ['Tell us where to send the code', 'Your name, mobile and email. Nothing else.'],
               ['Watch it build, then unlock it', 'Enter the code we send and your site opens right on this page.'],
             ].map(([title, body], i) => (

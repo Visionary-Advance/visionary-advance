@@ -146,8 +146,8 @@ function Stars({ rating }) {
 }
 
 function Progress({ step }) {
-  const steps = ['Your business', 'Confirm', 'Your info', 'Your site']
-  const current = { business: 0, match: 1, manual: 1, contact: 2, building: 3, unlock: 3, revealed: 3 }[step] ?? 0
+  const steps = ['Your business', 'Confirm', 'Style', 'Your info', 'Your site']
+  const current = { business: 0, match: 1, manual: 1, style: 2, contact: 3, building: 4, unlock: 4, revealed: 4 }[step] ?? 0
   return (
     <ol className="mb-6 flex items-center gap-2" aria-label="Progress">
       {steps.map((label, i) => (
@@ -172,6 +172,7 @@ export default function InstantSiteFlow({ defaultCity = '', defaultState = '' })
     state: defaultState,
     results: [],
     selected: null,
+    template: null,
     name: '',
     phone: '',
     email: '',
@@ -207,7 +208,7 @@ export default function InstantSiteFlow({ defaultCity = '', defaultState = '' })
     localStorage.removeItem(STORAGE_KEY)
     setS((prev) => ({
       ...prev,
-      step: 'business', businessName: '', results: [], selected: null,
+      step: 'business', businessName: '', results: [], selected: null, template: null,
       token: null, startedAt: null, reveal: null,
     }))
   }
@@ -222,6 +223,7 @@ export default function InstantSiteFlow({ defaultCity = '', defaultState = '' })
       {s.step === 'business' && <BusinessStep s={s} update={update} executeRecaptcha={executeRecaptcha} />}
       {s.step === 'match' && <MatchStep s={s} update={update} />}
       {s.step === 'manual' && <ManualStep s={s} update={update} executeRecaptcha={executeRecaptcha} />}
+      {s.step === 'style' && <StyleStep s={s} update={update} />}
       {s.step === 'contact' && <ContactStep s={s} update={update} executeRecaptcha={executeRecaptcha} />}
       {s.step === 'building' && <BuildingStep s={s} update={update} />}
       {s.step === 'unlock' && <UnlockStep s={s} update={update} />}
@@ -229,7 +231,7 @@ export default function InstantSiteFlow({ defaultCity = '', defaultState = '' })
       {s.step === 'handoff' && <HandoffStep s={s} />}
       {s.step === 'manual_done' && <HandoffStep s={s} manual />}
 
-      {['match', 'contact', 'manual', 'handoff', 'manual_done'].includes(s.step) && (
+      {['match', 'style', 'contact', 'manual', 'handoff', 'manual_done'].includes(s.step) && (
         <div className="mt-6 text-center">
           <TextLink onClick={startOver}>Start over</TextLink>
         </div>
@@ -349,7 +351,7 @@ function MatchStep({ s, update }) {
     trackEvent('instant_site_confirm', { category: place.category || 'unknown' })
     trackPixel('ViewContent', { content_name: 'business_confirmed', content_category: place.category || '' })
     // A listing phone is often the owner's cell — offer it, don't impose it.
-    update({ selected: place, step: 'contact', phone: s.phone || '' })
+    update({ selected: place, template: null, step: 'style', phone: s.phone || '' })
   }
 
   return (
@@ -378,7 +380,100 @@ function MatchStep({ s, update }) {
   )
 }
 
-// ── Step 3: contact ──────────────────────────────────────────────────────────
+// ── Step 3: style ────────────────────────────────────────────────────────────
+
+function StyleStep({ s, update }) {
+  const [state, setState] = useState({ loading: true, error: '', options: [], matched: false })
+  const place = s.selected
+  const typesKey = (place?.types || []).join(',')
+
+  useEffect(() => {
+    let cancelled = false
+    const qs = new URLSearchParams({ types: typesKey, label: place?.category || '' })
+    fetch(`/api/instant-site/styles?${qs}`)
+      .then(async (res) => {
+        const data = await res.json().catch(() => ({}))
+        if (cancelled) return
+        if (!res.ok) setState({ loading: false, error: data.error || "We couldn't load the styles.", options: [], matched: false })
+        else setState({ loading: false, error: '', options: data.options || [], matched: Boolean(data.matched) })
+      })
+      .catch(() => {
+        if (!cancelled) setState({ loading: false, error: "We couldn't load the styles. Check your connection.", options: [], matched: false })
+      })
+    return () => { cancelled = true }
+  }, [typesKey, place?.category])
+
+  function choose(option) {
+    trackEvent('instant_site_style', { style: option.tone })
+    trackPixel('CustomizeProduct', { content_name: option.tone })
+    update({ template: { id: option.id, tone: option.tone }, step: 'contact' })
+  }
+
+  return (
+    <div className="space-y-5">
+      <div>
+        <h2 className="font-inter-display text-2xl font-semibold text-[#062A26] sm:text-3xl">How should your site feel?</h2>
+        <p className="mt-1 text-gray-600">
+          {state.matched && place?.category
+            ? `Styles made for ${place.category.toLowerCase()} businesses. Pick the one that sounds like you.`
+            : 'Pick the one that sounds most like your business. Your photos, reviews and details go in either way.'}
+        </p>
+      </div>
+
+      {state.loading && (
+        <div className="grid gap-3 sm:grid-cols-2">
+          {[0, 1].map((i) => <div key={i} className="h-56 animate-pulse rounded-2xl bg-gray-100" />)}
+        </div>
+      )}
+      <ErrorText>{state.error}</ErrorText>
+
+      {!state.loading && !state.error && state.options.length > 0 && (
+        <div className="grid gap-3 sm:grid-cols-2">
+          {state.options.map((o) => (
+            <div key={o.id} className="flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white transition hover:border-[#008070] hover:shadow-md">
+              <div className="aspect-[16/10] bg-[#E7EDE8]">
+                {o.previewImage
+                  // eslint-disable-next-line @next/next/no-img-element
+                  ? <img src={o.previewImage} alt={`${o.tone} style example`} className="h-full w-full object-cover object-top" loading="lazy" />
+                  : <div className="flex h-full items-center justify-center px-4 text-center font-inter-display text-xl font-semibold text-[#062A26]/60">{o.tone}</div>}
+              </div>
+              <div className="flex flex-1 flex-col p-4">
+                <p className="text-lg font-bold text-[#062A26]">{o.tone}</p>
+                {o.description && <p className="mt-1 text-sm leading-relaxed text-gray-600">{o.description}</p>}
+                <div className="mt-auto flex items-center gap-4 pt-4">
+                  <button
+                    type="button" onClick={() => choose(o)}
+                    className="rounded-xl bg-[#008070] px-4 py-2.5 font-bold text-white transition hover:bg-[#006b5d]"
+                  >
+                    Use this style
+                  </button>
+                  {o.exampleUrl && (
+                    <a href={o.exampleUrl} target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-[#008070] underline-offset-4 hover:underline">
+                      See an example
+                    </a>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {!state.loading && !state.error && state.options.length === 0 && (
+        <div className="space-y-3 text-center">
+          <p className="text-gray-600">We&apos;re adding styles right now. Leave your details and we&apos;ll build yours by hand.</p>
+          <TextLink onClick={() => update({ step: 'manual', businessName: place?.name || s.businessName })}>Leave my details</TextLink>
+        </div>
+      )}
+
+      <div className="text-center">
+        <TextLink onClick={() => update({ step: 'match' })}>Back to your listing</TextLink>
+      </div>
+    </div>
+  )
+}
+
+// ── Step 4: contact ──────────────────────────────────────────────────────────
 
 function ContactStep({ s, update, executeRecaptcha }) {
   const [loading, setLoading] = useState(false)
@@ -407,10 +502,17 @@ function ContactStep({ s, update, executeRecaptcha }) {
         city: s.city,
         state: s.state,
         business: place,
+        templateId: s.template?.id,
+        styleName: s.template?.tone,
         meta: s.meta,
         eventId,
         recaptchaToken,
       })
+      if (!ok && data.reason === 'template') {
+        // Their style was switched off since they picked it — choose again.
+        update({ template: null, step: 'style' })
+        return
+      }
       if (!ok) { setError(data.error || 'Something went wrong. Try again.'); return }
       if (data.handoff) { update({ step: 'handoff' }); return }
       update({ token: data.token, startedAt: Date.now(), step: 'building' })
@@ -426,7 +528,8 @@ function ContactStep({ s, update, executeRecaptcha }) {
       <div>
         <h2 className="font-inter-display text-2xl font-semibold text-[#062A26] sm:text-3xl">Where should we send it?</h2>
         <p className="mt-1 text-gray-600">
-          We&apos;ll send a code to unlock <span className="font-bold text-[#062A26]">{place?.name}</span>&apos;s new site the
+          We&apos;ll send a code to unlock <span className="font-bold text-[#062A26]">{place?.name}</span>&apos;s new site
+          {s.template?.tone ? <> in the <span className="font-bold text-[#062A26]">{s.template.tone}</span> style</> : null} the
           moment it&apos;s ready.
         </p>
       </div>

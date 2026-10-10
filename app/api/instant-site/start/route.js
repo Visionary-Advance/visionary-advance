@@ -25,9 +25,10 @@ export async function POST(request) {
   const phone = String(body.phone || '').trim().slice(0, 30)
   const business = body.business || {}
   const placeId = String(business.placeId || '').trim()
+  const templateId = String(body.templateId || '').trim()
   const phoneDigits = phone.replace(/\D/g, '')
 
-  if (!name || !EMAIL_RE.test(email) || phoneDigits.length < 10 || !placeId) {
+  if (!name || !EMAIL_RE.test(email) || phoneDigits.length < 10 || !placeId || !templateId) {
     return NextResponse.json({ error: 'Please fill in your name, email and mobile number.' }, { status: 400 })
   }
 
@@ -57,6 +58,8 @@ export async function POST(request) {
       tags: ['instant-site'],
       form_data: {
         google_place_id: placeId,
+        template_id: templateId,
+        style: body.styleName || null,
         business_name: business.name || null,
         business_address: business.address || null,
         business_phone: business.phone || null,
@@ -96,6 +99,7 @@ export async function POST(request) {
     method: 'POST',
     body: {
       placeId,
+      templateId,
       name,
       email,
       phone,
@@ -110,6 +114,12 @@ export async function POST(request) {
       },
     },
   })
+
+  // Their chosen style was switched off between picking and submitting: send
+  // them back to choose again rather than hand-building a design they didn't pick.
+  if (result.status === 400 && result.data?.reason === 'template') {
+    return NextResponse.json({ error: result.data.error, reason: 'template' }, { status: 409 })
+  }
 
   if (!result.ok) {
     // Over a limit or broken: they're in the CRM, so it's a hand-build, not a

@@ -28,7 +28,7 @@ fbq('init','${PIXEL_ID}');fbq('track','PageView');`}
  */
 export function trackPixel(eventName, data = {}, eventId) {
   if (typeof window === 'undefined' || !window.fbq) return
-  const standard = ['Lead', 'CompleteRegistration', 'Search', 'ViewContent', 'InitiateCheckout', 'Contact']
+  const standard = ['Lead', 'CompleteRegistration', 'Search', 'ViewContent', 'InitiateCheckout', 'Contact', 'CustomizeProduct']
   const method = standard.includes(eventName) ? 'track' : 'trackCustom'
   window.fbq(method, eventName, data, eventId ? { eventID: eventId } : undefined)
 }
