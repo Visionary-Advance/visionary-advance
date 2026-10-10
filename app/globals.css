@@ -691,3 +691,24 @@ body.a11y-tts-active #a11y-root :where(p, li, h1, h2, h3, h4, h5, h6, blockquote
 .a11y-reading-mask-bottom {
   height: 100vh;
 }
+
+/* ── /get-your-site ─────────────────────────────────────────────────────────
+   The page's one orchestrated moment: a map pin drops onto the form card on
+   load. Everything else on the page is still. */
+@keyframes is-pin-drop {
+  0%   { transform: translateY(-140px) scale(0.9); opacity: 0; }
+  55%  { transform: translateY(6px) scale(1); opacity: 1; }
+  70%  { transform: translateY(-6px); }
+  85%  { transform: translateY(2px); }
+  100% { transform: translateY(0); }
+}
+@keyframes is-pin-ripple {
+  0%   { transform: scale(0.4); opacity: 0.55; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+.is-pin { animation: is-pin-drop 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.35s both; }
+.is-pin-ripple { animation: is-pin-ripple 1.1s ease-out 0.85s both; }
+@media (prefers-reduced-motion: reduce) {
+  .is-pin, .is-pin-ripple { animation: none; }
+  .is-pin-ripple { opacity: 0; }
+}

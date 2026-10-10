@@ -7,6 +7,7 @@ import Footer from './Footer';
 const LANDING_PAGES = new Set([
   '/construction-websites',
   '/affordable-small-business-website-design',
+  '/get-your-site',
 ]);
 
 export default function ConditionalLayout({ children }) {
