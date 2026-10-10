@@ -296,19 +296,50 @@ export default async function GetYourSitePage() {
                   ))}
                 </ul>
               </div>
+              {/* The story in one picture: a Google listing card, the same card the
+                  form shows at "Is this you?", becomes the site beside it. Taco
+                  Palace is the restaurant template's own demo business, so
+                  nothing here is a real customer. */}
               <figure className="px-6 pb-6 sm:px-8 sm:pb-8">
-                <div className="overflow-hidden rounded-xl ring-1 ring-[#062A26]/10 shadow-[0_24px_50px_-28px_rgba(6,42,38,0.55)]">
-                  <Image
-                    src="/Img/instant-site-example.jpg"
-                    alt="The Xocolate Coffee Co. website, built from the cafe's Google listing"
-                    width={1568}
-                    height={744}
-                    sizes="(min-width: 1024px) 720px, 100vw"
-                    className="h-auto w-full"
-                  />
+                <div className="relative pt-24 sm:pt-16">
+                  <div className="ml-auto overflow-hidden rounded-xl ring-1 ring-[#062A26]/10 shadow-[0_24px_50px_-28px_rgba(6,42,38,0.55)] sm:w-[82%]">
+                    <Image
+                      src="/Img/instant-site-taco-demo.jpg"
+                      alt="The Taco Palace example website: a hero photo of tacos, the restaurant name and an Order Now button"
+                      width={1200}
+                      height={717}
+                      sizes="(min-width: 1024px) 600px, 100vw"
+                      className="h-auto w-full"
+                    />
+                  </div>
+
+                  <div className="absolute left-0 top-0 w-[15.5rem] overflow-hidden rounded-xl bg-white shadow-[0_18px_40px_-18px_rgba(6,42,38,0.5)] ring-1 ring-[#062A26]/10">
+                    <div className="flex gap-3 p-3">
+                      <Image
+                        src="/Img/instant-site-taco-thumb.jpg"
+                        alt=""
+                        width={160}
+                        height={160}
+                        className="h-14 w-14 flex-shrink-0 rounded-lg object-cover"
+                      />
+                      <div className="min-w-0 text-sm">
+                        <p className="font-bold leading-tight">Taco Palace</p>
+                        <p className="text-[#062A26]/60">Mexican restaurant</p>
+                        <p className="mt-0.5">
+                          <span className="text-amber-500" aria-hidden="true">★★★★★</span>{' '}
+                          <span className="font-bold">4.8</span>
+                        </p>
+                        <p className="truncate text-[#062A26]/60">123 Main St, Eugene</p>
+                      </div>
+                    </div>
+                    <p className="border-t border-[#062A26]/10 bg-[#008070]/5 py-2 text-center text-sm font-bold text-[#008070]">
+                      Yes, this is my business
+                    </p>
+                  </div>
+
                 </div>
                 <figcaption className="mt-3 text-sm text-[#062A26]/70">
-                  Xocolate Coffee Co. in Eugene, built from their listing.
+                  Example: a Google listing, and the site we build from it.
                 </figcaption>
               </figure>
             </article>
