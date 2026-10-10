@@ -106,7 +106,7 @@ function MapBackdrop() {
 
 function MapPin() {
   return (
-    <div className="pointer-events-none absolute -top-9 right-8 z-10 flex flex-col items-center sm:right-12" aria-hidden="true">
+    <div className="pointer-events-none absolute -right-2 -top-12 z-10 flex flex-col items-center sm:-right-4" aria-hidden="true">
       <svg className="is-pin h-14 w-11 drop-shadow-[0_8px_10px_rgba(6,42,38,0.35)]" viewBox="0 0 44 56">
         <path d="M22 0C9.85 0 0 9.85 0 22c0 16.5 22 34 22 34s22-17.5 22-34C44 9.85 34.15 0 22 0z" fill="#E5483B" />
         <circle cx="22" cy="21" r="8" fill="#FFFFFF" />
