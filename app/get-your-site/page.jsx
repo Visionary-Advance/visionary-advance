@@ -3,6 +3,7 @@ import { headers } from 'next/headers'
 import InstantSiteFlow from '@/Components/InstantSite/InstantSiteFlow'
 import MetaPixel from '@/Components/InstantSite/MetaPixel'
 import FAQ from '@/Components/FAQ'
+import { Check, Globe, PencilLine, Search, ShieldCheck, Smartphone } from 'lucide-react'
 
 // Paid-ads landing page (Meta). Not for search: noindex, no site navigation,
 // and nothing on the page leads anywhere but the form. The rest of the page
@@ -11,7 +12,7 @@ import FAQ from '@/Components/FAQ'
 export const metadata = {
   title: 'See your new website free',
   description:
-    'Find your business on Google Maps and we build you a website from your listing in about two minutes. Free to see. $99 a month to keep it.',
+    'Find your business on Google Maps and we build you a website from your listing in a few minutes. Free to see. $99 a month to keep it.',
   robots: { index: false, follow: false },
   alternates: { canonical: 'https://visionaryadvance.com/get-your-site' },
 }
@@ -39,12 +40,58 @@ const QUOTES = [
   },
 ]
 
-const FROM_LISTING = [
-  ['Your hours, phone and map', 'Straight from Google, so customers can call or find you in one tap.'],
-  ['Your best reviews', 'Your five-star Google reviews, quoted on the page where new customers decide.'],
-  ['Your photos', 'The pictures already on your listing, sized for phones.'],
-  ['Pages written for you', 'Copy about your services, written from what your listing and reviews say.'],
+// The form, step by step. Times are what each screen takes, plus the build.
+const STEPS = [
+  {
+    time: 'About a minute',
+    title: 'Find your business and pick a style',
+    body: 'Type your business name and town, tap your Google listing, then choose how you want the site to feel.',
+  },
+  {
+    time: '30 seconds',
+    title: 'Tell us where to send your code',
+    body: "Your name, mobile number and email. That's all we ask for.",
+  },
+  {
+    time: '2 to 3 minutes',
+    title: 'Watch it build, then unlock it',
+    body: 'Your site builds while you wait. Enter the code we send and it opens right here.',
+  },
 ]
+
+// What the site is built from. Shown beside a real site built this way.
+const FROM_LISTING = [
+  'Your hours, phone number and map',
+  'Your five-star Google reviews',
+  'The photos already on your listing',
+  'Pages written about what you do',
+]
+
+// What we look after once it's live. Every line here is in the Starter plan.
+const CARE = {
+  hosting: {
+    title: 'Hosting and security, handled',
+    body: "We keep your site online, secure and up to date. There's nothing for you to install or renew.",
+  },
+  changes: {
+    title: 'Changes when you ask',
+    body: 'New hours or a fresh photo? Request it from your dashboard and we make the edit. One change a month is included.',
+  },
+  domain: {
+    title: 'Your own domain name',
+    body: "Free after your first paid month. We register it, connect it and keep it renewed while you're with us.",
+  },
+  phone: {
+    title: 'Made for phones',
+    body: 'Built for small screens first, so it loads fast and reads easily when someone looks you up on their phone.',
+  },
+  google: {
+    title: 'Set up for Google',
+    body: 'Page titles, descriptions and your map are set up so Google understands what you do and where you are.',
+  },
+}
+
+const ICON = { size: 22, strokeWidth: 1.75, 'aria-hidden': true }
 
 const FAQS = [
   {
@@ -154,20 +201,10 @@ export default async function GetYourSitePage() {
                 Your Google listing, built into a website while you watch.
               </h1>
               <p className="mt-5 max-w-xl text-lg leading-relaxed text-[#062A26]/80 sm:text-xl">
-                Type your business name. We pull your hours, photos and best reviews from Google Maps and build your site in
-                about two minutes. Free to see, $99 a month if you keep it.
+                We build your site from your Google listing&apos;s hours, photos and reviews. Free to see, $99 a month to
+                keep it.
               </p>
 
-              {/* Desktop only: on a phone the form comes straight after the
-                  headline, and this list follows further down the page. */}
-              <ul className="mt-10 hidden space-y-4 lg:block">
-                {FROM_LISTING.slice(0, 3).map(([title]) => (
-                  <li key={title} className="flex items-center gap-3 text-lg font-bold">
-                    <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-[#008070] text-sm text-white">✓</span>
-                    {title}
-                  </li>
-                ))}
-              </ul>
             </div>
 
             <div id="start" className="relative scroll-mt-6 lg:sticky lg:top-6 lg:col-span-6">
@@ -193,48 +230,124 @@ export default async function GetYourSitePage() {
         </div>
       </section>
 
-      {/* ── How it works (a real sequence, so it's numbered) ──────────────── */}
+      {/* ── How it works ───────────────────────────────────────────────────
+          A real sequence, so it's a numbered timeline: a line joins the steps
+          (vertical on phones, horizontal from md), and each step says how long
+          it takes, since "how long will this take?" is the question here.
+          The times match the form: one screen per step, ~2.5 min build. */}
       <section className="bg-[#E7EDE8] px-4 py-16 sm:px-6 lg:py-24">
         <div className="mx-auto max-w-6xl">
-          <h2 className="max-w-2xl font-inter-display text-3xl font-semibold leading-tight tracking-[-0.01em] sm:text-5xl">
-            Three steps, and you&apos;re looking at your new site.
+          <h2 className="max-w-3xl text-balance font-inter-display text-3xl font-semibold leading-tight tracking-[-0.01em] sm:text-5xl">
+            See your new site in a few minutes.
           </h2>
-          <ol className="mt-10 grid gap-8 md:grid-cols-3">
-            {[
-              ['Find your business, pick a style', 'Type its name and town, choose your Google listing, then pick how you want the site to feel.'],
-              ['Tell us where to send the code', 'Your name, mobile and email. Nothing else.'],
-              ['Watch it build, then unlock it', 'Enter the code we send and your site opens right on this page.'],
-            ].map(([title, body], i) => (
-              <li key={title} className="border-t-2 border-[#008070] pt-5">
-                <span className="font-inter-display text-5xl font-semibold text-[#008070]">{i + 1}</span>
-                <h3 className="mt-3 text-xl font-bold">{title}</h3>
-                <p className="mt-1 leading-relaxed text-[#062A26]/75">{body}</p>
+          <p className="mt-4 max-w-[60ch] text-lg leading-relaxed text-[#062A26]/75">
+            Three short steps, all on this page. You can stop at any point.
+          </p>
+
+          <ol className="relative mt-12 grid gap-10 md:grid-cols-3 md:gap-8">
+            {/* The line joining the steps. Sits behind the numbers. */}
+            <span aria-hidden="true" className="absolute left-6 right-[calc((100%_-_4rem)/3_-_1.5rem)] top-6 hidden h-0.5 bg-[#008070]/25 md:block" />
+            {STEPS.map((step, i) => (
+              <li key={step.title} className="relative grid grid-cols-[3rem_1fr] gap-x-5 md:block">
+                {/* Phones: a segment down to the next step, none after the last. */}
+                {i < STEPS.length - 1 && (
+                  <span aria-hidden="true" className="absolute -bottom-10 left-6 top-12 w-0.5 -translate-x-1/2 bg-[#008070]/25 md:hidden" />
+                )}
+                <span className="relative flex h-12 w-12 items-center justify-center rounded-full bg-[#008070] font-inter-display text-xl font-semibold text-white ring-8 ring-[#E7EDE8]">
+                  {i + 1}
+                </span>
+                <div className="md:mt-6">
+                  <p className="text-sm font-bold text-[#008070]">{step.time}</p>
+                  <h3 className="mt-1 text-balance text-xl font-bold">{step.title}</h3>
+                  <p className="mt-2 max-w-[38ch] leading-relaxed text-[#062A26]/75">{step.body}</p>
+                </div>
               </li>
             ))}
           </ol>
         </div>
       </section>
 
-      {/* ── What we pull from the listing ─────────────────────────────────── */}
+      {/* ── What you get ───────────────────────────────────────────────────
+          A bento with exactly six cells: the big one shows a real site built
+          from a Google listing, the other five are what we look after. Each
+          cell has its own surface so the grid reads as distinct promises. */}
       <section className="px-4 py-16 sm:px-6 lg:py-24">
-        <div className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-2 lg:items-center">
-          <div>
-            <h2 className="font-inter-display text-3xl font-semibold leading-tight tracking-[-0.01em] sm:text-5xl">
-              You already did the hard part when you set up your Google listing.
-            </h2>
-            <p className="mt-4 max-w-xl text-lg leading-relaxed text-[#062A26]/75">
-              Everything customers look for is already on it. We turn it into a site you can put on your truck, your
-              cards and your Facebook page.
-            </p>
-          </div>
-          <dl className="grid gap-6 sm:grid-cols-2">
-            {FROM_LISTING.map(([title, body]) => (
-              <div key={title} className="rounded-2xl bg-[#E7EDE8] p-6">
-                <dt className="text-lg font-bold">{title}</dt>
-                <dd className="mt-1 leading-relaxed text-[#062A26]/75">{body}</dd>
+        <div className="mx-auto max-w-6xl">
+          <h2 className="max-w-3xl text-balance font-inter-display text-3xl font-semibold leading-tight tracking-[-0.01em] sm:text-5xl">
+            You run the business. We run the website.
+          </h2>
+          <p className="mt-4 max-w-[60ch] text-lg leading-relaxed text-[#062A26]/75">
+            We build your site from your Google listing, then handle the hosting, updates and changes for $99 a month.
+          </p>
+
+          <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {/* 1. Built from the listing: the one cell with an image */}
+            <article className="overflow-hidden rounded-2xl bg-[#E7EDE8] md:col-span-2 lg:row-span-2">
+              <div className="p-6 sm:p-8">
+                <h3 className="font-inter-display text-2xl font-semibold sm:text-3xl">Built from your Google listing</h3>
+                <ul className="mt-5 grid gap-3 sm:grid-cols-2">
+                  {FROM_LISTING.map((item) => (
+                    <li key={item} className="flex items-start gap-2.5 leading-snug">
+                      <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-[#008070] text-white">
+                        <Check size={13} strokeWidth={3} aria-hidden="true" />
+                      </span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
               </div>
-            ))}
-          </dl>
+              <figure className="px-6 pb-6 sm:px-8 sm:pb-8">
+                <div className="overflow-hidden rounded-xl ring-1 ring-[#062A26]/10 shadow-[0_24px_50px_-28px_rgba(6,42,38,0.55)]">
+                  <Image
+                    src="/Img/instant-site-example.jpg"
+                    alt="The Xocolate Coffee Co. website, built from the cafe's Google listing"
+                    width={1568}
+                    height={744}
+                    sizes="(min-width: 1024px) 720px, 100vw"
+                    className="h-auto w-full"
+                  />
+                </div>
+                <figcaption className="mt-3 text-sm text-[#062A26]/70">
+                  Xocolate Coffee Co. in Eugene, built from their listing.
+                </figcaption>
+              </figure>
+            </article>
+
+            {/* 2. Hosting: the dark cell, the core "we take care of it" promise */}
+            <article className="flex flex-col rounded-2xl bg-[#062A26] p-6 text-white sm:p-8">
+              <ShieldCheck {...ICON} className="text-[#7FD1C6]" />
+              <h3 className="mt-4 text-balance text-xl font-bold">{CARE.hosting.title}</h3>
+              <p className="mt-2 leading-relaxed text-white/80">{CARE.hosting.body}</p>
+            </article>
+
+            {/* 3. Changes */}
+            <article className="flex flex-col rounded-2xl border border-[#062A26]/10 bg-white p-6 sm:p-8">
+              <PencilLine {...ICON} className="text-[#008070]" />
+              <h3 className="mt-4 text-balance text-xl font-bold">{CARE.changes.title}</h3>
+              <p className="mt-2 leading-relaxed text-[#062A26]/75">{CARE.changes.body}</p>
+            </article>
+
+            {/* 4. Domain: the accent cell */}
+            <article className="flex flex-col rounded-2xl bg-[#008070] p-6 text-white sm:p-8">
+              <Globe {...ICON} />
+              <h3 className="mt-4 text-balance text-xl font-bold">{CARE.domain.title}</h3>
+              <p className="mt-2 leading-relaxed text-white/90">{CARE.domain.body}</p>
+            </article>
+
+            {/* 5. Phones */}
+            <article className="flex flex-col rounded-2xl bg-[#CDE6E2] p-6 sm:p-8">
+              <Smartphone {...ICON} className="text-[#062A26]" />
+              <h3 className="mt-4 text-balance text-xl font-bold">{CARE.phone.title}</h3>
+              <p className="mt-2 leading-relaxed text-[#062A26]/80">{CARE.phone.body}</p>
+            </article>
+
+            {/* 6. Google. Spans both columns at md so the 2-col grid has no gap. */}
+            <article className="flex flex-col rounded-2xl border border-[#062A26]/10 bg-white p-6 sm:p-8 md:col-span-2 lg:col-span-1">
+              <Search {...ICON} className="text-[#008070]" />
+              <h3 className="mt-4 text-balance text-xl font-bold">{CARE.google.title}</h3>
+              <p className="mt-2 leading-relaxed text-[#062A26]/75">{CARE.google.body}</p>
+            </article>
+          </div>
         </div>
       </section>
 
@@ -250,7 +363,7 @@ export default async function GetYourSitePage() {
               first paid month. Cancel anytime.
             </p>
           </div>
-          <ScrollToFormButton>See my site free</ScrollToFormButton>
+          <ScrollToFormButton>Find my business</ScrollToFormButton>
         </div>
       </section>
 

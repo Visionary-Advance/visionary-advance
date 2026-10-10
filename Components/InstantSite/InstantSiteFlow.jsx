@@ -280,7 +280,7 @@ function BusinessStep({ s, update, executeRecaptcha }) {
         <label htmlFor="is-business" className={labelClass}>Business name</label>
         <input
           id="is-business" className={inputClass} autoComplete="organization" placeholder="e.g. Rivera Plumbing"
-          value={s.businessName} onChange={(e) => update({ businessName: e.target.value })} autoFocus
+          value={s.businessName} onChange={(e) => update({ businessName: e.target.value })}
         />
       </div>
       <div className="grid grid-cols-5 gap-3">
@@ -297,7 +297,7 @@ function BusinessStep({ s, update, executeRecaptcha }) {
             id="is-state" className={inputClass} autoComplete="address-level1"
             value={s.state} onChange={(e) => update({ state: e.target.value })}
           >
-            <option value="">—</option>
+            <option value="">Choose</option>
             {US_STATES.map(([code, name]) => <option key={code} value={code}>{name}</option>)}
           </select>
         </div>
@@ -554,7 +554,7 @@ function ContactStep({ s, update, executeRecaptcha }) {
 
       <div>
         <label htmlFor="is-email" className={labelClass}>Email</label>
-        <input id="is-email" className={inputClass} type="email" inputMode="email" autoComplete="email"
+        <input id="is-email" className={inputClass} type="email" inputMode="email" autoComplete="email" spellCheck={false}
           placeholder="you@example.com" value={s.email} onChange={(e) => update({ email: e.target.value.trim() })} />
         {suggestion && (
           <p className="mt-2 text-sm text-gray-600">
@@ -606,7 +606,7 @@ function ManualStep({ s, update, executeRecaptcha }) {
   return (
     <form onSubmit={submit} className="space-y-5" noValidate>
       <div>
-        <h2 className="font-inter-display text-2xl font-semibold text-[#062A26] sm:text-3xl">No problem — we&apos;ll build it by hand</h2>
+        <h2 className="font-inter-display text-2xl font-semibold text-[#062A26] sm:text-3xl">No problem. We&apos;ll build it by hand</h2>
         <p className="mt-1 text-gray-600">Leave your details and we&apos;ll put together a preview for {s.businessName || 'your business'} and send it over.</p>
       </div>
       <div>
@@ -624,7 +624,7 @@ function ManualStep({ s, update, executeRecaptcha }) {
       </div>
       <div>
         <label htmlFor="m-email" className={labelClass}>Email</label>
-        <input id="m-email" className={inputClass} type="email" inputMode="email" autoComplete="email"
+        <input id="m-email" className={inputClass} type="email" inputMode="email" autoComplete="email" spellCheck={false}
           value={s.email} onChange={(e) => update({ email: e.target.value.trim() })} />
       </div>
       <ErrorText>{error}</ErrorText>
@@ -696,7 +696,7 @@ function BuildingStep({ s, update }) {
           {remaining > 0 ? `${mm}:${ss}` : 'Almost…'}
         </p>
         <p className="mt-1 text-sm text-gray-500">
-          {remaining > 0 ? 'Stay on this page — your code arrives the moment it’s live.' : 'Final touches. Hang tight, this can take another minute.'}
+          {remaining > 0 ? 'Stay on this page. Your code arrives the moment it’s live.' : 'Final touches. Hang tight, this can take another minute.'}
         </p>
       </div>
 
@@ -728,7 +728,7 @@ function BuildingStep({ s, update }) {
           {review && (
             <figure key={reviewIndex} className="mt-3 animate-[fadeIn_.5s_ease]">
               <blockquote className="text-gray-800">&ldquo;{review.text}&rdquo;</blockquote>
-              <figcaption className="mt-1 text-sm text-gray-500">— {review.author}</figcaption>
+              <figcaption className="mt-1 text-sm text-gray-500">{review.author}, Google review</figcaption>
             </figure>
           )}
         </div>
