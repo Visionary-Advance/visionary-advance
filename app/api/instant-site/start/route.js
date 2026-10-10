@@ -25,10 +25,13 @@ export async function POST(request) {
   const phone = String(body.phone || '').trim().slice(0, 30)
   const business = body.business || {}
   const placeId = String(business.placeId || '').trim()
+  // Template ids are slugs (createTemplate enforces it); anything else is junk.
   const templateId = String(body.templateId || '').trim()
+  const validTemplateId = /^[a-z0-9][a-z0-9-]{0,63}$/.test(templateId)
+  const styleName = String(body.styleName || '').trim().slice(0, 40) || null
   const phoneDigits = phone.replace(/\D/g, '')
 
-  if (!name || !EMAIL_RE.test(email) || phoneDigits.length < 10 || !placeId || !templateId) {
+  if (!name || !EMAIL_RE.test(email) || phoneDigits.length < 10 || !placeId || !validTemplateId) {
     return NextResponse.json({ error: 'Please fill in your name, email and mobile number.' }, { status: 400 })
   }
 
@@ -59,7 +62,7 @@ export async function POST(request) {
       form_data: {
         google_place_id: placeId,
         template_id: templateId,
-        style: body.styleName || null,
+        style: styleName,
         business_name: business.name || null,
         business_address: business.address || null,
         business_phone: business.phone || null,
