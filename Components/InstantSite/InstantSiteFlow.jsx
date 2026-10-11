@@ -525,29 +525,29 @@ function StyleStep({ s, update }) {
       </div>
 
       {state.loading && (
-        <div className="grid gap-3 sm:grid-cols-2">
-          {[0, 1].map((i) => <div key={i} className="h-56 animate-pulse rounded-2xl bg-gray-100" />)}
+        <div className="grid gap-3">
+          {[0, 1].map((i) => <div key={i} className="h-56 animate-pulse rounded-2xl bg-gray-100 sm:h-40" />)}
         </div>
       )}
       <ErrorText>{state.error}</ErrorText>
 
       {!state.loading && !state.error && state.options.length > 0 && (
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-3">
           {state.options.map((o) => (
-            <div key={o.id} className="flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white transition hover:border-[#008070] hover:shadow-md">
-              <div className="aspect-[16/10] bg-[#E7EDE8]">
+            <div key={o.id} className="flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white transition hover:border-[#008070] hover:shadow-md sm:flex-row">
+              <div className="aspect-[16/10] bg-[#E7EDE8] sm:w-[45%] sm:flex-shrink-0 sm:self-stretch sm:aspect-auto sm:min-h-44">
                 {o.previewImage
                   // eslint-disable-next-line @next/next/no-img-element
-                  ? <img src={o.previewImage} alt={`${o.tone} style example`} className="h-full w-full object-cover object-top" loading="lazy" />
+                  ? <img src={o.previewImage} alt={`${o.tone} style example`} className="h-full w-full object-cover object-left-top" loading="lazy" />
                   : <div className="flex h-full items-center justify-center px-4 text-center font-inter-display text-xl font-semibold text-[#062A26]/60">{o.tone}</div>}
               </div>
               <div className="flex flex-1 flex-col p-4">
                 <p className="text-lg font-bold text-[#062A26]">{o.tone}</p>
                 {o.description && <p className="mt-1 text-sm leading-relaxed text-gray-600">{o.description}</p>}
-                <div className="mt-auto flex items-center gap-4 pt-4">
+                <div className="mt-auto flex flex-col items-center gap-3 pt-4">
                   <button
                     type="button" onClick={() => choose(o)}
-                    className="rounded-xl bg-[#008070] px-4 py-2.5 font-bold text-white transition hover:bg-[#006b5d]"
+                    className="w-full rounded-xl bg-[#008070] px-4 py-3 font-bold text-white transition hover:bg-[#006b5d]"
                   >
                     Use this style
                   </button>
