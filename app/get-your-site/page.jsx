@@ -207,7 +207,7 @@ export default async function GetYourSitePage() {
 
             </div>
 
-            <div id="start" className="relative scroll-mt-6 lg:sticky lg:top-6 lg:col-span-6">
+            <div id="start" className="relative min-w-0 scroll-mt-6 lg:sticky lg:top-6 lg:col-span-6">
               <MapPin />
               <InstantSiteFlow defaultCity={city} defaultState={state} />
             </div>

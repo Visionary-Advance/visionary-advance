@@ -1,5 +1,6 @@
 'use client'
 
+import { Check } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRecaptcha } from '@/lib/useRecaptcha'
 import { trackEvent } from '@/lib/analytics'
@@ -172,6 +173,7 @@ export default function InstantSiteFlow({ defaultCity = '', defaultState = '' })
     state: defaultState,
     results: [],
     selected: null,
+    industries: [],
     template: null,
     name: '',
     phone: '',
@@ -208,7 +210,7 @@ export default function InstantSiteFlow({ defaultCity = '', defaultState = '' })
     localStorage.removeItem(STORAGE_KEY)
     setS((prev) => ({
       ...prev,
-      step: 'business', businessName: '', results: [], selected: null, template: null,
+      step: 'business', businessName: '', results: [], selected: null, industries: [], template: null,
       token: null, startedAt: null, reveal: null,
     }))
   }
@@ -311,9 +313,9 @@ function BusinessStep({ s, update, executeRecaptcha }) {
 
 // ── Step 2: "is this you?" ───────────────────────────────────────────────────
 
-function BusinessCard({ place, onPick }) {
+function BusinessCard({ place, onPick, children }) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition hover:border-[#008070] hover:shadow-md">
+    <div className={`overflow-hidden rounded-2xl border bg-white shadow-sm transition ${children ? 'border-[#008070] shadow-md' : 'border-gray-200 hover:border-[#008070] hover:shadow-md'}`}>
       <div className="flex gap-4 p-4">
         <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl bg-gray-100 sm:h-24 sm:w-24">
           {place.photo
@@ -334,24 +336,123 @@ function BusinessCard({ place, onPick }) {
           {place.phone && <p className="text-sm text-gray-600">{place.phone}</p>}
         </div>
       </div>
-      <button
-        type="button" onClick={() => onPick(place)}
-        className="w-full border-t border-gray-100 bg-[#008070]/5 py-3 font-bold text-[#008070] transition hover:bg-[#008070] hover:text-white"
-      >
-        Yes, this is my business
-      </button>
+      {children || (
+        <button
+          type="button" onClick={() => onPick(place)}
+          className="w-full border-t border-gray-100 bg-[#008070]/5 py-3 font-bold text-[#008070] transition hover:bg-[#008070] hover:text-white"
+        >
+          Yes, this is my business
+        </button>
+      )}
+    </div>
+  )
+}
+
+// Google gives most trades one generic category (landscapers come back as
+// "General Contractor", cleaners as "Services"), so the owner says what they
+// do. WaaS suggests kinds from the listing's categories and name; the best
+// guess starts selected and they can pick more than one.
+function KindsPicker({ place, onContinue }) {
+  const [state, setState] = useState({ loading: true, error: '', kinds: [] })
+  const [picked, setPicked] = useState([])
+
+  useEffect(() => {
+    let cancelled = false
+    const qs = new URLSearchParams({ types: (place.types || []).join(','), label: place.category || '', name: place.name || '' })
+    fetch(`/api/instant-site/styles?${qs}`)
+      .then(async (res) => {
+        const data = await res.json().catch(() => ({}))
+        if (cancelled) return
+        if (!res.ok) {
+          setState({ loading: false, error: data.error || "We couldn't load this step.", kinds: [] })
+          return
+        }
+        const kinds = data.kinds || []
+        setState({ loading: false, error: '', kinds })
+        const best = kinds.find((k) => k.suggested)
+        setPicked(best ? [best.value] : [])
+      })
+      .catch(() => {
+        if (!cancelled) setState({ loading: false, error: "We couldn't load this step. Check your connection.", kinds: [] })
+      })
+    return () => { cancelled = true }
+  }, [place])
+
+  // "Something else" stands alone: it means none of the listed kinds.
+  const toggle = (value) => setPicked((prev) => {
+    if (value === 'other') return prev.includes('other') ? [] : ['other']
+    const rest = prev.filter((v) => v !== 'other')
+    return rest.includes(value) ? rest.filter((v) => v !== value) : [...rest, value]
+  })
+
+  const chips = [...state.kinds, { value: 'other', label: 'Something else' }]
+
+  return (
+    <div className="space-y-4 border-t border-gray-100 bg-[#008070]/5 p-4">
+      <div>
+        <p className="font-bold text-[#062A26]">What kind of work do you do?</p>
+        <p className="text-sm text-gray-600">Pick all that fit. We&apos;ll show you styles made for it.</p>
+      </div>
+
+      {state.loading && (
+        <div className="flex flex-wrap gap-2" aria-hidden="true">
+          {[0, 1, 2].map((i) => <div key={i} className="h-10 w-32 animate-pulse rounded-full bg-white" />)}
+        </div>
+      )}
+      <ErrorText>{state.error}</ErrorText>
+
+      {!state.loading && !state.error && (
+        <div className="flex flex-wrap gap-2" role="group" aria-label="Kinds of work">
+          {chips.map((k) => {
+            const on = picked.includes(k.value)
+            return (
+              <button
+                key={k.value} type="button" aria-pressed={on} onClick={() => toggle(k.value)}
+                className={`inline-flex min-h-10 items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-bold transition ${on ? 'border-[#008070] bg-[#008070] text-white' : 'border-gray-300 bg-white text-[#062A26] hover:border-[#008070]'}`}
+              >
+                {on && <Check size={16} strokeWidth={2.5} aria-hidden="true" />}
+                {k.label}
+              </button>
+            )
+          })}
+        </div>
+      )}
+
+      <PrimaryButton type="button" disabled={state.loading || picked.length === 0} onClick={() => onContinue(picked)}>
+        See my styles
+      </PrimaryButton>
     </div>
   )
 }
 
 function MatchStep({ s, update }) {
   const results = s.results || []
+  const [confirming, setConfirming] = useState(null)
 
   function pick(place) {
     trackEvent('instant_site_confirm', { category: place.category || 'unknown' })
     trackPixel('ViewContent', { content_name: 'business_confirmed', content_category: place.category || '' })
+    setConfirming(place)
+  }
+
+  function proceed(industries) {
+    trackEvent('instant_site_kinds', { kinds: industries.join(',') })
     // A listing phone is often the owner's cell — offer it, don't impose it.
-    update({ selected: place, template: null, step: 'style', phone: s.phone || '' })
+    update({ selected: confirming, industries, template: null, step: 'style', phone: s.phone || '' })
+  }
+
+  if (confirming) {
+    return (
+      <div className="space-y-5">
+        <h2 className="font-inter-display text-2xl font-semibold text-[#062A26] sm:text-3xl">Great, that&apos;s you.</h2>
+        <BusinessCard place={confirming}>
+          <KindsPicker place={confirming} onContinue={proceed} />
+        </BusinessCard>
+        <div className="text-center">
+          <TextLink onClick={() => setConfirming(null)}>{results.length > 1 ? 'Not this one' : 'Back'}</TextLink>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -386,10 +487,13 @@ function StyleStep({ s, update }) {
   const [state, setState] = useState({ loading: true, error: '', options: [], matched: false })
   const place = s.selected
   const typesKey = (place?.types || []).join(',')
+  const industriesKey = (s.industries || []).join(',')
 
   useEffect(() => {
     let cancelled = false
-    const qs = new URLSearchParams({ types: typesKey, label: place?.category || '' })
+    const qs = new URLSearchParams({ types: typesKey, label: place?.category || '', name: place?.name || '' })
+    // A visit resumed from before the kinds picker has no pick: let WaaS guess.
+    if (industriesKey) qs.set('industries', industriesKey)
     fetch(`/api/instant-site/styles?${qs}`)
       .then(async (res) => {
         const data = await res.json().catch(() => ({}))
@@ -401,7 +505,7 @@ function StyleStep({ s, update }) {
         if (!cancelled) setState({ loading: false, error: "We couldn't load the styles. Check your connection.", options: [], matched: false })
       })
     return () => { cancelled = true }
-  }, [typesKey, place?.category])
+  }, [typesKey, place?.category, place?.name, industriesKey])
 
   function choose(option) {
     trackEvent('instant_site_style', { style: option.tone })
@@ -414,8 +518,8 @@ function StyleStep({ s, update }) {
       <div>
         <h2 className="font-inter-display text-2xl font-semibold text-[#062A26] sm:text-3xl">How should your site feel?</h2>
         <p className="mt-1 text-gray-600">
-          {state.matched && place?.category
-            ? `Styles made for ${place.category.toLowerCase()} businesses. Pick the one that sounds like you.`
+          {state.matched
+            ? 'Styles made for your kind of work. Pick the one that sounds like you.'
             : 'Pick the one that sounds most like your business. Your photos, reviews and details go in either way.'}
         </p>
       </div>
@@ -503,6 +607,7 @@ function ContactStep({ s, update, executeRecaptcha }) {
         state: s.state,
         business: place,
         templateId: s.template?.id,
+        industry: (s.industries || []).find((i) => i !== 'other') || null,
         styleName: s.template?.tone,
         meta: s.meta,
         eventId,
