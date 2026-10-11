@@ -24,9 +24,9 @@ const INK = '#062A26'
 // Real reviews, from Components/Home/TestimonialsCarousel.jsx. Trimmed, not reworded.
 const QUOTES = [
   {
-    quote: 'They really took the time to understand my business and brought my vision to life with a clean, modern, and user-friendly design.',
-    name: 'Stephanie F.',
-    business: 'PatRick Environmental',
+    quote: 'Within the first month after launching, more than 10 customers contacted me through the website! I honestly had no idea my website could be such a vital advertising tool for my business.',
+    name: 'Calvin G.',
+    business: 'Three Peaks Tree Service',
   },
   {
     quote: 'We needed a website that looked professional and actually converted, and he delivered.',
