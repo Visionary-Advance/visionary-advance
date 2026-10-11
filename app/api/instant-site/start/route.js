@@ -30,7 +30,8 @@ export async function POST(request) {
   const validTemplateId = /^[a-z0-9][a-z0-9-]{0,63}$/.test(templateId)
   const styleName = String(body.styleName || '').trim().slice(0, 40) || null
   // The kind of work they picked on their card; WaaS checks it against its list.
-  const industry = /^[a-z_]{1,30}$/.test(String(body.industry || '')) ? body.industry : null
+  const industryRaw = typeof body.industry === 'string' ? body.industry : ''
+  const industry = /^[a-z_]{1,30}$/.test(industryRaw) ? industryRaw : null
   const phoneDigits = phone.replace(/\D/g, '')
 
   if (!name || !EMAIL_RE.test(email) || phoneDigits.length < 10 || !placeId || !validTemplateId) {
