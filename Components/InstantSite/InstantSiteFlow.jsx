@@ -211,7 +211,7 @@ export default function InstantSiteFlow({ defaultCity = '', defaultState = '' })
     setS((prev) => ({
       ...prev,
       step: 'business', businessName: '', results: [], selected: null, industries: [], template: null,
-      token: null, startedAt: null, reveal: null,
+      triedStyles: [], previous: null, token: null, startedAt: null, reveal: null,
     }))
   }
 
@@ -229,11 +229,11 @@ export default function InstantSiteFlow({ defaultCity = '', defaultState = '' })
       {s.step === 'contact' && <ContactStep s={s} update={update} executeRecaptcha={executeRecaptcha} />}
       {s.step === 'building' && <BuildingStep s={s} update={update} />}
       {s.step === 'unlock' && <UnlockStep s={s} update={update} />}
-      {s.step === 'revealed' && <RevealedStep s={s} />}
+      {s.step === 'revealed' && <RevealedStep s={s} update={update} onStartOver={startOver} />}
       {s.step === 'handoff' && <HandoffStep s={s} />}
       {s.step === 'manual_done' && <HandoffStep s={s} manual />}
 
-      {['match', 'style', 'contact', 'manual', 'handoff', 'manual_done'].includes(s.step) && (
+      {['match', 'style', 'contact', 'manual', 'unlock', 'handoff', 'manual_done'].includes(s.step) && (
         <div className="mt-6 text-center">
           <TextLink onClick={startOver}>Start over</TextLink>
         </div>
@@ -486,6 +486,8 @@ function MatchStep({ s, update }) {
 function StyleStep({ s, update }) {
   const [state, setState] = useState({ loading: true, error: '', options: [], matched: false })
   const place = s.selected
+  // Styles already built for this business, from "Try a different style".
+  const tried = s.triedStyles || []
   const typesKey = (place?.types || []).join(',')
   const industriesKey = (s.industries || []).join(',')
 
@@ -516,9 +518,13 @@ function StyleStep({ s, update }) {
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="font-inter-display text-2xl font-semibold text-[#062A26] sm:text-3xl">How should your site feel?</h2>
+        <h2 className="font-inter-display text-2xl font-semibold text-[#062A26] sm:text-3xl">
+          {tried.length ? 'Pick a different style' : 'How should your site feel?'}
+        </h2>
         <p className="mt-1 text-gray-600">
-          {state.matched
+          {tried.length
+            ? "We'll build it again in the style you choose and send you a new code."
+            : state.matched
             ? 'Styles made for your kind of work. Pick the one that sounds like you.'
             : 'Pick the one that sounds most like your business. Your photos, reviews and details go in either way.'}
         </p>
@@ -542,7 +548,12 @@ function StyleStep({ s, update }) {
                   : <div className="flex h-full items-center justify-center px-4 text-center font-inter-display text-xl font-semibold text-[#062A26]/60">{o.tone}</div>}
               </div>
               <div className="flex flex-1 flex-col p-4">
-                <p className="text-lg font-bold text-[#062A26]">{o.tone}</p>
+                <p className="flex flex-wrap items-center gap-2 text-lg font-bold text-[#062A26]">
+                  {o.tone}
+                  {tried.includes(o.id) && (
+                    <span className="rounded-full bg-[#E7EDE8] px-2.5 py-0.5 text-xs font-bold text-[#062A26]/70">You saw this one</span>
+                  )}
+                </p>
                 {o.description && <p className="mt-1 text-sm leading-relaxed text-gray-600">{o.description}</p>}
                 <div className="mt-auto flex flex-col items-center gap-3 pt-4">
                   <button
@@ -571,7 +582,11 @@ function StyleStep({ s, update }) {
       )}
 
       <div className="text-center">
-        <TextLink onClick={() => update({ step: 'match' })}>Back to your listing</TextLink>
+        {s.previous?.reveal ? (
+          <TextLink onClick={() => update({ ...s.previous, step: 'revealed', previous: null })}>Keep the site I have</TextLink>
+        ) : (
+          <TextLink onClick={() => update({ step: 'match' })}>Back to your listing</TextLink>
+        )}
       </div>
     </div>
   )
@@ -620,7 +635,7 @@ function ContactStep({ s, update, executeRecaptcha }) {
       }
       if (!ok) { setError(data.error || 'Something went wrong. Try again.'); return }
       if (data.handoff) { update({ step: 'handoff' }); return }
-      update({ token: data.token, startedAt: Date.now(), step: 'building' })
+      update({ token: data.token, startedAt: Date.now(), step: 'building', previous: null })
     } catch {
       setError('Something went wrong. Check your connection and try again.')
     } finally {
@@ -916,8 +931,25 @@ function UnlockStep({ s, update }) {
 
 // ── Step 6: revealed ─────────────────────────────────────────────────────────
 
-function RevealedStep({ s }) {
+function RevealedStep({ s, update, onStartOver }) {
   const r = s.reveal || {}
+
+  // Same business, kinds of work and contact details; only the style changes.
+  // A new style is a new build, so it goes back through the contact step
+  // (prefilled) and a fresh code.
+  function restyle() {
+    trackEvent('instant_site_restyle', { from: s.template?.tone || '' })
+    update({
+      step: 'style',
+      triedStyles: [...new Set([...(s.triedStyles || []), s.template?.id].filter(Boolean))],
+      // Kept so "Keep the site I have" can go straight back to it.
+      previous: { template: s.template, token: s.token, startedAt: s.startedAt, reveal: s.reveal },
+      template: null,
+      token: null,
+      startedAt: null,
+      reveal: null,
+    })
+  }
   return (
     <div className="space-y-5">
       <div className="text-center">
@@ -946,6 +978,22 @@ function RevealedStep({ s }) {
         </a>
       </div>
       <p className="text-center text-sm text-gray-500">We emailed you the link too, so you can come back to it anytime.</p>
+
+      <div className="rounded-2xl border border-gray-200 bg-[#E7EDE8]/50 p-4 text-center sm:p-5">
+        <p className="font-bold text-[#062A26]">Not quite the look you want?</p>
+        <p className="mt-1 text-sm text-gray-600">
+          See {s.selected?.name || 'your business'} in a different style. Your details stay the same.
+        </p>
+        <button
+          type="button" onClick={restyle}
+          className="mt-3 w-full rounded-xl border-2 border-[#008070] px-5 py-3 font-bold text-[#008070] transition hover:bg-[#008070] hover:text-white sm:w-auto"
+        >
+          Try a different style
+        </button>
+        <div className="mt-3">
+          <TextLink onClick={onStartOver}>Start over with a different business</TextLink>
+        </div>
+      </div>
     </div>
   )
 }
