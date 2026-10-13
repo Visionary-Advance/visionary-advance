@@ -29,11 +29,15 @@ export async function POST(request) {
     customData: { content_name: 'instant_site_unlocked' },
   })
 
-  await alertInstantSiteUnlocked({
-    businessName: body.businessName,
-    name: body.name,
-    previewUrl: result.data.previewUrl,
-  })
+  // Once per preview (WaaS claims it), with WaaS's business name rather than
+  // the one the page sent.
+  if (result.data.firstUnlock) {
+    await alertInstantSiteUnlocked({
+      businessName: result.data.businessName,
+      name: body.name,
+      previewUrl: result.data.previewUrl,
+    })
+  }
 
   return NextResponse.json(result.data)
 }

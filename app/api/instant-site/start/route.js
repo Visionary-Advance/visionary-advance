@@ -133,8 +133,10 @@ export async function POST(request) {
     return NextResponse.json({ error: result.data.error, reason: 'template' }, { status: 409 })
   }
 
-  const alert = (build) => alertInstantSiteLead({
-    business, name, email, phone,
+  const alert = (build, verifiedBusiness) => alertInstantSiteLead({
+    business: verifiedBusiness ?? { name: business.name },
+    verified: Boolean(verifiedBusiness),
+    name, email, phone,
     city: body.city, state: body.state,
     style: styleName, kinds, placeId,
     utmCampaign: meta.utm_campaign,
@@ -153,6 +155,8 @@ export async function POST(request) {
     return NextResponse.json({ handoff: true }, { status: 200 })
   }
 
-  await alert('started')
+  // A reused build (same person, same business and style, asking again) was
+  // already alerted when it started.
+  if (!result.data.reused) await alert('started', result.data.business)
   return NextResponse.json({ token: result.data.token })
 }

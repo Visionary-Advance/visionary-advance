@@ -12,11 +12,11 @@ export async function GET(request) {
   const result = await waas(`/status?token=${token}`)
   if (!result.ok) return NextResponse.json(result.data, { status: result.status })
 
-  // The page stops polling once it sees ready or failed, so each of these
-  // fires about once per build.
-  if (result.data.stage === 'ready') {
+  // WaaS says when to send these: once per build, however often this
+  // endpoint is polled (it claims each alert, migration 035 there).
+  if (result.data.alert === 'ready') {
     await alertInstantSiteReady({ businessName: result.data.businessName })
-  } else if (result.data.stage === 'failed') {
+  } else if (result.data.alert === 'failed') {
     await alertInstantSiteFailed({ businessName: result.data.businessName })
   }
 
