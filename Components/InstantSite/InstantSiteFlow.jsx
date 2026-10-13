@@ -623,6 +623,7 @@ function ContactStep({ s, update, executeRecaptcha }) {
         business: place,
         templateId: s.template?.id,
         industry: (s.industries || []).find((i) => i !== 'other') || null,
+        kinds: s.industries || [],
         styleName: s.template?.tone,
         meta: s.meta,
         eventId,
