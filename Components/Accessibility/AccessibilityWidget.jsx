@@ -153,7 +153,8 @@ export default function AccessibilityWidget() {
 
   return (
     <div data-a11y-widget>
-      {/* Trigger */}
+      {/* Trigger. Sits above the reCAPTCHA badge (fixed 14px from the bottom,
+          60px tall) that shares the bottom-right corner. */}
       <button
         ref={triggerRef}
         type="button"
@@ -161,7 +162,7 @@ export default function AccessibilityWidget() {
         aria-expanded={open}
         aria-haspopup="dialog"
         aria-label="Accessibility options"
-        className="fixed bottom-5 right-5 z-[9998] flex h-14 w-14 items-center justify-center rounded-full bg-[#008070] text-white shadow-lg ring-2 ring-white transition-transform hover:scale-105 focus:outline-none focus-visible:ring-4 focus-visible:ring-[#008070]/40"
+        className="fixed bottom-[88px] right-5 z-[9998] flex h-14 w-14 items-center justify-center rounded-full bg-[#008070] text-white shadow-lg ring-2 ring-white transition-transform hover:scale-105 focus:outline-none focus-visible:ring-4 focus-visible:ring-[#008070]/40"
       >
         {/* Universal access icon */}
         <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">

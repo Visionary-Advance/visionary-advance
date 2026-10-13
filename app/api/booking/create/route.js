@@ -62,15 +62,69 @@ function buildIcsFile({ name, email, startIso, endIso, meetLink, uid }) {
   return lines.join('\r\n')
 }
 
+// ── Domain/Setup call ─────────────────────────────────────────────────────────
+// Booked from /setup-call by customers who bought a site through WaaS: an
+// introduction plus getting their domain and account set up. It goes on the
+// calendar as "Domain/Setup — <name>" in its own colour so it can't be mistaken
+// for a discovery call.
+const SETUP_COLOR_ID = '5' // Google Calendar "Banana"
+
+const DOMAIN_STATUS = {
+  have:   'Already owns a domain',
+  need:   'Needs a new domain',
+  unsure: 'Not sure yet',
+}
+
+// Single-line text from the form, trimmed and capped.
+function field(value, max = 200) {
+  return typeof value === 'string' ? value.replace(/\s+/g, ' ').trim().slice(0, max) : ''
+}
+
+function setupDetails(body) {
+  return {
+    businessName: field(body.businessName, 120),
+    phone:        field(body.phone, 40),
+    domainStatus: DOMAIN_STATUS[body.domainStatus] ? body.domainStatus : 'unsure',
+    domain:       field(body.domain, 120),
+  }
+}
+
+function setupDescription({ name, email, message, details }) {
+  return [
+    'Domain/Setup call (booked from visionaryadvance.com/setup-call)',
+    `Client: ${name}`,
+    `Email: ${email}`,
+    details.phone ? `Phone: ${details.phone}` : null,
+    details.businessName ? `Business: ${details.businessName}` : null,
+    `Domain: ${DOMAIN_STATUS[details.domainStatus]}${details.domain ? ` (${details.domain})` : ''}`,
+    message ? `Notes:\n${message}` : null,
+  ].filter(Boolean).join('\n')
+}
+
 // POST /api/booking/create
+// Body: { name, email, message?, slotIso, meetingType?, recaptchaToken,
+//         callType?: 'discovery' | 'setup', businessName?, phone?, domainStatus?, domain? }
 export async function POST(request) {
   try {
     const body = await request.json()
-    const { name, email, message, slotIso, meetingType = 'meet', recaptchaToken } = body
+    const { slotIso, recaptchaToken } = body
+    const isSetup = body.callType === 'setup'
+    const name    = field(body.name, 100)
+    const email   = field(body.email, 200)
+    const message = typeof body.message === 'string' ? body.message.trim().slice(0, 2000) : ''
+    // Setup calls are always on Google Meet.
+    const meetingType = !isSetup && body.meetingType === 'in-person' ? 'in-person' : 'meet'
 
     // Basic validation
     if (!name || !email || !slotIso) {
       return NextResponse.json({ error: 'name, email, and slotIso are required' }, { status: 400 })
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return NextResponse.json({ error: 'Please enter a valid email address' }, { status: 400 })
+    }
+    const slot = new Date(slotIso)
+    if (Number.isNaN(slot.getTime()) || slot.getTime() < Date.now()) {
+      return NextResponse.json({ error: 'That time is no longer available. Please pick another.' }, { status: 400 })
     }
 
     // reCAPTCHA
@@ -79,19 +133,32 @@ export async function POST(request) {
       return NextResponse.json({ error: recaptchaError.error }, { status: recaptchaError.status })
     }
 
+    const details = isSetup ? setupDetails(body) : null
+
     // 1. Create Google Calendar event + Meet link
-    const booking = await createBookingEvent({ name, email, message, slotIso, meetingType })
+    const booking = await createBookingEvent({
+      name, email, message, slotIso: slot.toISOString(), meetingType,
+      ...(isSetup ? {
+        summary:     `Domain/Setup — ${details.businessName ? `${name} (${details.businessName})` : name}`,
+        description: setupDescription({ name, email, message, details }),
+        colorId:     SETUP_COLOR_ID,
+      } : {}),
+    })
 
     // 2. CRM lead (non-blocking)
-    const [firstName, ...rest] = name.trim().split(' ')
+    const [firstName, ...rest] = name.split(' ')
     createOrUpdateLead({
       first_name: firstName,
       last_name: rest.join(' ') || '',
       email,
+      ...(details?.phone ? { phone: details.phone } : {}),
+      ...(details?.businessName ? { company: details.businessName } : {}),
       source: 'contact_form',
-      conversion_page: '/contact',
-      project_type: 'Discovery Call',
-      form_data: { message: message || '' },
+      conversion_page: isSetup ? '/setup-call' : '/contact',
+      project_type: isSetup ? 'Domain/Setup Call' : 'Discovery Call',
+      form_data: isSetup
+        ? { message, domain_status: details.domainStatus, domain: details.domain }
+        : { message },
     }).catch((err) => console.error('[booking/create] CRM error:', err))
 
     // 3. Confirmation email to client
@@ -110,8 +177,8 @@ export async function POST(request) {
       const adminEmailResult = await resend.emails.send({
         from: 'Brandon Crites <noreply@mail.visionaryadvance.com>',
         to: 'brandon@visionaryadvance.com',
-        subject: `New booking: ${name} — ${formattedDate} at ${formattedTime}`,
-        html: buildAdminEmail({ name, email, formattedDate, formattedTime, meetLink: booking.meetLink, meetingType, message }),
+        subject: `${isSetup ? 'New Domain/Setup call' : 'New booking'}: ${name} — ${formattedDate} at ${formattedTime}`,
+        html: buildAdminEmail({ name, email, formattedDate, formattedTime, meetLink: booking.meetLink, meetingType, message, details }),
       })
       console.log('[booking/create] admin email result:', JSON.stringify(adminEmailResult))
     }
@@ -183,18 +250,30 @@ function buildClientEmail({ name, formattedDate, formattedTime, meetLink, meetin
   })
 }
 
-function buildAdminEmail({ name, email, formattedDate, formattedTime, meetLink, meetingType, message }) {
+// Form text going into email HTML.
+function esc(value) {
+  return String(value ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
+}
+
+// `details` is set for a Domain/Setup call (see setupDetails).
+function buildAdminEmail({ name, email, formattedDate, formattedTime, meetLink, meetingType, message, details }) {
+  const row = (label, value) => `<p style="margin:6px 0 0"><strong>${label}:</strong> ${esc(value)}</p>`
   return buildEmailCard({
-    headline: 'New Booking Received',
-    intro: `<p style="margin-top:0">You have a new discovery call booked.</p>`,
+    headline: details ? 'New Domain/Setup Call' : 'New Booking Received',
+    intro: details
+      ? `<p style="margin-top:0">A customer booked a domain and account setup call.</p>`
+      : `<p style="margin-top:0">You have a new discovery call booked.</p>`,
     formattedDate,
     formattedTime,
     meetLink,
     meetingType,
     extraRows: `
-      <p style="margin:10px 0 0;border-top:1px solid #f3f4f6;padding-top:10px"><strong>👤 Client:</strong> ${name}</p>
-      <p style="margin:6px 0 0"><strong>✉️ Email:</strong> <a href="mailto:${email}" style="color:#008070">${email}</a></p>
-      ${message ? `<p style="margin:6px 0 0"><strong>💬 Note:</strong> ${message}</p>` : ''}
+      <p style="margin:10px 0 0;border-top:1px solid #f3f4f6;padding-top:10px"><strong>👤 Client:</strong> ${esc(name)}</p>
+      <p style="margin:6px 0 0"><strong>✉️ Email:</strong> <a href="mailto:${esc(email)}" style="color:#008070">${esc(email)}</a></p>
+      ${details?.phone ? row('📞 Phone', details.phone) : ''}
+      ${details?.businessName ? row('🏢 Business', details.businessName) : ''}
+      ${details ? row('🌐 Domain', DOMAIN_STATUS[details.domainStatus] + (details.domain ? ` — ${details.domain}` : '')) : ''}
+      ${message ? row('💬 Note', message) : ''}
     `,
     cta: '',
     footer: '',
