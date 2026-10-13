@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { clientIp, notifyInstantSite, waas } from '@/lib/instant-site'
+import { alertInstantSiteUnlocked, clientIp, waas } from '@/lib/instant-site'
 import { sendMetaEvent } from '@/lib/meta'
 
 // Step 5: the code we sent them → the site. A correct code means a real,
@@ -29,10 +29,11 @@ export async function POST(request) {
     customData: { content_name: 'instant_site_unlocked' },
   })
 
-  await notifyInstantSite(
-    '🔥 **{business}** just unlocked their instant site ({name}). Hot lead — they\'re looking at it right now.',
-    { business: body.businessName, name: body.name },
-  )
+  await alertInstantSiteUnlocked({
+    businessName: body.businessName,
+    name: body.name,
+    previewUrl: result.data.previewUrl,
+  })
 
   return NextResponse.json(result.data)
 }

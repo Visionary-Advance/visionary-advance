@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { requireRecaptcha } from '@/lib/recaptcha'
 import { createOrUpdateLead } from '@/lib/crm'
-import { clientIp, waas } from '@/lib/instant-site'
+import { alertInstantSiteLead, clientIp, waas } from '@/lib/instant-site'
 import { sendMetaEvent } from '@/lib/meta'
 import { SMS_CONSENT_TEXT } from '@/lib/instant-site-copy'
 
@@ -32,6 +32,10 @@ export async function POST(request) {
   // The kind of work they picked on their card; WaaS checks it against its list.
   const industryRaw = typeof body.industry === 'string' ? body.industry : ''
   const industry = /^[a-z_]{1,30}$/.test(industryRaw) ? industryRaw : null
+  // Every kind of work they picked, for the alert only.
+  const kinds = (Array.isArray(body.kinds) ? body.kinds : [])
+    .filter((k) => typeof k === 'string' && /^[a-z_]{1,30}$/.test(k))
+    .slice(0, 12)
   const phoneDigits = phone.replace(/\D/g, '')
 
   if (!name || !EMAIL_RE.test(email) || phoneDigits.length < 10 || !placeId || !validTemplateId) {
@@ -76,7 +80,8 @@ export async function POST(request) {
         fbclid: meta.fbclid || null,
         sms_consent: { text: SMS_CONSENT_TEXT, at: new Date().toISOString(), ip },
       },
-    })
+    // This form sends its own Telegram alert below, once the build's fate is known.
+    }, { notify: false })
   } catch (err) {
     // Don't block the build on the CRM — the preview row in WaaS also holds
     // their contact details, so the lead still exists there.
@@ -128,12 +133,26 @@ export async function POST(request) {
     return NextResponse.json({ error: result.data.error, reason: 'template' }, { status: 409 })
   }
 
+  const alert = (build) => alertInstantSiteLead({
+    business, name, email, phone,
+    city: body.city, state: body.state,
+    style: styleName, kinds, placeId,
+    utmCampaign: meta.utm_campaign,
+    build,
+  })
+
   if (!result.ok) {
     // Over a limit or broken: they're in the CRM, so it's a hand-build, not a
     // lost lead. Tell them that rather than showing an error.
     console.error('[instant-site/start] build not started:', result.status, result.data)
+    const reason = result.data?.reason === 'phone' || result.data?.reason === 'ip' ? 'daily build limit reached'
+      : result.data?.reason === 'daily_cap' ? 'site-wide daily cap reached'
+      : result.data?.reason === 'disabled' ? 'instant previews switched off'
+      : `builder answered ${result.status}`
+    await alert(reason)
     return NextResponse.json({ handoff: true }, { status: 200 })
   }
 
+  await alert('started')
   return NextResponse.json({ token: result.data.token })
 }

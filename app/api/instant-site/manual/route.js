@@ -2,13 +2,13 @@ import { NextResponse } from 'next/server'
 import { requireRecaptcha } from '@/lib/recaptcha'
 import { createOrUpdateLead } from '@/lib/crm'
 import { sendMetaEvent } from '@/lib/meta'
-import { clientIp } from '@/lib/instant-site'
+import { alertInstantSiteManual, clientIp } from '@/lib/instant-site'
 import { SMS_CONSENT_TEXT } from '@/lib/instant-site-copy'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
 
 // "My business isn't on Google." There's no listing to build from, so this is
-// a lead for a hand-built site — saved to the CRM, which pings Discord.
+// a lead for a hand-built site, saved to the CRM, with its own Telegram alert.
 export async function POST(request) {
   const body = await request.json().catch(() => ({}))
 
@@ -56,11 +56,17 @@ export async function POST(request) {
         fbclid: meta.fbclid || null,
         sms_consent: { text: SMS_CONSENT_TEXT, at: new Date().toISOString(), ip },
       },
-    })
+    }, { notify: false })
   } catch (err) {
     console.error('[instant-site/manual] CRM save failed:', err)
     return NextResponse.json({ error: 'Something went wrong. Please try again.' }, { status: 500 })
   }
+
+  await alertInstantSiteManual({
+    businessName, name, email, phone,
+    city: body.city, state: body.state,
+    industry: String(body.industry || '').slice(0, 60) || null,
+  })
 
   sendMetaEvent({
     eventName: 'Lead',
