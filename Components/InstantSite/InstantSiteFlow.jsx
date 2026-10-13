@@ -1,6 +1,6 @@
 'use client'
 
-import { Check } from 'lucide-react'
+import { Check, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRecaptcha } from '@/lib/useRecaptcha'
 import { trackEvent } from '@/lib/analytics'
@@ -538,40 +538,7 @@ function StyleStep({ s, update }) {
       <ErrorText>{state.error}</ErrorText>
 
       {!state.loading && !state.error && state.options.length > 0 && (
-        <div className="grid gap-3">
-          {state.options.map((o) => (
-            <div key={o.id} className="flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white transition hover:border-[#008070] hover:shadow-md sm:flex-row">
-              <div className="aspect-[16/10] bg-[#E7EDE8] sm:w-[45%] sm:flex-shrink-0 sm:self-stretch sm:aspect-auto sm:min-h-44">
-                {o.previewImage
-                  // eslint-disable-next-line @next/next/no-img-element
-                  ? <img src={o.previewImage} alt={`${o.tone} style example`} className="h-full w-full object-cover object-left-top" loading="lazy" />
-                  : <div className="flex h-full items-center justify-center px-4 text-center font-inter-display text-xl font-semibold text-[#062A26]/60">{o.tone}</div>}
-              </div>
-              <div className="flex flex-1 flex-col p-4">
-                <p className="flex flex-wrap items-center gap-2 text-lg font-bold text-[#062A26]">
-                  {o.tone}
-                  {tried.includes(o.id) && (
-                    <span className="rounded-full bg-[#E7EDE8] px-2.5 py-0.5 text-xs font-bold text-[#062A26]/70">You saw this one</span>
-                  )}
-                </p>
-                {o.description && <p className="mt-1 text-sm leading-relaxed text-gray-600">{o.description}</p>}
-                <div className="mt-auto flex flex-col items-center gap-3 pt-4">
-                  <button
-                    type="button" onClick={() => choose(o)}
-                    className="w-full rounded-xl bg-[#008070] px-4 py-3 font-bold text-white transition hover:bg-[#006b5d]"
-                  >
-                    Use this style
-                  </button>
-                  {o.exampleUrl && (
-                    <a href={o.exampleUrl} target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-[#008070] underline-offset-4 hover:underline">
-                      See an example
-                    </a>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+        <StyleList options={state.options} tried={tried} onChoose={choose} />
       )}
 
       {!state.loading && !state.error && state.options.length === 0 && (
@@ -588,6 +555,153 @@ function StyleStep({ s, update }) {
           <TextLink onClick={() => update({ step: 'match' })}>Back to your listing</TextLink>
         )}
       </div>
+    </div>
+  )
+}
+
+function StyleCard({ option: o, tried, onChoose, className = '' }) {
+  return (
+    <div className={`flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white transition hover:border-[#008070] hover:shadow-md sm:flex-row ${className}`}>
+      <div className="aspect-[16/10] bg-[#E7EDE8] sm:w-[45%] sm:flex-shrink-0 sm:self-stretch sm:aspect-auto sm:min-h-44">
+        {o.previewImage
+          // eslint-disable-next-line @next/next/no-img-element
+          ? <img src={o.previewImage} alt={`${o.tone} style example`} className="h-full w-full object-cover object-left-top" loading="lazy" />
+          : <div className="flex h-full items-center justify-center px-4 text-center font-inter-display text-xl font-semibold text-[#062A26]/60">{o.tone}</div>}
+      </div>
+      <div className="flex flex-1 flex-col p-4">
+        <p className="flex flex-wrap items-center gap-2 text-lg font-bold text-[#062A26]">
+          {o.tone}
+          {tried.includes(o.id) && (
+            <span className="rounded-full bg-[#E7EDE8] px-2.5 py-0.5 text-xs font-bold text-[#062A26]/70">You saw this one</span>
+          )}
+        </p>
+        {o.description && <p className="mt-1 text-sm leading-relaxed text-gray-600">{o.description}</p>}
+        <div className="mt-auto flex flex-col items-center gap-3 pt-4">
+          <button
+            type="button" onClick={() => onChoose(o)}
+            className="w-full rounded-xl bg-[#008070] px-4 py-3 font-bold text-white transition hover:bg-[#006b5d]"
+          >
+            Use this style
+          </button>
+          {o.exampleUrl && (
+            <a href={o.exampleUrl} target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-[#008070] underline-offset-4 hover:underline">
+              See an example
+            </a>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Matches Tailwind's `sm` breakpoint, where the cards switch to side by side.
+const WIDE_QUERY = '(min-width: 640px)'
+const PAGE_SIZE = 2
+
+function useIsWide() {
+  const [wide, setWide] = useState(() => typeof window !== 'undefined' && window.matchMedia(WIDE_QUERY).matches)
+  useEffect(() => {
+    const mq = window.matchMedia(WIDE_QUERY)
+    const onChange = () => setWide(mq.matches)
+    onChange()
+    mq.addEventListener('change', onChange)
+    return () => mq.removeEventListener('change', onChange)
+  }, [])
+  return wide
+}
+
+// The style choices. Phones swipe sideways, one card at a time with the next
+// one peeking in (11 stacked cards would be 11 screens of scrolling). Wider
+// screens page through two at a time with buttons once there are more than
+// two; with one or two there's nothing to page.
+function StyleList({ options, tried, onChoose }) {
+  const wide = useIsWide()
+  return wide
+    ? <StylePager options={options} tried={tried} onChoose={onChoose} />
+    : <StyleSwiper options={options} tried={tried} onChoose={onChoose} />
+}
+
+function StylePager({ options, tried, onChoose }) {
+  const [page, setPage] = useState(0)
+  const pages = Math.ceil(options.length / PAGE_SIZE)
+  // A new list (different kinds of work picked) starts from the top.
+  useEffect(() => { setPage(0) }, [options])
+
+  if (options.length <= PAGE_SIZE) {
+    return (
+      <div className="grid gap-3">
+        {options.map((o) => <StyleCard key={o.id} option={o} tried={tried} onChoose={onChoose} />)}
+      </div>
+    )
+  }
+
+  const start = page * PAGE_SIZE
+  const shown = options.slice(start, start + PAGE_SIZE)
+  return (
+    <div className="space-y-3" role="group" aria-roledescription="carousel" aria-label="Styles">
+      <div className="grid gap-3">
+        {shown.map((o) => <StyleCard key={o.id} option={o} tried={tried} onChoose={onChoose} />)}
+      </div>
+      <div className="flex items-center justify-between gap-3">
+        <button
+          type="button" onClick={() => setPage((p) => Math.max(0, p - 1))} disabled={page === 0}
+          className="inline-flex items-center gap-1.5 rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-bold text-[#062A26] transition hover:border-[#008070] disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          <ChevronLeft size={16} aria-hidden="true" /> Previous
+        </button>
+        <p className="text-sm tabular-nums text-gray-500" aria-live="polite">
+          {shown.length > 1 ? `${start + 1}–${start + shown.length}` : start + 1} of {options.length} styles
+        </p>
+        <button
+          type="button" onClick={() => setPage((p) => Math.min(pages - 1, p + 1))} disabled={page >= pages - 1}
+          className="inline-flex items-center gap-1.5 rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-bold text-[#062A26] transition hover:border-[#008070] disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          Next <ChevronRight size={16} aria-hidden="true" />
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function StyleSwiper({ options, tried, onChoose }) {
+  const scroller = useRef(null)
+  const [index, setIndex] = useState(0)
+  useEffect(() => {
+    setIndex(0)
+    if (scroller.current) scroller.current.scrollLeft = 0
+  }, [options])
+
+  if (options.length === 1) {
+    return <StyleCard option={options[0]} tried={tried} onChoose={onChoose} />
+  }
+
+  // The card nearest the left edge is the current one.
+  function onScroll() {
+    const el = scroller.current
+    const first = el?.firstElementChild
+    if (!first) return
+    const step = first.getBoundingClientRect().width + 12 // gap-3
+    setIndex(Math.min(options.length - 1, Math.max(0, Math.round(el.scrollLeft / step))))
+  }
+
+  return (
+    <div className="space-y-2" role="group" aria-roledescription="carousel" aria-label="Styles">
+      {/* Bleeds to the panel's edges (its padding is p-5) so the next card peeks in. */}
+      <div
+        ref={scroller}
+        onScroll={onScroll}
+        className="-mx-5 flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-px-5 px-5 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
+        {options.map((o) => (
+          <StyleCard key={o.id} option={o} tried={tried} onChoose={onChoose} className="w-[85%] flex-shrink-0 snap-start" />
+        ))}
+      </div>
+      <p className="flex items-center justify-between text-sm text-gray-500">
+        <span className="tabular-nums" aria-live="polite">{index + 1} of {options.length}</span>
+        {index < options.length - 1 && (
+          <span className="inline-flex items-center gap-1" aria-hidden="true">Swipe for more <ChevronRight size={14} /></span>
+        )}
+      </p>
     </div>
   )
 }
