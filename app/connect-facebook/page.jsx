@@ -46,7 +46,7 @@ export default function FacebookConnectPage() {
     {
       icon: <Newspaper className="w-8 h-8" />,
       title: "Display Posts",
-      description: "Show your latest Facebook posts directly on your website"
+      description: "Show your latest Facebook and Instagram posts directly on your website"
     },
     {
       icon: <ImageIcon className="w-8 h-8" />,
@@ -68,7 +68,7 @@ export default function FacebookConnectPage() {
   const steps = [
     "Click 'Connect Facebook Account' below",
     "Log in to your Facebook account",
-    "Select the page you want to display posts from",
+    "Select the page you want to display posts from, and its Instagram account",
     "Your posts will automatically appear on your website!"
   ];
 
@@ -110,7 +110,7 @@ export default function FacebookConnectPage() {
                 Account
               </h1>
               <p className="font-manrope text-lg text-black max-w-3xl mx-auto">
-                Connect your Facebook page to automatically display your latest posts on your website
+                Connect your Facebook page and its linked Instagram account to automatically display your latest posts on your website
               </p>
             </div>
           </div>

@@ -26,6 +26,15 @@ export async function GET(request) {
     );
   }
 
+  // Reject callbacks that didn't start from our authorize route (CSRF)
+  const state = searchParams.get('state');
+  if (!state || state !== request.cookies.get('fb_oauth_state')?.value) {
+    console.error('❌ Facebook OAuth state mismatch');
+    return NextResponse.redirect(
+      new URL('/connect-facebook?error=oauth_failed', request.url)
+    );
+  }
+
   try {
     // Exchange code for access token
     const tokens = await exchangeCodeForTokens(code);
@@ -40,14 +49,16 @@ export async function GET(request) {
       );
     }
 
-    // Store the page token (first page)
+    // Store a page token for every page the user picked
     await storeFacebookTokens(null, null, tokens, pages);
 
-    console.log('✅ Facebook OAuth successful, connected page:', pages[0].name);
+    console.log('✅ Facebook OAuth successful, connected pages:', pages.map((p) => p.name).join(', '));
 
-    return NextResponse.redirect(
+    const response = NextResponse.redirect(
       new URL('/connect-facebook?success=true', request.url)
     );
+    response.cookies.delete({ name: 'fb_oauth_state', path: '/api/facebook' });
+    return response;
 
   } catch (err) {
     console.error('❌ Facebook OAuth error:', err);
