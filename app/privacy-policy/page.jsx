@@ -7,7 +7,7 @@ export default function PrivacyPolicy() {
 
       <p className="mb-4">
         <strong>Effective Date:</strong> 03/01/25 <br />
-        <strong>Last Updated:</strong> 03/01/25
+        <strong>Last Updated:</strong> 10/18/26
       </p>
 
       <p className="mb-6">
@@ -55,6 +55,26 @@ export default function PrivacyPolicy() {
 
       <h2 className="text-2xl font-semibold mb-4">Third-Party Services & Links</h2>
       <p className="mb-6">We may link to third-party sites or use services like analytics or payment processors. Their privacy policies apply separately.</p>
+
+      <h2 className="text-2xl font-semibold mb-4">Facebook and Instagram Data</h2>
+      <p className="mb-4">
+        If you connect a Facebook Page through our Connect Facebook page, you sign in with Facebook and choose which Pages, and which Instagram professional accounts linked to them, to share with us. You can change or remove that access at any time.
+      </p>
+      <p className="mb-4">From the accounts you choose, we receive and store:</p>
+      <ul className="list-disc pl-6 mb-6 space-y-2">
+        <li>The Page&apos;s ID and name, and the linked Instagram account&apos;s ID and username</li>
+        <li>Access tokens for the Page and for the Facebook login used to connect it, which let us read the Page&apos;s posts and the Instagram account&apos;s posts</li>
+      </ul>
+      <p className="mb-4">
+        We use this data only to read your public posts (text, photos, videos, links and post dates) and display them on the website we build or manage for you. Posts are fetched when your website needs them and are not stored long-term. We do not post, comment, send messages or change anything on your accounts, and we do not read private messages.
+      </p>
+      <p className="mb-4">
+        We do not sell this data or share it with anyone else, and we do not use it for advertising. Access tokens are stored in our secured database and are never shown on your website.
+      </p>
+      <p className="mb-6">
+        We keep this data while your website displays your posts. To stop sharing and have it deleted, follow the steps on our{' '}
+        <a href="/data-deletion" className="text-[#008070] underline">Data Deletion</a> page.
+      </p>
 
       <h2 className="text-2xl font-semibold mb-4">Data Retention</h2>
       <p className="mb-6">We retain personal data only as long as necessary to provide services, comply with laws, or resolve disputes.</p>
