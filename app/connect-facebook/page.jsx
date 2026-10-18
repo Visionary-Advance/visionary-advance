@@ -73,7 +73,7 @@ export default function FacebookConnectPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-white pt-26 text-black">
+    <div className="min-h-screen bg-[#191E1E] pt-26 text-white">
       {/* Message Banner */}
       {message.text && (
         <div className={`px-4 md:px-16 py-4 ${message.type === 'success' ? 'bg-green-900/30 border-green-500' : 'bg-red-900/30 border-red-500'} border-t-4`}>
@@ -83,7 +83,7 @@ export default function FacebookConnectPage() {
             ) : (
               <AlertCircle className="w-6 h-6 text-red-400 flex-shrink-0" />
             )}
-            <p className="font-manrope text-black">{message.text}</p>
+            <p className="font-manrope text-white">{message.text}</p>
           </div>
         </div>
       )}
@@ -94,11 +94,11 @@ export default function FacebookConnectPage() {
           <div className="text-center space-y-8">
             <div className="flex items-center justify-center gap-4">
               <div className="w-12 h-1 bg-[#008070]"></div>
-              <span className="font-manrope text-[#008070] font-semibold">Integration</span>
+              <span className="font-manrope text-[#00A38F] font-semibold">Integration</span>
             </div>
 
             <div className="space-y-4">
-              <h1 className="font-anton text-4xl md:text-5xl lg:text-6xl text-black leading-tight tracking-tight flex items-center justify-center gap-3 md:gap-4 flex-wrap">
+              <h1 className="font-anton text-4xl md:text-5xl lg:text-6xl text-white leading-tight tracking-tight flex items-center justify-center gap-3 md:gap-4 flex-wrap">
                 Connect Your
                 <Image
                   src="/Img/Facebook_Logo_Primary.png"
@@ -109,7 +109,7 @@ export default function FacebookConnectPage() {
                 />
                 Account
               </h1>
-              <p className="font-manrope text-lg text-black max-w-3xl mx-auto">
+              <p className="font-manrope text-lg text-white max-w-3xl mx-auto">
                 Connect your Facebook page and its linked Instagram account to automatically display your latest posts on your website
               </p>
             </div>
@@ -124,16 +124,16 @@ export default function FacebookConnectPage() {
             {features.map((feature, index) => (
               <div
                 key={index}
-                className="text-center space-y-6 p-8 bg-gray-50 rounded-2xl border border-gray-200 hover:border-[#008070]/50 transition-all duration-300"
+                className="text-center space-y-6 p-8 bg-white/5 rounded-2xl border border-white/10 hover:border-[#008070]/50 transition-all duration-300"
               >
-                <div className="text-[#008070] flex justify-center">
+                <div className="text-[#00A38F] flex justify-center">
                   {feature.icon}
                 </div>
                 <div className="space-y-4">
-                  <h3 className="font-anton text-xl text-black">
+                  <h3 className="font-anton text-xl text-white">
                     {feature.title}
                   </h3>
-                  <p className="font-manrope text-black">
+                  <p className="font-manrope text-white">
                     {feature.description}
                   </p>
                 </div>
@@ -144,11 +144,11 @@ export default function FacebookConnectPage() {
       </section>
 
       {/* How it Works */}
-      <section className="px-4 md:px-16 py-16 md:py-20 bg-gray-50">
+      <section className="px-4 md:px-16 py-16 md:py-20 bg-black/20">
         <div className="max-w-4xl mx-auto">
           <div className="text-center space-y-6 mb-16">
-            <p className="font-manrope font-semibold text-[#008070]">Simple Process</p>
-            <h2 className="font-anton text-3xl md:text-4xl text-black leading-tight">
+            <p className="font-manrope font-semibold text-[#00A38F]">Simple Process</p>
+            <h2 className="font-anton text-3xl md:text-4xl text-white leading-tight">
               How It Works
             </h2>
           </div>
@@ -157,12 +157,12 @@ export default function FacebookConnectPage() {
             {steps.map((step, index) => (
               <div
                 key={index}
-                className="flex items-start gap-6 p-6 bg-white rounded-2xl border border-gray-200"
+                className="flex items-start gap-6 p-6 bg-white/5 rounded-2xl border border-white/10"
               >
                 <div className="flex-shrink-0 w-12 h-12 bg-[#008070] rounded-full flex items-center justify-center">
                   <span className="font-anton text-white text-lg">{index + 1}</span>
                 </div>
-                <p className="font-manrope text-black text-lg pt-2">{step}</p>
+                <p className="font-manrope text-white text-lg pt-2">{step}</p>
               </div>
             ))}
           </div>
@@ -172,32 +172,32 @@ export default function FacebookConnectPage() {
       {/* Security Notice */}
       <section className="px-4 md:px-16 py-16 md:py-20">
         <div className="max-w-4xl mx-auto">
-          <div className="p-8 bg-gray-50 rounded-2xl border border-[#008070]/30">
+          <div className="p-8 bg-white/5 rounded-2xl border border-[#008070]/40">
             <div className="space-y-4">
               <div className="flex items-center gap-6">
                 <div className="flex-shrink-0 w-12 h-12 bg-[#008070]/20 rounded-full flex items-center justify-center">
-                  <Lock className="w-6 h-6 text-[#008070]" />
+                  <Lock className="w-6 h-6 text-[#00A38F]" />
                 </div>
-                <h3 className="font-anton text-2xl text-[#008070]">
+                <h3 className="font-anton text-2xl text-[#00A38F]">
                   Secure & Private
                 </h3>
               </div>
-              <p className="font-manrope text-black">
+              <p className="font-manrope text-white">
                 Your Facebook credentials are never stored on our servers. We use OAuth 2.0,
                 the industry standard for secure authorization. You can revoke access at any time
                 from your Facebook settings.
               </p>
               <div className="flex items-center gap-3 pt-2">
-                <CheckCircle className="w-5 h-5 text-[#008070]" />
-                <span className="font-manrope text-black">Bank-level encryption</span>
+                <CheckCircle className="w-5 h-5 text-[#00A38F]" />
+                <span className="font-manrope text-white">Bank-level encryption</span>
               </div>
               <div className="flex items-center gap-3">
-                <CheckCircle className="w-5 h-5 text-[#008070]" />
-                <span className="font-manrope text-black">Revoke access anytime</span>
+                <CheckCircle className="w-5 h-5 text-[#00A38F]" />
+                <span className="font-manrope text-white">Revoke access anytime</span>
               </div>
               <div className="flex items-center gap-3">
-                <CheckCircle className="w-5 h-5 text-[#008070]" />
-                <span className="font-manrope text-black">Industry standard OAuth 2.0</span>
+                <CheckCircle className="w-5 h-5 text-[#00A38F]" />
+                <span className="font-manrope text-white">Industry standard OAuth 2.0</span>
               </div>
             </div>
           </div>
@@ -208,10 +208,10 @@ export default function FacebookConnectPage() {
       <section className="px-4 md:px-16 py-16 md:py-28">
         <div className="max-w-4xl mx-auto text-center space-y-8">
           <div className="space-y-6">
-            <h2 className="font-anton text-3xl md:text-5xl text-black leading-tight">
+            <h2 className="font-anton text-3xl md:text-5xl text-white leading-tight">
               Ready to Get Started?
             </h2>
-            <p className="font-manrope text-lg text-black max-w-2xl mx-auto">
+            <p className="font-manrope text-lg text-white max-w-2xl mx-auto">
               Connect your Facebook account now and start displaying your posts on your website
             </p>
           </div>
@@ -219,7 +219,7 @@ export default function FacebookConnectPage() {
           <button
             onClick={handleConnect}
             disabled={isConnecting}
-            className="bg-[#008070] hover:bg-[#006b5d] text-black px-8 py-4 rounded-lg font-manrope font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-3"
+            className="bg-[#008070] hover:bg-[#006b5d] text-white px-8 py-4 rounded-lg font-manrope font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-3"
           >
             {isConnecting ? (
               <>
@@ -235,18 +235,18 @@ export default function FacebookConnectPage() {
             )}
           </button>
 
-          <p className="font-manrope text-black text-sm mt-6">
+          <p className="font-manrope text-white text-sm mt-6">
             By connecting, you agree to share your Facebook page data with this application
           </p>
         </div>
       </section>
 
       {/* Footer Info */}
-      <section className="px-4 md:px-16 py-12 border-t border-gray-200">
+      <section className="px-4 md:px-16 py-12 border-t border-white/10">
         <div className="max-w-6xl mx-auto text-center">
-          <p className="font-manrope text-black mb-4">
+          <p className="font-manrope text-white mb-4">
             Need help? Contact our support team at{' '}
-            <a href="mailto:info@visionaryadvance.com" className="text-[#008070] hover:underline">
+            <a href="mailto:info@visionaryadvance.com" className="text-[#00A38F] hover:underline">
               info@visionaryadvance.com
             </a>
           </p>
