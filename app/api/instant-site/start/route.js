@@ -4,6 +4,7 @@ import { createOrUpdateLead } from '@/lib/crm'
 import { alertInstantSiteLead, clientIp, waas } from '@/lib/instant-site'
 import { sendMetaEvent } from '@/lib/meta'
 import { SMS_CONSENT_TEXT } from '@/lib/instant-site-copy'
+import { claimTrialSpot } from '@/lib/trial'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
 
@@ -47,6 +48,13 @@ export async function POST(request) {
   const ip = clientIp(request)
   const userAgent = request.headers.get('user-agent')
 
+  // From /free-trial: take a spot (or join the waitlist) before anything else,
+  // so the banner's count moves the moment the form is submitted.
+  const fromTrial = body.offer === 'trial'
+  const trial = fromTrial
+    ? (await claimTrialSpot({ email, name, phone, businessName: business.name, placeId })) || 'unrecorded'
+    : null
+
   try {
     await createOrUpdateLead({
       email,
@@ -56,7 +64,7 @@ export async function POST(request) {
       phone,
       company: business.name || null,
       source: 'instant_site',
-      conversion_page: '/get-your-site',
+      conversion_page: fromTrial ? '/free-trial' : '/get-your-site',
       source_url: meta.landingUrl || null,
       utm_source: meta.utm_source || null,
       utm_medium: meta.utm_medium || null,
@@ -65,8 +73,9 @@ export async function POST(request) {
       utm_content: meta.utm_content || null,
       referrer: meta.referrer || null,
       business_type: business.category || null,
-      tags: ['instant-site'],
+      tags: ['instant-site', ...(trial === 'waitlist' ? ['trial-waitlist'] : trial ? ['free-trial'] : [])],
       form_data: {
+        trial_status: trial,
         google_place_id: placeId,
         template_id: templateId,
         style: styleName,
@@ -141,6 +150,7 @@ export async function POST(request) {
     style: styleName, kinds, placeId,
     utmCampaign: meta.utm_campaign,
     build,
+    trial,
   })
 
   if (!result.ok) {
@@ -152,11 +162,11 @@ export async function POST(request) {
       : result.data?.reason === 'disabled' ? 'instant previews switched off'
       : `builder answered ${result.status}`
     await alert(reason)
-    return NextResponse.json({ handoff: true }, { status: 200 })
+    return NextResponse.json({ handoff: true, trial }, { status: 200 })
   }
 
   // A reused build (same person, same business and style, asking again) was
   // already alerted when it started.
   if (!result.data.reused) await alert('started', result.data.business)
-  return NextResponse.json({ token: result.data.token })
+  return NextResponse.json({ token: result.data.token, trial })
 }

@@ -4,6 +4,7 @@
 import { NextResponse } from 'next/server';
 import { getSites, addSite, removeSite, updateSite, listSearchConsoleSites } from '@/lib/search-console';
 import { getGoogleConnectionStatus } from '@/lib/google-auth';
+import { syncEmailCounts } from '@/lib/resend-stats';
 
 export async function GET(request) {
   try {
@@ -95,6 +96,16 @@ export async function PATCH(request) {
     }
 
     const site = await updateSite(siteId, updates);
+
+    // Re-count from Resend's ~30-day history so a newly added inbox shows up
+    // now instead of after the next daily sync. Non-blocking for the save.
+    if (updates.notification_emails !== undefined) {
+      try {
+        await syncEmailCounts();
+      } catch (err) {
+        console.error('Email count sync after settings save failed:', err);
+      }
+    }
 
     return NextResponse.json({ site });
   } catch (error) {

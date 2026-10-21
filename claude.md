@@ -94,6 +94,14 @@ A unified CRM system with Supabase as the source of truth:
 - Idempotent: repeat events update the existing activity and never duplicate tasks
 - Schema: `supabase/pocket-schema.sql`
 
+**Comment-to-DM automations** (`lib/comment-automations.js`):
+- When someone comments a keyword on a connected FB Page / Instagram post, sends them a private reply (DM) and optionally a public reply
+- `GET/POST /api/meta/webhook` — GET answers Meta's verify handshake; POST checks `X-Hub-Signature-256` (HMAC of the raw body with `FACEBOOK_APP_SECRET`), so it reads `request.text()`
+- Rules in `social_comment_rules`, log in `social_comment_events` (unique `comment_id` claimed before sending, so duplicate deliveries never double-DM)
+- Meta allows one private reply per comment, within 7 days. Pages are subscribed to webhooks in the Facebook OAuth callback
+- Comments from people without a role on the Meta app only arrive after App Review grants Advanced Access
+- Schema: `supabase/migrations/20261020_comment_automations.sql`
+
 **UTM Tracking** (`lib/utm.js`):
 - Captures utm_source, utm_medium, utm_campaign, utm_term, utm_content
 - Extracts from URL params, cookies, and request headers
@@ -182,6 +190,10 @@ The app uses a conditional layout system via `Components/ConditionalLayout.jsx`:
 **Pocket Integration**:
 - `POCKET_API_KEY` (Pocket Public API key, `pk_...`)
 - `POCKET_WEBHOOK_SECRET` (signing secret, shown once when creating the webhook in the Pocket app)
+
+**Meta comment automations**:
+- `FACEBOOK_APP_SECRET` (also verifies webhook signatures)
+- `META_WEBHOOK_VERIFY_TOKEN` (any random string; enter the same value in the Meta App Dashboard webhook setup)
 
 **CRM Database** (separate Supabase instance):
 - `NEXT_PUBLIC_CRM_DB_URL` (CRM Supabase URL)

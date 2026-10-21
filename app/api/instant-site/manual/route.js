@@ -4,6 +4,7 @@ import { createOrUpdateLead } from '@/lib/crm'
 import { sendMetaEvent } from '@/lib/meta'
 import { alertInstantSiteManual, clientIp } from '@/lib/instant-site'
 import { SMS_CONSENT_TEXT } from '@/lib/instant-site-copy'
+import { claimTrialSpot } from '@/lib/trial'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
 
@@ -29,6 +30,12 @@ export async function POST(request) {
   const [firstName, ...rest] = name.split(/\s+/)
   const ip = clientIp(request)
 
+  // From /free-trial: take a spot or join the waitlist (see start/route.js)
+  const fromTrial = body.offer === 'trial'
+  const trial = fromTrial
+    ? (await claimTrialSpot({ email, name, phone, businessName })) || 'unrecorded'
+    : null
+
   try {
     await createOrUpdateLead({
       email,
@@ -38,7 +45,7 @@ export async function POST(request) {
       phone,
       company: businessName,
       source: 'instant_site',
-      conversion_page: '/get-your-site',
+      conversion_page: fromTrial ? '/free-trial' : '/get-your-site',
       source_url: meta.landingUrl || null,
       utm_source: meta.utm_source || null,
       utm_medium: meta.utm_medium || null,
@@ -47,8 +54,9 @@ export async function POST(request) {
       utm_content: meta.utm_content || null,
       referrer: meta.referrer || null,
       business_type: String(body.industry || '').slice(0, 60) || null,
-      tags: ['instant-site', 'not-on-google'],
+      tags: ['instant-site', 'not-on-google', ...(trial === 'waitlist' ? ['trial-waitlist'] : trial ? ['free-trial'] : [])],
       form_data: {
+        trial_status: trial,
         business_name: businessName,
         city: body.city || null,
         state: body.state || null,
@@ -66,6 +74,7 @@ export async function POST(request) {
     businessName, name, email, phone,
     city: body.city, state: body.state,
     industry: String(body.industry || '').slice(0, 60) || null,
+    trial,
   })
 
   sendMetaEvent({
@@ -85,5 +94,5 @@ export async function POST(request) {
     customData: { content_name: 'instant_site_manual' },
   })
 
-  return NextResponse.json({ ok: true })
+  return NextResponse.json({ ok: true, trial })
 }

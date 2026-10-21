@@ -8,6 +8,7 @@ import SEOPlanView from '@/Components/Admin/SEO/SEOPlanView';
 import SEOReportPanel from '@/Components/Admin/SEO/SEOReportPanel';
 import LinkToBusinessModal from '@/Components/Admin/SEO/LinkToBusinessModal';
 import KeywordsTab from '@/Components/Admin/SEO/KeywordsTab';
+import SiteSettingsTab from '@/Components/Admin/SEO/SiteSettingsTab';
 import { PLAN_TIERS, PLAN_TIER_LABELS } from '@/lib/seo-tiers';
 
 export default function SiteDetailPage({ params }) {
@@ -238,7 +239,8 @@ export default function SiteDetailPage({ params }) {
           { id: 'dashboard', label: 'Dashboard' },
           { id: 'keywords', label: 'Keywords' },
           { id: 'plan', label: 'Plan' },
-          { id: 'reports', label: 'Reports' }
+          { id: 'reports', label: 'Reports' },
+          { id: 'settings', label: 'Settings' }
         ].map(tab => (
           <button
             key={tab.id}
@@ -333,6 +335,9 @@ export default function SiteDetailPage({ params }) {
 
       {/* Reports Tab */}
       {activeTab === 'reports' && <SEOReportPanel site={site} userEmail={user?.email} />}
+
+      {/* Settings Tab */}
+      {activeTab === 'settings' && <SiteSettingsTab site={site} userEmail={user?.email} onSaved={(updated) => setSite({ ...site, ...updated })} />}
 
       {/* Link to Business Modal */}
       {showLinkModal && (

@@ -238,6 +238,7 @@ function ReportView({ report, site, onBack, onSend, onDelete }) {
   const currentMonth = monthComparison?.currentMonth;
   const previousMonth = monthComparison?.previousMonth;
   const trackedKeywords = report.tracked_keywords || [];
+  const ga4 = report.ga4;
 
   const priorityColors = {
     high: 'border-red-500 bg-red-500/10',
@@ -401,9 +402,25 @@ function ReportView({ report, site, onBack, onSend, onDelete }) {
                 <ChangeIndicator value={report.position_change} inverted />
               </td>
             </tr>
+            {ga4 && (
+              <>
+                <MetricRow label="Sessions" sublabel="GA4" current={ga4.current.sessions} previous={ga4.previous.sessions} change={ga4.changes.sessionsChange} />
+                <MetricRow label="Users" sublabel="GA4" current={ga4.current.totalUsers} previous={ga4.previous.totalUsers} change={ga4.changes.usersChange} />
+                <MetricRow label="Key Events" sublabel="GA4 conversions" current={ga4.current.keyEvents} previous={ga4.previous.keyEvents} change={ga4.changes.keyEventsChange} />
+              </>
+            )}
           </tbody>
         </table>
       </div>
+
+      {/* Website Traffic (GA4) */}
+      {ga4 && (ga4.channels.length > 0 || ga4.landingPages.length > 0 || ga4.keyEvents.length > 0) && (
+        <div className="grid gap-4 md:grid-cols-3 mb-6">
+          <BreakdownTable title="Sessions by Channel" rows={ga4.channels} metric="sessions" currentMonth={currentMonth} previousMonth={previousMonth} />
+          <BreakdownTable title="Top Landing Pages" rows={ga4.landingPages} metric="sessions" currentMonth={currentMonth} previousMonth={previousMonth} />
+          <BreakdownTable title="Key Events" rows={ga4.keyEvents} metric="keyEvents" currentMonth={currentMonth} previousMonth={previousMonth} />
+        </div>
+      )}
 
       {/* Tracked Keywords */}
       {trackedKeywords.length > 0 && (
@@ -610,6 +627,52 @@ function ChangeIndicator({ value, suffix = '%', inverted = false }) {
     <span className={`font-semibold ${color}`}>
       {arrow} {Math.abs(value).toFixed(1)}{suffix}
     </span>
+  );
+}
+
+function MetricRow({ label, sublabel, current, previous, change }) {
+  return (
+    <tr className="border-t border-gray-600">
+      <td className="px-4 py-3 text-gray-300">
+        {label}
+        {sublabel && <span className="block text-xs text-gray-500">{sublabel}</span>}
+      </td>
+      <td className="px-4 py-3 text-center text-white font-bold text-lg">{current.toLocaleString()}</td>
+      <td className="px-4 py-3 text-center text-gray-400">{previous.toLocaleString()}</td>
+      <td className="px-4 py-3 text-center">
+        <ChangeIndicator value={change} />
+      </td>
+    </tr>
+  );
+}
+
+function BreakdownTable({ title, rows, metric, currentMonth, previousMonth }) {
+  return (
+    <div className="bg-gray-700 rounded-lg overflow-hidden">
+      <h4 className="px-4 py-3 border-b border-gray-600 text-sm font-semibold text-white">{title}</h4>
+      {rows.length === 0 ? (
+        <p className="px-4 py-3 text-sm text-gray-500">No data</p>
+      ) : (
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="text-xs text-gray-400">
+              <th className="px-4 py-2 text-left font-medium"></th>
+              <th className="px-2 py-2 text-right font-medium" title={currentMonth?.name}>{currentMonth?.name?.split(' ')[0] || 'Current'}</th>
+              <th className="px-4 py-2 text-right font-medium" title={previousMonth?.name}>{previousMonth?.name?.split(' ')[0] || 'Previous'}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row) => (
+              <tr key={row.name} className="border-t border-gray-600">
+                <td className="px-4 py-2 text-gray-300 truncate max-w-[12rem]" title={row.name}>{row.name}</td>
+                <td className="px-2 py-2 text-right text-white tabular-nums">{row.current[metric].toLocaleString()}</td>
+                <td className="px-4 py-2 text-right text-gray-400 tabular-nums">{row.previous[metric].toLocaleString()}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
   );
 }
 

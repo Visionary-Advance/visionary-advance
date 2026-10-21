@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server';
 import {
   exchangeCodeForTokens,
   getFacebookPages,
-  storeFacebookTokens
+  storeFacebookTokens,
+  subscribePageWebhooks
 } from '@/lib/facebook';
 
 export async function GET(request) {
@@ -51,6 +52,15 @@ export async function GET(request) {
 
     // Store a page token for every page the user picked
     await storeFacebookTokens(null, null, tokens, pages);
+
+    // Comment-to-DM automations need each page's comment webhooks. A failure
+    // here (e.g. pages_manage_metadata declined) shouldn't fail the connection.
+    const subscriptions = await Promise.allSettled(pages.map(subscribePageWebhooks));
+    subscriptions.forEach((result, i) => {
+      if (result.status === 'rejected') {
+        console.error('⚠️ Webhook subscription failed for', pages[i].name, result.reason);
+      }
+    });
 
     console.log('✅ Facebook OAuth successful, connected pages:', pages.map((p) => p.name).join(', '));
 
