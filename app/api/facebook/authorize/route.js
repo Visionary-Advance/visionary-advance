@@ -32,11 +32,21 @@ export async function GET(request) {
   // pages_read_engagement: Read page posts and engagement data
   // instagram_basic: Read the linked Instagram professional account's profile and media
   // business_management: Reach pages and Instagram accounts owned through a Business portfolio
+  // pages_manage_metadata: Subscribe the app to the page's webhooks (comment events)
+  // pages_read_user_content: Read the text of other people's comments
+  // pages_messaging: Send comment-to-DM private replies on Facebook
+  // instagram_manage_comments: Receive Instagram comment webhooks and reply to comments
+  // instagram_manage_messages: Send comment-to-DM private replies on Instagram
   const scopes = [
     'pages_show_list',
     'pages_read_engagement',
     'instagram_basic',
-    'business_management'
+    'business_management',
+    'pages_manage_metadata',
+    'pages_read_user_content',
+    'pages_messaging',
+    'instagram_manage_comments',
+    'instagram_manage_messages'
   ].join(',');
 
   authUrl.searchParams.append('scope', scopes);

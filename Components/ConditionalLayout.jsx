@@ -8,6 +8,7 @@ const LANDING_PAGES = new Set([
   '/construction-websites',
   '/affordable-small-business-website-design',
   '/get-your-site',
+  '/free-trial',
 ]);
 
 export default function ConditionalLayout({ children }) {

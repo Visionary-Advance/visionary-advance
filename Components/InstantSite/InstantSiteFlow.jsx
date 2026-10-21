@@ -163,7 +163,10 @@ function Progress({ step }) {
 
 // ── the flow ─────────────────────────────────────────────────────────────────
 
-export default function InstantSiteFlow({ defaultCity = '', defaultState = '' }) {
+// `offer="trial"` is the /free-trial page: signups take a trial spot (or join
+// the waitlist), and its progress is saved apart from /get-your-site's.
+export default function InstantSiteFlow({ defaultCity = '', defaultState = '', offer = null }) {
+  const storageKey = offer === 'trial' ? `${STORAGE_KEY}-trial` : STORAGE_KEY
   const { executeRecaptcha } = useRecaptcha()
   const [hydrated, setHydrated] = useState(false)
   const [s, setS] = useState({
@@ -182,13 +185,15 @@ export default function InstantSiteFlow({ defaultCity = '', defaultState = '' })
     startedAt: null,
     reveal: null,
     meta: null,
+    // /free-trial only: 'trial', 'waitlist' or 'unrecorded', from the server
+    trial: null,
   })
   const update = useCallback((patch) => setS((prev) => ({ ...prev, ...patch })), [])
 
   // Restore an in-progress visit; capture attribution on the first one.
   useEffect(() => {
     let saved = null
-    try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null') } catch {}
+    try { saved = JSON.parse(localStorage.getItem(storageKey) || 'null') } catch {}
     setS((prev) => ({
       ...prev,
       ...(saved || {}),
@@ -197,17 +202,17 @@ export default function InstantSiteFlow({ defaultCity = '', defaultState = '' })
       meta: saved?.meta || collectMeta(),
     }))
     setHydrated(true)
-  }, [])
+  }, [storageKey])
 
   useEffect(() => {
     if (!hydrated) return
     const { results, ...persist } = s // results are re-fetched, not stored
     void results
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(persist))
-  }, [s, hydrated])
+    localStorage.setItem(storageKey, JSON.stringify(persist))
+  }, [s, hydrated, storageKey])
 
   const startOver = () => {
-    localStorage.removeItem(STORAGE_KEY)
+    localStorage.removeItem(storageKey)
     setS((prev) => ({
       ...prev,
       step: 'business', businessName: '', results: [], selected: null, industries: [], template: null,
@@ -224,9 +229,9 @@ export default function InstantSiteFlow({ defaultCity = '', defaultState = '' })
       {!['revealed'].includes(s.step) && <Progress step={s.step} />}
       {s.step === 'business' && <BusinessStep s={s} update={update} executeRecaptcha={executeRecaptcha} />}
       {s.step === 'match' && <MatchStep s={s} update={update} />}
-      {s.step === 'manual' && <ManualStep s={s} update={update} executeRecaptcha={executeRecaptcha} />}
+      {s.step === 'manual' && <ManualStep s={s} update={update} executeRecaptcha={executeRecaptcha} offer={offer} />}
       {s.step === 'style' && <StyleStep s={s} update={update} />}
-      {s.step === 'contact' && <ContactStep s={s} update={update} executeRecaptcha={executeRecaptcha} />}
+      {s.step === 'contact' && <ContactStep s={s} update={update} executeRecaptcha={executeRecaptcha} offer={offer} />}
       {s.step === 'building' && <BuildingStep s={s} update={update} />}
       {s.step === 'unlock' && <UnlockStep s={s} update={update} />}
       {s.step === 'revealed' && <RevealedStep s={s} update={update} onStartOver={startOver} />}
@@ -708,7 +713,7 @@ function StyleSwiper({ options, tried, onChoose }) {
 
 // ── Step 4: contact ──────────────────────────────────────────────────────────
 
-function ContactStep({ s, update, executeRecaptcha }) {
+function ContactStep({ s, update, executeRecaptcha, offer }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const place = s.selected
@@ -740,6 +745,7 @@ function ContactStep({ s, update, executeRecaptcha }) {
         kinds: s.industries || [],
         styleName: s.template?.tone,
         meta: s.meta,
+        offer,
         eventId,
         recaptchaToken,
       })
@@ -749,8 +755,8 @@ function ContactStep({ s, update, executeRecaptcha }) {
         return
       }
       if (!ok) { setError(data.error || 'Something went wrong. Try again.'); return }
-      if (data.handoff) { update({ step: 'handoff' }); return }
-      update({ token: data.token, startedAt: Date.now(), step: 'building', previous: null })
+      if (data.handoff) { update({ step: 'handoff', trial: data.trial ?? null }); return }
+      update({ token: data.token, startedAt: Date.now(), step: 'building', previous: null, trial: data.trial ?? null })
     } catch {
       setError('Something went wrong. Check your connection and try again.')
     } finally {
@@ -810,7 +816,7 @@ function ContactStep({ s, update, executeRecaptcha }) {
 
 // ── Not on Google ────────────────────────────────────────────────────────────
 
-function ManualStep({ s, update, executeRecaptcha }) {
+function ManualStep({ s, update, executeRecaptcha, offer }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [industry, setIndustry] = useState('')
@@ -829,10 +835,10 @@ function ManualStep({ s, update, executeRecaptcha }) {
       const recaptchaToken = await executeRecaptcha('instant_manual')
       const { ok, data } = await postJson('/api/instant-site/manual', {
         businessName: s.businessName, industry, city: s.city, state: s.state,
-        name: s.name.trim(), phone: s.phone, email: s.email, meta: s.meta, eventId, recaptchaToken,
+        name: s.name.trim(), phone: s.phone, email: s.email, meta: s.meta, offer, eventId, recaptchaToken,
       })
       if (!ok) { setError(data.error || 'Something went wrong. Try again.'); return }
-      update({ step: 'manual_done' })
+      update({ step: 'manual_done', trial: data.trial ?? null })
     } finally {
       setLoading(false)
     }
@@ -1046,6 +1052,10 @@ function UnlockStep({ s, update }) {
 
 // ── Step 6: revealed ─────────────────────────────────────────────────────────
 
+// A /free-trial signup that got a spot. 'unrecorded' (the count couldn't be
+// saved) is treated as a spot: the alert flags it, and we honour it.
+const hasTrialSpot = (s) => s.trial === 'trial' || s.trial === 'unrecorded'
+
 function RevealedStep({ s, update, onStartOver }) {
   const r = s.reveal || {}
 
@@ -1071,14 +1081,37 @@ function RevealedStep({ s, update, onStartOver }) {
         <h2 className="font-inter-display text-2xl font-semibold text-[#062A26] sm:text-3xl">
           Here&apos;s {s.selected?.name || 'your new site'}
         </h2>
-        <p className="mt-1 text-gray-600">Built from your Google listing. Claim it and it goes live on your own domain.</p>
+        <p className="mt-1 text-gray-600">
+          {hasTrialSpot(s)
+            ? 'Built from your Google listing. Your free trial spot is saved.'
+            : 'Built from your Google listing. Claim it and it goes live on your own domain.'}
+        </p>
       </div>
+      {s.trial === 'waitlist' && (
+        <p className="rounded-xl bg-amber-50 px-4 py-3 text-center text-sm text-amber-900">
+          The free trial filled up before you got in, so you&apos;re on the waitlist. We&apos;ll text you if a spot opens.
+          Don&apos;t want to wait? Claim it now for $99 a month.
+        </p>
+      )}
       <div className="overflow-hidden rounded-2xl border border-gray-200 shadow-xl">
         <div className="flex items-center gap-1.5 border-b border-gray-200 bg-gray-100 px-4 py-2.5">
           <span className="h-3 w-3 rounded-full bg-red-400" /><span className="h-3 w-3 rounded-full bg-amber-400" /><span className="h-3 w-3 rounded-full bg-green-400" />
         </div>
         <iframe src={r.previewUrl} title={`${s.selected?.name || 'Your'} website preview`} className="h-[70vh] w-full border-0 bg-white" />
       </div>
+      {hasTrialSpot(s) ? (
+        // No checkout for trial spots: the claim page charges $99 today, so we
+        // put trial sites live by hand and bill from January 1.
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <p className="flex-1 rounded-xl bg-[#008070]/10 px-5 py-4 font-bold text-[#062A26]">
+            🎟️ We&apos;ll text you within one business day to put it live. Free until January 1, no card needed.
+          </p>
+          <a href={r.viewUrl} target="_blank" rel="noopener noreferrer"
+            className="rounded-xl border border-gray-300 px-6 py-4 text-center font-bold text-gray-700 transition hover:border-gray-400">
+            Open full screen
+          </a>
+        </div>
+      ) : (
       <div className="flex flex-col gap-3 sm:flex-row">
         <a
           href={r.claimUrl}
@@ -1092,6 +1125,7 @@ function RevealedStep({ s, update, onStartOver }) {
           Open full screen
         </a>
       </div>
+      )}
       <p className="text-center text-sm text-gray-500">We emailed you the link too, so you can come back to it anytime.</p>
 
       <div className="rounded-2xl border border-gray-200 bg-[#E7EDE8]/50 p-4 text-center sm:p-5">
@@ -1126,6 +1160,12 @@ function HandoffStep({ s, manual }) {
           : `We're finishing ${s.selected?.name || 'your site'} by hand`}
         {' '}and send it to <span className="font-bold text-[#062A26]">{maskEmail(s.email)}</span>, usually within one business day.
       </p>
+      {hasTrialSpot(s) && (
+        <p className="font-bold text-[#008070]">🎟️ Your free trial spot is saved. Free until January 1.</p>
+      )}
+      {s.trial === 'waitlist' && (
+        <p className="text-gray-600">The free trial is full, so you&apos;re on the waitlist. We&apos;ll text you if a spot opens.</p>
+      )}
       <p className="text-sm text-gray-500">Questions? Call or text <a className="font-bold text-[#008070]" href="tel:+15413210468">(541) 321-0468</a>.</p>
     </div>
   )
