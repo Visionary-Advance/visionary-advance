@@ -50,15 +50,13 @@ The codebase implements a sophisticated OAuth token management system for both S
 - `jobberGraphQL(accountId, query, variables)` - Authenticated call; refreshes 5 min before expiry and retries once on a 401
 - `findJobberClient()`, `createJobberClient()`, `createJobberProperty()`, `createJobberRequest()` for lead capture (`requestCreate` needs a `clientId`, so the client always comes first)
 - Tokens stored in `jobber_accounts` table in the **main** Supabase instance. Jobber rotates refresh tokens and kills the old one immediately, so both tokens are saved on every refresh
-- `/api/jobber/authorize` sets a `jobber_oauth` cookie (state + optional site invite); the callback rejects a mismatched `state`
+- `/api/jobber/authorize` sets a `jobber_oauth_state` cookie; the callback rejects a mismatched `state`
 
-**Jobber lead intake for client websites** (`lib/jobber-leads.js`):
-- Client sites (e.g. Three Peaks) POST their form server-to-server to `/api/integrations/jobber/lead` with `Authorization: Bearer <JOBBER_LEAD_KEY>` → matched-or-new Client + Property + Request in the contractor's Jobber
-- Sites live in `jobber_lead_sites` (key stored as SHA-256 hash); every lead is logged in `jobber_lead_submissions` (`sent` / `duplicate` / `failed`). Same phone + service within 10 min is treated as a double-submit
-- `node scripts/jobber-site.mjs create <slug> "<Name>"` prints the site key and a single-use 14-day connect link (`/connect-jobber?site=&invite=`); the contractor opening it links their Jobber account to the site. Also `invite`, `rotate-key`, `status`
-- Free-text addresses are split by `parseUsAddress()`; the raw text is kept on the request too
-- The Jobber app is a Draft "Custom Integration": fine for up to 5 paying Jobber accounts without app review. Clients it creates get the app's name as their Lead Source
-- Schema: `supabase/migrations/20261023_jobber_lead_intake.sql`
+**Client websites sending leads to their own Jobber** (UC Blinds, Three Peaks):
+- The contractor connects once at `/connect-jobber` (OAuth here), which saves their row in `jobber_accounts`
+- Each client site then reads that row directly with this project's Supabase URL + service role key and its own `JOBBER_ACCOUNT_ID`, and calls Jobber itself (`ucblinds/app/api/create-jobber-request/route.js`, `three-peaks/app/lib/jobber.ts`). Only sites we own and deploy may hold the service role key
+- The client site refreshes that account's tokens itself. Jobber rotates refresh tokens and kills the old one immediately, so **nothing here should refresh a client site's account** — two refreshers would knock each other out
+- The Jobber app ("Website Jobber Integration") is a Draft "Custom Integration": fine for up to 5 paying Jobber accounts without app review. Clients it creates get the app's name as their Lead Source
 
 **HubSpot (`lib/hubspot.js`)**:
 - Automatic CRM integration for contact form submissions

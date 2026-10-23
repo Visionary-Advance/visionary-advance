@@ -1,6 +1,8 @@
 import crypto from 'crypto';
 import { NextResponse } from 'next/server';
-import { getSiteForInvite, OAUTH_COOKIE } from '@/lib/jobber-leads';
+
+// Holds the OAuth state between this route and the callback (CSRF check).
+const STATE_COOKIE = 'jobber_oauth_state';
 
 export async function GET(request) {
   const clientId = process.env.JOBBER_CLIENT_ID;
@@ -23,19 +25,6 @@ export async function GET(request) {
     );
   }
 
-  // A connect link for a client website carries ?site=&invite=. Check it now
-  // so a bad link fails before the contractor logs in to Jobber.
-  const { searchParams } = new URL(request.url);
-  const site = searchParams.get('site');
-  const invite = searchParams.get('invite');
-
-  if (site || invite) {
-    const valid = await getSiteForInvite(site, invite);
-    if (!valid) {
-      return NextResponse.redirect(new URL('/connect-jobber?error=invalid_invite', request.url));
-    }
-  }
-
   const authUrl = new URL('https://api.getjobber.com/api/oauth/authorize');
   authUrl.searchParams.append('client_id', clientId);
   authUrl.searchParams.append('redirect_uri', redirectUri);
@@ -51,9 +40,8 @@ export async function GET(request) {
 
   const response = NextResponse.redirect(authUrl.toString());
 
-  // The callback checks `state` against this cookie (CSRF), and picks the
-  // site invite back up from it.
-  response.cookies.set(OAUTH_COOKIE, JSON.stringify({ state, site, invite }), {
+  // The callback rejects the login unless Jobber hands back this same state.
+  response.cookies.set(STATE_COOKIE, state, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',

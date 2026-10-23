@@ -5,15 +5,9 @@ import {
   getJobberAccountInfo,
   storeJobberTokens
 } from '@/lib/jobber';
-import { getSiteForInvite, linkSiteToJobberAccount, OAUTH_COOKIE } from '@/lib/jobber-leads';
 
-function readOAuthCookie(request) {
-  try {
-    return JSON.parse(request.cookies.get(OAUTH_COOKIE)?.value || 'null');
-  } catch {
-    return null;
-  }
-}
+// Set by /api/jobber/authorize
+const STATE_COOKIE = 'jobber_oauth_state';
 
 function stateMatches(expected, actual) {
   if (!expected || !actual) return false;
@@ -24,7 +18,7 @@ function stateMatches(expected, actual) {
 
 function redirectTo(request, path) {
   const response = NextResponse.redirect(new URL(path, request.url));
-  response.cookies.delete({ name: OAUTH_COOKIE, path: '/api/jobber' });
+  response.cookies.delete({ name: STATE_COOKIE, path: '/api/jobber' });
   return response;
 }
 
@@ -44,8 +38,7 @@ export async function GET(request) {
     );
   }
 
-  const saved = readOAuthCookie(request);
-  if (!stateMatches(saved?.state, searchParams.get('state'))) {
+  if (!stateMatches(request.cookies.get(STATE_COOKIE)?.value, searchParams.get('state'))) {
     return redirectTo(request, '/connect-jobber?error=state_mismatch');
   }
 
@@ -53,16 +46,6 @@ export async function GET(request) {
     const tokens = await exchangeCodeForTokens(code);
     const accountInfo = await getJobberAccountInfo(tokens.access_token);
     await storeJobberTokens(accountInfo.id, accountInfo.name, tokens);
-
-    // Connect link for a client website: point that site's leads at this
-    // account. Re-checked here because the invite is single-use.
-    if (saved.site) {
-      const site = await getSiteForInvite(saved.site, saved.invite);
-      if (!site) {
-        return redirectTo(request, '/connect-jobber?error=invalid_invite');
-      }
-      await linkSiteToJobberAccount(site.id, accountInfo.id);
-    }
 
     return redirectTo(request, '/connect-jobber?success=true');
 
