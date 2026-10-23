@@ -7,12 +7,18 @@ import Image from 'next/image';
 export default function JobberConnectPage() {
   const [isConnecting, setIsConnecting] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
+  // Set when the contractor arrived from a website connect link (?site=&invite=)
+  const [invite, setInvite] = useState(null);
 
   useEffect(() => {
     // Check for success or error in URL params
     const params = new URLSearchParams(window.location.search);
     const success = params.get('success');
     const error = params.get('error');
+
+    if (params.get('site') && params.get('invite')) {
+      setInvite({ site: params.get('site'), invite: params.get('invite') });
+    }
 
     if (success === 'true') {
       setMessage({
@@ -25,6 +31,8 @@ export default function JobberConnectPage() {
       const errorMessages = {
         'oauth_failed': 'Failed to connect to Jobber. Please try again.',
         'access_denied': 'You denied access to Jobber.',
+        'invalid_invite': 'This connect link has expired or was already used. Ask us for a new one.',
+        'state_mismatch': 'The connection timed out. Please start again.',
       };
       setMessage({
         type: 'error',
@@ -38,7 +46,9 @@ export default function JobberConnectPage() {
   const handleConnect = () => {
     setIsConnecting(true);
     // Use the server-side authorize endpoint which handles all OAuth configuration
-    window.location.href = '/api/jobber/authorize';
+    window.location.href = invite
+      ? `/api/jobber/authorize?${new URLSearchParams(invite)}`
+      : '/api/jobber/authorize';
   };
 
   const features = [
