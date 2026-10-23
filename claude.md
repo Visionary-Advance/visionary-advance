@@ -47,8 +47,18 @@ The codebase implements a sophisticated OAuth token management system for both S
 **Jobber (`lib/jobber.js`)**:
 - `getValidJobberToken(accountId)` - Auto-refreshing token getter
 - Uses GraphQL API with `X-JOBBER-GRAPHQL-VERSION: 2025-01-20` header
-- `createJobberClient()` and `createJobberRequest()` for lead capture
-- Tokens stored in `jobber_accounts` table in Supabase
+- `jobberGraphQL(accountId, query, variables)` - Authenticated call; refreshes 5 min before expiry and retries once on a 401
+- `findJobberClient()`, `createJobberClient()`, `createJobberProperty()`, `createJobberRequest()` for lead capture (`requestCreate` needs a `clientId`, so the client always comes first)
+- Tokens stored in `jobber_accounts` table in the **main** Supabase instance. Jobber rotates refresh tokens and kills the old one immediately, so both tokens are saved on every refresh
+- `/api/jobber/authorize` sets a `jobber_oauth` cookie (state + optional site invite); the callback rejects a mismatched `state`
+
+**Jobber lead intake for client websites** (`lib/jobber-leads.js`):
+- Client sites (e.g. Three Peaks) POST their form server-to-server to `/api/integrations/jobber/lead` with `Authorization: Bearer <JOBBER_LEAD_KEY>` → matched-or-new Client + Property + Request in the contractor's Jobber
+- Sites live in `jobber_lead_sites` (key stored as SHA-256 hash); every lead is logged in `jobber_lead_submissions` (`sent` / `duplicate` / `failed`). Same phone + service within 10 min is treated as a double-submit
+- `node scripts/jobber-site.mjs create <slug> "<Name>"` prints the site key and a single-use 14-day connect link (`/connect-jobber?site=&invite=`); the contractor opening it links their Jobber account to the site. Also `invite`, `rotate-key`, `status`
+- Free-text addresses are split by `parseUsAddress()`; the raw text is kept on the request too
+- The Jobber app is a Draft "Custom Integration": fine for up to 5 paying Jobber accounts without app review. Clients it creates get the app's name as their Lead Source
+- Schema: `supabase/migrations/20261023_jobber_lead_intake.sql`
 
 **HubSpot (`lib/hubspot.js`)**:
 - Automatic CRM integration for contact form submissions
@@ -114,7 +124,7 @@ Uses THREE separate Supabase instances:
 
 2. **Tokens instance** (`SUPABASE_TOKENS_URL` + `SUPABASE_TOKENS_SERVICE_KEY`)
    - Jobber accounts
-   - Note: `lib/jobber.js` uses tokens instance, `lib/square-auth.js` uses main instance
+   - Note: despite the name, `lib/jobber.js` and `lib/square-auth.js` both use the main instance
 
 3. **CRM instance** (`NEXT_PUBLIC_CRM_DB_URL` + `NEXT_PUBLIC_CRM_DB_ANON`)
    - CRM leads (`crm_leads`)
