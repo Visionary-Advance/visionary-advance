@@ -1,0 +1,96 @@
+{
+  "site_url": "sc-domain:visionaryadvance.com",
+  "month": "November 2026",
+  "summary": "Clicks rose 9 → 16 and impressions ~2.2k → ~3.3k, but almost all of it is still page 2–5. The biggest lever is the Eugene web design cluster: /services/web-design (titled 'Web Design Services | Eugene, OR') is splitting Google's signal with /eugene-web-design, so Google mostly shows the generic page at positions 35–69 while the dedicated page sits at 11–21. Second, GA4 can't attribute most visits: 77 of ~100 sessions have landing page '(not set)', so leads can't be tied to pages yet.",
+  "goals": [
+    "/eugene-web-design becomes the only page ranking for 'eugene web design', 'eugene website designer' and 'eugene oregon web design', and moves into the top 10 for at least one of them",
+    "GA4 '(not set)' landing pages drop below 10% of sessions, and leads show up as Key Events",
+    "Money keywords are tracked in the SEO CRM so next month's run can measure movement"
+  ],
+  "metrics_to_track": [
+    { "metric": "Position: 'eugene oregon web design' (/eugene-web-design)", "current_value": "11.1", "target_value": "≤ 8" },
+    { "metric": "Position: 'eugene website design' (/eugene-web-design)", "current_value": "12.3", "target_value": "≤ 10" },
+    { "metric": "Impressions for Eugene web design queries going to /services/web-design", "current_value": "~240", "target_value": "< 30" },
+    { "metric": "Clicks to /eugene-web-design (28 days)", "current_value": "1", "target_value": "5" },
+    { "metric": "GA4 sessions with landing page '(not set)'", "current_value": "77 of ~100", "target_value": "< 10%" },
+    { "metric": "Organic search clicks (28 days)", "current_value": "16", "target_value": "25" }
+  ],
+  "keyword_strategy": {
+    "primary_keywords": ["eugene web design", "eugene website designer", "eugene oregon web design", "eugene website design"],
+    "secondary_keywords": ["eugene website hosting", "eugene web development", "business website design near me"],
+    "long_tail_opportunities": ["best web designer in springfield", "best website designer near me", "custom web design services eugene", "ecommerce website design eugene"]
+  },
+  "run_meta": {
+    "windows": { "current": ["2026-10-10", "2026-11-06"], "previous": ["2026-09-12", "2026-10-09"] },
+    "totals": {
+      "clicks": 16, "clicks_prev": 9,
+      "impressions": 3257, "impressions_prev": 2199,
+      "impressions_note": "sum of page-level rows",
+      "organic_sessions": 27,
+      "leads": 3,
+      "leads_note": "lead_form_submit ×2 + book_call_submit ×1, all on /contact, Aug 15 – Nov 6; none are GA4 Key Events yet"
+    },
+    "rules_fired": ["R1", "R2", "R4", "R5", "R6"],
+    "rules_skipped": { "R7": "no tracked keywords in seo_site_keywords" },
+    "gaps": [
+      "GA4 landing page is '(not set)' for 77 of ~100 sessions, so R5 (traffic with no leads) is unreliable",
+      "Lead events aren't marked as GA4 Key Events",
+      "No tracked keywords, so R7 was skipped",
+      "R3 competitor page comparison wasn't run (competitor sites not fetched) to keep the first run lean",
+      "R6 local was checked from GSC only; GBP profile not audited",
+      "GSC query×page pulled with a keyword regex filter and 120 rows (not 500) to keep the run lean"
+    ],
+    "report_path": "seo/reports/visionaryadvance/2026-11/plan.md",
+    "token_cost": "not available in-session; see plan.md"
+  },
+  "tasks": [
+    {
+      "title": "Stop /services/web-design competing with /eugene-web-design for Eugene keywords",
+      "description": "Google splits Eugene web design queries between two pages. /services/web-design gets its title from app/services/[slug]/layout.js as 'Web Design Services | Eugene, OR', so it competes with /eugene-web-design ('Eugene Web Design & Web Designer | Lane County, Oregon'). Google mostly shows the weaker generic page: 'eugene web design' 53 impr at pos 35 vs 2 impr at pos 21 on the Eugene page; 'eugene website designer' 36 impr at pos 38; 'eugene oregon web design' 36 impr at pos 55 vs pos 11 on the Eugene page; 'eugene website design' 23 impr at pos 48 vs pos 12. /services/web-design went from 136 to 746 impressions this period at an average position of 42. Making the services page location-neutral and linking it to the Eugene page should push that signal to /eugene-web-design. Score: impact 5 × ease 4 = 20.",
+      "priority": "high",
+      "category": "on-page",
+      "estimated_effort": "small",
+      "files_to_modify": ["app/services/[slug]/layout.js", "lib/services-data.js", "app/services/[slug]/page.jsx"],
+      "acceptance_criteria": [
+        "/services/web-design <title> and meta description no longer mention Eugene; other /services/* pages keep their current titles unless deliberately changed",
+        "/services/web-design has a visible, crawlable link to /eugene-web-design with descriptive anchor text (e.g. 'Eugene web design')",
+        "/eugene-web-design title, canonical and content are unchanged",
+        "npm run build passes",
+        "Next monthly run: Eugene web design queries going to /services/web-design drop below 30 impressions, and /eugene-web-design is the top page for them"
+      ],
+      "target_keywords": ["eugene web design", "eugene website designer", "eugene oregon web design", "eugene website design", "eugene web designer"],
+      "claude_code_prompt": "In C:/Users/brand/websites/visionary-advance, on a new branch 'seo/services-web-design-decannibalize', stop /services/web-design competing with /eugene-web-design for Eugene keywords.\n1. In lib/services-data.js add an optional `metaTitle` (and optional `metaDescription`) per service. Set web-design's to a location-neutral title such as 'Custom Web Design Services | Visionary Advance' (≤ 60 chars, and check whether the root title template already appends the brand) and a description that doesn't mention Eugene.\n2. In app/services/[slug]/layout.js use `service.metaTitle ?? `${service.title} Services | Eugene, OR`` and `service.metaDescription ?? ...` so only web-design changes.\n3. In app/services/[slug]/page.jsx, for slug 'web-design' only, add a short line near the top or in the included list linking to /eugene-web-design with anchor text 'Eugene web design' (a next/link, not a button with JS navigation).\n4. Don't touch app/eugene-web-design or lib/eugene-page-content.js.\n5. Run npm run build, then run `graphify update .`.\nOpen a PR into main describing the GSC evidence; don't push to main."
+    },
+    {
+      "title": "Fix GA4 tracking so visits and leads can be tied to pages",
+      "description": "77 of ~100 sessions (Oct 10 – Nov 6) have landing page '(not set)', and Direct is 62 of them. Components/Analytics.jsx pushes the first page_view from a useEffect, but gtag('js') and gtag('config', GA_ID) only run later from a <Script strategy='lazyOnload'>. The first page_view usually reaches dataLayer before GA4 is configured, and visitors who leave before lazyOnload fires are never tracked. page_location is also built from origin + pathname, which drops the query string, so utm_* and gclid are lost (likely inflating 'Direct'). Separately, lead_form_submit, book_call_submit and click_phone fire but aren't marked as Key Events, so GA4 reports 0 conversions. Score: impact 4 × ease 4 = 16.",
+      "priority": "high",
+      "category": "analytics",
+      "estimated_effort": "small",
+      "files_to_modify": ["Components/Analytics.jsx"],
+      "acceptance_criteria": [
+        "gtag('js') and gtag('config', GA_ID, { send_page_view: false }) run before the first manual page_view (e.g. the init script uses strategy 'afterInteractive', or the effect configures before sending)",
+        "page_location includes window.location.search; page_path stays normalized (proposal tokens still stripped)",
+        "A fresh visit to /?utm_source=test&utm_medium=test shows in GA4 Realtime/DebugView with the correct landing page and source/medium",
+        "Brandon marks lead_form_submit, book_call_submit and click_phone as Key Events in GA4 Admin → Events",
+        "After 7 days, '(not set)' landing pages are under 10% of sessions"
+      ],
+      "target_keywords": [],
+      "claude_code_prompt": "In C:/Users/brand/websites/visionary-advance, on a new branch 'fix/ga4-landing-page-not-set', fix GA4 attribution in Components/Analytics.jsx.\nProblem: the first page_view is pushed from a useEffect before the lazyOnload init <Script> runs gtag('js')/gtag('config'), so GA4 records sessions with landing page '(not set)', and page_location drops the query string (losing utm_* and gclid).\n1. Make sure gtag('js', new Date()) and both config calls (ADS_ID and GA_ID, send_page_view: false) run before any page_view: move the init to strategy='afterInteractive', or do the js/config calls once inside the effect (guarded by a window flag) before sending the event. Keep the gtag.js library script loading as now unless measurements show it's needed earlier.\n2. Set page_location to window.location.origin + page_path + window.location.search, but keep normalizePath for /proposals tokens (don't include the search string on those).\n3. Keep the excluded-path logic unchanged.\n4. Run npm run build and `graphify update .`.\nOpen a PR into main explaining the '(not set)' evidence (77/~100 sessions) and how to verify in GA4 Realtime with ?utm_source=test. Remind Brandon in the PR to mark lead_form_submit, book_call_submit and click_phone as Key Events in GA4 Admin."
+    },
+    {
+      "title": "Add the money keywords to the SEO CRM for tracking",
+      "description": "seo_site_keywords is empty for visionaryadvance.com, so this run couldn't measure keyword movement (R7), and the client report has no money-keyword positions. Add the cluster this plan targets, with targets, so next month's run and the /admin/seo keyword view show progress. The basic tier allows 20 keywords. Score: impact 3 × ease 5 = 15.",
+      "priority": "medium",
+      "category": "analytics",
+      "estimated_effort": "small",
+      "files_to_modify": [],
+      "acceptance_criteria": [
+        "seo_site_keywords has these keywords for visionaryadvance.com with target positions: eugene web design (5), eugene website designer (5), eugene oregon web design (5), eugene website design (5), eugene web designer (5), eugene website hosting (5), eugene web development (10), business website design near me (10), best web designer in springfield (10), construction website design (10)",
+        "They show in /admin/seo → Visionary Advance → keywords with current positions"
+      ],
+      "target_keywords": ["eugene web design", "eugene website designer", "eugene oregon web design", "eugene website design", "eugene website hosting"],
+      "claude_code_prompt": "Add tracked keywords for visionaryadvance.com in the SEO CRM. Prefer the /admin/seo keyword UI. If doing it from Claude Code, use lib/seo-keywords.js addKeyword() (it enforces the tier cap) for site 'sc-domain:visionaryadvance.com' with: eugene web design (target 5), eugene website designer (5), eugene oregon web design (5), eugene website design (5), eugene web designer (5), eugene website hosting (5), eugene web development (10), business website design near me (10), best web designer in springfield (10), construction website design (10). Show Brandon the list before inserting."
+    }
+  ]
+}

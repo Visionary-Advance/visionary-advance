@@ -39,3 +39,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# SEO automation credentials
+seo/secrets/
+
+# graphify local cache and snapshots
+graphify-out/cache/
+graphify-out/2*/
