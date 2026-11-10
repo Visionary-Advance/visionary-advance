@@ -1,4 +1,8 @@
+import crypto from 'crypto';
 import { NextResponse } from 'next/server';
+
+// Holds the OAuth state between this route and the callback (CSRF check).
+const STATE_COOKIE = 'jobber_oauth_state';
 
 export async function GET(request) {
   const clientId = process.env.JOBBER_CLIENT_ID;
@@ -31,10 +35,19 @@ export async function GET(request) {
   const scopes = 'clients:read clients:write requests:read requests:write';
   authUrl.searchParams.append('scope', scopes);
 
-  const state = Math.random().toString(36).substring(7);
+  const state = crypto.randomBytes(24).toString('base64url');
   authUrl.searchParams.append('state', state);
 
-  console.log('🔐 Redirecting to Jobber OAuth:', authUrl.toString());
+  const response = NextResponse.redirect(authUrl.toString());
 
-  return NextResponse.redirect(authUrl.toString());
+  // The callback rejects the login unless Jobber hands back this same state.
+  response.cookies.set(STATE_COOKIE, state, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/api/jobber',
+    maxAge: 10 * 60,
+  });
+
+  return response;
 }

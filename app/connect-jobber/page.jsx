@@ -25,6 +25,7 @@ export default function JobberConnectPage() {
       const errorMessages = {
         'oauth_failed': 'Failed to connect to Jobber. Please try again.',
         'access_denied': 'You denied access to Jobber.',
+        'state_mismatch': 'The connection timed out. Please start again.',
       };
       setMessage({
         type: 'error',

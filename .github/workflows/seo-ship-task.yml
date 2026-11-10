@@ -1,0 +1,134 @@
+# SEO Ship Task: started by the "Ship" button in /admin/seo (visionaryadvance.com).
+# Claude Code edits files for one approved SEO task; this workflow then commits,
+# pushes a branch and opens a PR. Brandon reviews the Vercel preview and merges.
+# Nothing is merged automatically.
+#
+# Install: copy to .github/workflows/seo-ship-task.yml on the default branch of each client repo.
+# Org secrets (Visionary-Advance → Settings → Secrets and variables → Actions):
+#   CLAUDE_CODE_OAUTH_TOKEN   from `claude setup-token` (uses the Claude Pro subscription)
+#   SEO_SHIP_CALLBACK_URL     https://visionaryadvance.com/api/seo/ship-callback
+#   SEO_SHIP_CALLBACK_SECRET  same value as SEO_SHIP_CALLBACK_SECRET in Vercel
+# Source of truth: visionary-advance/seo/github/seo-ship-task.yml
+
+name: SEO Ship Task
+
+on:
+  workflow_dispatch:
+    inputs:
+      task_id:
+        description: seo_plan_tasks.id
+        required: true
+      task_title:
+        description: Task title (PR title)
+        required: true
+      branch:
+        description: Branch to create
+        required: true
+      base:
+        description: Base branch for the PR
+        required: true
+        default: main
+      prompt:
+        description: Full task prompt
+        required: true
+
+concurrency:
+  group: seo-ship-${{ inputs.task_id }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  ship:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      TASK_ID: ${{ inputs.task_id }}
+      TASK_TITLE: ${{ inputs.task_title }}
+      BRANCH: ${{ inputs.branch }}
+      BASE: ${{ inputs.base }}
+      CALLBACK_URL: ${{ secrets.SEO_SHIP_CALLBACK_URL }}
+      CALLBACK_SECRET: ${{ secrets.SEO_SHIP_CALLBACK_SECRET }}
+      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    steps:
+      - name: Report running
+        run: |
+          jq -n --arg t "$TASK_ID" --arg r "$RUN_URL" '{task_id:$t, status:"running", run_url:$r}' \
+            | curl -fsS -X POST "$CALLBACK_URL" -H "Authorization: Bearer $CALLBACK_SECRET" \
+                -H "Content-Type: application/json" --data @- || echo "callback failed (continuing)"
+
+      # Actions are pinned to commit SHAs (tag in the comment). Bump deliberately.
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ inputs.base }}
+          fetch-depth: 0
+
+      - name: Create branch
+        run: |
+          git config user.name "Visionary Advance SEO Bot"
+          git config user.email "seo-bot@users.noreply.github.com"
+          if git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null; then
+            echo "::error::Branch $BRANCH already exists on origin"; exit 1
+          fi
+          git checkout -b "$BRANCH"
+
+      - name: Run Claude Code
+        id: claude
+        uses: anthropics/claude-code-action@4fa93a88de49bbef68b10eb15aabedf28ca0e1ed # v1.0.271
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          prompt: ${{ inputs.prompt }}
+          claude_args: |
+            --max-turns 40
+            --allowedTools "Read,Edit,Write,MultiEdit,Glob,Grep,Bash(git diff:*),Bash(git status:*),Bash(ls:*),Bash(cat:*)"
+
+      - name: Commit, push and open PR
+        id: pr
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          EXECUTION_FILE: ${{ steps.claude.outputs.execution_file }}
+        run: |
+          git add -A
+          if git diff --cached --quiet && [ "$(git rev-list --count "origin/$BASE..HEAD")" = "0" ]; then
+            echo "::error::Claude made no changes"; exit 1
+          fi
+          git diff --cached --quiet || git commit -m "SEO: $TASK_TITLE" -m "SEO plan task $TASK_ID"
+          git push -u origin "$BRANCH"
+
+          SUMMARY=""
+          if [ -n "$EXECUTION_FILE" ] && [ -f "$EXECUTION_FILE" ]; then
+            SUMMARY=$(jq -r 'if type=="array" then (map(select(.type=="result")) | last | .result // "") else (.result // "") end' "$EXECUTION_FILE" 2>/dev/null || true)
+          fi
+          {
+            echo "Approved SEO plan task, shipped from **/admin/seo**."
+            echo
+            echo "**Task:** $TASK_TITLE"
+            echo
+            echo "### What changed"
+            echo "${SUMMARY:-See the diff.}"
+            echo
+            echo "---"
+            echo "Review the Vercel preview, then merge. Nothing here merges automatically."
+            echo "Task \`$TASK_ID\` · [workflow run]($RUN_URL)"
+          } > pr-body.md
+
+          PR_URL=$(gh pr create --base "$BASE" --head "$BRANCH" --title "SEO: $TASK_TITLE" --body-file pr-body.md)
+          echo "pr_url=$PR_URL" >> "$GITHUB_OUTPUT"
+
+      - name: Report PR open
+        env:
+          PR_URL: ${{ steps.pr.outputs.pr_url }}
+        run: |
+          jq -n --arg t "$TASK_ID" --arg p "$PR_URL" --arg r "$RUN_URL" '{task_id:$t, status:"pr_open", pr_url:$p, run_url:$r}' \
+            | curl -fsS -X POST "$CALLBACK_URL" -H "Authorization: Bearer $CALLBACK_SECRET" \
+                -H "Content-Type: application/json" --data @-
+
+      - name: Report failure
+        if: failure()
+        run: |
+          jq -n --arg t "$TASK_ID" --arg r "$RUN_URL" '{task_id:$t, status:"failed", run_url:$r, error:"Workflow failed. Open the run for details."}' \
+            | curl -fsS -X POST "$CALLBACK_URL" -H "Authorization: Bearer $CALLBACK_SECRET" \
+                -H "Content-Type: application/json" --data @- || true

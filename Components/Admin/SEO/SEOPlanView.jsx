@@ -1,6 +1,31 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { getCRMAuthClient } from '@/lib/supabase-crm-client';
+
+// Admin sessions live in localStorage, so admin-only routes need the bearer token.
+async function authFetch(url, options = {}) {
+  const { data } = await getCRMAuthClient().auth.getSession();
+  const token = data?.session?.access_token;
+  return fetch(url, {
+    ...options,
+    headers: {
+      ...(options.headers || {}),
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+  });
+}
+
+const sourceLabels = {
+  claude: { text: 'Claude', color: 'bg-orange-500/20 text-orange-300' },
+  gemini: { text: 'Gemini', color: 'bg-blue-500/20 text-blue-300' },
+  manual: { text: 'Manual', color: 'bg-gray-500/20 text-gray-300' },
+};
+
+function SourceBadge({ source }) {
+  const s = sourceLabels[source] || sourceLabels.gemini;
+  return <span className={`text-xs px-2 py-0.5 rounded-full ${s.color}`}>{s.text}</span>;
+}
 
 const priorityColors = {
   high: 'border-red-500 bg-red-500/10',
@@ -19,6 +44,7 @@ const categoryColors = {
   content: 'text-green-400',
   'on-page': 'text-blue-400',
   'off-page': 'text-orange-400',
+  local: 'text-pink-400',
   analytics: 'text-teal-400'
 };
 
@@ -134,6 +160,47 @@ export default function SEOPlanView({ site }) {
     }
   }
 
+  async function handleShip(task) {
+    const res = await authFetch('/api/seo/plans/tasks/ship', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ taskId: task.id })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to ship task');
+    setActivePlan(prev => prev && {
+      ...prev,
+      tasks: prev.tasks.map(t => (t.id === task.id ? { ...t, ...data.task } : t))
+    });
+  }
+
+  // While a task is shipping, refresh every 15s so the PR link shows up on its own.
+  const shippingInFlight = activePlan?.tasks?.some(t => ['queued', 'running'].includes(t.ship_status));
+  useEffect(() => {
+    if (!shippingInFlight || !site?.id) return;
+    const id = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/seo/plans?siteId=${site.id}&activeOnly=true`);
+        const data = await res.json();
+        if (data.plan) setActivePlan(data.plan);
+      } catch {
+        // ignore; next tick retries
+      }
+    }, 15000);
+    return () => clearInterval(id);
+  }, [shippingInFlight, site?.id]);
+
+  async function handleDraftAction(planId, action) {
+    const res = await authFetch('/api/seo/plans/draft', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ planId, action })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || `Failed to ${action} draft`);
+    await fetchPlans();
+  }
+
   async function handleSaveNotes(taskId, notes) {
     try {
       await fetch('/api/seo/plans/tasks', {
@@ -164,10 +231,22 @@ export default function SEOPlanView({ site }) {
     );
   }
 
+  const draftPlan = plans.find(p => p.status === 'draft') || null;
+  const draftPanel = draftPlan && (
+    <DraftPlanPanel
+      plan={draftPlan}
+      onAction={handleDraftAction}
+      expandedTask={expandedTask}
+      onExpand={setExpandedTask}
+      onSaveNotes={handleSaveNotes}
+    />
+  );
+
   // No active plan
   if (!activePlan) {
     return (
       <div className="space-y-6">
+        {draftPanel}
         <div className="bg-[#0a0a0a] rounded-lg border border-[#262626] p-8 text-center">
           <svg className="w-16 h-16 mx-auto mb-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
@@ -221,11 +300,16 @@ export default function SEOPlanView({ site }) {
 
   return (
     <div className="space-y-6">
+      {draftPanel}
+
       {/* Plan Header */}
       <div className="bg-[#0a0a0a] rounded-lg border border-[#262626] p-6">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h3 className="text-lg font-semibold text-white">{activePlan.month} SEO Plan</h3>
+            <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+              {activePlan.month} SEO Plan
+              <SourceBadge source={activePlan.generated_by} />
+            </h3>
             <p className="text-gray-400 text-sm mt-1">
               Created {new Date(activePlan.created_at).toLocaleDateString()}
             </p>
@@ -356,6 +440,7 @@ export default function SEOPlanView({ site }) {
           <TaskGroup
             label="High Priority"
             tasks={highTasks}
+            onShip={handleShip}
             onToggle={handleToggleTask}
             expandedTask={expandedTask}
             onExpand={setExpandedTask}
@@ -364,6 +449,7 @@ export default function SEOPlanView({ site }) {
           <TaskGroup
             label="Medium Priority"
             tasks={mediumTasks}
+            onShip={handleShip}
             onToggle={handleToggleTask}
             expandedTask={expandedTask}
             onExpand={setExpandedTask}
@@ -372,6 +458,7 @@ export default function SEOPlanView({ site }) {
           <TaskGroup
             label="Low Priority"
             tasks={lowTasks}
+            onShip={handleShip}
             onToggle={handleToggleTask}
             expandedTask={expandedTask}
             onExpand={setExpandedTask}
@@ -428,7 +515,7 @@ export default function SEOPlanView({ site }) {
   );
 }
 
-function TaskGroup({ label, tasks, onToggle, expandedTask, onExpand, onSaveNotes }) {
+function TaskGroup({ label, tasks, onToggle, onShip, expandedTask, onExpand, onSaveNotes }) {
   if (tasks.length === 0) return null;
 
   return (
@@ -439,6 +526,7 @@ function TaskGroup({ label, tasks, onToggle, expandedTask, onExpand, onSaveNotes
           <TaskCard
             key={task.id}
             task={task}
+            onShip={onShip}
             onToggle={onToggle}
             isExpanded={expandedTask === task.id}
             onExpand={onExpand}
@@ -450,7 +538,71 @@ function TaskGroup({ label, tasks, onToggle, expandedTask, onExpand, onSaveNotes
   );
 }
 
-function TaskCard({ task, onToggle, isExpanded, onExpand, onSaveNotes }) {
+const shipLabels = {
+  queued: { text: 'Queued on GitHub…', color: 'text-yellow-400' },
+  running: { text: 'Claude is working…', color: 'text-yellow-400' },
+  pr_open: { text: 'PR ready to review', color: 'text-teal-400' },
+  failed: { text: 'Ship failed', color: 'text-red-400' },
+};
+
+function ShipControl({ task, onShip }) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState(null);
+  const shippable = task.claude_code_prompt && task.files_to_modify?.length > 0;
+  if (!onShip || task.status === 'completed') return null;
+
+  if (!shippable) {
+    return <span className="text-xs text-gray-600" title="No code change: do this one manually">Manual task</span>;
+  }
+
+  const state = shipLabels[task.ship_status];
+  const canShip = !task.ship_status || task.ship_status === 'failed';
+
+  async function ship() {
+    setBusy(true);
+    setError(null);
+    try {
+      await onShip(task);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="flex flex-col items-end gap-1 shrink-0">
+      <div className="flex items-center gap-2">
+        {state && <span className={`text-xs ${state.color}`}>{state.text}</span>}
+        {task.pr_url && (
+          <a href={task.pr_url} target="_blank" rel="noopener noreferrer" className="text-xs text-teal-400 hover:text-teal-300 underline">
+            Open PR
+          </a>
+        )}
+        {task.ship_run_url && task.ship_status !== 'pr_open' && (
+          <a href={task.ship_run_url} target="_blank" rel="noopener noreferrer" className="text-xs text-gray-400 hover:text-gray-300 underline">
+            Run log
+          </a>
+        )}
+        {canShip && (
+          <button
+            onClick={ship}
+            disabled={busy}
+            className="text-xs bg-teal-500 hover:bg-teal-600 text-white px-3 py-1 rounded-lg transition-colors disabled:opacity-50"
+            title="Claude makes this change on a branch and opens a PR. You review and merge."
+          >
+            {busy ? 'Starting…' : task.ship_status === 'failed' ? 'Retry ship' : 'Ship'}
+          </button>
+        )}
+      </div>
+      {(error || (task.ship_status === 'failed' && task.ship_error)) && (
+        <span className="text-xs text-red-400 max-w-xs text-right">{error || task.ship_error}</span>
+      )}
+    </div>
+  );
+}
+
+function TaskCard({ task, onToggle, onShip, isExpanded, onExpand, onSaveNotes }) {
   const [notes, setNotes] = useState(task.notes || '');
   const [saving, setSaving] = useState(false);
   const status = statusConfig[task.status] || statusConfig.pending;
@@ -467,14 +619,18 @@ function TaskCard({ task, onToggle, isExpanded, onExpand, onSaveNotes }) {
     >
       <div className="p-4">
         <div className="flex items-start gap-3">
-          {/* Status Toggle */}
-          <button
-            onClick={() => onToggle(task)}
-            className={`mt-0.5 text-lg shrink-0 ${status.color} hover:opacity-80 transition-opacity`}
-            title={`Click to change status (${status.label})`}
-          >
-            {status.icon}
-          </button>
+          {/* Status Toggle (hidden on draft plans, which aren't being worked yet) */}
+          {onToggle ? (
+            <button
+              onClick={() => onToggle(task)}
+              className={`mt-0.5 text-lg shrink-0 ${status.color} hover:opacity-80 transition-opacity`}
+              title={`Click to change status (${status.label})`}
+            >
+              {status.icon}
+            </button>
+          ) : (
+            <span className="mt-0.5 text-lg shrink-0 text-gray-600">○</span>
+          )}
 
           <div className="flex-1 min-w-0">
             {/* Title + Meta */}
@@ -503,6 +659,8 @@ function TaskCard({ task, onToggle, isExpanded, onExpand, onSaveNotes }) {
               {isExpanded ? 'Collapse' : 'Details & Notes'}
             </button>
           </div>
+
+          <ShipControl task={task} onShip={onShip} />
         </div>
       </div>
 
@@ -591,6 +749,114 @@ function TaskCard({ task, onToggle, isExpanded, onExpand, onSaveNotes }) {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function DraftPlanPanel({ plan, onAction, expandedTask, onExpand, onSaveNotes }) {
+  const [busy, setBusy] = useState(null);
+  const [confirmDiscard, setConfirmDiscard] = useState(false);
+  const [error, setError] = useState(null);
+  const tasks = plan.tasks || [];
+  const reportPath = plan.run_meta?.report_path;
+
+  async function run(action) {
+    setBusy(action);
+    setError(null);
+    try {
+      await onAction(plan.id, action);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setBusy(null);
+      setConfirmDiscard(false);
+    }
+  }
+
+  return (
+    <div className="bg-[#0a0a0a] rounded-lg border border-orange-500/40 p-6 space-y-4">
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-xs font-semibold uppercase tracking-wider bg-orange-500/20 text-orange-300 px-2 py-0.5 rounded">
+              Draft · needs approval
+            </span>
+            <SourceBadge source={plan.generated_by} />
+          </div>
+          <h3 className="text-lg font-semibold text-white mt-2">{plan.month} SEO Plan</h3>
+          <p className="text-gray-500 text-sm">
+            Created {new Date(plan.created_at).toLocaleDateString()} · {tasks.length} task{tasks.length === 1 ? '' : 's'}
+            {reportPath && <> · report: <code className="text-gray-400">{reportPath}</code></>}
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          {confirmDiscard ? (
+            <>
+              <button
+                onClick={() => run('discard')}
+                disabled={!!busy}
+                className="text-sm bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
+              >
+                {busy === 'discard' ? 'Discarding...' : 'Confirm discard'}
+              </button>
+              <button
+                onClick={() => setConfirmDiscard(false)}
+                disabled={!!busy}
+                className="text-sm text-gray-400 hover:text-white px-2 py-1.5"
+              >
+                Cancel
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={() => setConfirmDiscard(true)}
+              disabled={!!busy}
+              className="text-sm bg-[#171717] hover:bg-[#262626] border border-[#262626] text-gray-300 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
+            >
+              Discard
+            </button>
+          )}
+          <button
+            onClick={() => run('approve')}
+            disabled={!!busy}
+            className="text-sm bg-teal-500 hover:bg-teal-600 text-white px-4 py-1.5 rounded-lg transition-colors disabled:opacity-50"
+          >
+            {busy === 'approve' ? 'Approving...' : 'Approve & make active'}
+          </button>
+        </div>
+      </div>
+
+      <p className="text-gray-500 text-xs">
+        Approving archives the current active plan and makes this one live. Nothing changes on the website until each task ships as its own PR.
+      </p>
+
+      {error && <p className="text-sm text-red-400">{error}</p>}
+
+      {plan.summary && <p className="text-gray-300 text-sm">{plan.summary}</p>}
+
+      {plan.goals?.length > 0 && (
+        <ul className="space-y-1">
+          {plan.goals.map((goal, idx) => (
+            <li key={idx} className="text-gray-300 text-sm flex items-start gap-2">
+              <span className="text-orange-300 mt-0.5 shrink-0">-</span>
+              {goal}
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <div className="space-y-2">
+        {tasks.map(task => (
+          <TaskCard
+            key={task.id}
+            task={task}
+            onToggle={null}
+            isExpanded={expandedTask === task.id}
+            onExpand={onExpand}
+            onSaveNotes={onSaveNotes}
+          />
+        ))}
+      </div>
     </div>
   );
 }

@@ -47,8 +47,16 @@ The codebase implements a sophisticated OAuth token management system for both S
 **Jobber (`lib/jobber.js`)**:
 - `getValidJobberToken(accountId)` - Auto-refreshing token getter
 - Uses GraphQL API with `X-JOBBER-GRAPHQL-VERSION: 2025-01-20` header
-- `createJobberClient()` and `createJobberRequest()` for lead capture
-- Tokens stored in `jobber_accounts` table in Supabase
+- `jobberGraphQL(accountId, query, variables)` - Authenticated call; refreshes 5 min before expiry and retries once on a 401
+- `findJobberClient()`, `createJobberClient()`, `createJobberProperty()`, `createJobberRequest()` for lead capture (`requestCreate` needs a `clientId`, so the client always comes first)
+- Tokens stored in `jobber_accounts` table in the **main** Supabase instance. Jobber rotates refresh tokens and kills the old one immediately, so both tokens are saved on every refresh
+- `/api/jobber/authorize` sets a `jobber_oauth_state` cookie; the callback rejects a mismatched `state`
+
+**Client websites sending leads to their own Jobber** (UC Blinds, Three Peaks):
+- The contractor connects once at `/connect-jobber` (OAuth here), which saves their row in `jobber_accounts`
+- Each client site then reads that row directly with this project's Supabase URL + service role key and its own `JOBBER_ACCOUNT_ID`, and calls Jobber itself (`ucblinds/app/api/create-jobber-request/route.js`, `three-peaks/app/lib/jobber.ts`). Only sites we own and deploy may hold the service role key
+- The client site refreshes that account's tokens itself. Jobber rotates refresh tokens and kills the old one immediately, so **nothing here should refresh a client site's account** — two refreshers would knock each other out
+- The Jobber app ("Website Jobber Integration") is a Draft "Custom Integration": fine for up to 5 paying Jobber accounts without app review. Clients it creates get the app's name as their Lead Source
 
 **HubSpot (`lib/hubspot.js`)**:
 - Automatic CRM integration for contact form submissions
@@ -114,7 +122,7 @@ Uses THREE separate Supabase instances:
 
 2. **Tokens instance** (`SUPABASE_TOKENS_URL` + `SUPABASE_TOKENS_SERVICE_KEY`)
    - Jobber accounts
-   - Note: `lib/jobber.js` uses tokens instance, `lib/square-auth.js` uses main instance
+   - Note: despite the name, `lib/jobber.js` and `lib/square-auth.js` both use the main instance
 
 3. **CRM instance** (`NEXT_PUBLIC_CRM_DB_URL` + `NEXT_PUBLIC_CRM_DB_ANON`)
    - CRM leads (`crm_leads`)
@@ -283,3 +291,14 @@ The admin section is protected with Supabase Auth:
 - **Primary Service**: Web design/development for construction companies
 - **Lead Generation**: Free website audits as entry point
 - **Integration Goal**: Seamless client onboarding through Square (payments) and Jobber (CRM)
+
+## graphify
+
+This project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships.
+
+Rules:
+- When graphify-out/graph.json exists, run `graphify query "<question>"` before your first grep, search or source-file read for a codebase question, and put this rule in every subagent prompt that explores code. Read raw files only for lines the graph or an earlier read already located. Use `graphify path "<A>" "<B>"` for relationships and `graphify explain "<concept>"` for focused concepts. These return a scoped subgraph, usually much smaller than GRAPH_REPORT.md or raw grep output.
+- If graphify-out/wiki/index.md exists, use it for broad navigation instead of raw source browsing.
+- Read graphify-out/GRAPH_REPORT.md only for broad architecture review or when query/path/explain do not surface enough context.
+- After modifying code, run `graphify update .` to keep the graph current (AST-only, no API cost).
+- A committed graphify-out/graph.json is rewritten whole on every build, so a large diff to it in a pull request is expected. Do not flag it as churn or suggest skipping the graph rebuild or its hooks.
