@@ -46,10 +46,27 @@ function AnalyticsInner() {
       }
     }
 
+    // Configure GA before the first page_view (once per page load), so the
+    // queued commands are always ordered: js -> config -> event.
+    if (!window.__gaConfigured) {
+      window.__gaConfigured = true
+      window.gtag('js', new Date())
+      // Disable automatic page_view; we send it manually on route change
+      // so SPA navigations are tracked consistently.
+      window.gtag('config', ADS_ID, { send_page_view: false })
+      if (GA_ID) window.gtag('config', GA_ID, { send_page_view: false })
+    }
+
     const page_path = normalizePath(pathname)
+    // Keep the query string (utm_*, gclid) except on proposal pages, whose
+    // URLs/params are personalized.
+    const isProposal = pathname?.startsWith('/proposals/')
     window.gtag('event', 'page_view', {
       page_path,
-      page_location: window.location.origin + page_path,
+      page_location:
+        window.location.origin +
+        page_path +
+        (isProposal ? '' : window.location.search),
     })
   }, [pathname, searchParams, excluded])
 
@@ -62,17 +79,6 @@ function AnalyticsInner() {
         src={`https://www.googletagmanager.com/gtag/js?id=${ADS_ID}`}
         strategy="lazyOnload"
       />
-      <Script id="gtag-init" strategy="lazyOnload">
-        {`
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          // Disable automatic page_view; we send it manually on route change
-          // so SPA navigations are tracked consistently.
-          gtag('config', '${ADS_ID}', { send_page_view: false });
-          ${GA_ID ? `gtag('config', '${GA_ID}', { send_page_view: false });` : ''}
-        `}
-      </Script>
     </>
   )
 }
