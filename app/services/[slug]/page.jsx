@@ -45,6 +45,15 @@ export default function ServicePage({ params }) {
         <p className="mt-6 max-w-[1100px] text-[clamp(1.1rem,2.5vw,2rem)] leading-snug font-semibold font-inter-display text-black">
           {scrollRevealText}
         </p>
+        {slug === 'web-design' && (
+          <p className="mt-4 font-inter-display text-lg text-black">
+            Based in Lane County? See our{' '}
+            <Link href="/eugene-web-design" className="text-[#008070] underline font-semibold">
+              Eugene web design
+            </Link>{' '}
+            page.
+          </p>
+        )}
       </section>
 
       {/* ===== IMAGE SHOWCASE ===== */}

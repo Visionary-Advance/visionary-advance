@@ -16,8 +16,9 @@ export async function generateMetadata({ params }) {
   }
 
   const url = `https://visionaryadvance.com/services/${slug}`
-  const title = `${service.title} Services | Eugene, OR`
-  const description = (service.scrollRevealText || '').slice(0, 160)
+  const title = service.metaTitle ?? `${service.title} Services | Eugene, OR`
+  const description =
+    service.metaDescription ?? (service.scrollRevealText || '').slice(0, 160)
   const image = service.showcaseImage
     ? `https://visionaryadvance.com${service.showcaseImage}`
     : OG_IMAGE
