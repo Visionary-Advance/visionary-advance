@@ -1,5 +1,26 @@
 @import "tailwindcss";
 
+/* Admin dashboard tokens (bg-adm-surface, text-adm-muted, ...). Contrast checked on
+   adm-surface: text 17:1, muted 7.7:1, subtle 5.5:1, white on accent-solid 5.4:1. */
+@theme {
+  --color-adm-bg: #09090b;
+  --color-adm-surface: #111113;
+  --color-adm-raised: #18181b;
+  --color-adm-hover: #222226;
+  --color-adm-border: #27272a;
+  --color-adm-border-strong: #3f3f46;
+  --color-adm-text: #f4f4f5;
+  --color-adm-muted: #a1a1aa;
+  --color-adm-subtle: #8a8a93;
+  --color-adm-accent: #2dd4bf;
+  --color-adm-accent-solid: #0f766e;
+  --color-adm-accent-solid-hover: #115e59;
+  --color-adm-good: #4ade80;
+  --color-adm-warn: #fbbf24;
+  --color-adm-bad: #f87171;
+  --color-adm-info: #60a5fa;
+}
+
 /* Note: Fonts loaded via next/font/google in layout.js for better performance */
 
 .hero-pattern {

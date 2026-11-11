@@ -1,203 +1,201 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+// Daily Search Console trend, one metric at a time (never two y-scales). Position is
+// drawn inverted so "up" always means better. Hover / arrow keys show exact values,
+// and a table view carries the same numbers for screen readers.
+
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { ChartLine, Table2 } from 'lucide-react';
+import { SegmentedControl, IconButton, EmptyState, Table, Th, Td, cx, focusRing } from './ui';
+import { fmtCompact, fmtInt, fmtPct, fmtPos, fmtDate } from './format';
+
+const METRICS = [
+  { value: 'clicks', label: 'Clicks', fmt: fmtCompact, full: fmtInt },
+  { value: 'impressions', label: 'Impressions', fmt: fmtCompact, full: fmtInt },
+  { value: 'ctr', label: 'CTR', fmt: v => fmtPct(v, 1), full: v => fmtPct(v, 2) },
+  { value: 'position', label: 'Avg. position', fmt: fmtPos, full: fmtPos, inverted: true },
+];
+
+const H = 260;
+const PAD = { top: 12, right: 12, bottom: 28, left: 48 };
 
 export default function SEOAnalyticsChart({ data }) {
-  const [metric, setMetric] = useState('clicks');
+  const [metricKey, setMetricKey] = useState('clicks');
+  const [view, setView] = useState('chart');
+  const metric = METRICS.find(m => m.value === metricKey);
 
-  const chartData = useMemo(() => {
-    if (!data || data.length === 0) return { points: [], max: 0, labels: [] };
-
-    const values = data.map(d => d[metric] || 0);
-    const max = Math.max(...values, 1);
-
-    return {
-      points: values,
-      max,
-      labels: data.map(d => formatDate(d.date))
-    };
-  }, [data, metric]);
+  const rows = useMemo(
+    () => (data || []).map(d => ({ date: d.date, value: Number(d[metricKey]) || 0 })),
+    [data, metricKey]
+  );
 
   if (!data || data.length === 0) {
-    return (
-      <div className="h-64 flex items-center justify-center text-gray-500">
-        No data available
-      </div>
-    );
+    return <EmptyState icon={ChartLine} title="No daily data yet" description="Sync Search Console to see the trend." />;
   }
-
-  // Create SVG path for the area chart
-  const width = 100;
-  const height = 40;
-  const padding = 2;
-  const effectiveWidth = width - padding * 2;
-  const effectiveHeight = height - padding * 2;
-
-  const points = chartData.points.map((value, index) => {
-    const x = padding + (index / (chartData.points.length - 1)) * effectiveWidth;
-    const y = padding + effectiveHeight - (value / chartData.max) * effectiveHeight;
-    return { x, y, value };
-  });
-
-  const linePath = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
-  const areaPath = `${linePath} L ${points[points.length - 1].x} ${height - padding} L ${padding} ${height - padding} Z`;
-
-  // Y-axis labels
-  const yLabels = [
-    { value: chartData.max, y: padding },
-    { value: Math.round(chartData.max / 2), y: height / 2 },
-    { value: 0, y: height - padding }
-  ];
 
   return (
     <div>
-      {/* Metric Selector */}
-      <div className="flex gap-2 mb-4">
-        {[
-          { key: 'clicks', label: 'Clicks' },
-          { key: 'impressions', label: 'Impressions' },
-          { key: 'ctr', label: 'CTR' },
-          { key: 'position', label: 'Position' }
-        ].map(m => (
-          <button
-            key={m.key}
-            onClick={() => setMetric(m.key)}
-            className={`
-              px-3 py-1 text-sm rounded transition-colors
-              ${metric === m.key
-                ? 'bg-teal-500 text-white'
-                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-              }
-            `}
-          >
-            {m.label}
-          </button>
-        ))}
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <SegmentedControl options={METRICS} value={metricKey} onChange={setMetricKey} label="Metric" size="sm" />
+        <IconButton
+          icon={view === 'chart' ? Table2 : ChartLine}
+          label={view === 'chart' ? 'Show as table' : 'Show as chart'}
+          size="sm"
+          onClick={() => setView(v => (v === 'chart' ? 'table' : 'chart'))}
+        />
       </div>
-
-      {/* Chart */}
-      <div className="relative h-64">
-        {/* Y-axis labels */}
-        <div className="absolute left-0 top-0 bottom-0 w-12 flex flex-col justify-between text-xs text-gray-500">
-          {yLabels.map((l, i) => (
-            <span key={i}>{formatValue(l.value, metric)}</span>
-          ))}
+      {view === 'chart' ? (
+        <LineChart rows={rows} metric={metric} />
+      ) : (
+        <div className="max-h-80 overflow-y-auto rounded-lg border border-adm-border">
+          <Table>
+            <thead className="sticky top-0 bg-adm-surface">
+              <tr><Th>Date</Th><Th align="right">{metric.label}</Th></tr>
+            </thead>
+            <tbody>
+              {[...rows].reverse().map(r => (
+                <tr key={r.date} className="border-t border-adm-border">
+                  <Td className="text-adm-muted">{fmtDate(r.date)}</Td>
+                  <Td align="right" numeric className="text-adm-text">{metric.full(r.value)}</Td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
         </div>
-
-        {/* Chart Area */}
-        <div className="ml-12 h-full relative">
-          <svg
-            viewBox={`0 0 ${width} ${height}`}
-            className="w-full h-full"
-            preserveAspectRatio="none"
-          >
-            {/* Grid lines */}
-            <line
-              x1={padding}
-              y1={padding}
-              x2={width - padding}
-              y2={padding}
-              stroke="#374151"
-              strokeWidth="0.2"
-            />
-            <line
-              x1={padding}
-              y1={height / 2}
-              x2={width - padding}
-              y2={height / 2}
-              stroke="#374151"
-              strokeWidth="0.2"
-            />
-            <line
-              x1={padding}
-              y1={height - padding}
-              x2={width - padding}
-              y2={height - padding}
-              stroke="#374151"
-              strokeWidth="0.2"
-            />
-
-            {/* Area fill */}
-            <path
-              d={areaPath}
-              fill="url(#gradient)"
-              opacity="0.3"
-            />
-
-            {/* Line */}
-            <path
-              d={linePath}
-              fill="none"
-              stroke="#14b8a6"
-              strokeWidth="0.5"
-              vectorEffect="non-scaling-stroke"
-            />
-
-            {/* Gradient definition */}
-            <defs>
-              <linearGradient id="gradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#14b8a6" />
-                <stop offset="100%" stopColor="#14b8a6" stopOpacity="0" />
-              </linearGradient>
-            </defs>
-          </svg>
-
-          {/* Interactive overlay */}
-          <div className="absolute inset-0 flex">
-            {points.map((point, i) => (
-              <div
-                key={i}
-                className="flex-1 group relative"
-              >
-                {/* Tooltip */}
-                <div className="hidden group-hover:block absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-10">
-                  <div className="bg-gray-900 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
-                    <div className="font-medium">{chartData.labels[i]}</div>
-                    <div className="text-teal-400">{formatValue(point.value, metric)}</div>
-                  </div>
-                </div>
-
-                {/* Hover line */}
-                <div className="hidden group-hover:block absolute top-0 left-1/2 w-px h-full bg-gray-600" />
-
-                {/* Point dot */}
-                <div
-                  className="hidden group-hover:block absolute w-2 h-2 bg-teal-400 rounded-full left-1/2 -translate-x-1/2 -translate-y-1/2"
-                  style={{ top: `${((height - padding - (point.value / chartData.max) * effectiveHeight) / height) * 100}%` }}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* X-axis labels */}
-        <div className="ml-12 flex justify-between text-xs text-gray-500 mt-2">
-          <span>{chartData.labels[0]}</span>
-          <span>{chartData.labels[Math.floor(chartData.labels.length / 2)]}</span>
-          <span>{chartData.labels[chartData.labels.length - 1]}</span>
-        </div>
-      </div>
+      )}
     </div>
   );
 }
 
-function formatDate(dateString) {
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+function LineChart({ rows, metric }) {
+  const ref = useRef(null);
+  const [width, setWidth] = useState(0);
+  const [hover, setHover] = useState(null);
+
+  useEffect(() => {
+    if (!ref.current) return;
+    const ro = new ResizeObserver(([entry]) => setWidth(entry.contentRect.width));
+    ro.observe(ref.current);
+    return () => ro.disconnect();
+  }, []);
+
+  const values = rows.map(r => r.value);
+  const { lo, hi, ticks } = useMemo(() => scaleFor(values, metric), [values.join(','), metric.value]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const plotW = Math.max(0, width - PAD.left - PAD.right);
+  const plotH = H - PAD.top - PAD.bottom;
+  const x = i => PAD.left + (rows.length > 1 ? (i / (rows.length - 1)) * plotW : plotW / 2);
+  const y = v => {
+    const t = hi === lo ? 0.5 : (v - lo) / (hi - lo);
+    return PAD.top + (metric.inverted ? t : 1 - t) * plotH;
+  };
+
+  const line = rows.map((r, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(r.value).toFixed(1)}`).join(' ');
+  const baseY = metric.inverted ? PAD.top + plotH : y(lo);
+  const area = rows.length > 1 ? `${line} L${x(rows.length - 1).toFixed(1)},${baseY} L${x(0).toFixed(1)},${baseY} Z` : '';
+
+  const labelIdx = xLabelIndexes(rows.length, width < 480 ? 3 : 6);
+  const h = hover !== null ? rows[hover] : null;
+
+  function indexFromEvent(e) {
+    const rect = ref.current.getBoundingClientRect();
+    const px = e.clientX - rect.left - PAD.left;
+    return Math.max(0, Math.min(rows.length - 1, Math.round((px / plotW) * (rows.length - 1))));
+  }
+
+  const latest = rows[rows.length - 1];
+  const summary = `${metric.label} over ${rows.length} days, latest ${metric.full(latest.value)} on ${fmtDate(latest.date)}. Use the arrow keys to step through days.`;
+
+  return (
+    <div
+      ref={ref}
+      className={cx('relative select-none rounded-lg outline-none', focusRing)}
+      style={{ height: H }}
+      tabIndex={0}
+      role="img"
+      aria-label={summary}
+      onPointerMove={e => width && setHover(indexFromEvent(e))}
+      onPointerLeave={() => setHover(null)}
+      onKeyDown={e => {
+        if (e.key === 'ArrowRight') setHover(i => Math.min(rows.length - 1, (i ?? -1) + 1));
+        else if (e.key === 'ArrowLeft') setHover(i => Math.max(0, (i ?? rows.length) - 1));
+        else if (e.key === 'Escape') setHover(null);
+        else return;
+        e.preventDefault();
+      }}
+      onBlur={() => setHover(null)}
+    >
+      {width > 0 && (
+        <svg width={width} height={H} className="absolute inset-0" aria-hidden>
+          {ticks.map(t => (
+            <g key={t}>
+              <line x1={PAD.left} x2={width - PAD.right} y1={y(t)} y2={y(t)} className="stroke-adm-border" strokeWidth="1" />
+              <text x={PAD.left - 8} y={y(t)} dy="0.32em" textAnchor="end" className="fill-adm-subtle text-[11px] tabular-nums">
+                {metric.fmt(t)}
+              </text>
+            </g>
+          ))}
+          {labelIdx.map(i => (
+            <text key={i} x={x(i)} y={H - 8} textAnchor={i === 0 ? 'start' : i === rows.length - 1 ? 'end' : 'middle'} className="fill-adm-subtle text-[11px]">
+              {fmtDate(rows[i].date, { month: 'short', day: 'numeric' })}
+            </text>
+          ))}
+          {area && <path d={area} className="fill-adm-accent" fillOpacity="0.08" />}
+          <path d={line} fill="none" className="stroke-adm-accent" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+          {h && (
+            <>
+              <line x1={x(hover)} x2={x(hover)} y1={PAD.top} y2={PAD.top + plotH} className="stroke-adm-border-strong" strokeWidth="1" />
+              <circle cx={x(hover)} cy={y(h.value)} r="4.5" className="fill-adm-accent stroke-adm-surface" strokeWidth="2" />
+            </>
+          )}
+        </svg>
+      )}
+      {h && width > 0 && (
+        <div
+          className="pointer-events-none absolute z-10 rounded-lg border border-adm-border bg-adm-raised px-3 py-2 text-xs shadow-xl"
+          style={{
+            top: Math.max(0, y(h.value) - 64),
+            left: Math.min(Math.max(x(hover) - 70, 0), width - 140),
+            width: 140,
+          }}
+        >
+          <p className="text-adm-muted">{fmtDate(h.date, { weekday: 'short', month: 'short', day: 'numeric' })}</p>
+          <p className="mt-0.5 text-sm font-semibold text-adm-text tabular-nums">{metric.full(h.value)} <span className="font-normal text-adm-muted">{metric.label.toLowerCase()}</span></p>
+        </div>
+      )}
+    </div>
+  );
 }
 
-function formatValue(value, metric) {
-  if (metric === 'ctr') {
-    return (value * 100).toFixed(1) + '%';
+// Round, evenly spaced ticks. Counts start at 0; position hugs its range.
+function scaleFor(values, metric) {
+  let min = Math.min(...values), max = Math.max(...values);
+  if (metric.inverted) {
+    min = Math.max(1, Math.floor(min));
+    max = Math.ceil(max);
+    if (max === min) max = min + 1;
+  } else {
+    min = 0;
+    if (max <= 0) max = metric.value === 'ctr' ? 0.01 : 1;
   }
-  if (metric === 'position') {
-    return value.toFixed(1);
-  }
-  if (value >= 1000000) {
-    return (value / 1000000).toFixed(1) + 'M';
-  }
-  if (value >= 1000) {
-    return (value / 1000).toFixed(1) + 'K';
-  }
-  return value.toLocaleString();
+  const step = niceStep((max - min) / 4);
+  const lo = Math.floor(min / step) * step;
+  const hi = Math.ceil(max / step) * step;
+  const ticks = [];
+  for (let t = lo; t <= hi + step / 2; t += step) ticks.push(Number(t.toFixed(6)));
+  return { lo: metric.inverted ? Math.max(lo, metric.inverted ? 1 : 0) : lo, hi, ticks: metric.inverted ? ticks.filter(t => t >= 1) : ticks };
+}
+
+function niceStep(raw) {
+  if (raw <= 0) return 1;
+  const mag = 10 ** Math.floor(Math.log10(raw));
+  const n = raw / mag;
+  return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 2.5 ? 2.5 : n <= 5 ? 5 : 10) * mag;
+}
+
+function xLabelIndexes(n, count) {
+  if (n <= 1) return [0];
+  const out = new Set();
+  for (let k = 0; k < count; k++) out.add(Math.round((k / (count - 1)) * (n - 1)));
+  return [...out];
 }

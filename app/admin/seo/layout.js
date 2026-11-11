@@ -1,218 +1,257 @@
-// app/admin/seo/layout.js
 'use client'
 
-import { useState } from 'react'
+// SEO shell: a sidebar that knows about your sites (and, inside one, its sections),
+// fixed on desktop and a slide-out drawer on mobile.
+
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import {
+  LayoutGrid, FileText, ArrowLeft, House, LogOut, Menu, X, ChevronDown, ChartLine, Globe,
+} from 'lucide-react'
 import { useAdminAuth } from '@/Components/Admin/AdminAuthProvider'
+import { SEOProvider, useSEO } from '@/Components/Admin/SEO/SEOContext'
+import { ToastProvider, cx, focusRing } from '@/Components/Admin/SEO/ui'
+import { SITE_SECTIONS, sectionHref, currentSection } from '@/Components/Admin/SEO/sections'
 
 export default function SEOLayout({ children }) {
+  return (
+    <SEOProvider>
+      <ToastProvider>
+        <Shell>{children}</Shell>
+      </ToastProvider>
+    </SEOProvider>
+  )
+}
+
+function Shell({ children }) {
   const pathname = usePathname()
-  const { user, signOut } = useAdminAuth()
-  const [sidebarOpen, setSidebarOpen] = useState(true)
-  const [showUserMenu, setShowUserMenu] = useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false)
 
-  const navItems = [
-    { href: '/admin/seo', label: 'Dashboard', icon: DashboardIcon, exact: true },
-    { href: '/admin/seo/sites', label: 'Sites', icon: GlobeIcon },
-    { href: '/admin/seo/reports', label: 'Reports', icon: DocumentIcon },
-  ]
-
-  const handleSignOut = async () => {
-    await signOut()
-  }
+  // Close the mobile drawer on navigation.
+  useEffect(() => { setMobileOpen(false) }, [pathname])
 
   return (
-    <div className="min-h-screen bg-[#000000]">
-      {/* Sidebar */}
-      <aside
-        className={`fixed left-0 top-0 z-40 h-screen transition-transform ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        } w-64 border-r border-[#262626] bg-[#0a0a0a]`}
+    <div className="min-h-dvh bg-adm-bg text-adm-text">
+      <a
+        href="#seo-main"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[70] focus:rounded-lg focus:bg-adm-raised focus:px-3 focus:py-2 focus:text-sm"
       >
-        <div className="flex h-full flex-col">
-          {/* Logo */}
-          <div className="flex h-16 items-center border-b border-[#262626] px-6">
-            <Link href="/admin/seo" className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-500">
-                <ChartIcon className="h-4 w-4 text-white" />
-              </div>
-              <span className="text-lg font-semibold text-[#fafafa]">SEO</span>
-            </Link>
-          </div>
+        Skip to content
+      </a>
 
-          {/* Navigation */}
-          <nav className="flex-1 space-y-1 p-4">
-            {navItems.map((item) => {
-              const isActive = item.exact ? pathname === item.href : pathname.startsWith(item.href)
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                    isActive
-                      ? 'bg-[#171717] text-[#fafafa]'
-                      : 'text-[#a1a1aa] hover:bg-[#171717] hover:text-[#fafafa]'
-                  }`}
-                >
-                  <item.icon className="h-5 w-5" />
-                  {item.label}
-                </Link>
-              )
-            })}
-
-            {/* Divider */}
-            <div className="my-4 border-t border-[#262626]" />
-
-            {/* Back to Admin */}
-            <Link
-              href="/admin"
-              className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-[#a1a1aa] hover:bg-[#171717] hover:text-[#fafafa]"
-            >
-              <ArrowLeftIcon className="h-5 w-5" />
-              Admin Hub
-            </Link>
-          </nav>
-
-          {/* User section */}
-          <div className="border-t border-[#262626] p-4">
-            <div className="relative">
-              <button
-                onClick={() => setShowUserMenu(!showUserMenu)}
-                className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-[#a1a1aa] transition-colors hover:bg-[#171717] hover:text-[#fafafa]"
-              >
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#171717] text-xs font-medium text-[#fafafa]">
-                  {user?.email?.[0]?.toUpperCase() || 'A'}
-                </div>
-                <div className="flex-1 truncate">
-                  <div className="truncate text-[#fafafa]">{user?.email || 'Admin'}</div>
-                </div>
-                <ChevronIcon className={`h-4 w-4 transition-transform ${showUserMenu ? 'rotate-180' : ''}`} />
-              </button>
-
-              {/* User dropdown menu */}
-              {showUserMenu && (
-                <>
-                  <div className="fixed inset-0 z-10" onClick={() => setShowUserMenu(false)} />
-                  <div className="absolute bottom-full left-0 right-0 z-20 mb-2 rounded-lg border border-[#262626] bg-[#171717] py-1 shadow-xl">
-                    <Link
-                      href="/admin"
-                      className="flex items-center gap-3 px-3 py-2 text-sm text-[#a1a1aa] hover:bg-[#262626] hover:text-[#fafafa]"
-                    >
-                      <ArrowLeftIcon className="h-4 w-4" />
-                      Admin Hub
-                    </Link>
-                    <Link
-                      href="/"
-                      className="flex items-center gap-3 px-3 py-2 text-sm text-[#a1a1aa] hover:bg-[#262626] hover:text-[#fafafa]"
-                    >
-                      <HomeIcon className="h-4 w-4" />
-                      Back to Site
-                    </Link>
-                    <button
-                      onClick={handleSignOut}
-                      className="flex w-full items-center gap-3 px-3 py-2 text-left text-sm text-red-400 hover:bg-[#262626]"
-                    >
-                      <LogoutIcon className="h-4 w-4" />
-                      Sign Out
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
+      {/* Desktop sidebar */}
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 border-r border-adm-border bg-adm-surface lg:block">
+        <SidebarContent />
       </aside>
 
-      {/* Main content */}
-      <div className={`${sidebarOpen ? 'ml-64' : 'ml-0'} min-h-screen transition-all`}>
-        {/* Mobile header */}
-        <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-[#262626] bg-[#0a0a0a] px-6 lg:hidden">
+      {/* Mobile drawer */}
+      {mobileOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <div className="absolute inset-0 bg-black/60" onClick={() => setMobileOpen(false)} aria-hidden />
+          <aside className="absolute inset-y-0 left-0 w-72 max-w-[85%] border-r border-adm-border bg-adm-surface shadow-2xl">
+            <button
+              type="button"
+              onClick={() => setMobileOpen(false)}
+              aria-label="Close menu"
+              className={cx('absolute right-3 top-3.5 rounded-lg p-1.5 text-adm-muted hover:bg-adm-raised hover:text-adm-text', focusRing)}
+            >
+              <X className="h-5 w-5" aria-hidden />
+            </button>
+            <SidebarContent />
+          </aside>
+        </div>
+      )}
+
+      <div className="lg:pl-60">
+        {/* Mobile top bar */}
+        <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-adm-border bg-adm-surface/95 px-4 backdrop-blur lg:hidden">
           <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="rounded-lg p-2 text-[#a1a1aa] hover:bg-[#171717] hover:text-[#fafafa]"
+            type="button"
+            onClick={() => setMobileOpen(true)}
+            aria-label="Open menu"
+            className={cx('rounded-lg p-2 -ml-2 text-adm-muted hover:bg-adm-raised hover:text-adm-text', focusRing)}
           >
-            <MenuIcon className="h-5 w-5" />
+            <Menu className="h-5 w-5" aria-hidden />
           </button>
-          <span className="text-lg font-semibold text-[#fafafa]">SEO</span>
+          <Link href="/admin/seo" className="flex items-center gap-2 font-semibold">
+            <Logo /> SEO
+          </Link>
         </header>
 
-        {/* Page content */}
-        <main className="p-6 lg:p-8">{children}</main>
+        <main id="seo-main" className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+          {children}
+        </main>
       </div>
     </div>
   )
 }
 
-// Icons
-function DashboardIcon({ className }) {
+function Logo() {
   return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
-    </svg>
+    <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-adm-accent-solid">
+      <ChartLine className="h-4 w-4 text-white" aria-hidden />
+    </span>
   )
 }
 
-function GlobeIcon({ className }) {
+function SidebarContent() {
+  const pathname = usePathname()
+  const { sites, sitesLoading, planBySite } = useSEO()
+  const activeSiteId = pathname.match(/^\/admin\/seo\/sites\/([^/]+)/)?.[1]
+
   return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
-    </svg>
+    <div className="flex h-full flex-col">
+      <div className="flex h-14 items-center border-b border-adm-border px-4">
+        <Link href="/admin/seo" className={cx('flex items-center gap-2.5 rounded-lg font-semibold', focusRing)}>
+          <Logo />
+          <span>SEO</span>
+        </Link>
+      </div>
+
+      <nav aria-label="SEO" className="flex-1 overflow-y-auto px-3 py-4">
+        <ul className="space-y-0.5">
+          <NavItem href="/admin/seo" icon={LayoutGrid} active={pathname === '/admin/seo'}>All sites</NavItem>
+          <NavItem href="/admin/seo/reports" icon={FileText} active={pathname.startsWith('/admin/seo/reports')}>Reports</NavItem>
+        </ul>
+
+        <p className="mb-1.5 mt-6 px-2.5 text-xs font-medium uppercase tracking-wider text-adm-subtle">Sites</p>
+        {sitesLoading && sites.length === 0 ? (
+          <div className="space-y-2 px-2.5">
+            {[0, 1, 2].map(i => <div key={i} className="h-5 animate-pulse rounded bg-adm-raised" />)}
+          </div>
+        ) : sites.length === 0 ? (
+          <p className="px-2.5 text-sm text-adm-subtle">No sites yet</p>
+        ) : (
+          <ul className="space-y-0.5">
+            {sites.map(site => (
+              <SiteNavItem
+                key={site.id}
+                site={site}
+                pathname={pathname}
+                expanded={site.id === activeSiteId}
+                hasDraft={planBySite[site.id]?.hasDraft}
+              />
+            ))}
+          </ul>
+        )}
+      </nav>
+
+      <div className="border-t border-adm-border p-3">
+        <UserMenu />
+      </div>
+    </div>
   )
 }
 
-function DocumentIcon({ className }) {
+function NavItem({ href, icon: Icon, active, children, small }) {
   return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-    </svg>
+    <li>
+      <Link
+        href={href}
+        aria-current={active ? 'page' : undefined}
+        className={cx(
+          'flex items-center gap-2.5 rounded-lg px-2.5 font-medium transition-colors',
+          small ? 'py-1.5 text-[13px]' : 'py-2 text-sm',
+          active ? 'bg-adm-raised text-adm-text' : 'text-adm-muted hover:bg-adm-raised hover:text-adm-text',
+          focusRing
+        )}
+      >
+        {Icon && <Icon className={cx(small ? 'h-3.5 w-3.5' : 'h-4 w-4', active ? 'text-adm-accent' : '')} aria-hidden />}
+        <span className="truncate">{children}</span>
+      </Link>
+    </li>
   )
 }
 
-function ChartIcon({ className }) {
+function SiteNavItem({ site, pathname, expanded, hasDraft }) {
+  const base = `/admin/seo/sites/${site.id}`
   return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
-    </svg>
+    <li>
+      <Link
+        href={base}
+        aria-expanded={expanded}
+        className={cx(
+          'flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium transition-colors',
+          expanded ? 'text-adm-text' : 'text-adm-muted hover:bg-adm-raised hover:text-adm-text',
+          focusRing
+        )}
+      >
+        <Globe className="h-4 w-4 shrink-0" aria-hidden />
+        <span className="flex-1 truncate">{site.display_name || site.site_url}</span>
+        {hasDraft && (
+          <span className="h-2 w-2 shrink-0 rounded-full bg-adm-warn" title="Draft plan waiting for approval">
+            <span className="sr-only">Draft plan waiting for approval</span>
+          </span>
+        )}
+        <ChevronDown className={cx('h-3.5 w-3.5 shrink-0 transition-transform', expanded ? '' : '-rotate-90')} aria-hidden />
+      </Link>
+      {expanded && (
+        <ul className="mb-2 ml-4 mt-0.5 space-y-0.5 border-l border-adm-border pl-2">
+          {SITE_SECTIONS.map(section => {
+            const href = sectionHref(site.id, section.slug)
+            const active = currentSection(pathname, site.id) === section.slug
+            return (
+              <NavItem key={section.slug} href={href} icon={section.icon} active={active} small>
+                {section.label}
+              </NavItem>
+            )
+          })}
+        </ul>
+      )}
+    </li>
   )
 }
 
-function ArrowLeftIcon({ className }) {
+function UserMenu() {
+  const { user, signOut } = useAdminAuth()
+  const [open, setOpen] = useState(false)
+
   return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-    </svg>
+    <div className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        aria-expanded={open}
+        aria-haspopup="menu"
+        className={cx('flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left text-sm hover:bg-adm-raised cursor-pointer', focusRing)}
+      >
+        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-adm-raised text-xs font-semibold text-adm-text">
+          {user?.email?.[0]?.toUpperCase() || 'A'}
+        </span>
+        <span className="flex-1 truncate text-adm-muted">{user?.email || 'Admin'}</span>
+        <ChevronDown className={cx('h-4 w-4 text-adm-subtle transition-transform', open && 'rotate-180')} aria-hidden />
+      </button>
+      {open && (
+        <>
+          <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} aria-hidden />
+          <div role="menu" className="absolute bottom-full left-0 right-0 z-20 mb-2 rounded-xl border border-adm-border bg-adm-raised p-1 shadow-xl">
+            <MenuLink href="/admin" icon={ArrowLeft}>Admin hub</MenuLink>
+            <MenuLink href="/" icon={House}>Back to site</MenuLink>
+            <div className="my-1 border-t border-adm-border" />
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => signOut()}
+              className={cx('flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm text-adm-bad hover:bg-adm-hover cursor-pointer', focusRing)}
+            >
+              <LogOut className="h-4 w-4" aria-hidden /> Sign out
+            </button>
+          </div>
+        </>
+      )}
+    </div>
   )
 }
 
-function HomeIcon({ className }) {
+function MenuLink({ href, icon: Icon, children }) {
   return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-    </svg>
-  )
-}
-
-function LogoutIcon({ className }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
-    </svg>
-  )
-}
-
-function ChevronIcon({ className }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-    </svg>
-  )
-}
-
-function MenuIcon({ className }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-    </svg>
+    <Link
+      href={href}
+      role="menuitem"
+      className={cx('flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-adm-muted hover:bg-adm-hover hover:text-adm-text', focusRing)}
+    >
+      <Icon className="h-4 w-4" aria-hidden /> {children}
+    </Link>
   )
 }

@@ -1,7 +1,21 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+// The monthly SEO plan: a compact task list (left), the plan's context in a sticky
+// side panel (right), and each task's full detail in a drawer that keeps ?task= in
+// the URL so a refresh reopens it.
+
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  ArrowDown, ArrowUp, Check, ChevronDown, ChevronRight, Circle, CircleCheck, CircleDot, Copy, ExternalLink,
+  GitPullRequest, History, ListChecks, LoaderCircle, Minus, RefreshCw, Rocket, Sparkles, TriangleAlert,
+} from 'lucide-react';
 import { getCRMAuthClient } from '@/lib/supabase-crm-client';
+import { usePersistedState } from '@/lib/usePersistedState';
+import {
+  Alert, Badge, Button, Card, CardHeader, ConfirmButton, Drawer, EmptyState, IconButton, Modal, PageLoader,
+  ProgressBar, SectionLabel, SegmentedControl, cx, focusRing, inputClass, useToast,
+} from './ui';
+import { fmtDate } from './format';
 
 // Admin sessions live in localStorage, so admin-only routes need the bearer token.
 async function authFetch(url, options = {}) {
@@ -16,147 +30,139 @@ async function authFetch(url, options = {}) {
   });
 }
 
-const sourceLabels = {
-  claude: { text: 'Claude', color: 'bg-orange-500/20 text-orange-300' },
-  gemini: { text: 'Gemini', color: 'bg-blue-500/20 text-blue-300' },
-  manual: { text: 'Manual', color: 'bg-gray-500/20 text-gray-300' },
+const STATUS = {
+  pending: { label: 'To do', icon: Circle, cls: 'text-adm-muted' },
+  in_progress: { label: 'In progress', icon: CircleDot, cls: 'text-adm-warn' },
+  completed: { label: 'Done', icon: CircleCheck, cls: 'text-adm-good' },
 };
 
-function SourceBadge({ source }) {
-  const s = sourceLabels[source] || sourceLabels.gemini;
-  return <span className={`text-xs px-2 py-0.5 rounded-full ${s.color}`}>{s.text}</span>;
+const PRIORITY = {
+  high: { label: 'High priority', short: 'High', tone: 'bad', icon: ArrowUp },
+  medium: { label: 'Medium priority', short: 'Medium', tone: 'warn', icon: Minus },
+  low: { label: 'Low priority', short: 'Low', tone: 'info', icon: ArrowDown },
+};
+
+const EFFORT = { small: 'Quick win', medium: 'Medium effort', large: 'Large effort' };
+
+const SOURCE = { claude: 'Claude', gemini: 'Gemini', manual: 'Manual' };
+
+const SHIP = {
+  queued: { label: 'Queued on GitHub', tone: 'warn', icon: LoaderCircle, spin: true },
+  running: { label: 'Claude is working', tone: 'warn', icon: LoaderCircle, spin: true },
+  pr_open: { label: 'PR ready to review', tone: 'accent', icon: GitPullRequest },
+  failed: { label: 'Ship failed', tone: 'bad', icon: TriangleAlert },
+};
+
+function capitalize(s) {
+  return s ? s.charAt(0).toUpperCase() + s.slice(1).replace(/-/g, ' ') : s;
 }
 
-const priorityColors = {
-  high: 'border-red-500 bg-red-500/10',
-  medium: 'border-yellow-500 bg-yellow-500/10',
-  low: 'border-blue-500 bg-blue-500/10'
-};
+function readTaskParam() {
+  if (typeof window === 'undefined') return null;
+  return new URLSearchParams(window.location.search).get('task');
+}
 
-const priorityLabels = {
-  high: { text: 'High', color: 'bg-red-500' },
-  medium: { text: 'Medium', color: 'bg-yellow-500' },
-  low: { text: 'Low', color: 'bg-blue-500' }
-};
+function writeTaskParam(taskId) {
+  const url = new URL(window.location.href);
+  if (taskId) url.searchParams.set('task', taskId);
+  else url.searchParams.delete('task');
+  window.history.replaceState(window.history.state, '', url);
+}
 
-const categoryColors = {
-  technical: 'text-purple-400',
-  content: 'text-green-400',
-  'on-page': 'text-blue-400',
-  'off-page': 'text-orange-400',
-  local: 'text-pink-400',
-  analytics: 'text-teal-400'
-};
-
-const effortLabels = {
-  small: { text: 'Quick', color: 'bg-green-600' },
-  medium: { text: 'Medium', color: 'bg-yellow-600' },
-  large: { text: 'Large', color: 'bg-red-600' }
-};
-
-const statusConfig = {
-  pending: { label: 'To Do', icon: '○', color: 'text-gray-400' },
-  in_progress: { label: 'In Progress', icon: '◐', color: 'text-yellow-400' },
-  completed: { label: 'Done', icon: '●', color: 'text-green-400' }
-};
-
-const statusCycle = { pending: 'in_progress', in_progress: 'completed', completed: 'pending' };
-
-export default function SEOPlanView({ site }) {
+export default function SEOPlanView({ site, onPlanChange }) {
+  const notify = useToast();
   const [plans, setPlans] = useState([]);
   const [activePlan, setActivePlan] = useState(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
-  const [filter, setFilter] = useState('all');
-  const [expandedTask, setExpandedTask] = useState(null);
+  const [filter, setFilter] = usePersistedState('plan.filter', 'all');
+  const [openTaskId, setOpenTaskId] = useState(readTaskParam);
   const [showHistory, setShowHistory] = useState(false);
 
-  useEffect(() => {
-    if (!site?.id) return;
-    fetchPlans();
-  }, [site?.id]);
+  const openTask = useCallback(id => {
+    setOpenTaskId(id);
+    writeTaskParam(id);
+  }, []);
 
-  async function fetchPlans() {
-    setLoading(true);
+  const fetchPlans = useCallback(async () => {
     try {
       const [activeRes, allRes] = await Promise.all([
         fetch(`/api/seo/plans?siteId=${site.id}&activeOnly=true`),
-        fetch(`/api/seo/plans?siteId=${site.id}`)
+        fetch(`/api/seo/plans?siteId=${site.id}`),
       ]);
       const activeData = await activeRes.json();
       const allData = await allRes.json();
       setActivePlan(activeData.plan || null);
       setPlans(allData.plans || []);
     } catch (err) {
-      console.error('Error fetching plans:', err);
+      notify(`Couldn't load plans: ${err.message}`, 'error');
     } finally {
       setLoading(false);
     }
-  }
+  }, [site.id, notify]);
+
+  useEffect(() => {
+    if (site?.id) fetchPlans();
+  }, [site?.id, fetchPlans]);
 
   async function handleGeneratePlan() {
     setGenerating(true);
     try {
-      // Sync latest data first
       await fetch('/api/seo/sync', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ siteId: site.id, type: 'analytics', days: 60 })
+        body: JSON.stringify({ siteId: site.id, type: 'analytics', days: 60 }),
       });
-
       const res = await fetch('/api/seo/plans', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ siteId: site.id })
+        body: JSON.stringify({ siteId: site.id }),
       });
-
       const data = await res.json();
-      if (data.error) {
-        alert('Failed to generate plan: ' + data.error);
-        return;
-      }
-
+      if (data.error) throw new Error(data.error);
       setActivePlan(data.plan);
       await fetchPlans();
+      onPlanChange?.();
+      notify('New plan generated', 'success');
     } catch (err) {
-      alert('Failed to generate plan: ' + err.message);
+      notify(`Failed to generate plan: ${err.message}`, 'error');
     } finally {
       setGenerating(false);
     }
   }
 
-  async function handleToggleTask(task) {
-    const newStatus = statusCycle[task.status];
+  async function handleSetStatus(task, status) {
+    if (status === task.status) return;
+    const prevPlan = activePlan;
+    // Optimistic: the select should feel instant.
+    setActivePlan(p => p && { ...p, tasks: p.tasks.map(t => (t.id === task.id ? { ...t, status } : t)) });
     try {
       const res = await fetch('/api/seo/plans/tasks', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ taskId: task.id, status: newStatus })
+        body: JSON.stringify({ taskId: task.id, status }),
       });
-
       const data = await res.json();
-      if (data.error) return;
-
-      // Update local state
-      setActivePlan(prev => {
-        if (!prev) return prev;
-        const updatedTasks = prev.tasks.map(t =>
-          t.id === task.id ? { ...t, status: newStatus, completed_at: data.task.completed_at } : t
-        );
-        return { ...prev, tasks: updatedTasks };
+      if (data.error) throw new Error(data.error);
+      setActivePlan(p => p && {
+        ...p,
+        tasks: p.tasks.map(t => (t.id === task.id ? { ...t, status, completed_at: data.task?.completed_at } : t)),
       });
-
-      // If plan got auto-archived (all tasks complete), refresh
-      if (newStatus === 'completed') {
+      onPlanChange?.();
+      // Finishing the last task archives the plan server-side.
+      if (status === 'completed') {
         const checkRes = await fetch(`/api/seo/plans?siteId=${site.id}&activeOnly=true`);
         const checkData = await checkRes.json();
         if (!checkData.plan) {
+          notify('All tasks done. The plan moved to history.', 'success');
+          openTask(null);
           setActivePlan(null);
           fetchPlans();
         }
       }
     } catch (err) {
-      console.error('Error updating task:', err);
+      setActivePlan(prevPlan);
+      notify(`Couldn't update status: ${err.message}`, 'error');
     }
   }
 
@@ -164,13 +170,13 @@ export default function SEOPlanView({ site }) {
     const res = await authFetch('/api/seo/plans/tasks/ship', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ taskId: task.id })
+      body: JSON.stringify({ taskId: task.id }),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Failed to ship task');
     setActivePlan(prev => prev && {
       ...prev,
-      tasks: prev.tasks.map(t => (t.id === task.id ? { ...t, ...data.task } : t))
+      tasks: prev.tasks.map(t => (t.id === task.id ? { ...t, ...data.task } : t)),
     });
   }
 
@@ -194,369 +200,272 @@ export default function SEOPlanView({ site }) {
     const res = await authFetch('/api/seo/plans/draft', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ planId, action })
+      body: JSON.stringify({ planId, action }),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || `Failed to ${action} draft`);
     await fetchPlans();
+    onPlanChange?.();
+    notify(action === 'approve' ? 'Draft approved. It’s now the active plan.' : 'Draft discarded', 'success');
   }
 
   async function handleSaveNotes(taskId, notes) {
-    try {
-      await fetch('/api/seo/plans/tasks', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ taskId, notes })
-      });
-
-      setActivePlan(prev => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          tasks: prev.tasks.map(t => t.id === taskId ? { ...t, notes } : t)
-        };
-      });
-    } catch (err) {
-      console.error('Error saving notes:', err);
-    }
-  }
-
-  if (!site) return null;
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-400"></div>
-      </div>
-    );
+    const res = await fetch('/api/seo/plans/tasks', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ taskId, notes }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.error) throw new Error(data.error || 'Failed to save notes');
+    const patch = list => list.map(t => (t.id === taskId ? { ...t, notes } : t));
+    setActivePlan(prev => prev && { ...prev, tasks: patch(prev.tasks) });
+    setPlans(prev => prev.map(p => ({ ...p, tasks: patch(p.tasks || []) })));
   }
 
   const draftPlan = plans.find(p => p.status === 'draft') || null;
-  const draftPanel = draftPlan && (
-    <DraftPlanPanel
-      plan={draftPlan}
-      onAction={handleDraftAction}
-      expandedTask={expandedTask}
-      onExpand={setExpandedTask}
-      onSaveNotes={handleSaveNotes}
-    />
-  );
+  const archived = plans.filter(p => p.status === 'archived');
+  const tasks = activePlan?.tasks || [];
 
-  // No active plan
-  if (!activePlan) {
-    return (
-      <div className="space-y-6">
-        {draftPanel}
-        <div className="bg-[#0a0a0a] rounded-lg border border-[#262626] p-8 text-center">
-          <svg className="w-16 h-16 mx-auto mb-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-          </svg>
-          <h3 className="text-lg font-semibold text-white mb-2">No Active SEO Plan</h3>
-          <p className="text-gray-400 mb-6 max-w-md mx-auto">
-            Generate an AI-powered SEO plan based on your latest Search Console data. The plan includes prioritized tasks with specific action items.
-          </p>
-          <button
-            onClick={handleGeneratePlan}
-            disabled={generating}
-            className="bg-teal-500 hover:bg-teal-600 text-white px-6 py-2.5 rounded-lg transition-colors disabled:opacity-50 flex items-center gap-2 mx-auto"
-          >
-            {generating ? (
-              <>
-                <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
-                Syncing & Generating...
-              </>
-            ) : (
-              <>
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-                Generate Plan
-              </>
-            )}
-          </button>
-        </div>
+  // The open task may live in the active plan or the draft.
+  const openTaskObj = useMemo(() => {
+    if (!openTaskId) return null;
+    const inActive = tasks.find(t => t.id === openTaskId);
+    if (inActive) return { task: inActive, draft: false };
+    const inDraft = draftPlan?.tasks?.find(t => t.id === openTaskId);
+    return inDraft ? { task: inDraft, draft: true } : null;
+  }, [openTaskId, tasks, draftPlan]);
 
-        {/* Plan History */}
-        {plans.length > 0 && (
-          <PlanHistory plans={plans.filter(p => p.status === 'archived')} />
-        )}
-      </div>
-    );
-  }
+  if (loading) return <PageLoader />;
 
-  // Active plan view
-  const tasks = activePlan.tasks || [];
-  const completedCount = tasks.filter(t => t.status === 'completed').length;
-  const progressPct = tasks.length > 0 ? Math.round((completedCount / tasks.length) * 100) : 0;
-
-  const filteredTasks = filter === 'all'
-    ? tasks
-    : tasks.filter(t => t.status === filter);
-
-  // Group by priority for display
-  const highTasks = filteredTasks.filter(t => t.priority === 'high');
-  const mediumTasks = filteredTasks.filter(t => t.priority === 'medium');
-  const lowTasks = filteredTasks.filter(t => t.priority === 'low');
+  const counts = {
+    all: tasks.length,
+    pending: tasks.filter(t => t.status === 'pending').length,
+    in_progress: tasks.filter(t => t.status === 'in_progress').length,
+    completed: tasks.filter(t => t.status === 'completed').length,
+  };
+  const filtered = filter === 'all' ? tasks : tasks.filter(t => t.status === filter);
 
   return (
     <div className="space-y-6">
-      {draftPanel}
+      {draftPlan && (
+        <DraftBanner plan={draftPlan} hasActive={!!activePlan} onAction={handleDraftAction} onOpenTask={openTask} />
+      )}
 
-      {/* Plan Header */}
-      <div className="bg-[#0a0a0a] rounded-lg border border-[#262626] p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-              {activePlan.month} SEO Plan
-              <SourceBadge source={activePlan.generated_by} />
-            </h3>
-            <p className="text-gray-400 text-sm mt-1">
-              Created {new Date(activePlan.created_at).toLocaleDateString()}
-            </p>
-          </div>
-          <button
-            onClick={handleGeneratePlan}
-            disabled={generating}
-            className="text-sm bg-[#171717] hover:bg-[#262626] border border-[#262626] text-white px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50 flex items-center gap-2"
-          >
-            {generating ? (
-              <>
-                <span className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></span>
-                Generating...
-              </>
-            ) : (
-              <>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-                Regenerate
-              </>
-            )}
-          </button>
-        </div>
-
-        {/* Summary */}
-        {activePlan.summary && (
-          <p className="text-gray-300 text-sm mb-4">{activePlan.summary}</p>
-        )}
-
-        {/* Progress Bar */}
-        <div className="mb-4">
-          <div className="flex items-center justify-between text-sm mb-1">
-            <span className="text-gray-400">Progress</span>
-            <span className="text-white font-medium">{completedCount}/{tasks.length} tasks ({progressPct}%)</span>
-          </div>
-          <div className="w-full bg-[#262626] rounded-full h-2">
-            <div
-              className="bg-teal-500 h-2 rounded-full transition-all duration-500"
-              style={{ width: `${progressPct}%` }}
-            />
-          </div>
-        </div>
-
-        {/* Goals */}
-        {activePlan.goals?.length > 0 && (
-          <div>
-            <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Goals</h4>
-            <ul className="space-y-1">
-              {activePlan.goals.map((goal, idx) => (
-                <li key={idx} className="text-gray-300 text-sm flex items-start gap-2">
-                  <span className="text-teal-400 mt-0.5 shrink-0">-</span>
-                  {goal}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {/* Keyword Strategy */}
-        {activePlan.keyword_strategy && (
-          <div className="mt-4 pt-4 border-t border-[#262626]">
-            <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Keyword Strategy</h4>
-            <div className="space-y-2">
-              {activePlan.keyword_strategy.primary_keywords?.length > 0 && (
-                <div>
-                  <span className="text-gray-500 text-xs">Primary: </span>
-                  <div className="flex flex-wrap gap-1 mt-1">
-                    {activePlan.keyword_strategy.primary_keywords.map((kw, i) => (
-                      <span key={i} className="text-xs bg-teal-500/20 text-teal-300 px-2 py-0.5 rounded-full">{kw}</span>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {activePlan.keyword_strategy.secondary_keywords?.length > 0 && (
-                <div>
-                  <span className="text-gray-500 text-xs">Secondary: </span>
-                  <div className="flex flex-wrap gap-1 mt-1">
-                    {activePlan.keyword_strategy.secondary_keywords.map((kw, i) => (
-                      <span key={i} className="text-xs bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-full">{kw}</span>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {activePlan.keyword_strategy.long_tail_opportunities?.length > 0 && (
-                <div>
-                  <span className="text-gray-500 text-xs">Long-Tail: </span>
-                  <div className="flex flex-wrap gap-1 mt-1">
-                    {activePlan.keyword_strategy.long_tail_opportunities.map((kw, i) => (
-                      <span key={i} className="text-xs bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded-full">{kw}</span>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Filter Bar */}
-      <div className="flex items-center gap-2">
-        {['all', 'pending', 'in_progress', 'completed'].map(f => {
-          const count = f === 'all' ? tasks.length : tasks.filter(t => t.status === f).length;
-          const label = f === 'all' ? 'All' : statusConfig[f]?.label || f;
-          return (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className={`text-sm px-3 py-1.5 rounded-lg transition-colors ${
-                filter === f
-                  ? 'bg-teal-500/20 text-teal-400 border border-teal-500/50'
-                  : 'bg-[#171717] text-gray-400 border border-[#262626] hover:border-gray-500'
-              }`}
-            >
-              {label} ({count})
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Task Groups */}
-      {filteredTasks.length === 0 ? (
-        <div className="bg-[#0a0a0a] rounded-lg border border-[#262626] p-8 text-center text-gray-400">
-          No tasks match this filter.
-        </div>
+      {!activePlan ? (
+        <Card>
+          <EmptyState
+            icon={ListChecks}
+            title="No active SEO plan"
+            description="Generate a plan from the latest Search Console data. You get prioritized tasks, each with clear acceptance criteria."
+            action={
+              <div className="flex flex-wrap justify-center gap-2">
+                <Button variant="primary" icon={Sparkles} onClick={handleGeneratePlan} loading={generating}>
+                  {generating ? 'Syncing & generating…' : 'Generate plan'}
+                </Button>
+                {archived.length > 0 && (
+                  <Button icon={History} onClick={() => setShowHistory(true)}>Past plans ({archived.length})</Button>
+                )}
+              </div>
+            }
+          />
+        </Card>
       ) : (
-        <div className="space-y-4">
-          <TaskGroup
-            label="High Priority"
-            tasks={highTasks}
-            onShip={handleShip}
-            onToggle={handleToggleTask}
-            expandedTask={expandedTask}
-            onExpand={setExpandedTask}
-            onSaveNotes={handleSaveNotes}
-          />
-          <TaskGroup
-            label="Medium Priority"
-            tasks={mediumTasks}
-            onShip={handleShip}
-            onToggle={handleToggleTask}
-            expandedTask={expandedTask}
-            onExpand={setExpandedTask}
-            onSaveNotes={handleSaveNotes}
-          />
-          <TaskGroup
-            label="Low Priority"
-            tasks={lowTasks}
-            onShip={handleShip}
-            onToggle={handleToggleTask}
-            expandedTask={expandedTask}
-            onExpand={setExpandedTask}
-            onSaveNotes={handleSaveNotes}
-          />
-        </div>
-      )}
+        <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
+          <div className="min-w-0">
+            <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <h2 className="flex flex-wrap items-center gap-2 text-lg font-semibold">
+                  {activePlan.month} plan
+                  <Badge icon={Sparkles}>{SOURCE[activePlan.generated_by] || 'AI'}</Badge>
+                </h2>
+                <p className="mt-0.5 text-sm text-adm-muted">Created {fmtDate(activePlan.created_at)}</p>
+              </div>
+              <div className="flex gap-2">
+                {archived.length > 0 && (
+                  <Button size="sm" variant="ghost" icon={History} onClick={() => setShowHistory(true)}>
+                    History
+                  </Button>
+                )}
+                <Button size="sm" icon={RefreshCw} onClick={handleGeneratePlan} loading={generating} title="Sync the last 60 days and generate a fresh plan">
+                  {generating ? 'Generating…' : 'Regenerate'}
+                </Button>
+              </div>
+            </div>
 
-      {/* Metrics to Track */}
-      {activePlan.metrics_to_track?.length > 0 && (
-        <div className="bg-[#0a0a0a] rounded-lg border border-[#262626] p-6">
-          <h4 className="text-sm font-medium text-gray-400 uppercase tracking-wider mb-3">Metrics to Track</h4>
-          <div className="overflow-hidden rounded-lg border border-[#262626]">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-[#171717]">
-                  <th className="px-4 py-2 text-left text-gray-400">Metric</th>
-                  <th className="px-4 py-2 text-center text-gray-400">Current</th>
-                  <th className="px-4 py-2 text-center text-gray-400">Target</th>
-                </tr>
-              </thead>
-              <tbody>
-                {activePlan.metrics_to_track.map((m, idx) => (
-                  <tr key={idx} className="border-t border-[#262626]">
-                    <td className="px-4 py-2 text-gray-300">{m.metric}</td>
-                    <td className="px-4 py-2 text-center text-gray-400">{m.current_value}</td>
-                    <td className="px-4 py-2 text-center text-teal-400 font-medium">{m.target_value}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            {/* Sticky toolbar: filters + progress stay in view while you work down the list. */}
+            <div className="sticky top-14 z-20 -mx-2 mb-4 flex flex-wrap items-center justify-between gap-3 bg-adm-bg/95 px-2 py-2 backdrop-blur lg:top-0">
+              <SegmentedControl
+                label="Filter tasks by status"
+                size="sm"
+                value={filter}
+                onChange={setFilter}
+                options={[
+                  { value: 'all', label: 'All', count: counts.all },
+                  { value: 'pending', label: 'To do', count: counts.pending },
+                  { value: 'in_progress', label: 'In progress', count: counts.in_progress },
+                  { value: 'completed', label: 'Done', count: counts.completed },
+                ]}
+              />
+              <div className="flex items-center gap-2 text-xs text-adm-muted">
+                <span className="tabular-nums">{counts.completed} of {counts.all} done</span>
+                <ProgressBar value={counts.completed} max={counts.all} className="w-24" label="Plan progress" />
+              </div>
+            </div>
+
+            {filtered.length === 0 ? (
+              <Card><p className="p-8 text-center text-sm text-adm-muted">No tasks match this filter.</p></Card>
+            ) : (
+              <div className="space-y-6">
+                {['high', 'medium', 'low'].map(p => {
+                  const group = filtered.filter(t => t.priority === p);
+                  if (group.length === 0) return null;
+                  return (
+                    <section key={p} aria-labelledby={`grp-${p}`}>
+                      <h3 id={`grp-${p}`} className="mb-2 flex items-center gap-2 text-sm font-semibold">
+                        <Badge tone={PRIORITY[p].tone} icon={PRIORITY[p].icon}>{PRIORITY[p].short}</Badge>
+                        <span className="text-adm-muted">priority</span>
+                        <span className="text-xs font-normal text-adm-subtle tabular-nums">{group.length}</span>
+                      </h3>
+                      <Card as="ul" className="divide-y divide-adm-border">
+                        {group.map(task => (
+                          <TaskRow
+                            key={task.id}
+                            task={task}
+                            onOpen={() => openTask(task.id)}
+                            onStatus={s => handleSetStatus(task, s)}
+                            onShip={handleShip}
+                          />
+                        ))}
+                      </Card>
+                    </section>
+                  );
+                })}
+                {filtered.some(t => !PRIORITY[t.priority]) && (
+                  <Card as="ul" className="divide-y divide-adm-border">
+                    {filtered.filter(t => !PRIORITY[t.priority]).map(task => (
+                      <TaskRow key={task.id} task={task} onOpen={() => openTask(task.id)} onStatus={s => handleSetStatus(task, s)} onShip={handleShip} />
+                    ))}
+                  </Card>
+                )}
+              </div>
+            )}
           </div>
+
+          <PlanSidePanel plan={activePlan} counts={counts} />
         </div>
       )}
 
-      {/* Plan History */}
-      {plans.filter(p => p.status === 'archived').length > 0 && (
-        <div>
-          <button
-            onClick={() => setShowHistory(!showHistory)}
-            className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors mb-3"
-          >
-            <svg className={`w-4 h-4 transition-transform ${showHistory ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-            Plan History ({plans.filter(p => p.status === 'archived').length})
-          </button>
-          {showHistory && (
-            <PlanHistory plans={plans.filter(p => p.status === 'archived')} />
+      {openTaskObj && (
+        <TaskDrawer
+          key={openTaskObj.task.id}
+          task={openTaskObj.task}
+          draft={openTaskObj.draft}
+          onClose={() => openTask(null)}
+          onStatus={s => handleSetStatus(openTaskObj.task, s)}
+          onShip={handleShip}
+          onSaveNotes={handleSaveNotes}
+        />
+      )}
+
+      {showHistory && <HistoryModal plans={archived} onClose={() => setShowHistory(false)} />}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+
+function StatusSelect({ task, onChange, size = 'sm' }) {
+  const s = STATUS[task.status] || STATUS.pending;
+  const Icon = s.icon;
+  return (
+    <div className="relative inline-flex">
+      <Icon className={cx('pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2', s.cls)} aria-hidden />
+      <select
+        value={task.status}
+        onChange={e => onChange(e.target.value)}
+        aria-label={`Status for ${task.title}`}
+        className={cx(
+          'appearance-none rounded-lg border border-adm-border bg-adm-raised pl-7 pr-7 font-medium text-adm-text hover:border-adm-border-strong cursor-pointer',
+          size === 'sm' ? 'h-8 text-xs' : 'h-9 text-sm',
+          focusRing
+        )}
+      >
+        {Object.entries(STATUS).map(([value, cfg]) => (
+          <option key={value} value={value}>{cfg.label}</option>
+        ))}
+      </select>
+      <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-adm-subtle" aria-hidden />
+    </div>
+  );
+}
+
+function TaskMeta({ task }) {
+  const items = [
+    task.category && capitalize(task.category),
+    task.estimated_effort && (EFFORT[task.estimated_effort] || capitalize(task.estimated_effort)),
+    task.files_to_modify?.length > 0 && `${task.files_to_modify.length} file${task.files_to_modify.length === 1 ? '' : 's'}`,
+  ].filter(Boolean);
+  if (items.length === 0) return null;
+  return (
+    <p className="flex flex-wrap items-center gap-x-2 text-xs text-adm-subtle">
+      {items.map((item, i) => (
+        <span key={i} className="flex items-center gap-2">
+          {i > 0 && <span aria-hidden>·</span>}
+          {item}
+        </span>
+      ))}
+    </p>
+  );
+}
+
+function TaskRow({ task, onOpen, onStatus, onShip, draft = false }) {
+  const done = task.status === 'completed';
+  const ship = SHIP[task.ship_status];
+  return (
+    <li className="group flex flex-col gap-3 px-4 py-3.5 transition-colors hover:bg-adm-raised/40 sm:flex-row sm:items-center">
+      <div className="min-w-0 flex-1">
+        <button
+          type="button"
+          onClick={onOpen}
+          className={cx(
+            'rounded text-left text-sm font-medium hover:underline cursor-pointer',
+            done ? 'text-adm-subtle line-through' : 'text-adm-text',
+            focusRing
+          )}
+        >
+          {task.title}
+        </button>
+        {task.description && <p className="mt-0.5 line-clamp-1 text-sm text-adm-muted">{task.description}</p>}
+        <div className="mt-1.5 flex flex-wrap items-center gap-2">
+          <TaskMeta task={task} />
+          {ship && (
+            <Badge tone={ship.tone} icon={ship.icon} className={ship.spin ? '[&>svg]:animate-spin' : ''}>{ship.label}</Badge>
           )}
         </div>
-      )}
-    </div>
-  );
-}
-
-function TaskGroup({ label, tasks, onToggle, onShip, expandedTask, onExpand, onSaveNotes }) {
-  if (tasks.length === 0) return null;
-
-  return (
-    <div>
-      <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">{label}</h4>
-      <div className="space-y-2">
-        {tasks.map(task => (
-          <TaskCard
-            key={task.id}
-            task={task}
-            onShip={onShip}
-            onToggle={onToggle}
-            isExpanded={expandedTask === task.id}
-            onExpand={onExpand}
-            onSaveNotes={onSaveNotes}
-          />
-        ))}
       </div>
-    </div>
+      <div className="flex shrink-0 items-center gap-2">
+        {!draft && <StatusSelect task={task} onChange={onStatus} />}
+        {!draft && <ShipControl task={task} onShip={onShip} compact />}
+        <IconButton icon={ChevronRight} label={`Open details for ${task.title}`} size="sm" onClick={onOpen} />
+      </div>
+    </li>
   );
 }
 
-const shipLabels = {
-  queued: { text: 'Queued on GitHub…', color: 'text-yellow-400' },
-  running: { text: 'Claude is working…', color: 'text-yellow-400' },
-  pr_open: { text: 'PR ready to review', color: 'text-teal-400' },
-  failed: { text: 'Ship failed', color: 'text-red-400' },
-};
-
-function ShipControl({ task, onShip }) {
+function ShipControl({ task, onShip, compact = false }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
   const shippable = task.claude_code_prompt && task.files_to_modify?.length > 0;
   if (!onShip || task.status === 'completed') return null;
 
   if (!shippable) {
-    return <span className="text-xs text-gray-600" title="No code change: do this one manually">Manual task</span>;
+    return compact ? null : (
+      <p className="text-sm text-adm-muted">No code change in this one. Do it by hand, then mark it done.</p>
+    );
   }
 
-  const state = shipLabels[task.ship_status];
   const canShip = !task.ship_status || task.ship_status === 'failed';
+  const errText = error || (task.ship_status === 'failed' ? task.ship_error : null);
 
   async function ship() {
     setBusy(true);
@@ -570,192 +479,297 @@ function ShipControl({ task, onShip }) {
     }
   }
 
-  return (
-    <div className="flex flex-col items-end gap-1 shrink-0">
-      <div className="flex items-center gap-2">
-        {state && <span className={`text-xs ${state.color}`}>{state.text}</span>}
-        {task.pr_url && (
-          <a href={task.pr_url} target="_blank" rel="noopener noreferrer" className="text-xs text-teal-400 hover:text-teal-300 underline">
-            Open PR
-          </a>
-        )}
-        {task.ship_run_url && task.ship_status !== 'pr_open' && (
-          <a href={task.ship_run_url} target="_blank" rel="noopener noreferrer" className="text-xs text-gray-400 hover:text-gray-300 underline">
-            Run log
-          </a>
-        )}
-        {canShip && (
-          <button
-            onClick={ship}
-            disabled={busy}
-            className="text-xs bg-teal-500 hover:bg-teal-600 text-white px-3 py-1 rounded-lg transition-colors disabled:opacity-50"
-            title="Claude makes this change on a branch and opens a PR. You review and merge."
-          >
-            {busy ? 'Starting…' : task.ship_status === 'failed' ? 'Retry ship' : 'Ship'}
-          </button>
-        )}
-      </div>
-      {(error || (task.ship_status === 'failed' && task.ship_error)) && (
-        <span className="text-xs text-red-400 max-w-xs text-right">{error || task.ship_error}</span>
+  const links = (
+    <>
+      {task.pr_url && (
+        <Button size="sm" icon={GitPullRequest} href={task.pr_url} external>Open PR</Button>
       )}
+      {task.ship_run_url && task.ship_status !== 'pr_open' && (
+        <Button size="sm" variant="ghost" icon={ExternalLink} href={task.ship_run_url} external>Run log</Button>
+      )}
+    </>
+  );
+
+  if (compact) {
+    return (
+      <>
+        {task.pr_url && <Button size="sm" icon={GitPullRequest} href={task.pr_url} external>PR</Button>}
+        {canShip && (
+          <Button size="sm" variant="primary" icon={Rocket} onClick={ship} loading={busy} title={errText || 'Claude makes this change on a branch and opens a PR. You review and merge.'}>
+            {task.ship_status === 'failed' ? 'Retry' : 'Ship'}
+          </Button>
+        )}
+      </>
+    );
+  }
+
+  return (
+    <div className="space-y-2">
+      <div className="flex flex-wrap items-center gap-2">
+        {canShip && (
+          <Button size="sm" variant="primary" icon={Rocket} onClick={ship} loading={busy}>
+            {busy ? 'Starting…' : task.ship_status === 'failed' ? 'Retry ship' : 'Ship as PR'}
+          </Button>
+        )}
+        {links}
+      </div>
+      {canShip && !errText && (
+        <p className="text-xs text-adm-subtle">Claude makes this change on a branch and opens a PR. You review and merge.</p>
+      )}
+      {errText && <p className="text-xs text-adm-bad" role="alert">{errText}</p>}
     </div>
   );
 }
 
-function TaskCard({ task, onToggle, onShip, isExpanded, onExpand, onSaveNotes }) {
-  const [notes, setNotes] = useState(task.notes || '');
-  const [saving, setSaving] = useState(false);
-  const status = statusConfig[task.status] || statusConfig.pending;
-
-  async function handleSave() {
-    setSaving(true);
-    await onSaveNotes(task.id, notes);
-    setSaving(false);
-  }
+function PlanSidePanel({ plan, counts }) {
+  const pct = counts.all ? Math.round((counts.completed / counts.all) * 100) : 0;
+  const ks = plan.keyword_strategy || {};
+  const kwGroups = [
+    ['Primary', ks.primary_keywords],
+    ['Secondary', ks.secondary_keywords],
+    ['Long-tail', ks.long_tail_opportunities],
+  ].filter(([, list]) => list?.length > 0);
 
   return (
-    <div className={`rounded-lg border-l-4 ${priorityColors[task.priority] || 'border-gray-500 bg-gray-500/10'} bg-[#0a0a0a] border border-[#262626] overflow-hidden`}
-      style={{ borderLeftColor: task.priority === 'high' ? '#ef4444' : task.priority === 'medium' ? '#eab308' : '#3b82f6' }}
-    >
-      <div className="p-4">
-        <div className="flex items-start gap-3">
-          {/* Status Toggle (hidden on draft plans, which aren't being worked yet) */}
-          {onToggle ? (
-            <button
-              onClick={() => onToggle(task)}
-              className={`mt-0.5 text-lg shrink-0 ${status.color} hover:opacity-80 transition-opacity`}
-              title={`Click to change status (${status.label})`}
-            >
-              {status.icon}
-            </button>
-          ) : (
-            <span className="mt-0.5 text-lg shrink-0 text-gray-600">○</span>
-          )}
-
-          <div className="flex-1 min-w-0">
-            {/* Title + Meta */}
-            <div className="flex items-center gap-2 mb-1 flex-wrap">
-              <h5 className={`font-medium ${task.status === 'completed' ? 'text-gray-500 line-through' : 'text-white'}`}>
-                {task.title}
-              </h5>
-              <span className={`text-xs ${categoryColors[task.category] || 'text-gray-400'}`}>
-                {task.category}
-              </span>
-              {task.estimated_effort && (
-                <span className={`text-xs text-white px-1.5 py-0.5 rounded ${effortLabels[task.estimated_effort]?.color || 'bg-gray-600'}`}>
-                  {effortLabels[task.estimated_effort]?.text || task.estimated_effort}
-                </span>
-              )}
-            </div>
-
-            {/* Description */}
-            <p className="text-gray-400 text-sm">{task.description}</p>
-
-            {/* Expand/Collapse */}
-            <button
-              onClick={() => onExpand(isExpanded ? null : task.id)}
-              className="text-xs text-gray-500 hover:text-gray-300 mt-2 transition-colors"
-            >
-              {isExpanded ? 'Collapse' : 'Details & Notes'}
-            </button>
-          </div>
-
-          <ShipControl task={task} onShip={onShip} />
-        </div>
-      </div>
-
-      {/* Expanded Detail */}
-      {isExpanded && (
-        <div className="px-4 pb-4 pt-0 ml-9 border-t border-[#262626] mt-2 pt-3">
-          {/* Files */}
-          {task.files_to_modify?.length > 0 && (
-            <div className="mb-3">
-              <p className="text-gray-500 text-xs mb-1">Files to modify:</p>
-              <div className="flex flex-wrap gap-1">
-                {task.files_to_modify.map((f, i) => (
-                  <span key={i} className="text-xs bg-[#171717] text-gray-300 px-2 py-0.5 rounded">{f}</span>
-                ))}
+    <aside className="space-y-4 lg:sticky lg:top-8" aria-label="Plan details">
+      <Card className="p-5">
+        <SectionLabel>Progress</SectionLabel>
+        <p className="mt-2 text-3xl font-semibold">{pct}%</p>
+        <ProgressBar value={counts.completed} max={counts.all} className="mt-3" label="Plan progress" />
+        <dl className="mt-4 grid grid-cols-3 gap-2 text-center">
+          {['pending', 'in_progress', 'completed'].map(s => {
+            const Icon = STATUS[s].icon;
+            return (
+              <div key={s} className="rounded-lg bg-adm-raised px-2 py-2">
+                <dt className="flex items-center justify-center gap-1 text-[11px] text-adm-muted">
+                  <Icon className={cx('h-3 w-3', STATUS[s].cls)} aria-hidden />{STATUS[s].label}
+                </dt>
+                <dd className="mt-0.5 text-base font-semibold tabular-nums">{counts[s]}</dd>
               </div>
+            );
+          })}
+        </dl>
+      </Card>
+
+      {(plan.summary || plan.goals?.length > 0) && (
+        <Card className="space-y-4 p-5">
+          {plan.summary && (
+            <div>
+              <SectionLabel>Summary</SectionLabel>
+              <p className="mt-2 text-sm leading-relaxed text-adm-muted">{plan.summary}</p>
             </div>
           )}
-
-          {/* Acceptance Criteria */}
-          {task.acceptance_criteria?.length > 0 && (
-            <div className="mb-3">
-              <p className="text-gray-500 text-xs mb-1">Acceptance Criteria:</p>
-              <ul className="space-y-1">
-                {task.acceptance_criteria.map((c, i) => (
-                  <li key={i} className="text-gray-300 text-sm flex items-start gap-2">
-                    <span className="text-gray-500">-</span>
-                    {c}
+          {plan.goals?.length > 0 && (
+            <div>
+              <SectionLabel>Goals</SectionLabel>
+              <ul className="mt-2 space-y-2">
+                {plan.goals.map((goal, i) => (
+                  <li key={i} className="flex gap-2 text-sm text-adm-text">
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-adm-accent" aria-hidden />
+                    {goal}
                   </li>
                 ))}
               </ul>
             </div>
           )}
-
-          {/* Target Keywords */}
-          {task.target_keywords?.length > 0 && (
-            <div className="mb-3">
-              <p className="text-gray-500 text-xs mb-1">Target Keywords:</p>
-              <div className="flex flex-wrap gap-1">
-                {task.target_keywords.map((kw, i) => (
-                  <span key={i} className="text-xs bg-teal-500/20 text-teal-300 px-2 py-0.5 rounded-full">{kw}</span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Claude Code Prompt */}
-          {task.claude_code_prompt && (
-            <div className="mb-3">
-              <div className="flex items-center justify-between mb-1">
-                <p className="text-gray-500 text-xs">Claude Code Prompt:</p>
-                <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(task.claude_code_prompt);
-                  }}
-                  className="text-xs text-teal-400 hover:text-teal-300 transition-colors flex items-center gap-1"
-                >
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                  </svg>
-                  Copy
-                </button>
-              </div>
-              <pre className="text-xs bg-[#171717] text-gray-300 px-3 py-2 rounded-lg border border-[#262626] whitespace-pre-wrap break-words">{task.claude_code_prompt}</pre>
-            </div>
-          )}
-
-          {/* Notes */}
-          <div>
-            <p className="text-gray-500 text-xs mb-1">Notes:</p>
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Add notes..."
-              rows={3}
-              className="w-full bg-[#171717] border border-[#262626] rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 resize-none focus:outline-none focus:border-teal-500"
-            />
-            {notes !== (task.notes || '') && (
-              <button
-                onClick={handleSave}
-                disabled={saving}
-                className="mt-1 text-xs bg-teal-500 hover:bg-teal-600 text-white px-3 py-1 rounded transition-colors disabled:opacity-50"
-              >
-                {saving ? 'Saving...' : 'Save Notes'}
-              </button>
-            )}
-          </div>
-        </div>
+        </Card>
       )}
-    </div>
+
+      {kwGroups.length > 0 && (
+        <Card className="space-y-3 p-5">
+          <SectionLabel>Keyword strategy</SectionLabel>
+          {kwGroups.map(([label, list]) => (
+            <div key={label}>
+              <p className="mb-1.5 text-xs text-adm-muted">{label}</p>
+              <div className="flex flex-wrap gap-1.5">
+                {list.map((kw, i) => <Badge key={i}>{kw}</Badge>)}
+              </div>
+            </div>
+          ))}
+        </Card>
+      )}
+
+      {plan.metrics_to_track?.length > 0 && (
+        <Card>
+          <div className="px-5 pt-5"><SectionLabel>Metrics to track</SectionLabel></div>
+          <table className="mt-2 w-full text-sm">
+            <thead>
+              <tr className="text-xs text-adm-subtle">
+                <th scope="col" className="px-5 py-1.5 text-left font-medium">Metric</th>
+                <th scope="col" className="px-2 py-1.5 text-right font-medium">Now</th>
+                <th scope="col" className="px-5 py-1.5 text-right font-medium">Target</th>
+              </tr>
+            </thead>
+            <tbody>
+              {plan.metrics_to_track.map((m, i) => (
+                <tr key={i} className="border-t border-adm-border">
+                  <td className="px-5 py-2 text-adm-muted">{m.metric}</td>
+                  <td className="px-2 py-2 text-right tabular-nums text-adm-muted">{m.current_value}</td>
+                  <td className="px-5 py-2 text-right font-medium tabular-nums text-adm-text">{m.target_value}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div className="h-3" />
+        </Card>
+      )}
+    </aside>
   );
 }
 
-function DraftPlanPanel({ plan, onAction, expandedTask, onExpand, onSaveNotes }) {
+function TaskDrawer({ task, draft, onClose, onStatus, onShip, onSaveNotes }) {
+  const notify = useToast();
+  const [notes, setNotes] = useState(task.notes || '');
+  const [saving, setSaving] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const p = PRIORITY[task.priority];
+  const dirty = notes !== (task.notes || '');
+
+  async function save() {
+    setSaving(true);
+    try {
+      await onSaveNotes(task.id, notes);
+      notify('Notes saved', 'success');
+    } catch (err) {
+      notify(err.message, 'error');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function copyPrompt() {
+    try {
+      await navigator.clipboard.writeText(task.claude_code_prompt);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      notify('Copy failed. Select the text and copy it manually.', 'error');
+    }
+  }
+
+  return (
+    <Drawer
+      onClose={onClose}
+      label={task.title}
+      header={
+        <div>
+          <div className="mb-2 flex flex-wrap items-center gap-1.5">
+            {p && <Badge tone={p.tone} icon={p.icon}>{p.label}</Badge>}
+            {task.category && <Badge>{capitalize(task.category)}</Badge>}
+            {task.estimated_effort && <Badge>{EFFORT[task.estimated_effort] || task.estimated_effort}</Badge>}
+            {draft && <Badge tone="warn">Draft</Badge>}
+          </div>
+          <h2 className="text-lg font-semibold leading-snug">{task.title}</h2>
+        </div>
+      }
+    >
+      <div className="space-y-6">
+        {!draft && (
+          <div className="space-y-4 rounded-xl border border-adm-border bg-adm-raised/50 p-4">
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-sm text-adm-muted">Status</span>
+              <StatusSelect task={task} onChange={onStatus} size="md" />
+            </div>
+            {task.status !== 'completed' && (
+              <div className="border-t border-adm-border pt-4">
+                {SHIP[task.ship_status] && (
+                  <Badge tone={SHIP[task.ship_status].tone} icon={SHIP[task.ship_status].icon} className="mb-3">{SHIP[task.ship_status].label}</Badge>
+                )}
+                <ShipControl task={task} onShip={onShip} />
+              </div>
+            )}
+          </div>
+        )}
+
+        {task.description && (
+          <DetailSection title="What to do">
+            <p className="text-sm leading-relaxed text-adm-text">{task.description}</p>
+          </DetailSection>
+        )}
+
+        {task.acceptance_criteria?.length > 0 && (
+          <DetailSection title="Done when">
+            <ul className="space-y-2">
+              {task.acceptance_criteria.map((c, i) => (
+                <li key={i} className="flex gap-2 text-sm text-adm-text">
+                  <CircleCheck className="mt-0.5 h-4 w-4 shrink-0 text-adm-subtle" aria-hidden />
+                  {c}
+                </li>
+              ))}
+            </ul>
+          </DetailSection>
+        )}
+
+        {task.target_keywords?.length > 0 && (
+          <DetailSection title="Target keywords">
+            <div className="flex flex-wrap gap-1.5">
+              {task.target_keywords.map((kw, i) => <Badge key={i}>{kw}</Badge>)}
+            </div>
+          </DetailSection>
+        )}
+
+        {task.files_to_modify?.length > 0 && (
+          <DetailSection title="Files to change">
+            <ul className="space-y-1">
+              {task.files_to_modify.map((f, i) => (
+                <li key={i} className="break-all rounded-md bg-adm-raised px-2.5 py-1.5 font-mono text-xs text-adm-muted">{f}</li>
+              ))}
+            </ul>
+          </DetailSection>
+        )}
+
+        {task.claude_code_prompt && (
+          <DetailSection
+            title="Claude Code prompt"
+            action={
+              <Button size="sm" variant="ghost" icon={copied ? Check : Copy} onClick={copyPrompt}>
+                {copied ? 'Copied' : 'Copy'}
+              </Button>
+            }
+          >
+            <pre className="max-h-64 overflow-auto whitespace-pre-wrap break-words rounded-lg border border-adm-border bg-adm-raised p-3 font-mono text-xs leading-relaxed text-adm-muted">
+              {task.claude_code_prompt}
+            </pre>
+          </DetailSection>
+        )}
+
+        <DetailSection title="Notes">
+          <label htmlFor={`notes-${task.id}`} className="sr-only">Notes for {task.title}</label>
+          <textarea
+            id={`notes-${task.id}`}
+            value={notes}
+            onChange={e => setNotes(e.target.value)}
+            placeholder="Anything worth remembering about this task…"
+            rows={4}
+            className={cx(inputClass, 'resize-y')}
+          />
+          {dirty && (
+            <div className="mt-2 flex gap-2">
+              <Button size="sm" variant="primary" onClick={save} loading={saving}>Save notes</Button>
+              <Button size="sm" variant="ghost" onClick={() => setNotes(task.notes || '')} disabled={saving}>Discard</Button>
+            </div>
+          )}
+        </DetailSection>
+      </div>
+    </Drawer>
+  );
+}
+
+function DetailSection({ title, action, children }) {
+  return (
+    <section>
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <SectionLabel>{title}</SectionLabel>
+        {action}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function DraftBanner({ plan, hasActive, onAction, onOpenTask }) {
+  const [expanded, setExpanded] = usePersistedState('plan.draftExpanded', !hasActive);
   const [busy, setBusy] = useState(null);
-  const [confirmDiscard, setConfirmDiscard] = useState(false);
   const [error, setError] = useState(null);
   const tasks = plan.tasks || [];
   const reportPath = plan.run_meta?.report_path;
@@ -769,122 +783,93 @@ function DraftPlanPanel({ plan, onAction, expandedTask, onExpand, onSaveNotes })
       setError(err.message);
     } finally {
       setBusy(null);
-      setConfirmDiscard(false);
     }
   }
 
   return (
-    <div className="bg-[#0a0a0a] rounded-lg border border-orange-500/40 p-6 space-y-4">
-      <div className="flex items-start justify-between gap-4 flex-wrap">
-        <div>
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs font-semibold uppercase tracking-wider bg-orange-500/20 text-orange-300 px-2 py-0.5 rounded">
-              Draft · needs approval
-            </span>
-            <SourceBadge source={plan.generated_by} />
+    <Card className="border-amber-500/40">
+      <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge tone="warn" icon={TriangleAlert}>Draft · needs approval</Badge>
+            <Badge icon={Sparkles}>{SOURCE[plan.generated_by] || 'AI'}</Badge>
           </div>
-          <h3 className="text-lg font-semibold text-white mt-2">{plan.month} SEO Plan</h3>
-          <p className="text-gray-500 text-sm">
-            Created {new Date(plan.created_at).toLocaleDateString()} · {tasks.length} task{tasks.length === 1 ? '' : 's'}
-            {reportPath && <> · report: <code className="text-gray-400">{reportPath}</code></>}
+          <h2 className="mt-2 text-base font-semibold">{plan.month} plan</h2>
+          <p className="mt-0.5 text-sm text-adm-muted">
+            Created {fmtDate(plan.created_at)} · {tasks.length} task{tasks.length === 1 ? '' : 's'}
+            {reportPath && <> · report <code className="font-mono text-xs">{reportPath}</code></>}
+          </p>
+          <p className="mt-2 text-xs text-adm-subtle">
+            Approving {hasActive ? 'archives the current plan and ' : ''}makes this one live. Nothing changes on the website until each task ships as its own PR.
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          {confirmDiscard ? (
-            <>
-              <button
-                onClick={() => run('discard')}
-                disabled={!!busy}
-                className="text-sm bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
-              >
-                {busy === 'discard' ? 'Discarding...' : 'Confirm discard'}
-              </button>
-              <button
-                onClick={() => setConfirmDiscard(false)}
-                disabled={!!busy}
-                className="text-sm text-gray-400 hover:text-white px-2 py-1.5"
-              >
-                Cancel
-              </button>
-            </>
-          ) : (
-            <button
-              onClick={() => setConfirmDiscard(true)}
-              disabled={!!busy}
-              className="text-sm bg-[#171717] hover:bg-[#262626] border border-[#262626] text-gray-300 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
-            >
-              Discard
-            </button>
-          )}
-          <button
-            onClick={() => run('approve')}
-            disabled={!!busy}
-            className="text-sm bg-teal-500 hover:bg-teal-600 text-white px-4 py-1.5 rounded-lg transition-colors disabled:opacity-50"
-          >
-            {busy === 'approve' ? 'Approving...' : 'Approve & make active'}
-          </button>
+        <div className="flex shrink-0 flex-wrap items-center gap-2">
+          <ConfirmButton onConfirm={() => run('discard')} confirmLabel="Confirm discard" size="sm">Discard</ConfirmButton>
+          <Button variant="primary" size="sm" icon={Check} onClick={() => run('approve')} loading={busy === 'approve'} disabled={!!busy}>
+            Approve & make active
+          </Button>
         </div>
       </div>
 
-      <p className="text-gray-500 text-xs">
-        Approving archives the current active plan and makes this one live. Nothing changes on the website until each task ships as its own PR.
-      </p>
+      {error && <div className="px-5 pb-4"><Alert tone="bad">{error}</Alert></div>}
 
-      {error && <p className="text-sm text-red-400">{error}</p>}
-
-      {plan.summary && <p className="text-gray-300 text-sm">{plan.summary}</p>}
-
-      {plan.goals?.length > 0 && (
-        <ul className="space-y-1">
-          {plan.goals.map((goal, idx) => (
-            <li key={idx} className="text-gray-300 text-sm flex items-start gap-2">
-              <span className="text-orange-300 mt-0.5 shrink-0">-</span>
-              {goal}
-            </li>
-          ))}
-        </ul>
-      )}
-
-      <div className="space-y-2">
-        {tasks.map(task => (
-          <TaskCard
-            key={task.id}
-            task={task}
-            onToggle={null}
-            isExpanded={expandedTask === task.id}
-            onExpand={onExpand}
-            onSaveNotes={onSaveNotes}
-          />
-        ))}
+      <div className="border-t border-adm-border">
+        <button
+          type="button"
+          onClick={() => setExpanded(e => !e)}
+          aria-expanded={expanded}
+          className={cx('flex w-full items-center gap-2 px-5 py-3 text-left text-sm font-medium text-adm-muted hover:text-adm-text cursor-pointer', focusRing)}
+        >
+          <ChevronRight className={cx('h-4 w-4 transition-transform', expanded && 'rotate-90')} aria-hidden />
+          {expanded ? 'Hide' : 'Review'} the {tasks.length} proposed task{tasks.length === 1 ? '' : 's'}
+        </button>
+        {expanded && (
+          <div className="space-y-4 px-5 pb-5">
+            {plan.summary && <p className="text-sm leading-relaxed text-adm-muted">{plan.summary}</p>}
+            {plan.goals?.length > 0 && (
+              <ul className="space-y-1.5">
+                {plan.goals.map((g, i) => (
+                  <li key={i} className="flex gap-2 text-sm"><Check className="mt-0.5 h-4 w-4 shrink-0 text-adm-warn" aria-hidden />{g}</li>
+                ))}
+              </ul>
+            )}
+            <ul className="divide-y divide-adm-border rounded-xl border border-adm-border">
+              {tasks.map(task => (
+                <TaskRow key={task.id} task={task} draft onOpen={() => onOpenTask(task.id)} />
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
-    </div>
+    </Card>
   );
 }
 
-function PlanHistory({ plans }) {
-  if (plans.length === 0) return null;
-
+function HistoryModal({ plans, onClose }) {
   return (
-    <div className="space-y-2">
-      {plans.map(plan => {
-        const tasks = plan.tasks || [];
-        const completed = tasks.filter(t => t.status === 'completed').length;
-        return (
-          <div key={plan.id} className="bg-[#0a0a0a] rounded-lg border border-[#262626] p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h4 className="text-white font-medium">{plan.month}</h4>
-                <p className="text-gray-500 text-sm">
-                  {completed}/{tasks.length} tasks completed
-                </p>
-              </div>
-              <span className="text-xs bg-[#171717] text-gray-400 px-2 py-1 rounded">
-                Archived
-              </span>
-            </div>
-          </div>
-        );
-      })}
-    </div>
+    <Modal title="Past plans" description="Archived plans for this site, newest first." onClose={onClose} size="lg">
+      {plans.length === 0 ? (
+        <p className="text-sm text-adm-muted">No archived plans yet.</p>
+      ) : (
+        <ul className="divide-y divide-adm-border">
+          {plans.map(plan => {
+            const tasks = plan.tasks || [];
+            const done = tasks.filter(t => t.status === 'completed').length;
+            return (
+              <li key={plan.id} className="py-3 first:pt-0 last:pb-0">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="font-medium">{plan.month}</p>
+                    <p className="text-xs text-adm-subtle">Created {fmtDate(plan.created_at)}</p>
+                  </div>
+                  <span className="text-sm tabular-nums text-adm-muted">{done}/{tasks.length} done</span>
+                </div>
+                <ProgressBar value={done} max={tasks.length || 1} className="mt-2" label={`${plan.month} progress`} />
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </Modal>
   );
 }
