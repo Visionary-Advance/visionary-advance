@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { usePersistedState } from '@/lib/usePersistedState'
 import Link from 'next/link'
 import { useAdminAuth } from '@/Components/Admin/AdminAuthProvider'
 import StatusBadge from '@/Components/Admin/DevOps/StatusBadge'
@@ -10,10 +11,10 @@ export default function SitesListPage() {
   const { loading: authLoading } = useAdminAuth()
   const [sites, setSites] = useState([])
   const [loading, setLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [envFilter, setEnvFilter] = useState('')
-  const [statusFilter, setStatusFilter] = useState('')
-  const [viewMode, setViewMode] = useState('grid') // 'grid' or 'table'
+  const [searchTerm, setSearchTerm] = usePersistedState('searchTerm', '')
+  const [envFilter, setEnvFilter] = usePersistedState('envFilter', '')
+  const [statusFilter, setStatusFilter] = usePersistedState('statusFilter', '')
+  const [viewMode, setViewMode] = usePersistedState('viewMode', 'grid') // 'grid' or 'table'
 
   // Fetch sites
   useEffect(() => {

@@ -2,6 +2,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { usePersistedState } from '@/lib/usePersistedState'
 import { formatCurrency } from '@/lib/finance'
 import FinanceStatCard from '@/Components/Admin/Finance/FinanceStatCard'
 import DeadlineAlert from '@/Components/Admin/Finance/DeadlineAlert'
@@ -11,7 +12,7 @@ import QuarterlyCard from '@/Components/Admin/Finance/QuarterlyCard'
 export default function FinanceDashboard() {
   const [stats, setStats] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [year, setYear] = useState(new Date().getFullYear())
+  const [year, setYear] = usePersistedState('year', new Date().getFullYear())
 
   const fetchStats = async () => {
     try {

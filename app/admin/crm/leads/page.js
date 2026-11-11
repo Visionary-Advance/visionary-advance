@@ -2,6 +2,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { usePersistedState } from '@/lib/usePersistedState'
 import Link from 'next/link'
 import ScoreBadge from '@/Components/CRM/Shared/ScoreBadge'
 import StageBadge from '@/Components/CRM/Shared/StageBadge'
@@ -11,14 +12,14 @@ export default function LeadsPage() {
   const [leads, setLeads] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [pagination, setPagination] = useState({ page: 1, limit: 20, total: 0, totalPages: 0 })
+  const [pagination, setPagination] = usePersistedState('pagination', { page: 1, limit: 20, total: 0, totalPages: 0 })
 
   // Filters
-  const [search, setSearch] = useState('')
-  const [stageFilter, setStageFilter] = useState('')
-  const [sourceFilter, setSourceFilter] = useState('')
-  const [sortBy, setSortBy] = useState('created_at')
-  const [sortOrder, setSortOrder] = useState('desc')
+  const [search, setSearch] = usePersistedState('search', '')
+  const [stageFilter, setStageFilter] = usePersistedState('stageFilter', '')
+  const [sourceFilter, setSourceFilter] = usePersistedState('sourceFilter', '')
+  const [sortBy, setSortBy] = usePersistedState('sortBy', 'created_at')
+  const [sortOrder, setSortOrder] = usePersistedState('sortOrder', 'desc')
 
   const fetchLeads = useCallback(async () => {
     setLoading(true)

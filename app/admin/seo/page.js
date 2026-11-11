@@ -1,328 +1,263 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+// Home of the SEO dashboard: every site in one sortable table with its last-28-day
+// numbers and plan progress, plus portfolio totals and the latest reports.
+
+import { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useAdminAuth } from '@/Components/Admin/AdminAuthProvider';
+import { ChevronRight, FileText, Globe, Plus, Search, Send, TriangleAlert } from 'lucide-react';
+import { useSEO } from '@/Components/Admin/SEO/SEOContext';
+import { usePersistedState } from '@/lib/usePersistedState';
 import AddSiteModal from '@/Components/Admin/SEO/AddSiteModal';
+import {
+  Alert, Badge, Button, Card, CardHeader, Delta, EmptyState, PageHeader, PageLoader, ProgressBar, SearchInput,
+  Skeleton, StatTile, Table, Th, Td, cx, focusRing, useSort, useToast,
+} from '@/Components/Admin/SEO/ui';
+import { fmtCompact, fmtDate, fmtInt, fmtPos, hostOf, pctChange, reportPeriod, timeAgo } from '@/Components/Admin/SEO/format';
 
-export default function SEODashboardPage() {
-  const { user, loading: authLoading } = useAdminAuth();
+export default function SEOSitesHome() {
   const router = useRouter();
-
-  const [sites, setSites] = useState([]);
-  const [availableSites, setAvailableSites] = useState([]);
-  const [recentReports, setRecentReports] = useState([]);
-  const [aggregateMetrics, setAggregateMetrics] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const notify = useToast();
+  const {
+    user, googleConnected, sites, availableSites, sitesLoading, sitesError, refreshSites,
+    analyticsBySite, loadAnalytics, planBySite, loadPlanSummary,
+  } = useSEO();
+  const [search, setSearch] = usePersistedState('search', '');
   const [showAddModal, setShowAddModal] = useState(false);
-  const [googleConnected, setGoogleConnected] = useState(false);
+  const [recentReports, setRecentReports] = useState(null);
 
-  // Check Google connection
   useEffect(() => {
-    if (!user?.email) return;
-    fetch(`/api/auth/google/status?email=${encodeURIComponent(user.email)}`)
+    sites.forEach(s => { loadAnalytics(s.id); loadPlanSummary(s.id); });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sites.map(s => s.id).join(',')]);
+
+  useEffect(() => {
+    if (!googleConnected) return;
+    fetch('/api/seo/reports?limit=5')
       .then(r => r.json())
-      .then(data => setGoogleConnected(data.connected))
-      .catch(() => {});
-  }, [user?.email]);
+      .then(d => setRecentReports(d.reports || []))
+      .catch(() => setRecentReports([]));
+  }, [googleConnected]);
 
-  // Fetch all data
-  useEffect(() => {
-    if (!user?.email || !googleConnected) return;
+  const rows = useMemo(() => sites.map(site => {
+    const a = analyticsBySite[site.id];
+    const ok = a && !a.error;
+    return {
+      site,
+      loading: a === undefined,
+      error: a?.error,
+      clicks: ok ? a.totalClicks : null,
+      clicksDelta: ok ? pctChange(a.totalClicks, a.previous?.totalClicks) : null,
+      impressions: ok ? a.totalImpressions : null,
+      position: ok && a.avgPosition ? a.avgPosition : null,
+      plan: planBySite[site.id],
+      name: (site.display_name || site.site_url || '').toLowerCase(),
+      lastSync: site.last_sync_at ? new Date(site.last_sync_at).getTime() : null,
+    };
+  }), [sites, analyticsBySite, planBySite]);
 
-    async function fetchData() {
-      setLoading(true);
-      try {
-        const [sitesRes, reportsRes] = await Promise.all([
-          fetch(`/api/seo/sites?email=${encodeURIComponent(user.email)}&includeAvailable=true`),
-          fetch('/api/seo/reports?limit=5')
-        ]);
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return rows;
+    return rows.filter(r => r.name.includes(q) || r.site.site_url?.toLowerCase().includes(q));
+  }, [rows, search]);
 
-        const sitesData = await sitesRes.json();
-        const reportsData = await reportsRes.json();
+  const [sorted, sortProps] = useSort(filtered, { key: 'clicks', dir: 'desc' }, {
+    planPct: r => (r.plan?.active?.total ? r.plan.active.done / r.plan.active.total : null),
+  });
 
-        const fetchedSites = sitesData.sites || [];
-        setSites(fetchedSites);
-        setAvailableSites(sitesData.availableSites || []);
-        setRecentReports(reportsData.reports || []);
-
-        // Fetch aggregate analytics across all sites
-        if (fetchedSites.length > 0) {
-          const analyticsResults = await Promise.all(
-            fetchedSites.map(s =>
-              fetch(`/api/seo/analytics?siteId=${s.id}&days=28`)
-                .then(r => r.json())
-                .catch(() => null)
-            )
-          );
-
-          let totalClicks = 0;
-          let totalImpressions = 0;
-          let sitesWithData = 0;
-
-          analyticsResults.forEach(data => {
-            if (data && !data.error) {
-              totalClicks += data.totalClicks || 0;
-              totalImpressions += data.totalImpressions || 0;
-              if (data.totalClicks || data.totalImpressions) sitesWithData++;
-            }
-          });
-
-          setAggregateMetrics({ totalClicks, totalImpressions, sitesWithData });
-        }
-      } catch (err) {
-        console.error('Error fetching dashboard data:', err);
-      } finally {
-        setLoading(false);
+  const totals = useMemo(() => {
+    let clicks = 0, impressions = 0, prevClicks = 0, prevImpr = 0, withPrev = 0, loaded = 0, openTasks = 0, drafts = 0;
+    sites.forEach(s => {
+      const a = analyticsBySite[s.id];
+      if (a && !a.error) {
+        loaded++;
+        clicks += a.totalClicks || 0;
+        impressions += a.totalImpressions || 0;
+        if (a.previous) { withPrev++; prevClicks += a.previous.totalClicks || 0; prevImpr += a.previous.totalImpressions || 0; }
       }
-    }
-    fetchData();
-  }, [user?.email, googleConnected]);
+      const p = planBySite[s.id];
+      if (p?.active) openTasks += p.active.total - p.active.done;
+      if (p?.hasDraft) drafts++;
+    });
+    return {
+      clicks, impressions, openTasks, drafts,
+      loading: sites.length > 0 && loaded < sites.filter(s => !analyticsBySite[s.id]?.error).length,
+      clicksDelta: withPrev ? pctChange(clicks, prevClicks) : null,
+      imprDelta: withPrev ? pctChange(impressions, prevImpr) : null,
+    };
+  }, [sites, analyticsBySite, planBySite]);
 
-  // Add site handler
   async function handleAddSite(siteUrl, displayName) {
     const res = await fetch('/api/seo/sites', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ siteUrl, googleEmail: user.email, displayName })
+      body: JSON.stringify({ siteUrl, googleEmail: user.email, displayName }),
     });
     const data = await res.json();
     if (data.error) throw new Error(data.error);
-
-    const sitesRes = await fetch(`/api/seo/sites?email=${encodeURIComponent(user.email)}&includeAvailable=true`);
-    const sitesData = await sitesRes.json();
-    setSites(sitesData.sites || []);
-    setAvailableSites(sitesData.availableSites || []);
+    await refreshSites();
     setShowAddModal(false);
-
-    // Navigate to the new site
+    notify('Site added. Sync it to pull its Search Console data.', 'success');
     if (data.site?.id) router.push(`/admin/seo/sites/${data.site.id}`);
   }
 
-  if (authLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-400"></div>
-      </div>
-    );
-  }
+  if (googleConnected === null || (googleConnected && sitesLoading && sites.length === 0)) return <PageLoader />;
 
-  if (!googleConnected) {
+  if (googleConnected === false) {
     return (
-      <div>
-        <h1 className="text-2xl font-bold text-white mb-6">SEO Dashboard</h1>
-        <div className="bg-[#0a0a0a] rounded-lg border border-[#262626] p-8 text-center">
-          <div className="text-gray-400 mb-4">
-            Connect your Google account to access Search Console data.
-          </div>
-          <button
-            onClick={() => router.push('/admin')}
-            className="bg-teal-500 hover:bg-teal-600 text-white px-6 py-2 rounded-lg transition-colors"
-          >
-            Connect Google Account
-          </button>
-        </div>
-      </div>
+      <>
+        <PageHeader title="All sites" />
+        <Card>
+          <EmptyState
+            icon={Globe}
+            title="Connect your Google account"
+            description="Search Console access is how this dashboard gets clicks, impressions and rankings."
+            action={<Button variant="primary" href="/admin">Connect Google account</Button>}
+          />
+        </Card>
+      </>
     );
   }
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-white">SEO Dashboard</h1>
-        <div className="flex gap-3">
-          <button
-            onClick={() => router.push('/admin/seo/sites')}
-            className="bg-[#171717] hover:bg-[#262626] border border-[#262626] text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
-            </svg>
-            View All Sites
-          </button>
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            Add Site
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        title="All sites"
+        description="Search performance over the last 28 days, compared with the 28 days before."
+        actions={<Button variant="primary" icon={Plus} onClick={() => setShowAddModal(true)}>Add site</Button>}
+      />
 
-      {loading ? (
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-400"></div>
-        </div>
-      ) : sites.length === 0 ? (
-        <div className="bg-[#0a0a0a] rounded-lg border border-[#262626] p-12 text-center">
-          <svg className="w-16 h-16 text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
-          </svg>
-          <h2 className="text-xl font-semibold text-white mb-2">Get Started with SEO Tracking</h2>
-          <p className="text-gray-400 mb-6">Add your first site from Google Search Console to start monitoring performance.</p>
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="bg-teal-500 hover:bg-teal-600 text-white px-6 py-2.5 rounded-lg transition-colors"
-          >
-            Add Your First Site
-          </button>
-        </div>
+      {sitesError && <Alert tone="bad" title="Couldn't load sites" className="mb-6">{sitesError}</Alert>}
+
+      {sites.length === 0 ? (
+        <Card>
+          <EmptyState
+            icon={Globe}
+            title="Add your first site"
+            description="Pick a Search Console property to start tracking its traffic and rankings."
+            action={<Button variant="primary" icon={Plus} onClick={() => setShowAddModal(true)}>Add site</Button>}
+          />
+        </Card>
       ) : (
         <div className="space-y-6">
-          {/* Aggregate Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-[#0a0a0a] rounded-lg border border-[#262626] p-5">
-              <p className="text-gray-400 text-sm mb-1">Total Sites</p>
-              <p className="text-3xl font-bold text-white">{sites.length}</p>
-              <p className="text-gray-500 text-xs mt-1">
-                {aggregateMetrics?.sitesWithData || 0} with data
-              </p>
-            </div>
-            <div className="bg-[#0a0a0a] rounded-lg border border-[#262626] p-5">
-              <p className="text-gray-400 text-sm mb-1">Total Clicks (28d)</p>
-              <p className="text-3xl font-bold text-white">
-                {(aggregateMetrics?.totalClicks || 0).toLocaleString()}
-              </p>
-              <p className="text-gray-500 text-xs mt-1">Across all sites</p>
-            </div>
-            <div className="bg-[#0a0a0a] rounded-lg border border-[#262626] p-5">
-              <p className="text-gray-400 text-sm mb-1">Total Impressions (28d)</p>
-              <p className="text-3xl font-bold text-white">
-                {(aggregateMetrics?.totalImpressions || 0).toLocaleString()}
-              </p>
-              <p className="text-gray-500 text-xs mt-1">Across all sites</p>
-            </div>
-          </div>
+          <section aria-label="Portfolio totals" className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+            <StatTile label="Sites" value={fmtInt(sites.length)} hint={totals.drafts ? `${totals.drafts} draft plan${totals.drafts === 1 ? '' : 's'} to review` : 'tracked'} />
+            <StatTile label="Clicks" loading={totals.loading} value={fmtCompact(totals.clicks)} delta={<Delta value={totals.clicksDelta} label="vs previous 28 days" />} />
+            <StatTile label="Impressions" loading={totals.loading} value={fmtCompact(totals.impressions)} delta={<Delta value={totals.imprDelta} label="vs previous 28 days" />} />
+            <StatTile label="Open plan tasks" value={fmtInt(totals.openTasks)} hint="across active plans" />
+          </section>
 
-          {/* Sites Quick List */}
-          <div className="bg-[#0a0a0a] rounded-lg border border-[#262626]">
-            <div className="flex items-center justify-between p-4 border-b border-[#262626]">
-              <h2 className="text-lg font-semibold text-white">Your Sites</h2>
-              <button
-                onClick={() => router.push('/admin/seo/sites')}
-                className="text-sm text-teal-400 hover:text-teal-300 transition-colors"
-              >
-                View All
-              </button>
+          <Card>
+            <div className="flex flex-col gap-3 border-b border-adm-border px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+              <h2 className="text-sm font-semibold">Sites <span className="font-normal text-adm-subtle">{filtered.length}</span></h2>
+              <SearchInput value={search} onChange={setSearch} placeholder="Search sites" icon={Search} className="sm:w-64" />
             </div>
-            <div className="divide-y divide-[#262626]">
-              {sites.map(site => (
-                <button
-                  key={site.id}
-                  onClick={() => router.push(`/admin/seo/sites/${site.id}`)}
-                  className="w-full flex items-center justify-between p-4 hover:bg-[#171717] transition-colors text-left"
-                >
-                  <div className="flex-1 min-w-0">
-                    <p className="text-white font-medium truncate">{site.display_name}</p>
-                    <p className="text-gray-500 text-sm truncate">{site.site_url}</p>
-                  </div>
-                  <div className="flex items-center gap-3 ml-4">
-                    {site.last_sync_at ? (
-                      <span className="text-gray-500 text-xs">
-                        Synced {formatTimeAgo(site.last_sync_at)}
-                      </span>
-                    ) : (
-                      <span className="text-gray-600 text-xs">Not synced</span>
-                    )}
-                    <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Recent Reports */}
-          <div className="bg-[#0a0a0a] rounded-lg border border-[#262626]">
-            <div className="flex items-center justify-between p-4 border-b border-[#262626]">
-              <h2 className="text-lg font-semibold text-white">Recent Reports</h2>
-              <button
-                onClick={() => router.push('/admin/seo/reports')}
-                className="text-sm text-teal-400 hover:text-teal-300 transition-colors"
-              >
-                View All
-              </button>
-            </div>
-            {recentReports.length === 0 ? (
-              <div className="p-6 text-center text-gray-400">
-                <p>No reports generated yet.</p>
-                <p className="text-sm mt-1">Generate reports from individual site pages.</p>
-              </div>
+            {filtered.length === 0 ? (
+              <p className="p-8 text-center text-sm text-adm-muted">No sites match “{search}”.</p>
             ) : (
-              <div className="divide-y divide-[#262626]">
-                {recentReports.map(report => {
-                  const currentMonth = report.month_comparison?.currentMonth?.name;
-                  const previousMonth = report.month_comparison?.previousMonth?.name;
-                  const period = currentMonth && previousMonth
-                    ? `${currentMonth} vs ${previousMonth}`
-                    : formatDateRange(report.start_date, report.end_date);
-                  const siteName = report.site?.display_name || report.site?.site_url || 'Unknown';
-
-                  return (
-                    <button
-                      key={report.id}
-                      onClick={() => router.push(`/admin/seo/sites/${report.site_id}?tab=reports`)}
-                      className="w-full flex items-center justify-between p-4 hover:bg-[#171717] transition-colors text-left"
-                    >
-                      <div className="flex-1 min-w-0">
-                        <p className="text-white font-medium">{siteName}</p>
-                        <p className="text-gray-500 text-sm">{period}</p>
-                      </div>
-                      <div className="flex items-center gap-3 ml-4">
-                        <span className="text-gray-400 text-sm">
-                          {report.total_clicks?.toLocaleString() || 0} clicks
-                        </span>
-                        {report.status === 'sent' ? (
-                          <span className="text-xs bg-green-900/50 text-green-300 px-2 py-0.5 rounded">Sent</span>
-                        ) : (
-                          <span className="text-xs bg-gray-700 text-gray-300 px-2 py-0.5 rounded">Draft</span>
-                        )}
-                        <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
+              <Table>
+                <thead>
+                  <tr>
+                    <Th {...sortProps('name', 'asc')}>Site</Th>
+                    <Th align="right" {...sortProps('clicks')}>Clicks</Th>
+                    <Th align="right" {...sortProps('clicksDelta')}>Change</Th>
+                    <Th align="right" className="hidden md:table-cell" {...sortProps('impressions')}>Impr.</Th>
+                    <Th align="right" className="hidden md:table-cell" {...sortProps('position', 'asc')}>Avg. pos.</Th>
+                    <Th className="hidden lg:table-cell" {...sortProps('planPct')}>Plan</Th>
+                    <Th className="hidden xl:table-cell" {...sortProps('lastSync')}>Synced</Th>
+                    <Th><span className="sr-only">Open</span></Th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sorted.map(r => <SiteRow key={r.site.id} row={r} />)}
+                </tbody>
+              </Table>
             )}
-          </div>
+          </Card>
+
+          <Card>
+            <CardHeader
+              title="Recent reports"
+              actions={<Button size="sm" variant="ghost" href="/admin/seo/reports">View all</Button>}
+            />
+            {recentReports === null ? (
+              <div className="space-y-3 p-5">{[0, 1, 2].map(i => <Skeleton key={i} className="h-5 w-full" />)}</div>
+            ) : recentReports.length === 0 ? (
+              <EmptyState icon={FileText} title="No reports yet" description="Generate one from a site's Reports section." />
+            ) : (
+              <ul className="divide-y divide-adm-border">
+                {recentReports.map(report => (
+                  <li key={report.id}>
+                    <Link
+                      href={`/admin/seo/sites/${report.site_id}/reports?report=${report.id}`}
+                      className={cx('flex items-center gap-4 px-5 py-3 hover:bg-adm-raised/50', focusRing)}
+                    >
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-sm font-medium text-adm-text">{report.site?.display_name || hostOf(report.site?.site_url) || 'Unknown site'}</span>
+                        <span className="block text-xs text-adm-subtle">{reportPeriod(report)}</span>
+                      </span>
+                      <span className="hidden text-sm tabular-nums text-adm-muted sm:inline">{fmtInt(report.total_clicks)} clicks</span>
+                      {report.status === 'sent' ? <Badge tone="good" icon={Send}>Sent</Badge> : <Badge>Draft</Badge>}
+                      <ChevronRight className="h-4 w-4 text-adm-subtle" aria-hidden />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Card>
         </div>
       )}
 
-      {/* Add Site Modal */}
       {showAddModal && (
-        <AddSiteModal
-          availableSites={availableSites}
-          onAdd={handleAddSite}
-          onClose={() => setShowAddModal(false)}
-        />
+        <AddSiteModal availableSites={availableSites} onAdd={handleAddSite} onClose={() => setShowAddModal(false)} />
       )}
     </div>
   );
 }
 
-function formatTimeAgo(dateString) {
-  const date = new Date(dateString);
-  const now = new Date();
-  const diffMs = now - date;
-  const diffMins = Math.floor(diffMs / 60000);
-  const diffHours = Math.floor(diffMins / 60);
-  const diffDays = Math.floor(diffHours / 24);
-
-  if (diffMins < 1) return 'just now';
-  if (diffMins < 60) return `${diffMins}m ago`;
-  if (diffHours < 24) return `${diffHours}h ago`;
-  return `${diffDays}d ago`;
-}
-
-function formatDateRange(startDate, endDate) {
-  const start = new Date(startDate);
-  const end = new Date(endDate);
-  const options = { month: 'short', day: 'numeric' };
-  return `${start.toLocaleDateString('en-US', options)} - ${end.toLocaleDateString('en-US', options)}`;
+function SiteRow({ row }) {
+  const { site, loading, error, plan } = row;
+  const href = `/admin/seo/sites/${site.id}`;
+  const cell = (content, cls) => (loading ? <Skeleton className={cx('ml-auto h-4', cls || 'w-12')} /> : content);
+  return (
+    <tr className="border-t border-adm-border first:border-t-0 hover:bg-adm-raised/50">
+      <Td className="max-w-0 w-full">
+        <Link href={href} className={cx('block rounded', focusRing)}>
+          <span className="block truncate font-medium text-adm-text hover:underline">{site.display_name || hostOf(site.site_url)}</span>
+          <span className="block truncate text-xs text-adm-subtle">{hostOf(site.site_url)}</span>
+        </Link>
+      </Td>
+      <Td align="right" numeric className="text-adm-text">
+        {error ? <span title={error} className="inline-flex items-center gap-1 text-adm-warn"><TriangleAlert className="h-3.5 w-3.5" aria-hidden />Error</span> : cell(fmtInt(row.clicks))}
+      </Td>
+      <Td align="right">{cell(<Delta value={row.clicksDelta} label="vs previous 28 days" />)}</Td>
+      <Td align="right" numeric className="hidden text-adm-muted md:table-cell">{cell(fmtInt(row.impressions))}</Td>
+      <Td align="right" numeric className="hidden text-adm-muted md:table-cell">{cell(fmtPos(row.position), 'w-8')}</Td>
+      <Td className="hidden lg:table-cell">
+        {!plan ? <Skeleton className="h-4 w-24" /> : (
+          <div className="flex min-w-[9rem] items-center gap-2">
+            {plan.active ? (
+              <>
+                <ProgressBar value={plan.active.done} max={plan.active.total} className="w-16" label={`${site.display_name} plan progress`} />
+                <span className="whitespace-nowrap text-xs tabular-nums text-adm-muted">{plan.active.done}/{plan.active.total}</span>
+              </>
+            ) : (
+              <span className="text-xs text-adm-subtle">No plan</span>
+            )}
+            {plan.hasDraft && <Badge tone="warn">Draft</Badge>}
+          </div>
+        )}
+      </Td>
+      <Td className="hidden whitespace-nowrap text-xs text-adm-muted xl:table-cell" title={site.last_sync_at ? fmtDate(site.last_sync_at) : undefined}>
+        {site.last_sync_at ? timeAgo(site.last_sync_at) : <span className="text-adm-warn">Never</span>}
+      </Td>
+      <Td align="right">
+        <Link href={href} aria-label={`Open ${site.display_name || site.site_url}`} className={cx('inline-flex rounded p-1 text-adm-subtle hover:text-adm-text', focusRing)}>
+          <ChevronRight className="h-4 w-4" aria-hidden />
+        </Link>
+      </Td>
+    </tr>
+  );
 }

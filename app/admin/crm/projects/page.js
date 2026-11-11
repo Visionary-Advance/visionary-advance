@@ -4,6 +4,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { usePersistedState } from '@/lib/usePersistedState'
 import Link from 'next/link'
 
 const STATUS_CONFIG = {
@@ -19,8 +20,8 @@ const STATUS_ORDER = ['planning', 'active', 'on_hold', 'completed', 'cancelled']
 export default function ProjectsKanbanPage() {
   const [projects, setProjects] = useState({ byStatus: {} })
   const [loading, setLoading] = useState(true)
-  const [view, setView] = useState('kanban') // kanban or list
-  const [search, setSearch] = useState('')
+  const [view, setView] = usePersistedState('view', 'kanban') // kanban or list
+  const [search, setSearch] = usePersistedState('search', '')
   const [draggedProject, setDraggedProject] = useState(null)
 
   useEffect(() => {

@@ -3,6 +3,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { usePersistedState } from '@/lib/usePersistedState'
 import Link from 'next/link'
 import { getCRMAuthClient } from '@/lib/supabase-crm-client'
 
@@ -46,10 +47,10 @@ function formatDate(value) {
 export default function PocketInboxPage() {
   const [recordings, setRecordings] = useState([])
   const [leads, setLeads] = useState([])
-  const [status, setStatus] = useState('unmatched')
+  const [status, setStatus] = usePersistedState('status', 'unmatched')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [expanded, setExpanded] = useState(null)
+  const [expanded, setExpanded] = usePersistedState('expanded', null)
   const [selectedLead, setSelectedLead] = useState({})
   const [busyId, setBusyId] = useState(null)
   const [syncing, setSyncing] = useState(false)

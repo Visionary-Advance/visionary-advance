@@ -2,6 +2,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { usePersistedState } from '@/lib/usePersistedState'
 import { formatCurrency } from '@/lib/finance'
 import QuarterlyCard from '@/Components/Admin/Finance/QuarterlyCard'
 import QuarterlyLineChart from '@/Components/Admin/Finance/QuarterlyLineChart'
@@ -9,7 +10,7 @@ import QuarterlyLineChart from '@/Components/Admin/Finance/QuarterlyLineChart'
 export default function TaxEstimatorPage() {
   const [stats, setStats] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [year, setYear] = useState(new Date().getFullYear())
+  const [year, setYear] = usePersistedState('year', new Date().getFullYear())
 
   const fetchStats = async () => {
     try {

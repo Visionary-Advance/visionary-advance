@@ -1,13 +1,14 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { usePersistedState } from '@/lib/usePersistedState'
 import Link from 'next/link'
 import IndustrySelect from '@/Components/IndustrySelect'
 
 export default function BusinessesPage() {
   const [businesses, setBusinesses] = useState([])
   const [loading, setLoading] = useState(true)
-  const [search, setSearch] = useState('')
+  const [search, setSearch] = usePersistedState('search', '')
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [creating, setCreating] = useState(false)
   const [newBusiness, setNewBusiness] = useState({ name: '', website: '', industry: '' })

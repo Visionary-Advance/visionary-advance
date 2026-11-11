@@ -2,6 +2,7 @@
 'use client'
 
 import { useState, useEffect, use } from 'react'
+import { usePersistedState } from '@/lib/usePersistedState'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import TypeBadge from '@/Components/Admin/SystemForge/TypeBadge'
@@ -16,7 +17,7 @@ export default function ModuleDetailPage({ params }) {
   const [module, setModule] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [activeTab, setActiveTab] = useState('files')
+  const [activeTab, setActiveTab] = usePersistedState('activeTab', 'files')
   const [selectedFile, setSelectedFile] = useState(null)
   const [showEditForm, setShowEditForm] = useState(false)
   const [showAddFile, setShowAddFile] = useState(false)
