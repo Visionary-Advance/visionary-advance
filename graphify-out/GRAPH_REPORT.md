@@ -1,17 +1,17 @@
-# Graph Report - visionary-advance  (2026-11-09)
+# Graph Report - visionary-advance  (2026-11-11)
 
 ## Corpus Check
-- 482 files · ~289,916 words
+- 497 files · ~293,519 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 26 file(s) not represented in the graph (top: .ttf 18, (none) 4, .ico 1)
 
 ## Summary
-- 2652 nodes · 5833 edges · 160 communities (124 shown, 36 thin omitted)
-- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 57 edges (avg confidence: 0.85)
+- 2727 nodes · 6513 edges · 158 communities (123 shown, 35 thin omitted)
+- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 58 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `5d0eceed`
+- Built from commit: `e324eb87`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -21,7 +21,7 @@
 - 002_crm_premium_features.sql
 - leads/[id]/page.js
 - ProposalEditor.jsx
-- vault/[id]/page.js
+- ModuleDetailPage
 - app/layout.js
 - supabase-crm.js
 - devops.js
@@ -31,11 +31,11 @@
 - logActivity
 - tasks.js
 - systemforge.js
-- businesses/[id]/page.js
+- react
 - proposals.js
-- lucide-react
+- formatCurrency
 - search-console.js
-- devops/page.js
+- devops/sites/[id]/page.js
 - seo-reports.js
 - sanity-boilerplate/lib/sanity.js
 - AdminAuthProvider.jsx
@@ -43,36 +43,36 @@
 - createOrUpdateLead
 - next
 - 20260201_systemforge_tables.sql
-- dependencies
+- jobber.js
 - framer-motion
-- formatCurrency
+- CSVImportModal.jsx
 - 001_crm_schema.sql
-- devops/sites/[id]/page.js
+- businesses/[id]/page.js
 - stripe-crm.js
 - useRecaptcha
-- SEOReportPanel.jsx
+- package.json
 - businesses.js
 - @supabase/supabase-js
 - lib/sanity.js
-- package.json
+- dependencies
 - useAdminAuth
 - affordable-small-business-website-design/page.jsx
 - app/blog/[slug]/page.jsx
-- SEOPlanView.jsx
+- comment-automations.js
 - seo.js
 - finance.js
 - local/route.js
-- generateBreadcrumbSchema
+- BlogPostCard
 - instant-site/start/route.js
-- HomeClient.jsx
-- businesses/page.js
+- LandingPageTemplate.jsx
+- ga4.js
 - square-auth.js
 - instant-site.js
-- jobber.js
-- LandingPageTemplate.jsx
+- app/blog/tag/[slug]/page.jsx
+- sanity-boilerplate/Components/Blog/BlogPostContent.jsx
 - compilerOptions
 - google-auth.js
-- seo/sites/[id]/page.js
+- ModuleCard.jsx
 - project-tasks.js
 - time-tracking.js
 - plans/route.js
@@ -84,49 +84,49 @@
 - devops-schema.sql
 - incidents/[id]/page.js
 - facebook.js
-- useRecaptcha
-- seo/sites/page.js
+- analytics.js
+- projects/page.js
 - github-import.js
 - Components/Blog/BlogPostContent.jsx
-- sanity-boilerplate/Components/Blog/BlogPostContent.jsx
-- crm/layout.js
+- EXPENSE_CATEGORIES
+- system-forge/layout.js
 - tasks/page.js
 - HealthAPITemplate
 - 20260201_all_tables.sql
-- system-forge/layout.js
+- gemini-seo.js
 - create/route.js
 - urlForImage
-- projects/[id]/page.js
+- usePersistedState
 - crm-schema.sql
-- pocket/page.js
+- lucide-react
 - income/[id]/page.js
-- finance/layout.js
+- businesses/page.js
 - system-forge/page.js
 - google-calendar.js
 - resend-stats.js
 - crm/page.js
-- seo/layout.js
+- finance/layout.js
 - sanity-boilerplate/lib/image.js
-- devops/layout.js
-- admin/page.js
-- seo/page.js
-- app/page.js
+- pocket/page.js
+- import/page.js
+- services/[slug]/layout.js
+- HomeClient.jsx
 - sanity-boilerplate/schemas/index.js
-- KeywordsTab
+- vault/page.js
 - save-draft-plan.mjs
 - lighthouse-audit/route.js
 - inputs
 - inputs
-- projects/page.js
-- comment-automations.js
+- devops/sites/page.js
+- scripts
 - 20261020_comment_automations.sql
 - supabase_schema.sql
-- ga4.js
-- eugene-website-hosting/layout.js
-- services/[slug]/layout.js
+- InvoiceList.jsx
+- sites/[id]/route.js
+- incidents/[id]/page.js
 - steps
-- income/route.js
-- scripts
+- eugene-website-hosting/layout.js
+- finance/page.js
 - steps
 - audit/layout.js
 - data-deletion/layout.js
@@ -138,49 +138,45 @@
 - 20261021_trial_signups.sql
 - next.config.mjs
 - workflows/seo-ship-task.yml
-- papaparse
+- income/route.js
 - hubspot.js
 - github/seo-ship-task.yml
-- proposals/[id]/page.js
-- supabase@^2.48.3
-- @tiptap/extension-table-cell@^3.19.0
+- @gsap/react
+- leads/new/page.js
+- papaparse
 - env
 - postcss.config.mjs
 - vercel.json
 - env
-- TaskList.jsx
-- TimeTracker.jsx
-- with
-- with
-- sites/[id]/route.js
-- TestimonialsCarousel.jsx
-- base
-- permissions
-- base
-- permissions
-- task_title
-- task_title
-- @gsap/react
-- @portabletext/react
 - react-dom@^19.2.3
 - styled-components@^6.1.19
+- with
+- with
+- branch
+- TestimonialsCarousel.jsx
+- task_id
+- branch
+- task_id
+- supabase@^2.48.3
+- task_title
+- task_title
 - @tiptap/extension-image
+- @tiptap/extension-table@^3.19.0
+- @tiptap/extension-table-cell@^3.19.0
 
 ## God Nodes (most connected - your core abstractions)
-1. `next` - 228 edges
-2. `react` - 132 edges
-3. `lucide-react` - 48 edges
-4. `supabaseCRM` - 41 edges
-5. `useAdminAuth()` - 39 edges
-6. `logActivity()` - 35 edges
-7. `urlForImage()` - 33 edges
-8. `trackEvent()` - 31 edges
-9. `framer-motion` - 28 edges
-10. `formatCurrency()` - 27 edges
+1. `next` - 234 edges
+2. `react` - 140 edges
+3. `lucide-react` - 65 edges
+4. `cx()` - 61 edges
+5. `supabaseCRM` - 41 edges
+6. `usePersistedState()` - 36 edges
+7. `logActivity()` - 35 edges
+8. `Button()` - 34 edges
+9. `urlForImage()` - 33 edges
+10. `useAdminAuth()` - 33 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `POST()` --calls--> `createProject()`  [EXTRACTED]
-  app/api/crm/leads/[id]/projects/route.js → lib/projects.js
 - `ConstructionWebsiteDesignPage()` --calls--> `LandingPageTemplate()`  [EXTRACTED]
   app/construction-website-design/page.jsx → Components/Landing/LandingPageTemplate.jsx
 - `EcommerceWebDesignAgencyPage()` --calls--> `LandingPageTemplate()`  [EXTRACTED]
@@ -189,19 +185,21 @@
   app/law-firm-web-design/page.jsx → Components/Landing/LandingPageTemplate.jsx
 - `ResponsiveWebDesignServicesPage()` --calls--> `LandingPageTemplate()`  [EXTRACTED]
   app/responsive-web-design-services/page.jsx → Components/Landing/LandingPageTemplate.jsx
+- `SmallBusinessWebsiteDesignPage()` --calls--> `LandingPageTemplate()`  [EXTRACTED]
+  app/small-business-website-design/page.jsx → Components/Landing/LandingPageTemplate.jsx
 
 ## Import Cycles
 - 2-file cycle: `Components/Accessibility/A11yProvider.jsx -> Components/Accessibility/AccessibilityWidget.jsx -> Components/Accessibility/A11yProvider.jsx`
 
-## Communities (160 total, 36 thin omitted)
+## Communities (158 total, 35 thin omitted)
 
 ### Community 0 - "pocket.js"
-Cohesion: 0.07
-Nodes (44): DELETE(), PATCH(), GET(), POST(), POST(), GET(), GET(), POST() (+36 more)
+Cohesion: 0.08
+Nodes (43): DELETE(), PATCH(), GET(), POST(), POST(), GET(), POST(), authorized() (+35 more)
 
 ### Community 1 - "InstantSiteFlow.jsx"
 Cohesion: 0.07
-Nodes (72): handleBookingSubmit(), FAQS, FreeTrialPage(), metadata, SpotsBanner(), FAQS, GetYourSitePage(), metadata (+64 more)
+Nodes (73): handleBookingSubmit(), FAQS, FreeTrialPage(), metadata, SpotsBanner(), FAQS, GetYourSitePage(), metadata (+65 more)
 
 ### Community 2 - "002_crm_premium_features.sql"
 Cohesion: 0.05
@@ -212,20 +210,20 @@ Cohesion: 0.07
 Nodes (56): ACTIVITY_TYPES, ActivityTypeIcon(), ArrowLeftIcon(), ClientDetailPage(), EmailIcon(), formatHostingDate(), FormIcon(), MeetingIcon() (+48 more)
 
 ### Community 4 - "ProposalEditor.jsx"
-Cohesion: 0.19
-Nodes (18): ArrowLeftIcon(), NewProposalPage(), TrashIcon(), BoldIcon(), BulletListIcon(), CodeIcon(), Divider(), HRIcon() (+10 more)
-
-### Community 5 - "vault/[id]/page.js"
 Cohesion: 0.07
-Nodes (29): ArrowLeftIcon(), CloudIcon(), FolderIcon(), GitHubIcon(), ImportPage(), AddFileModal(), ArrowLeftIcon(), ModuleDetailPage() (+21 more)
+Nodes (45): ArrowLeftIcon(), NewProposalPage(), TrashIcon(), ArrowLeftIcon(), ProjectDetailPage(), STATUS_CONFIG, STATUS_OPTIONS, StatusBadge() (+37 more)
+
+### Community 5 - "ModuleDetailPage"
+Cohesion: 0.17
+Nodes (8): AddFileModal(), ArrowLeftIcon(), ModuleDetailPage(), PlusIcon(), FileEditor(), FileIcon(), FileList(), TrashIcon()
 
 ### Community 6 - "app/layout.js"
 Cohesion: 0.07
 Nodes (36): dmSansBold, dmSansReg, instSans, metadata, RootLayout(), DEFAULT_SETTINGS, FONT_SCALES, isProfileActive() (+28 more)
 
 ### Community 7 - "supabase-crm.js"
-Cohesion: 0.07
-Nodes (5): GET(), getPipelineStats(), SOURCES, STAGES, supabaseCRM
+Cohesion: 0.08
+Nodes (3): GET(), getPipelineStats(), supabaseCRM
 
 ### Community 8 - "devops.js"
 Cohesion: 0.09
@@ -240,12 +238,12 @@ Cohesion: 0.09
 Nodes (32): idx_seo_sites_business_id, idx_seo_plan_tasks_plan_id, idx_seo_plan_tasks_status, idx_seo_plans_month, idx_seo_plans_site_id, idx_seo_plans_status, seo_plan_tasks, seo_plans (+24 more)
 
 ### Community 11 - "crm.js"
-Cohesion: 0.14
-Nodes (19): PATCH(), PATCH(), POST(), calculateLeadScore(), createOrUpdateLead(), SCORE_WEIGHTS, syncToHubSpot(), toggleActivityPin() (+11 more)
+Cohesion: 0.12
+Nodes (21): PATCH(), PATCH(), POST(), calculateLeadScore(), createOrUpdateLead(), SCORE_WEIGHTS, SOURCES, STAGES (+13 more)
 
 ### Community 12 - "logActivity"
-Cohesion: 0.11
-Nodes (23): GET(), POST(), POST(), GET(), POST(), DELETE(), GET(), PATCH() (+15 more)
+Cohesion: 0.10
+Nodes (25): GET(), POST(), POST(), POST(), GET(), POST(), DELETE(), GET() (+17 more)
 
 ### Community 13 - "tasks.js"
 Cohesion: 0.10
@@ -255,81 +253,85 @@ Nodes (25): DELETE(), GET(), PATCH(), DELETE(), GET(), PATCH(), POST(), GET() (+
 Cohesion: 0.14
 Nodes (31): DELETE(), GET(), PATCH(), GET(), POST(), DELETE(), GET(), PATCH() (+23 more)
 
-### Community 15 - "businesses/[id]/page.js"
-Cohesion: 0.18
-Nodes (15): AlertIcon(), ArrowLeftIcon(), BusinessDetailPage(), DevOpsStatusBadge(), XIcon(), ProjectCard(), STATUS_CONFIG, ProjectForm() (+7 more)
+### Community 15 - "react"
+Cohesion: 0.09
+Nodes (16): FinanceSettingsPage(), AuditPage(), tips, CTA_VARIANTS, ContactForm(), projectTypes, timelines, businessTypes (+8 more)
 
 ### Community 16 - "proposals.js"
 Cohesion: 0.10
 Nodes (26): GET(), GET(), POST(), DELETE(), GET(), PATCH(), POST(), POST() (+18 more)
 
-### Community 18 - "search-console.js"
-Cohesion: 0.15
-Nodes (30): GET(), POST(), DELETE(), GET(), PATCH(), POST(), POST(), addDashboardWidget() (+22 more)
+### Community 17 - "formatCurrency"
+Cohesion: 0.23
+Nodes (13): ExpensesPage(), CategoryPieChart(), CustomTooltip(), CustomTooltip(), MonthlyChart(), CustomTooltip(), MoMChange(), MonthlyExpenseSummary() (+5 more)
 
-### Community 19 - "devops/page.js"
-Cohesion: 0.13
-Nodes (25): ChartIcon(), CheckIcon(), DevOpsDashboardPage(), fetchStats(), runAllChecks(), formatTimeAgo(), PlusIcon(), RefreshIcon() (+17 more)
+### Community 18 - "search-console.js"
+Cohesion: 0.12
+Nodes (37): GET(), maxDuration, GET(), POST(), DELETE(), GET(), PATCH(), POST() (+29 more)
+
+### Community 19 - "devops/sites/[id]/page.js"
+Cohesion: 0.17
+Nodes (19): ArrowLeftIcon(), CheckIcon(), EditIcon(), ExternalLinkIcon(), RefreshIcon(), SiteDetailPage(), fetchSite(), runCheck() (+11 more)
 
 ### Community 20 - "seo-reports.js"
-Cohesion: 0.14
-Nodes (27): POST(), GET(), DELETE(), GET(), POST(), DELETE(), GET(), POST() (+19 more)
+Cohesion: 0.15
+Nodes (25): GET(), DELETE(), GET(), DELETE(), GET(), POST(), formatPlanForClaudeCode(), buildKeywordPerformance() (+17 more)
 
 ### Community 21 - "sanity-boilerplate/lib/sanity.js"
-Cohesion: 0.10
-Nodes (6): getAllPosts(), getClient(), getPostBySlug(), getPostsByCategory(), getPostsBySeries(), getPostsByTag()
+Cohesion: 0.09
+Nodes (10): getAllPosts(), getClient(), getPostBySlug(), getPostsByCategory(), getPostsBySeries(), getPostsByTag(), client, previewClient (+2 more)
 
 ### Community 22 - "AdminAuthProvider.jsx"
-Cohesion: 0.19
-Nodes (25): AdminLayout(), metadata, AdminLoginPage(), AdminAuthContext, AdminAuthProvider(), PUBLIC_ROUTES, CheckIcon(), CloseIcon() (+17 more)
+Cohesion: 0.07
+Nodes (58): ArrowLeftIcon(), BuildingIcon(), ChevronIcon(), ClientsIcon(), CRMLayout(), DashboardIcon(), HomeIcon(), KanbanIcon() (+50 more)
 
 ### Community 23 - "sanity"
 Cohesion: 0.09
 Nodes (7): sanity@^5.1.0, @sanity/code-input@^7.0.2, @sanity/vision@^5.1.0, sanity, @sanity/code-input, @sanity/vision, schemaTypes
 
 ### Community 24 - "createOrUpdateLead"
-Cohesion: 0.14
-Nodes (16): POST(), POST(), resend, POST(), resend, sendAdminNotification(), sendUserAuditEmail(), POST() (+8 more)
+Cohesion: 0.16
+Nodes (14): POST(), resend, POST(), resend, sendAdminNotification(), sendUserAuditEmail(), POST(), POST() (+6 more)
 
 ### Community 25 - "next"
-Cohesion: 0.06
-Nodes (13): ArrowLeftIcon(), NewLeadPage(), STAGES, TIMELINES, PRIORITY_COLORS, TASK_TYPE_LABELS, serverStartTime, ErrorContent() (+5 more)
+Cohesion: 0.05
+Nodes (9): PRIORITY_COLORS, TASK_TYPE_LABELS, serverStartTime, ErrorContent(), SquareError(), SquareSuccess(), SuccessContent(), next (+1 more)
 
 ### Community 26 - "20260201_systemforge_tables.sql"
 Cohesion: 0.15
 Nodes (25): idx_industry_presets_industry, idx_project_modules_module, idx_project_modules_project, idx_projects_created, idx_projects_status, idx_projects_user_id, idx_vault_files_module_id, idx_vault_files_path (+17 more)
 
-### Community 27 - "dependencies"
-Cohesion: 0.07
-Nodes (28): dependencies, date-fns@^4.1.0, framer-motion@^12.23.12, gsap@^3.13.0, headlessui@^0.0.0, heroicons@^2.2.0, lucide-react@^0.542.0, next@^16.0.0 (+20 more)
+### Community 27 - "jobber.js"
+Cohesion: 0.23
+Nodes (17): GET(), redirectTo(), stateMatches(), createJobberClient(), createJobberProperty(), createJobberRequest(), digitsOf(), exchangeCodeForTokens() (+9 more)
 
 ### Community 28 - "framer-motion"
-Cohesion: 0.24
-Nodes (15): EugeneWebDesignPage(), EugeneWebsiteHostingPage(), EugeneFAQ(), EugeneTestimonials(), FinalCTA(), LocalProof(), AnimatedNumber(), LocalTrustBand() (+7 more)
+Cohesion: 0.23
+Nodes (16): EugeneWebDesignPage(), EugeneWebsiteHostingPage(), EugeneFAQ(), EugeneHero(), EugeneTestimonials(), FinalCTA(), LocalProof(), AnimatedNumber() (+8 more)
 
-### Community 29 - "formatCurrency"
-Cohesion: 0.07
-Nodes (50): ExpensesPage(), FinanceDashboard(), TaxEstimatorPage(), CategoryBadge(), CategoryPieChart(), CustomTooltip(), AlertIcon(), CheckIcon() (+42 more)
+### Community 29 - "CSVImportModal.jsx"
+Cohesion: 0.17
+Nodes (24): AlertIcon(), CheckIcon(), CSVImportModal(), ImportResult(), Step1Upload(), Step2Mapping(), Step3Preview(), UploadIcon() (+16 more)
 
 ### Community 30 - "001_crm_schema.sql"
 Cohesion: 0.15
 Nodes (25): create_initial_stage_history(), create_lead_initial_stage, crm_activities, crm_leads, crm_pipeline_summary, crm_recent_leads, crm_stage_history, idx_activities_created (+17 more)
 
-### Community 31 - "devops/sites/[id]/page.js"
-Cohesion: 0.20
-Nodes (15): ArrowLeftIcon(), CheckIcon(), EditIcon(), ExternalLinkIcon(), RefreshIcon(), SiteDetailPage(), fetchSite(), runCheck() (+7 more)
+### Community 31 - "businesses/[id]/page.js"
+Cohesion: 0.23
+Nodes (11): AlertIcon(), ArrowLeftIcon(), BusinessDetailPage(), DevOpsStatusBadge(), XIcon(), ProjectCard(), STATUS_CONFIG, ProjectForm() (+3 more)
 
 ### Community 32 - "stripe-crm.js"
-Cohesion: 0.21
-Nodes (20): GET(), GET(), POST(), getStripe(), POST(), createStripeInvoice(), findStripeCustomerByEmail(), formatCurrency() (+12 more)
+Cohesion: 0.24
+Nodes (18): GET(), GET(), POST(), getStripe(), POST(), createStripeInvoice(), findStripeCustomerByEmail(), formatCurrency() (+10 more)
 
 ### Community 33 - "useRecaptcha"
-Cohesion: 0.17
-Nodes (14): ContactPage(), COVERS, metadata, SetupCallPage(), CalendarPicker(), DAYS, isSameDay(), MONTHS (+6 more)
+Cohesion: 0.15
+Nodes (17): ContactPage(), handleFormSubmit(), COVERS, metadata, SetupCallPage(), CalendarPicker(), DAYS, isSameDay() (+9 more)
 
-### Community 34 - "SEOReportPanel.jsx"
-Cohesion: 0.14
-Nodes (17): BreakdownTable(), ChangeIndicator(), ChevronLeftIcon(), ChevronRightIcon(), ClockIcon(), CloseIcon(), DocumentIcon(), EmailIcon() (+9 more)
+### Community 34 - "package.json"
+Cohesion: 0.09
+Nodes (24): @google/generative-ai@^0.24.1, gsap@^3.13.0, headlessui@^0.0.0, @octokit/rest@^22.0.1, @react-email/render@^1.4.0, @tiptap/extension-table-row@^3.19.0, @tiptap/starter-kit@^3.19.0, devDependencies (+16 more)
 
 ### Community 35 - "businesses.js"
 Cohesion: 0.18
@@ -337,19 +339,19 @@ Nodes (20): DELETE(), GET(), POST(), DELETE(), GET(), PATCH(), GET(), POST() (+1
 
 ### Community 36 - "@supabase/supabase-js"
 Cohesion: 0.22
-Nodes (19): DELETE(), PATCH(), GET(), getSupabase(), POST(), getSearchAnalytics(), addKeyword(), buildKeywordPerformance() (+11 more)
+Nodes (18): DELETE(), PATCH(), GET(), getSupabase(), POST(), addKeyword(), countKeywords(), dateString() (+10 more)
 
 ### Community 37 - "lib/sanity.js"
-Cohesion: 0.11
-Nodes (21): BlogPage(), metadata, PillBadge(), revalidate, GET(), sitemap(), getAllCategories(), getAllPosts() (+13 more)
+Cohesion: 0.14
+Nodes (17): BlogPage(), metadata, PillBadge(), revalidate, GET(), sitemap(), getAllCategories(), getAllPosts() (+9 more)
 
-### Community 38 - "package.json"
-Cohesion: 0.09
-Nodes (24): @google/generative-ai@^0.24.1, @octokit/rest@^22.0.1, @tiptap/extension-link@^3.19.0, @tiptap/extension-table-header@^3.19.0, @tiptap/pm@^3.19.0, @tiptap/react@^3.19.0, @types/react-syntax-highlighter@^15.5.13, devDependencies (+16 more)
+### Community 38 - "dependencies"
+Cohesion: 0.07
+Nodes (28): dependencies, date-fns@^4.1.0, framer-motion@^12.23.12, heroicons@^2.2.0, lucide-react@^0.542.0, next@^16.0.0, next-sanity@^12.0.5, ogl@^1.0.11 (+20 more)
 
 ### Community 39 - "useAdminAuth"
-Cohesion: 0.16
-Nodes (12): ArrowLeftIcon(), EditSitePage(), ArrowLeftIcon(), NewSitePage(), ChangeIndicator(), formatDateRange(), SEOReportsPage(), useAdminAuth() (+4 more)
+Cohesion: 0.20
+Nodes (8): ArrowLeftIcon(), EditSitePage(), ArrowLeftIcon(), NewSitePage(), CheckIcon(), ChevronIcon(), CRMLeadSelector(), XIcon()
 
 ### Community 40 - "affordable-small-business-website-design/page.jsx"
 Cohesion: 0.19
@@ -359,53 +361,53 @@ Nodes (12): breadcrumbSchema, faqSchema, metadata, NinetyNineDollarWebsitesPage(
 Cohesion: 0.24
 Nodes (17): BlogPostPage(), generateMetadata(), generateStaticParams(), revalidate, BlogCTA(), BlogHero(), BlogPostContent(), RelatedPosts() (+9 more)
 
-### Community 42 - "SEOPlanView.jsx"
-Cohesion: 0.12
-Nodes (21): authFetch(), categoryColors, DraftPlanPanel(), effortLabels, PlanHistory(), priorityColors, priorityLabels, SEOPlanView() (+13 more)
+### Community 42 - "comment-automations.js"
+Cohesion: 0.24
+Nodes (15): POST(), escapeRegex(), extractComments(), findAccount(), findMatchingRule(), getSupabaseClient(), graphPost(), handleMetaWebhook() (+7 more)
 
 ### Community 43 - "seo.js"
 Cohesion: 0.12
 Nodes (7): metadata, metadata, metadata, metadata, eugenePageContent, DEFAULT_OG_IMAGE, SYSTEMS_PAGE_META
 
 ### Community 44 - "finance.js"
-Cohesion: 0.16
-Nodes (18): GET(), GET(), getQuarterForDate(), GET(), GET(), PATCH(), GET(), calculateEstimatedTax() (+10 more)
+Cohesion: 0.21
+Nodes (16): GET(), getQuarterForDate(), GET(), GET(), PATCH(), GET(), calculateEstimatedTax(), DEFAULT_TAX_RATES (+8 more)
 
 ### Community 45 - "local/route.js"
 Cohesion: 0.13
 Nodes (15): ALLOWED_DIRECTORIES, ALLOWED_EXTENSIONS, detectLanguage(), getFilesRecursively(), IGNORED_PATTERNS, isAllowedExtension(), isPathAllowed(), POST() (+7 more)
 
-### Community 46 - "generateBreadcrumbSchema"
-Cohesion: 0.16
-Nodes (24): CategoryPage(), generateMetadata(), generateStaticParams(), revalidate, generateMetadata(), generateStaticParams(), revalidate, TagPage() (+16 more)
+### Community 46 - "BlogPostCard"
+Cohesion: 0.29
+Nodes (12): CategoryPage(), generateMetadata(), generateStaticParams(), revalidate, BlogPostCard(), getAllCategorySlugs(), getCategoryBySlug(), getPostsByCategory() (+4 more)
 
 ### Community 47 - "instant-site/start/route.js"
-Cohesion: 0.35
-Nodes (9): POST(), POST(), POST(), clientIp(), SMS_CONSENT_TEXT, normPhone(), sendMetaEvent(), sha256() (+1 more)
+Cohesion: 0.21
+Nodes (13): POST(), POST(), POST(), GET(), POST(), alertInstantSiteUnlocked(), clientIp(), SMS_CONSENT_TEXT (+5 more)
 
-### Community 48 - "HomeClient.jsx"
-Cohesion: 0.12
-Nodes (15): PillBadge(), tabs, WorkDetailPage(), A11yContext, CTA(), categoryIcons, HomeClient(), PillBadge() (+7 more)
+### Community 48 - "LandingPageTemplate.jsx"
+Cohesion: 0.21
+Nodes (11): PricingSection(), projectPlans, seoPlans, LandingHero(), buildSchemas(), FinalCTA(), IncludedSection(), LandingPageTemplate() (+3 more)
 
-### Community 49 - "businesses/page.js"
-Cohesion: 0.23
-Nodes (13): BuildingIcon(), BusinessesPage(), ChartIcon(), PlusIcon(), SearchIcon(), UsersIcon(), ClientIcon(), ClientsPage() (+5 more)
+### Community 49 - "ga4.js"
+Cohesion: 0.30
+Nodes (12): GET(), emptyTotals(), ga4Request(), getGa4MonthlyData(), listGa4Properties(), listKeyEventNames(), normalizePropertyId(), percentChange() (+4 more)
 
 ### Community 50 - "square-auth.js"
 Cohesion: 0.21
 Nodes (16): GET(), POST(), dynamic, GET(), POST(), runtime, callSquareAPI(), getClientLocationId() (+8 more)
 
 ### Community 51 - "instant-site.js"
-Cohesion: 0.18
-Nodes (20): POST(), GET(), GET(), alertInstantSiteFailed(), alertInstantSiteLead(), alertInstantSiteManual(), alertInstantSiteReady(), alertInstantSiteUnlocked() (+12 more)
+Cohesion: 0.20
+Nodes (18): POST(), GET(), alertInstantSiteFailed(), alertInstantSiteLead(), alertInstantSiteManual(), alertInstantSiteReady(), INVISIBLE, kindLabel() (+10 more)
 
-### Community 52 - "jobber.js"
-Cohesion: 0.23
-Nodes (17): GET(), redirectTo(), stateMatches(), createJobberClient(), createJobberProperty(), createJobberRequest(), digitsOf(), exchangeCodeForTokens() (+9 more)
+### Community 52 - "app/blog/tag/[slug]/page.jsx"
+Cohesion: 0.29
+Nodes (12): generateMetadata(), generateStaticParams(), revalidate, TagPage(), generateBreadcrumbSchema(), getAllTagSlugs(), getPostsByTag(), getTagBySlug() (+4 more)
 
-### Community 53 - "LandingPageTemplate.jsx"
-Cohesion: 0.32
-Nodes (8): LandingHero(), buildSchemas(), FinalCTA(), IncludedSection(), LandingPageTemplate(), ProcessSection(), PainPoints(), WhyUs()
+### Community 53 - "sanity-boilerplate/Components/Blog/BlogPostContent.jsx"
+Cohesion: 0.15
+Nodes (9): @portabletext/react, components, Callout(), CALLOUT_STYLES, CodeBlock(), EmbeddedCTA(), ImageGallery(), Quote() (+1 more)
 
 ### Community 54 - "compilerOptions"
 Cohesion: 0.11
@@ -415,9 +417,9 @@ Nodes (18): compilerOptions, allowJs, esModuleInterop, incremental, isolatedModu
 Cohesion: 0.17
 Nodes (18): GET(), POST(), GET(), GET(), GET(), ANALYTICS_SCOPE, exchangeCodeForTokens(), generateOAuthUrl() (+10 more)
 
-### Community 56 - "seo/sites/[id]/page.js"
-Cohesion: 0.16
-Nodes (9): MetricCard(), SiteDetailPage(), formatDate(), formatValue(), SEOAnalyticsChart(), KEYWORD_LIMITS, PLAN_TASK_LIMITS, PLAN_TIER_LABELS (+1 more)
+### Community 56 - "ModuleCard.jsx"
+Cohesion: 0.21
+Nodes (9): CategoryBadge(), ModuleCard(), TrashIcon(), TypeIcon(), RelationshipItem(), RelationshipManager(), XIcon(), TYPE_CONFIG (+1 more)
 
 ### Community 57 - "project-tasks.js"
 Cohesion: 0.19
@@ -428,8 +430,8 @@ Cohesion: 0.20
 Nodes (11): GET(), POST(), DELETE(), PATCH(), createTimeEntry(), deleteTimeEntry(), getProjectTimeEntries(), getProjectTimeSummary() (+3 more)
 
 ### Community 59 - "plans/route.js"
-Cohesion: 0.19
-Nodes (20): POST(), GET(), POST(), PATCH(), buildDataSummary(), buildTrafficSummary(), callWithRetry(), generateAIRecommendations() (+12 more)
+Cohesion: 0.26
+Nodes (14): POST(), GET(), POST(), PATCH(), getDetailedAnalytics(), approveDraftPlan(), archivePlan(), createPlan() (+6 more)
 
 ### Community 60 - "construction-website-design/page.jsx"
 Cohesion: 0.17
@@ -440,16 +442,16 @@ Cohesion: 0.18
 Nodes (16): idx_finance_income_client_id, finance_expenses, finance_income, finance_quarterly_payments, finance_settings, idx_finance_expenses_category, idx_finance_expenses_created, idx_finance_expenses_date (+8 more)
 
 ### Community 62 - "seo-email.js"
-Cohesion: 0.27
-Nodes (12): breakdownHeaderHtml(), breakdownRowHtml(), escapeHtml(), formatChangeInline(), formatChangeText(), formatDateRange(), formatKeywordRow(), generateReportHtml() (+4 more)
+Cohesion: 0.23
+Nodes (14): POST(), breakdownHeaderHtml(), breakdownRowHtml(), escapeHtml(), formatChangeInline(), formatChangeText(), formatDateRange(), formatKeywordRow() (+6 more)
 
 ### Community 63 - "react"
-Cohesion: 0.11
-Nodes (15): AboutPage(), fadeUp(), scaleIn, slideFrom(), FinanceSettingsPage(), AuditPage(), tips, services (+7 more)
+Cohesion: 0.21
+Nodes (10): AboutPage(), fadeUp(), scaleIn, slideFrom(), services, ServicesPage(), stats, ServicePage() (+2 more)
 
 ### Community 64 - "works/page.jsx"
-Cohesion: 0.31
-Nodes (8): categoryIcons, fadeUp(), PillBadge(), ProjectCard(), staggerContainer, WorksPage(), defaultFaqs, FAQ()
+Cohesion: 0.18
+Nodes (11): categoryIcons, fadeUp(), PillBadge(), ProjectCard(), staggerContainer, WorksPage(), PillBadge(), tabs (+3 more)
 
 ### Community 65 - "devops-schema.sql"
 Cohesion: 0.22
@@ -457,19 +459,19 @@ Nodes (15): devops_alerts, devops_health_checks, devops_incidents, devops_sites,
 
 ### Community 66 - "incidents/[id]/page.js"
 Cohesion: 0.19
-Nodes (12): ArrowLeftIcon(), INCIDENT_STATUSES, IncidentDetailPage(), fetchIncident(), updateStatus(), STATUS_CONFIG, CheckIcon(), INCIDENT_STATUSES (+4 more)
+Nodes (16): ChartIcon(), CheckIcon(), DevOpsDashboardPage(), fetchStats(), runAllChecks(), formatTimeAgo(), PlusIcon(), RefreshIcon() (+8 more)
 
 ### Community 67 - "facebook.js"
 Cohesion: 0.28
 Nodes (12): GET(), GET(), exchangeCodeForTokens(), getFacebookAccount(), getFacebookPages(), getInstagramMedia(), getLongLivedToken(), getPagePosts() (+4 more)
 
-### Community 68 - "useRecaptcha"
-Cohesion: 0.14
-Nodes (23): handleFormSubmit(), CTA_VARIANTS, ContactForm(), projectTypes, timelines, AuditResultPanel(), ScoreCircle(), businessTypes (+15 more)
+### Community 68 - "analytics.js"
+Cohesion: 0.24
+Nodes (9): AuditResultPanel(), ScoreCircle(), DarkVeil, SystemsCTA(), WebsiteAudit(), getServiceTypeFromPath(), trackAuditEmailSubmit(), trackAuditSubmit() (+1 more)
 
-### Community 69 - "seo/sites/page.js"
-Cohesion: 0.19
-Nodes (5): SEOSitesPage(), LinkToBusinessModal(), formatPermission(), formatTimeAgo(), SEOSiteCard()
+### Community 69 - "projects/page.js"
+Cohesion: 0.43
+Nodes (6): KanbanIcon(), ListIcon(), ProjectKanbanCard(), ProjectsKanbanPage(), STATUS_CONFIG, STATUS_ORDER
 
 ### Community 70 - "github-import.js"
 Cohesion: 0.29
@@ -479,13 +481,13 @@ Nodes (13): POST(), ALLOWED_EXTENSIONS, analyzeRepository(), createOctokit(), de
 Cohesion: 0.17
 Nodes (8): components, Callout(), CALLOUT_STYLES, CodeBlock(), EmbeddedCTA(), ImageGallery(), Quote(), VideoEmbed()
 
-### Community 72 - "sanity-boilerplate/Components/Blog/BlogPostContent.jsx"
-Cohesion: 0.16
-Nodes (8): components, Callout(), CALLOUT_STYLES, CodeBlock(), EmbeddedCTA(), ImageGallery(), Quote(), VideoEmbed()
+### Community 72 - "EXPENSE_CATEGORIES"
+Cohesion: 0.17
+Nodes (9): GET(), POST(), validateExpenseRow(), validateIncomeRow(), ExpenseForm(), ReceiptUpload(), UploadIcon(), EXPENSE_CATEGORIES (+1 more)
 
-### Community 73 - "crm/layout.js"
-Cohesion: 0.27
-Nodes (13): ArrowLeftIcon(), BuildingIcon(), ChevronIcon(), ClientsIcon(), CRMLayout(), DashboardIcon(), HomeIcon(), KanbanIcon() (+5 more)
+### Community 73 - "system-forge/layout.js"
+Cohesion: 0.29
+Nodes (12): ArrowLeftIcon(), ChevronIcon(), DashboardIcon(), ForgeIcon(), HomeIcon(), ImportIcon(), LogoutIcon(), MenuIcon() (+4 more)
 
 ### Community 74 - "tasks/page.js"
 Cohesion: 0.19
@@ -499,9 +501,9 @@ Nodes (9): CheckIcon(), ChevronIcon(), CopyIcon(), generateAPIKey(), HealthAPITe
 Cohesion: 0.26
 Nodes (13): crm_activities, crm_leads, crm_stage_history, google_oauth, idx_crm_activities_created_at, idx_crm_activities_lead_id, idx_crm_leads_created_at, idx_crm_leads_email (+5 more)
 
-### Community 77 - "system-forge/layout.js"
-Cohesion: 0.29
-Nodes (12): ArrowLeftIcon(), ChevronIcon(), DashboardIcon(), ForgeIcon(), HomeIcon(), ImportIcon(), LogoutIcon(), MenuIcon() (+4 more)
+### Community 77 - "gemini-seo.js"
+Cohesion: 0.61
+Nodes (7): buildDataSummary(), buildTrafficSummary(), callWithRetry(), generateAIRecommendations(), generateSEOPlan(), getClient(), parseJsonResponse()
 
 ### Community 78 - "create/route.js"
 Cohesion: 0.26
@@ -511,25 +513,25 @@ Nodes (11): buildAdminEmail(), buildClientEmail(), buildEmailCard(), DOMAIN_STAT
 Cohesion: 0.17
 Nodes (17): generateMetadata(), generateStaticParams(), revalidate, SeriesPage(), CategoryBadge(), getAllSeriesSlugs(), getSeriesBySlug(), date-fns (+9 more)
 
-### Community 80 - "projects/[id]/page.js"
+### Community 80 - "usePersistedState"
 Cohesion: 0.23
-Nodes (13): ArrowLeftIcon(), ProjectDetailPage(), STATUS_CONFIG, STATUS_OPTIONS, StatusBadge(), CheckIcon(), MilestoneTimeline(), EditIcon() (+5 more)
+Nodes (11): ClientIcon(), ClientsPage(), PlusIcon(), SearchIcon(), TrashIcon(), CheckIcon(), INCIDENT_STATUSES, IncidentRow() (+3 more)
 
 ### Community 81 - "crm-schema.sql"
 Cohesion: 0.29
 Nodes (12): crm_activities, crm_leads, crm_leads_updated_at, crm_stage_history, idx_crm_activities_lead_id, idx_crm_leads_created_at, idx_crm_leads_email, idx_crm_leads_source (+4 more)
 
-### Community 82 - "pocket/page.js"
-Cohesion: 0.29
-Nodes (8): authFetch(), formatDate(), formatDuration(), PocketInboxPage(), STATUS_TABS, authFetch(), SiteSettingsTab(), getCRMAuthClient()
+### Community 82 - "lucide-react"
+Cohesion: 0.05
+Nodes (136): Logo(), MenuLink(), NavItem(), SEOLayout(), Shell(), SidebarContent(), SiteNavItem(), UserMenu() (+128 more)
 
 ### Community 83 - "income/[id]/page.js"
-Cohesion: 0.23
-Nodes (12): ArrowLeftIcon(), DetailField(), ExternalLinkIcon(), IncomeDetailPage(), SummaryRow(), TaxRow(), IncomePage(), POST() (+4 more)
-
-### Community 84 - "finance/layout.js"
 Cohesion: 0.32
-Nodes (11): ArrowLeftIcon(), ChevronIcon(), DashboardIcon(), ExpensesIcon(), FinanceLayout(), HomeIcon(), IncomeIcon(), LogoutIcon() (+3 more)
+Nodes (9): ArrowLeftIcon(), DetailField(), ExternalLinkIcon(), IncomeDetailPage(), SummaryRow(), TaxRow(), IncomePage(), IncomeForm() (+1 more)
+
+### Community 84 - "businesses/page.js"
+Cohesion: 0.52
+Nodes (6): BuildingIcon(), BusinessesPage(), ChartIcon(), PlusIcon(), SearchIcon(), UsersIcon()
 
 ### Community 85 - "system-forge/page.js"
 Cohesion: 0.35
@@ -540,64 +542,60 @@ Cohesion: 0.35
 Nodes (9): GET(), GET(), calendarFetch(), createBookingEvent(), formatSlotLabel(), getAccessToken(), getAvailableSlots(), getRawEvents() (+1 more)
 
 ### Community 87 - "resend-stats.js"
-Cohesion: 0.26
-Nodes (12): addDays(), bareAddress(), dayOf(), DELIVERED_EVENTS, domainFromSiteUrl(), FAILED_EVENTS, getEmailCountsForSite(), getSupabase() (+4 more)
+Cohesion: 0.25
+Nodes (12): GET(), addDays(), bareAddress(), dayOf(), DELIVERED_EVENTS, domainFromSiteUrl(), FAILED_EVENTS, getEmailCountsForSite() (+4 more)
 
 ### Community 88 - "crm/page.js"
 Cohesion: 0.29
 Nodes (7): CRMDashboardPage(), QuickStatCard(), ProjectWidgets(), RiskBadge(), PRIORITY_COLORS, TASK_TYPE_ICONS, TasksWidget()
 
-### Community 89 - "seo/layout.js"
-Cohesion: 0.35
-Nodes (10): ArrowLeftIcon(), ChartIcon(), ChevronIcon(), DashboardIcon(), DocumentIcon(), GlobeIcon(), HomeIcon(), LogoutIcon() (+2 more)
+### Community 89 - "finance/layout.js"
+Cohesion: 0.32
+Nodes (11): ArrowLeftIcon(), ChevronIcon(), DashboardIcon(), ExpensesIcon(), FinanceLayout(), HomeIcon(), IncomeIcon(), LogoutIcon() (+3 more)
 
 ### Community 90 - "sanity-boilerplate/lib/image.js"
 Cohesion: 0.20
 Nodes (7): @sanity/client@^7.13.2, @sanity/image-url@^2.0.2, @sanity/client, @sanity/image-url, client, previewClient, builder
 
-### Community 91 - "devops/layout.js"
-Cohesion: 0.38
-Nodes (9): AlertIcon(), ArrowLeftIcon(), ChevronIcon(), DashboardIcon(), DevOpsLayout(), HomeIcon(), LogoutIcon(), MenuIcon() (+1 more)
+### Community 91 - "pocket/page.js"
+Cohesion: 0.43
+Nodes (6): authFetch(), formatDate(), formatDuration(), PocketInboxPage(), STATUS_TABS, getCRMAuthClient()
 
-### Community 92 - "admin/page.js"
+### Community 92 - "import/page.js"
+Cohesion: 0.27
+Nodes (6): ArrowLeftIcon(), CloudIcon(), FolderIcon(), GitHubIcon(), ImportPage(), ImportWizard()
+
+### Community 94 - "HomeClient.jsx"
+Cohesion: 0.16
+Nodes (15): HomePage(), metadata, CTA(), categoryIcons, HomeClient(), PillBadge(), ProjectCard(), ScrollReveal() (+7 more)
+
+### Community 96 - "vault/page.js"
 Cohesion: 0.36
-Nodes (8): AdminDashboard(), ArrowIcon(), CRMIcon(), DevOpsIcon(), FinanceIcon(), ForgeIcon(), SEOIcon(), SettingsIcon()
-
-### Community 93 - "seo/page.js"
-Cohesion: 0.31
-Nodes (5): formatDateRange(), formatTimeAgo(), SEODashboardPage(), AddSiteModal(), formatPermission()
-
-### Community 94 - "app/page.js"
-Cohesion: 0.33
-Nodes (7): HomePage(), metadata, HOME_TITLE_TEST, pickRandomVariant(), resolveVariant(), config, middleware()
-
-### Community 96 - "KeywordsTab"
-Cohesion: 0.39
-Nodes (8): DeltaCell(), KeywordsTab(), handleAdd(), handleDelete(), handleUpdateTarget(), loadKeywords(), PositionCell(), Toast()
+Nodes (6): BoxIcon(), ImportIcon(), PlusIcon(), VaultPage(), ModuleForm(), XIcon()
 
 ### Community 97 - "save-draft-plan.mjs"
-Cohesion: 0.31
-Nodes (7): getPlanTaskCap(), CATEGORIES, EFFORTS, Fail, fail(), main(), PRIORITIES
+Cohesion: 0.17
+Nodes (10): getPlanTaskCap(), KEYWORD_LIMITS, PLAN_TASK_LIMITS, PLAN_TIERS, CATEGORIES, EFFORTS, Fail, fail() (+2 more)
 
 ### Community 98 - "lighthouse-audit/route.js"
 Cohesion: 0.31
 Nodes (8): checkRateLimit(), getRateLimitKey(), POST(), rateLimitMap, resend, saveAuditToDatabase(), sendAuditNotificationEmail(), supabase
 
 ### Community 99 - "inputs"
-Cohesion: 0.17
-Nodes (12): description, required, branch, prompt, task_id, on, workflow_dispatch, description (+4 more)
+Cohesion: 0.20
+Nodes (10): default, description, required, base, prompt, on, workflow_dispatch, description (+2 more)
 
 ### Community 100 - "inputs"
-Cohesion: 0.17
-Nodes (12): description, required, branch, prompt, task_id, on, workflow_dispatch, description (+4 more)
+Cohesion: 0.20
+Nodes (10): default, description, required, base, prompt, on, workflow_dispatch, description (+2 more)
 
-### Community 101 - "projects/page.js"
-Cohesion: 0.43
-Nodes (6): KanbanIcon(), ListIcon(), ProjectKanbanCard(), ProjectsKanbanPage(), STATUS_CONFIG, STATUS_ORDER
+### Community 101 - "devops/sites/page.js"
+Cohesion: 0.39
+Nodes (7): GridIcon(), PlusIcon(), ServerIcon(), SitesListPage(), SiteTableRow(), StatusTab(), TableIcon()
 
-### Community 102 - "comment-automations.js"
-Cohesion: 0.24
-Nodes (15): POST(), escapeRegex(), extractComments(), findAccount(), findMatchingRule(), getSupabaseClient(), graphPost(), handleMetaWebhook() (+7 more)
+### Community 102 - "scripts"
+Cohesion: 0.50
+Nodes (4): scripts, build, dev, start
 
 ### Community 103 - "20261020_comment_automations.sql"
 Cohesion: 0.60
@@ -607,17 +605,21 @@ Nodes (5): idx_social_comment_events_created, idx_social_comment_events_rule, id
 Cohesion: 0.47
 Nodes (4): idx_website_audits_avg_score, idx_website_audits_created_at, idx_website_audits_url, va_website_audits
 
-### Community 105 - "ga4.js"
-Cohesion: 0.30
-Nodes (12): GET(), emptyTotals(), ga4Request(), getGa4MonthlyData(), listGa4Properties(), listKeyEventNames(), normalizePropertyId(), percentChange() (+4 more)
+### Community 105 - "InvoiceList.jsx"
+Cohesion: 0.46
+Nodes (6): DownloadIcon(), ExternalLinkIcon(), InvoiceCard(), InvoiceList(), RefreshIcon(), StripeIcon()
+
+### Community 107 - "incidents/[id]/page.js"
+Cohesion: 0.38
+Nodes (6): ArrowLeftIcon(), INCIDENT_STATUSES, IncidentDetailPage(), fetchIncident(), updateStatus(), STATUS_CONFIG
 
 ### Community 108 - "steps"
 Cohesion: 0.20
 Nodes (10): EXECUTION_FILE, GH_TOKEN, PR_URL, steps, env, id, if, name (+2 more)
 
-### Community 110 - "scripts"
-Cohesion: 0.50
-Nodes (4): scripts, build, dev, start
+### Community 110 - "finance/page.js"
+Cohesion: 0.17
+Nodes (7): FinanceDashboard(), AlertIcon(), DeadlineAlert(), FinanceStatCard(), PaymentStatusBadge(), QuarterlyCard(), PAYMENT_STATUSES
 
 ### Community 111 - "steps"
 Cohesion: 0.20
@@ -625,7 +627,7 @@ Nodes (10): EXECUTION_FILE, GH_TOKEN, PR_URL, steps, env, id, if, name (+2 more)
 
 ### Community 126 - "workflows/seo-ship-task.yml"
 Cohesion: 0.22
-Nodes (8): concurrency, cancel-in-progress, group, jobs, ship, name, runs-on, timeout-minutes
+Nodes (8): concurrency, cancel-in-progress, group, jobs, name, permissions, contents, pull-requests
 
 ### Community 128 - "hubspot.js"
 Cohesion: 0.58
@@ -633,27 +635,19 @@ Nodes (8): createDeal(), createOrUpdateCompany(), createOrUpdateContact(), creat
 
 ### Community 129 - "github/seo-ship-task.yml"
 Cohesion: 0.22
-Nodes (8): concurrency, cancel-in-progress, group, jobs, ship, name, runs-on, timeout-minutes
+Nodes (8): concurrency, cancel-in-progress, group, jobs, name, permissions, contents, pull-requests
 
-### Community 130 - "proposals/[id]/page.js"
-Cohesion: 0.43
-Nodes (6): ArrowLeftIcon(), LinkIcon(), ProposalDetailPage(), SendIcon(), ProposalStatusBadge(), STATUS_CONFIG
+### Community 131 - "leads/new/page.js"
+Cohesion: 0.50
+Nodes (4): ArrowLeftIcon(), NewLeadPage(), STAGES, TIMELINES
 
 ### Community 133 - "env"
-Cohesion: 0.25
-Nodes (8): BASE, BRANCH, CALLBACK_SECRET, CALLBACK_URL, RUN_URL, TASK_ID, TASK_TITLE, env
+Cohesion: 0.18
+Nodes (11): BASE, BRANCH, CALLBACK_SECRET, CALLBACK_URL, RUN_URL, TASK_ID, TASK_TITLE, ship (+3 more)
 
 ### Community 141 - "env"
-Cohesion: 0.25
-Nodes (8): BASE, BRANCH, CALLBACK_SECRET, CALLBACK_URL, RUN_URL, TASK_ID, TASK_TITLE, env
-
-### Community 142 - "TaskList.jsx"
-Cohesion: 0.48
-Nodes (4): TaskForm(), PRIORITY_COLORS, TaskItem(), TaskList()
-
-### Community 143 - "TimeTracker.jsx"
-Cohesion: 0.52
-Nodes (4): TimeEntryForm(), TimeEntryItem(), TimeEntryList(), TimeTracker()
+Cohesion: 0.18
+Nodes (11): BASE, BRANCH, CALLBACK_SECRET, CALLBACK_URL, RUN_URL, TASK_ID, TASK_TITLE, ship (+3 more)
 
 ### Community 144 - "with"
 Cohesion: 0.29
@@ -663,25 +657,25 @@ Nodes (7): with, claude_args, claude_code_oauth_token, fetch-depth, github_token
 Cohesion: 0.29
 Nodes (7): with, claude_args, claude_code_oauth_token, fetch-depth, github_token, prompt, ref
 
+### Community 146 - "branch"
+Cohesion: 0.67
+Nodes (3): description, required, branch
+
 ### Community 147 - "TestimonialsCarousel.jsx"
 Cohesion: 0.50
 Nodes (4): doubled, StarRating(), testimonials, TestimonialsCarousel()
 
-### Community 148 - "base"
-Cohesion: 0.50
-Nodes (4): default, description, required, base
+### Community 148 - "task_id"
+Cohesion: 0.67
+Nodes (3): task_id, description, required
 
-### Community 149 - "permissions"
-Cohesion: 0.50
-Nodes (4): permissions, contents, id-token, pull-requests
+### Community 149 - "branch"
+Cohesion: 0.67
+Nodes (3): description, required, branch
 
-### Community 150 - "base"
-Cohesion: 0.50
-Nodes (4): default, description, required, base
-
-### Community 151 - "permissions"
-Cohesion: 0.50
-Nodes (4): permissions, contents, id-token, pull-requests
+### Community 150 - "task_id"
+Cohesion: 0.67
+Nodes (3): task_id, description, required
 
 ### Community 152 - "task_title"
 Cohesion: 0.67
@@ -693,23 +687,23 @@ Nodes (3): task_title, description, required
 
 ## Knowledge Gaps
 - **1 isolated node(s):** `RFC-5545`
-  These have ≤1 connection - possible missing edges. (Counts symbols only; 570 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **36 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+  These have ≤1 connection - possible missing edges. (Counts symbols only; 573 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **35 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `next` connect `next` to `pocket.js`, `InstantSiteFlow.jsx`, `leads/[id]/page.js`, `ProposalEditor.jsx`, `vault/[id]/page.js`, `app/layout.js`, `supabase-crm.js`, `devops.js`, `crm.js`, `logActivity`, `tasks.js`, `systemforge.js`, `businesses/[id]/page.js`, `proposals.js`, `lucide-react`, `search-console.js`, `devops/page.js`, `seo-reports.js`, `AdminAuthProvider.jsx`, `createOrUpdateLead`, `dependencies`, `framer-motion`, `devops/sites/[id]/page.js`, `stripe-crm.js`, `businesses.js`, `@supabase/supabase-js`, `package.json`, `useAdminAuth`, `affordable-small-business-website-design/page.jsx`, `app/blog/[slug]/page.jsx`, `finance.js`, `local/route.js`, `generateBreadcrumbSchema`, `instant-site/start/route.js`, `HomeClient.jsx`, `businesses/page.js`, `square-auth.js`, `instant-site.js`, `jobber.js`, `LandingPageTemplate.jsx`, `google-auth.js`, `seo/sites/[id]/page.js`, `project-tasks.js`, `time-tracking.js`, `plans/route.js`, `react`, `works/page.jsx`, `incidents/[id]/page.js`, `facebook.js`, `useRecaptcha`, `seo/sites/page.js`, `github-import.js`, `Components/Blog/BlogPostContent.jsx`, `sanity-boilerplate/Components/Blog/BlogPostContent.jsx`, `crm/layout.js`, `tasks/page.js`, `system-forge/layout.js`, `create/route.js`, `urlForImage`, `projects/[id]/page.js`, `pocket/page.js`, `income/[id]/page.js`, `finance/layout.js`, `system-forge/page.js`, `google-calendar.js`, `crm/page.js`, `seo/layout.js`, `devops/layout.js`, `admin/page.js`, `seo/page.js`, `app/page.js`, `lighthouse-audit/route.js`, `projects/page.js`, `comment-automations.js`, `ga4.js`, `income/route.js`, `proposals/[id]/page.js`, `sites/[id]/route.js`?**
-  _High betweenness centrality (0.485) - this node is a cross-community bridge._
+- **Why does `next` connect `next` to `pocket.js`, `InstantSiteFlow.jsx`, `leads/[id]/page.js`, `ProposalEditor.jsx`, `ModuleDetailPage`, `app/layout.js`, `supabase-crm.js`, `devops.js`, `crm.js`, `logActivity`, `tasks.js`, `systemforge.js`, `react`, `proposals.js`, `search-console.js`, `devops/sites/[id]/page.js`, `seo-reports.js`, `AdminAuthProvider.jsx`, `createOrUpdateLead`, `jobber.js`, `framer-motion`, `businesses/[id]/page.js`, `stripe-crm.js`, `package.json`, `businesses.js`, `@supabase/supabase-js`, `dependencies`, `useAdminAuth`, `affordable-small-business-website-design/page.jsx`, `app/blog/[slug]/page.jsx`, `comment-automations.js`, `finance.js`, `local/route.js`, `BlogPostCard`, `instant-site/start/route.js`, `LandingPageTemplate.jsx`, `ga4.js`, `square-auth.js`, `instant-site.js`, `app/blog/tag/[slug]/page.jsx`, `sanity-boilerplate/Components/Blog/BlogPostContent.jsx`, `google-auth.js`, `ModuleCard.jsx`, `project-tasks.js`, `time-tracking.js`, `plans/route.js`, `seo-email.js`, `react`, `works/page.jsx`, `incidents/[id]/page.js`, `facebook.js`, `analytics.js`, `projects/page.js`, `github-import.js`, `Components/Blog/BlogPostContent.jsx`, `EXPENSE_CATEGORIES`, `system-forge/layout.js`, `tasks/page.js`, `create/route.js`, `urlForImage`, `usePersistedState`, `lucide-react`, `income/[id]/page.js`, `businesses/page.js`, `system-forge/page.js`, `google-calendar.js`, `resend-stats.js`, `crm/page.js`, `finance/layout.js`, `pocket/page.js`, `import/page.js`, `HomeClient.jsx`, `vault/page.js`, `lighthouse-audit/route.js`, `devops/sites/page.js`, `sites/[id]/route.js`, `incidents/[id]/page.js`, `income/route.js`, `leads/new/page.js`?**
+  _High betweenness centrality (0.491) - this node is a cross-community bridge._
 - **What connects `RFC-5545` to the rest of the system?**
   _1 weakly-connected nodes found - possible missing edges._
 - **Should `pocket.js` be split into smaller, more focused modules?**
-  _Cohesion score 0.07062146892655367 - nodes in this community are weakly interconnected._
-- **Why does `react` connect `react` to `InstantSiteFlow.jsx`, `proposals/[id]/page.js`, `leads/[id]/page.js`, `ProposalEditor.jsx`, `vault/[id]/page.js`, `app/layout.js`, `TaskList.jsx`, `businesses/[id]/page.js`, `TimeTracker.jsx`, `lucide-react`, `devops/page.js`, `TestimonialsCarousel.jsx`, `AdminAuthProvider.jsx`, `next`, `dependencies`, `framer-motion`, `formatCurrency`, `devops/sites/[id]/page.js`, `useRecaptcha`, `SEOReportPanel.jsx`, `package.json`, `useAdminAuth`, `app/blog/[slug]/page.jsx`, `SEOPlanView.jsx`, `HomeClient.jsx`, `businesses/page.js`, `seo/sites/[id]/page.js`, `works/page.jsx`, `incidents/[id]/page.js`, `useRecaptcha`, `seo/sites/page.js`, `Components/Blog/BlogPostContent.jsx`, `sanity-boilerplate/Components/Blog/BlogPostContent.jsx`, `crm/layout.js`, `tasks/page.js`, `HealthAPITemplate`, `system-forge/layout.js`, `projects/[id]/page.js`, `pocket/page.js`, `income/[id]/page.js`, `finance/layout.js`, `system-forge/page.js`, `crm/page.js`, `seo/layout.js`, `devops/layout.js`, `admin/page.js`, `seo/page.js`, `KeywordsTab`, `projects/page.js`?**
-  _High betweenness centrality (0.147) - this node is a cross-community bridge._
+  _Cohesion score 0.07518796992481203 - nodes in this community are weakly interconnected._
+- **Why does `react` connect `react` to `InstantSiteFlow.jsx`, `leads/[id]/page.js`, `ProposalEditor.jsx`, `leads/new/page.js`, `ModuleDetailPage`, `app/layout.js`, `formatCurrency`, `devops/sites/[id]/page.js`, `TestimonialsCarousel.jsx`, `AdminAuthProvider.jsx`, `next`, `framer-motion`, `CSVImportModal.jsx`, `businesses/[id]/page.js`, `useRecaptcha`, `package.json`, `dependencies`, `useAdminAuth`, `app/blog/[slug]/page.jsx`, `LandingPageTemplate.jsx`, `sanity-boilerplate/Components/Blog/BlogPostContent.jsx`, `ModuleCard.jsx`, `react`, `works/page.jsx`, `incidents/[id]/page.js`, `analytics.js`, `projects/page.js`, `Components/Blog/BlogPostContent.jsx`, `EXPENSE_CATEGORIES`, `system-forge/layout.js`, `tasks/page.js`, `HealthAPITemplate`, `usePersistedState`, `lucide-react`, `income/[id]/page.js`, `businesses/page.js`, `system-forge/page.js`, `crm/page.js`, `finance/layout.js`, `pocket/page.js`, `import/page.js`, `HomeClient.jsx`, `vault/page.js`, `devops/sites/page.js`, `InvoiceList.jsx`, `incidents/[id]/page.js`, `finance/page.js`?**
+  _High betweenness centrality (0.112) - this node is a cross-community bridge._
 - **Should `InstantSiteFlow.jsx` be split into smaller, more focused modules?**
-  _Cohesion score 0.06613924050632912 - nodes in this community are weakly interconnected._
-- **Why does `@supabase/supabase-js` connect `resend-stats.js` to `pocket.js`, `InstantSiteFlow.jsx`, `supabase-crm.js`, `systemforge.js`, `search-console.js`, `seo-reports.js`, `dependencies`, `businesses.js`, `@supabase/supabase-js`, `package.json`, `square-auth.js`, `jobber.js`, `google-auth.js`, `plans/route.js`, `facebook.js`, `pocket/page.js`, `save-draft-plan.mjs`, `lighthouse-audit/route.js`, `comment-automations.js`?**
-  _High betweenness centrality (0.033) - this node is a cross-community bridge._
+  _Cohesion score 0.06504065040650407 - nodes in this community are weakly interconnected._
+- **Why does `@sanity/client` connect `sanity-boilerplate/lib/image.js` to `publish-blog-drafts.mjs`, `package.json`, `sanity-boilerplate/lib/sanity.js`?**
+  _High betweenness centrality (0.025) - this node is a cross-community bridge._
 - **Should `002_crm_premium_features.sql` be split into smaller, more focused modules?**
   _Cohesion score 0.0519311911716975 - nodes in this community are weakly interconnected._
