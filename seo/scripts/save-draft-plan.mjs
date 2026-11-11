@@ -10,10 +10,7 @@
 import { readFileSync } from 'node:fs';
 import { createClient } from '@supabase/supabase-js';
 import { getPlanTaskCap } from '../../lib/seo-tiers.js';
-
-const PRIORITIES = ['high', 'medium', 'low'];
-const EFFORTS = ['small', 'medium', 'large'];
-const CATEGORIES = ['technical', 'content', 'on-page', 'off-page', 'local', 'analytics'];
+import { validatePlan, toTaskRows } from '../../lib/seo-plan-validate.js';
 
 class Fail extends Error {}
 function fail(msg) {
@@ -35,23 +32,7 @@ try {
 }
 
 // ---- validate ----
-const errors = [];
-if (!plan.site_url) errors.push('site_url is required');
-if (!plan.month) errors.push('month is required (e.g. "November 2026")');
-if (!plan.summary) errors.push('summary is required');
-if (!Array.isArray(plan.tasks) || plan.tasks.length === 0) errors.push('tasks must be a non-empty array');
-
-(plan.tasks || []).forEach((t, i) => {
-  const at = `tasks[${i}]`;
-  if (!t.title) errors.push(`${at}.title is required`);
-  if (!t.description) errors.push(`${at}.description is required`);
-  if (!PRIORITIES.includes(t.priority)) errors.push(`${at}.priority must be one of ${PRIORITIES.join('/')}`);
-  if (!EFFORTS.includes(t.estimated_effort)) errors.push(`${at}.estimated_effort must be one of ${EFFORTS.join('/')}`);
-  if (!CATEGORIES.includes(t.category)) errors.push(`${at}.category must be one of ${CATEGORIES.join('/')}`);
-  if (!Array.isArray(t.acceptance_criteria) || t.acceptance_criteria.length === 0) {
-    errors.push(`${at}.acceptance_criteria must be a non-empty array`);
-  }
-});
+const errors = validatePlan(plan);
 if (errors.length) fail(`Plan is invalid:\n  - ${errors.join('\n  - ')}`);
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -105,20 +86,7 @@ const { data: saved, error: planError } = await supabase
   .single();
 if (planError) fail(`Could not save plan: ${planError.message}`);
 
-const rows = plan.tasks.map((t, idx) => ({
-  plan_id: saved.id,
-  title: t.title,
-  description: t.description,
-  priority: t.priority,
-  category: t.category,
-  estimated_effort: t.estimated_effort,
-  files_to_modify: t.files_to_modify || [],
-  acceptance_criteria: t.acceptance_criteria,
-  target_keywords: t.target_keywords || [],
-  claude_code_prompt: t.claude_code_prompt || null,
-  status: 'pending',
-  sort_order: idx,
-}));
+const rows = toTaskRows(saved.id, plan.tasks);
 
 const { error: taskError } = await supabase.from('seo_plan_tasks').insert(rows);
 if (taskError) {

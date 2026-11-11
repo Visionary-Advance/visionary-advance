@@ -111,7 +111,7 @@ Client config lives in Supabase (`crm_businesses` + `seo_sites` + `seo_keywords`
   - **Built:** `seo/.claude/skills/seo-monthly-run/`. One site per run, rules R1–R7, impact × ease scoring, writes `seo/reports/<slug>/<YYYY-MM>/plan.{json,md}`.
   - **Drafts:** `seo/scripts/save-draft-plan.mjs` validates the plan, enforces the tier cap (`PLAN_TASK_LIMITS`: basic 3 / growth 5 / authority 8) and saves `status='draft'`, `generated_by='claude'`. Claude never writes plan rows any other way.
   - **Approval:** a Draft panel in `/admin/seo` → Plan, with Approve (archives the active plan, promotes the draft) and Discard. It calls `POST /api/seo/plans/draft`, which is behind `requireAdmin`.
-  - **Gemini "Generate Plan"** stays until Claude runs are trusted, then gets retired. Plans show a Claude/Gemini badge.
+  - **Gemini "Generate Plan" retired (2026-11-11).** The Generate/Regenerate buttons now start a Claude run (Phase 2c). Old Gemini plans keep their badge in history.
   - **Gemini monthly job retired (2026-11-09).** `generateReport()` (`lib/seo-reports.js`, run by the `seo-reports` cron and manual reports) used to build and save a Gemini plan, which archived the approved plan. It now reads the active plan instead.
 - **Phase 2b: Ship button (built 2026-11-09).** Each code task on the active plan has a **Ship** button.
   - Flow: `POST /api/seo/plans/tasks/ship` (`requireAdmin`) → `lib/seo-ship.js` dispatches `.github/workflows/seo-ship-task.yml` in `seo_sites.github_repo` → Claude Code (Pro OAuth token) edits files → the workflow commits, pushes `seo/<id>-<slug>` and opens a PR → `POST /api/seo/ship-callback` (shared secret) records the PR → Telegram ping via n8n.
@@ -119,6 +119,12 @@ Client config lives in Supabase (`crm_businesses` + `seo_sites` + `seo_keywords`
   - Shippable = `files_to_modify` non-empty and `claude_code_prompt` set. Everything else shows "Manual task".
   - Workflow source of truth: `seo/github/seo-ship-task.yml`. Copy it into each client repo's `.github/workflows/`.
   - Task columns: `ship_status` (queued/running/pr_open/failed), `ship_branch`, `pr_url`, `ship_run_url`, `ship_error`. Migration 009.
+- **Phase 2c: Background plan runs (built 2026-11-11).** "Generate plan" / "Regenerate" on a site and **Generate all plans** on the SEO home start Claude in a GitHub Action, so runs keep going after the page is closed.
+  - Flow: `POST /api/seo/plan-runs` (`requireAdmin`) → `lib/seo-plan-runs.js` inserts `seo_plan_runs` rows and dispatches `.github/workflows/seo-plan-run.yml` **in this repo** once, with a matrix of run IDs (`max-parallel: 2`) → each job fetches `GET /api/seo/plan-runs/<id>/input` (`lib/seo-plan-input.js`: live GSC, URL inspection for click drops, GA4, keywords, last two plans, pulled with the app's Google OAuth, so the runner needs no Google credentials) → checks out the client repo read-only into `client/` → Claude Code (Pro OAuth token) follows `seo/github/plan-run-instructions.md` and writes `work/plan.json` → `POST /api/seo/plan-runs/callback` → `saveDraftPlan()` → Telegram ping.
+  - The headless rules in `seo/github/plan-run-instructions.md` mirror the `seo-monthly-run` skill. Change both together.
+  - Validation (`lib/seo-plan-validate.js`) is shared by the callback, `save-draft-plan.mjs` and `seo/scripts/validate-plan.mjs` (run by Claude in the Action).
+  - A run with no callback for 60 minutes reads as failed and stops blocking new runs. Migration 010.
+  - Runner auth reuses `SEO_SHIP_CALLBACK_SECRET` (`lib/seo-runner-auth.js`). Client repo reads need the `SEO_CLIENT_REPO_TOKEN` Actions secret.
 - **Phase 3: Monthly plan rules.**
   - Flag queries with high impressions, position 4–15 and low CTR for title and meta rewrites.
   - Check for cannibalization before ever suggesting a new page.

@@ -4,22 +4,11 @@
 // Fails closed when the secret is unset.
 
 import { NextResponse } from 'next/server';
-import { timingSafeEqual } from 'node:crypto';
+import { verifyRunnerSecret } from '@/lib/seo-runner-auth';
 import { applyShipCallback, ShipError } from '@/lib/seo-ship';
 
-function authorized(request) {
-  const secret = process.env.SEO_SHIP_CALLBACK_SECRET;
-  if (!secret) return false;
-
-  const header = request.headers.get('authorization') || '';
-  const token = header.startsWith('Bearer ') ? header.slice(7) : '';
-  const a = Buffer.from(token);
-  const b = Buffer.from(secret);
-  return a.length === b.length && timingSafeEqual(a, b);
-}
-
 export async function POST(request) {
-  if (!authorized(request)) {
+  if (!verifyRunnerSecret(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

@@ -6,8 +6,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ChevronRight, FileText, Globe, Plus, Search, Send, TriangleAlert } from 'lucide-react';
+import { ChevronRight, FileText, Globe, LoaderCircle, Plus, Search, Send, Sparkles, TriangleAlert } from 'lucide-react';
 import { useSEO } from '@/Components/Admin/SEO/SEOContext';
+import { isRunInFlight, usePlanRuns } from '@/Components/Admin/SEO/planRuns';
 import { usePersistedState } from '@/lib/usePersistedState';
 import AddSiteModal from '@/Components/Admin/SEO/AddSiteModal';
 import {
@@ -26,6 +27,40 @@ export default function SEOSitesHome() {
   const [search, setSearch] = usePersistedState('search', '');
   const [showAddModal, setShowAddModal] = useState(false);
   const [recentReports, setRecentReports] = useState(null);
+  const [confirmAll, setConfirmAll] = useState(false);
+  const [startingAll, setStartingAll] = useState(false);
+
+  // Background Claude plan runs (GitHub Action, 2 sites at a time).
+  const { runs, start: startRuns } = usePlanRuns(null, {
+    onFinish: run => {
+      loadPlanSummary(run.site_id, { force: true });
+      const name = sites.find(s => s.id === run.site_id)?.display_name || 'A site';
+      if (run.status === 'completed') notify(`${name}: draft plan ready to review`, 'success');
+      else notify(`${name}: plan generation failed`, 'error');
+    },
+  });
+  const generatingCount = runs ? Object.values(runs).filter(isRunInFlight).length : 0;
+
+  useEffect(() => {
+    if (!confirmAll) return;
+    const t = setTimeout(() => setConfirmAll(false), 5000);
+    return () => clearTimeout(t);
+  }, [confirmAll]);
+
+  async function handleGenerateAll() {
+    if (!confirmAll) { setConfirmAll(true); return; }
+    setConfirmAll(false);
+    setStartingAll(true);
+    try {
+      const { started, skipped } = await startRuns('all');
+      const extra = skipped?.length ? ` (${skipped.length} already running)` : '';
+      notify(started ? `Generating ${started} plan${started === 1 ? '' : 's'}, 2 at a time${extra}. You can leave this page.` : `All sites are already generating${extra}.`, 'success');
+    } catch (err) {
+      notify(`Couldn't start plan generation: ${err.message}`, 'error');
+    } finally {
+      setStartingAll(false);
+    }
+  }
 
   useEffect(() => {
     sites.forEach(s => { loadAnalytics(s.id); loadPlanSummary(s.id); });
@@ -126,7 +161,25 @@ export default function SEOSitesHome() {
       <PageHeader
         title="All sites"
         description="Search performance over the last 28 days, compared with the 28 days before."
-        actions={<Button variant="primary" icon={Plus} onClick={() => setShowAddModal(true)}>Add site</Button>}
+        actions={
+          <>
+            {sites.length > 0 && (
+              <Button
+                variant={confirmAll ? 'primary' : 'secondary'}
+                icon={Sparkles}
+                onClick={handleGenerateAll}
+                loading={startingAll}
+                disabled={startingAll || generatingCount >= sites.length}
+                title="Claude writes a draft plan for every site in the background, 2 at a time. Uses your Claude Pro usage."
+              >
+                {generatingCount > 0
+                  ? `Generating ${generatingCount} plan${generatingCount === 1 ? '' : 's'}…`
+                  : confirmAll ? `Generate ${sites.length} plans?` : 'Generate all plans'}
+              </Button>
+            )}
+            <Button variant="primary" icon={Plus} onClick={() => setShowAddModal(true)}>Add site</Button>
+          </>
+        }
       />
 
       {sitesError && <Alert tone="bad" title="Couldn't load sites" className="mb-6">{sitesError}</Alert>}
@@ -171,7 +224,7 @@ export default function SEOSitesHome() {
                   </tr>
                 </thead>
                 <tbody>
-                  {sorted.map(r => <SiteRow key={r.site.id} row={r} />)}
+                  {sorted.map(r => <SiteRow key={r.site.id} row={r} run={runs?.[r.site.id]} />)}
                 </tbody>
               </Table>
             )}
@@ -217,7 +270,7 @@ export default function SEOSitesHome() {
   );
 }
 
-function SiteRow({ row }) {
+function SiteRow({ row, run }) {
   const { site, loading, error, plan } = row;
   const href = `/admin/seo/sites/${site.id}`;
   const cell = (content, cls) => (loading ? <Skeleton className={cx('ml-auto h-4', cls || 'w-12')} /> : content);
@@ -246,7 +299,15 @@ function SiteRow({ row }) {
             ) : (
               <span className="text-xs text-adm-subtle">No plan</span>
             )}
-            {plan.hasDraft && <Badge tone="warn">Draft</Badge>}
+            {isRunInFlight(run) ? (
+              <Badge tone="info" icon={LoaderCircle} className="[&>svg]:animate-spin" title="Claude is writing a draft plan">
+                {run.status === 'queued' ? 'Queued' : 'Generating'}
+              </Badge>
+            ) : run?.status === 'failed' && !plan.hasDraft ? (
+              <Badge tone="bad" icon={TriangleAlert} title={run.error || 'Plan generation failed'}>Failed</Badge>
+            ) : plan.hasDraft ? (
+              <Badge tone="warn">Draft</Badge>
+            ) : null}
           </div>
         )}
       </Td>

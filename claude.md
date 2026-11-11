@@ -110,6 +110,11 @@ A unified CRM system with Supabase as the source of truth:
 - Comments from people without a role on the Meta app only arrive after App Review grants Advanced Access
 - Schema: `supabase/migrations/20261020_comment_automations.sql`
 
+**SEO plan generation** (`lib/seo-plan-runs.js`):
+- Plans are written by Claude Code, never Gemini. Generate / Regenerate / "Generate all plans" in `/admin/seo` start the `seo-plan-run` GitHub Action (Claude Pro OAuth token, 2 sites at a time), so a run survives leaving the page
+- Each run is a `seo_plan_runs` row (queued → running → completed/failed). The Action pulls its data from `/api/seo/plan-runs/[id]/input` and posts `plan.json` to `/api/seo/plan-runs/callback`; both use the `SEO_SHIP_CALLBACK_SECRET` bearer
+- Results land as **draft** plans that need approval. Details: `seo/CLAUDE.md` (Phase 2c)
+
 **UTM Tracking** (`lib/utm.js`):
 - Captures utm_source, utm_medium, utm_campaign, utm_term, utm_content
 - Extracts from URL params, cookies, and request headers

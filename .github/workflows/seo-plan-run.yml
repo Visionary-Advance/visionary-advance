@@ -1,0 +1,141 @@
+# SEO Plan Run: started by "Generate plan" / "Generate all" in /admin/seo (lib/seo-plan-runs.js).
+# One matrix job per site, 2 at a time. Each job pulls the site's data packet from the app,
+# runs Claude Code (Claude Pro subscription) to write plan.json, and posts it back. The app
+# saves it as a DRAFT plan. Nothing goes live until Brandon approves it in /admin/seo.
+#
+# Lives only in this repo (visionary-advance), unlike seo-ship-task.yml.
+# Secrets (org or repo → Settings → Secrets and variables → Actions):
+#   CLAUDE_CODE_OAUTH_TOKEN   from `claude setup-token` (already set for Ship)
+#   SEO_SHIP_CALLBACK_URL     https://visionaryadvance.com/api/seo/ship-callback (the app's base URL is taken from it)
+#   SEO_SHIP_CALLBACK_SECRET  same value as in Vercel (already set for Ship)
+#   SEO_CLIENT_REPO_TOKEN     fine-grained PAT, Contents: Read-only on the client repos, so Claude can
+#                             read their code and make tasks Ship-ready. Without it, only this repo is readable.
+
+name: SEO Plan Run
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_ids:
+        description: JSON array of seo_plan_runs ids
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        run_id: ${{ fromJSON(inputs.run_ids) }}
+    env:
+      RUN_ID: ${{ matrix.run_id }}
+      # Secrets are set per step (only the ones that call the app), never while Claude runs.
+      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    steps:
+      # Actions are pinned to commit SHAs (tag in the comment). Bump deliberately.
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      # Claude runs this pristine, read-only copy, so editing the workspace can't change what executes.
+      - name: Install validator outside the workspace
+        run: |
+          mkdir -p /tmp/seo-validator/seo/scripts /tmp/seo-validator/lib
+          cp seo/scripts/validate-plan.mjs /tmp/seo-validator/seo/scripts/
+          cp lib/seo-plan-validate.js lib/seo-tiers.js /tmp/seo-validator/lib/
+          chmod -R a-w /tmp/seo-validator
+
+      - name: Report running
+        env:
+          CALLBACK_URL: ${{ secrets.SEO_SHIP_CALLBACK_URL }}
+          RUNNER_SECRET: ${{ secrets.SEO_SHIP_CALLBACK_SECRET }}
+        run: |
+          echo "API=${CALLBACK_URL%%/api/*}" >> "$GITHUB_ENV"
+          mkdir -p work
+          jq -n --arg r "$RUN_ID" --arg u "$RUN_URL" '{run_id:$r, status:"running", run_url:$u}' \
+            | curl -sS --max-time 30 -X POST "${CALLBACK_URL%%/api/*}/api/seo/plan-runs/callback" \
+                -H "Authorization: Bearer $RUNNER_SECRET" -H "Content-Type: application/json" --data @- \
+            || echo "running callback failed (continuing)"
+
+      - name: Fetch data packet
+        id: input
+        env:
+          RUNNER_SECRET: ${{ secrets.SEO_SHIP_CALLBACK_SECRET }}
+        run: |
+          if ! curl -sS --fail-with-body --max-time 300 -H "Authorization: Bearer $RUNNER_SECRET" \
+              "$API/api/seo/plan-runs/$RUN_ID/input" -o work/input.json; then
+            echo "Couldn't fetch the data packet: $(head -c 300 work/input.json 2>/dev/null)" > work/error.txt
+            exit 1
+          fi
+          echo "repo=$(jq -r '.site.github_repo // empty' work/input.json)" >> "$GITHUB_OUTPUT"
+          echo "ref=$(jq -r '.site.github_default_branch // "main"' work/input.json)" >> "$GITHUB_OUTPUT"
+          jq '{site: .site.display_name, tier: .site.plan_tier, gaps}' work/input.json
+
+      - name: Check out client repo (read-only)
+        if: steps.input.outputs.repo != ''
+        continue-on-error: true
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          repository: ${{ steps.input.outputs.repo }}
+          ref: ${{ steps.input.outputs.ref }}
+          path: client
+          fetch-depth: 1
+          persist-credentials: false
+          token: ${{ steps.input.outputs.repo == github.repository && secrets.GITHUB_TOKEN || secrets.SEO_CLIENT_REPO_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Run Claude Code
+        id: claude
+        uses: anthropics/claude-code-action@4fa93a88de49bbef68b10eb15aabedf28ca0e1ed # v1.0.271
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          prompt: |
+            Read seo/github/plan-run-instructions.md and follow it exactly.
+            The data packet is work/input.json. The client's website code (read-only) is in client/ if that folder exists.
+            Write the plan to work/plan.json and validate it with: node /tmp/seo-validator/seo/scripts/validate-plan.mjs work/plan.json work/input.json
+          claude_args: |
+            --max-turns 50
+            --allowedTools "Read,Glob,Grep,Write(./work/plan.json),Edit(./work/plan.json),Bash(node /tmp/seo-validator/seo/scripts/validate-plan.mjs work/plan.json work/input.json)"
+
+      - name: Submit plan
+        env:
+          RUNNER_SECRET: ${{ secrets.SEO_SHIP_CALLBACK_SECRET }}
+          EXECUTION_FILE: ${{ steps.claude.outputs.execution_file }}
+        run: |
+          if [ ! -s work/plan.json ]; then
+            echo "Claude finished without writing a plan." > work/error.txt; exit 1
+          fi
+          if ! node /tmp/seo-validator/seo/scripts/validate-plan.mjs work/plan.json work/input.json > work/validate.txt 2>&1; then
+            { echo "Plan didn't pass validation:"; cat work/validate.txt; } > work/error.txt; exit 1
+          fi
+          META='{}'
+          if [ -n "$EXECUTION_FILE" ] && [ -f "$EXECUTION_FILE" ]; then
+            META=$(jq -c 'if type=="array" then (map(select(.type=="result")) | last) else . end
+              | {num_turns, duration_ms, usage}' "$EXECUTION_FILE" 2>/dev/null || echo '{}')
+          fi
+          jq -n --arg r "$RUN_ID" --arg u "$RUN_URL" --argjson meta "$META" --slurpfile plan work/plan.json \
+            '{run_id:$r, status:"completed", run_url:$u, meta:$meta, plan:$plan[0]}' > work/payload.json
+          if ! curl -sS --fail-with-body --max-time 60 -X POST "$API/api/seo/plan-runs/callback" \
+              -H "Authorization: Bearer $RUNNER_SECRET" -H "Content-Type: application/json" \
+              --data @work/payload.json -o work/response.json; then
+            echo "The app rejected the plan: $(head -c 300 work/response.json 2>/dev/null)" > work/error.txt; exit 1
+          fi
+          cat work/response.json
+
+      - name: Report failure
+        if: failure()
+        env:
+          CALLBACK_URL: ${{ secrets.SEO_SHIP_CALLBACK_URL }}
+          RUNNER_SECRET: ${{ secrets.SEO_SHIP_CALLBACK_SECRET }}
+        run: |
+          ERR=$(head -c 900 work/error.txt 2>/dev/null || true)
+          jq -n --arg r "$RUN_ID" --arg u "$RUN_URL" --arg e "${ERR:-Workflow failed. Open the run for details.}" \
+            '{run_id:$r, status:"failed", run_url:$u, error:$e}' \
+            | curl -sS --max-time 30 -X POST "${CALLBACK_URL%%/api/*}/api/seo/plan-runs/callback" \
+                -H "Authorization: Bearer $RUNNER_SECRET" -H "Content-Type: application/json" --data @- || true
