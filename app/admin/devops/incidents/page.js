@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { usePersistedState } from '@/lib/usePersistedState'
 import Link from 'next/link'
 import { useAdminAuth } from '@/Components/Admin/AdminAuthProvider'
 import SeverityBadge from '@/Components/Admin/DevOps/SeverityBadge'
@@ -17,9 +18,9 @@ export default function IncidentsPage() {
   const { loading: authLoading } = useAdminAuth()
   const [incidents, setIncidents] = useState([])
   const [loading, setLoading] = useState(true)
-  const [statusFilter, setStatusFilter] = useState('')
-  const [severityFilter, setSeverityFilter] = useState('')
-  const [includeResolved, setIncludeResolved] = useState(false)
+  const [statusFilter, setStatusFilter] = usePersistedState('statusFilter', '')
+  const [severityFilter, setSeverityFilter] = usePersistedState('severityFilter', '')
+  const [includeResolved, setIncludeResolved] = usePersistedState('includeResolved', false)
 
   // Fetch incidents
   useEffect(() => {

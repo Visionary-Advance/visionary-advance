@@ -2,6 +2,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { usePersistedState } from '@/lib/usePersistedState'
 import Link from 'next/link'
 
 const PRIORITY_COLORS = {
@@ -27,10 +28,10 @@ export default function TasksPage() {
   const [error, setError] = useState(null)
 
   // Filters
-  const [statusFilter, setStatusFilter] = useState('')
-  const [priorityFilter, setPriorityFilter] = useState('')
-  const [typeFilter, setTypeFilter] = useState('')
-  const [includeCompleted, setIncludeCompleted] = useState(false)
+  const [statusFilter, setStatusFilter] = usePersistedState('statusFilter', '')
+  const [priorityFilter, setPriorityFilter] = usePersistedState('priorityFilter', '')
+  const [typeFilter, setTypeFilter] = usePersistedState('typeFilter', '')
+  const [includeCompleted, setIncludeCompleted] = usePersistedState('includeCompleted', false)
 
   // Linkable entities
   const [businesses, setBusinesses] = useState([])

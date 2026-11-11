@@ -2,6 +2,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { usePersistedState } from '@/lib/usePersistedState'
 import Link from 'next/link'
 import ModuleCard from '@/Components/Admin/SystemForge/ModuleCard'
 import ModuleForm from '@/Components/Admin/SystemForge/ModuleForm'
@@ -13,9 +14,9 @@ export default function VaultPage() {
   const [showForm, setShowForm] = useState(false)
 
   // Filters
-  const [search, setSearch] = useState('')
-  const [typeFilter, setTypeFilter] = useState('')
-  const [categoryFilter, setCategoryFilter] = useState('')
+  const [search, setSearch] = usePersistedState('search', '')
+  const [typeFilter, setTypeFilter] = usePersistedState('typeFilter', '')
+  const [categoryFilter, setCategoryFilter] = usePersistedState('categoryFilter', '')
 
   const fetchModules = useCallback(async () => {
     setLoading(true)

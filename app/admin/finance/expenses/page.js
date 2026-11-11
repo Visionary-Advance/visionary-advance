@@ -2,6 +2,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { usePersistedState } from '@/lib/usePersistedState'
 import { formatCurrency, EXPENSE_CATEGORIES } from '@/lib/finance'
 import { format } from 'date-fns'
 import ExpenseForm from '@/Components/Admin/Finance/ExpenseForm'
@@ -13,9 +14,9 @@ import MonthlyExpenseSummary from '@/Components/Admin/Finance/MonthlyExpenseSumm
 export default function ExpensesPage() {
   const [entries, setEntries] = useState([])
   const [loading, setLoading] = useState(true)
-  const [year, setYear] = useState(new Date().getFullYear())
-  const [month, setMonth] = useState('')
-  const [category, setCategory] = useState('')
+  const [year, setYear] = usePersistedState('year', new Date().getFullYear())
+  const [month, setMonth] = usePersistedState('month', '')
+  const [category, setCategory] = usePersistedState('category', '')
   const [showForm, setShowForm] = useState(false)
   const [showImport, setShowImport] = useState(false)
   const [editEntry, setEditEntry] = useState(null)
@@ -23,7 +24,7 @@ export default function ExpensesPage() {
   const [deleteConfirm, setDeleteConfirm] = useState(null)
   const [categoryData, setCategoryData] = useState([])
   const [yearTotal, setYearTotal] = useState(0)
-  const [view, setView] = useState('transactions') // 'transactions' | 'monthly'
+  const [view, setView] = usePersistedState('view', 'transactions') // 'transactions' | 'monthly'
   const [monthlyData, setMonthlyData] = useState([])
 
   const fetchEntries = async (page = 1) => {

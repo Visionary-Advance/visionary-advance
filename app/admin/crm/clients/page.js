@@ -2,6 +2,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { usePersistedState } from '@/lib/usePersistedState'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import IndustrySelect from '@/Components/IndustrySelect'
@@ -11,12 +12,12 @@ export default function ClientsPage() {
   const [clients, setClients] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [pagination, setPagination] = useState({ page: 1, limit: 20, total: 0, totalPages: 0 })
+  const [pagination, setPagination] = usePersistedState('pagination', { page: 1, limit: 20, total: 0, totalPages: 0 })
 
   // Filters
-  const [search, setSearch] = useState('')
-  const [sortBy, setSortBy] = useState('client_since')
-  const [sortOrder, setSortOrder] = useState('desc')
+  const [search, setSearch] = usePersistedState('search', '')
+  const [sortBy, setSortBy] = usePersistedState('sortBy', 'client_since')
+  const [sortOrder, setSortOrder] = usePersistedState('sortOrder', 'desc')
 
   // Create client modal
   const [showCreateModal, setShowCreateModal] = useState(false)

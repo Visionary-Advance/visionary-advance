@@ -2,6 +2,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { usePersistedState } from '@/lib/usePersistedState'
 import Link from 'next/link'
 import { formatCurrency, PAYMENT_METHODS } from '@/lib/finance'
 import { format } from 'date-fns'
@@ -11,9 +12,9 @@ import CSVImportModal from '@/Components/Admin/Finance/CSVImportModal'
 export default function IncomePage() {
   const [entries, setEntries] = useState([])
   const [loading, setLoading] = useState(true)
-  const [year, setYear] = useState(new Date().getFullYear())
-  const [month, setMonth] = useState('')
-  const [search, setSearch] = useState('')
+  const [year, setYear] = usePersistedState('year', new Date().getFullYear())
+  const [month, setMonth] = usePersistedState('month', '')
+  const [search, setSearch] = usePersistedState('search', '')
   const [showForm, setShowForm] = useState(false)
   const [showImport, setShowImport] = useState(false)
   const [editEntry, setEditEntry] = useState(null)
