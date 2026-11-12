@@ -81,19 +81,35 @@ We decided not to switch to `AminForou/mcp-gsc`, because the current server alre
 - Tested: `next build` passes. Callback returns 401 with no or wrong secret, 400 on bad body and 404 on an unknown task. Ship and draft return 401 with no admin token.
 
 **One-time setup (Brandon):**
-1. **Claude token:** run `claude setup-token` locally, then add the org secret `CLAUDE_CODE_OAUTH_TOKEN` (GitHub → Visionary-Advance org → Settings → Secrets and variables → Actions). It uses the Pro subscription, and each Ship run counts against Pro limits.
-2. **Callback secret:** generate a random string. Add it as the org secret `SEO_SHIP_CALLBACK_SECRET` **and** as the Vercel env var `SEO_SHIP_CALLBACK_SECRET`.
-3. **Callback URL:** add the org secret `SEO_SHIP_CALLBACK_URL` = `https://visionaryadvance.com/api/seo/ship-callback`.
-4. **Dispatch token:** create a fine-grained PAT (resource owner Visionary-Advance, all repositories, permission **Actions: Read and write**) and save it as the Vercel env var `GITHUB_SEO_DISPATCH_TOKEN`.
-5. **Org Actions settings:** allow workflows to create pull requests (Settings → Actions → General → Workflow permissions → "Allow GitHub Actions to create and approve pull requests"), and give org secrets access to all repos (or the 6 SEO repos).
-6. **Workflow file:** copy `seo/github/seo-ship-task.yml` to `.github/workflows/` on `main` in each client repo (three-peaks, anco, nw-hazmat, patrick, kings). This repo gets it when this branch merges.
+> **Repo secrets, not org secrets.** On the org's current GitHub plan, org secrets can't be used by private repos. Steps 1–3 go into **each of the 6 repos** (repo → Settings → Secrets and variables → Actions → Secrets). With the GitHub CLI: `gh secret set <NAME> -R Visionary-Advance/<repo>`.
+
+1. **Claude token:** run `claude setup-token` locally, then add the repo secret `CLAUDE_CODE_OAUTH_TOKEN`. It uses the Pro subscription, and each Ship run counts against Pro limits.
+2. **Callback secret:** generate a random string. Add it as the repo secret `SEO_SHIP_CALLBACK_SECRET` (the same value in every repo) **and** as the Vercel env var `SEO_SHIP_CALLBACK_SECRET`.
+3. **Callback URL:** add the repo secret `SEO_SHIP_CALLBACK_URL` = `https://visionaryadvance.com/api/seo/ship-callback`.
+4. **Dispatch token:** create a fine-grained PAT (resource owner Visionary-Advance, only the 6 SEO repos, permission **Actions: Read and write**) and save it as the Vercel env var `GITHUB_SEO_DISPATCH_TOKEN`.
+5. **Actions settings:**
+   - Allow workflows to create pull requests: Settings → Actions → General → Workflow permissions → "Allow GitHub Actions to create and approve pull requests". Set it at org level; if that has no effect, set it in each repo.
+   - The Actions policy must allow `actions/checkout` and `anthropics/claude-code-action`. "Allow all actions" is simplest.
+   - Leave "Require actions to be pinned to a full-length commit SHA" off until a Ship run works, because claude-code-action's internal steps may not be pinned.
+6. **Workflow file:** ✅ added 2026-11-10 to `main` in three-peaks, anco, nw-hazmat, patrick and kings (and in this repo via the seo-automation merge). After changing the template, re-copy it to each repo.
 7. **Deploy:** the callback must be live at visionaryadvance.com before Ship works end to end, even when clicking Ship from `npm run dev`.
 
 **Gotchas:**
 - workflow_dispatch only runs workflows that exist on the ref, so a 404 from dispatch means the file isn't on `main` yet, or the PAT can't see the repo.
 - PRs opened with `GITHUB_TOKEN` don't trigger other GitHub workflows. Vercel previews still build, because Vercel uses its own GitHub app.
 - Actions are **pinned to commit SHAs**: `claude-code-action` 4fa93a88… (v1.0.271) and `checkout` 11d5960a… (v4.4.0). That way a moved tag can't run different code with the Claude token. To upgrade, run `git ls-remote --tags <repo>`, update the SHA in `seo/github/seo-ship-task.yml`, then re-copy it to each repo. No `id-token` permission is needed, because `github_token` is passed directly.
-- The Gemini **Regenerate** button on the plan view still calls `createPlan()`, which archives the active plan. Avoid it until Gemini is retired.
+- **The callback URL is `https://visionary-advance.vercel.app/api/seo/ship-callback`, not visionaryadvance.com.** The main domain sits behind Cloudflare, and Bot Fight Mode returns 403 to GitHub runners; Skip rules don't apply to it. A Vercel Firewall custom rule (path equals `/api/seo/ship-callback` → Bypass) covers Vercel's own Bot Protection. The route still requires the secret.
+- **Reading callback errors in the run log:** a 403 means a firewall blocked it before the app. A 401 means the secret in GitHub doesn't match Vercel's `SEO_SHIP_CALLBACK_SECRET`; set them again together and redeploy.
+- `gh secret set NAME` with no `-b` waits for you to paste the value. Pressing Enter without pasting saves a **blank** secret, which makes the action fail with "Either ANTHROPIC_API_KEY, CLAUDE_CODE_OAUTH_TOKEN… is required".
+- **Testing callbacks for free:** re-run an old Ship run whose branch still exists. It stops at "Create branch" before Claude starts, and the failure callback still fires. Afterwards, set the task's `ship_status` back.
+- ~~The Gemini Regenerate button archives the active plan.~~ Gone: Gemini was removed on 2026-11-11, and Regenerate now starts a Claude plan run that only writes a draft.
+
+**Plan runs (Generate / Regenerate / Generate all), added 2026-11-11:**
+- Workflow `.github/workflows/seo-plan-run.yml` lives only in **visionary-advance**; nothing gets copied to client repos.
+- It reuses that repo's `CLAUDE_CODE_OAUTH_TOKEN`, `SEO_SHIP_CALLBACK_URL` (the app's base URL is taken from it, so it also uses visionary-advance.vercel.app) and `SEO_SHIP_CALLBACK_SECRET`.
+- **`SEO_CLIENT_REPO_TOKEN`** is a **repo secret in visionary-advance** (org secrets don't reach private repos on this plan): a fine-grained PAT, resource owner Visionary-Advance, Contents: Read-only on three-peaks, anco, nw-hazmat, patrick and kings. Without it the client checkout fails with "Repository not found" and tasks come out without file paths (no Ship button). The token expires; renew it.
+- The app routes it calls are `/api/seo/plan-runs/<id>/input` and `/api/seo/plan-runs/callback`. If Vercel's bot protection ever blocks them (403 in the run log), extend the Firewall bypass rule from `/api/seo/ship-callback` to cover `/api/seo/plan-runs/`.
+- A failed run's error lists the tool calls that the permission rules blocked.
 
 ### Gotchas
 - **`unable to impersonate ... invalid_grant / invalid_rapt`**: Workspace reauth policy expired Brandon's login. Re-run the impersonation command. This will block unattended runs (Phase 5) unless a JSON key is allowed or reauth is relaxed in Workspace Admin → Security → Google Cloud session control.
