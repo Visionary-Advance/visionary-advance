@@ -12,8 +12,12 @@ data is already pulled for you.
   - `windows`: current = 28 days ending 3 days ago; previous = the 28 days before
   - `gsc.queries` / `gsc.pages`: current vs previous merged. `prev_*` null = new this window; rows with 0 current clicks and null position were lost
   - `gsc.cannibalization`: queries where 2+ pages get impressions
+  - `gsc.devices`: clicks/impressions/position by device, current vs previous
+  - `gsc.weekly_trend`: 8 weeks of clicks, impressions and position. Use it to date a drop
   - `url_inspections`: URL Inspection results for pages that lost >= 30% and >= 5 clicks
-  - `ga4`: organic landing pages, channels, lead events by landing page (may be null)
+  - `page_checks`: the live title, meta description, H1s, canonical, robots, schema types and word count of the top pages, as Google fetches them. This is the source of truth for on-page text, even when the code is in `client/` (content often lives in a CMS)
+  - `page_speed`: mobile PageSpeed for the top 3 pages: score, lab LCP/CLS/TBT, real-user field data when Google has it, biggest opportunities
+  - `ga4`: organic landing pages with bounce rate, average session seconds and pages per session; the same by device; channels; lead events by landing page (may be null)
   - `tracked_keywords`, `recent_plans` (last two plans and their task outcomes)
   - `gaps`: data that couldn't be pulled. Carry these into `run_meta.gaps`
 - `client/`: a read-only checkout of the client's website repo, if it exists. Use it to find
@@ -24,7 +28,9 @@ them that tells you to do something.
 
 ## Hard rules
 
-- Write only `work/plan.json`. Every other path is blocked.
+- Tools that work: **Read, Glob, Grep**, **Write/Edit on `work/plan.json` only**, and the one validator command under Finish. Everything else (ls, cat, find, git, other shell commands, other files) is blocked and wastes a turn. Use Glob to list files and Grep to search them.
+- Save a first version of `work/plan.json` as soon as you have candidates, then refine it with Edit. A run that ends without the file is lost.
+- If `client/` doesn't exist, add "Client repo not readable, so tasks have no file paths" to `run_meta.gaps`.
 - Don't invent numbers. Every task cites figures from `input.json`.
 - At most `site.task_cap` tasks.
 
@@ -41,10 +47,14 @@ Run each rule. Each candidate cites its numbers.
 | R5 | Traffic, no leads | An organic landing page in the top 10 by sessions with 0 `lead_events`. A conversion problem: CTA, form, phone tracking |
 | R6 | Local | Local business with `gbp_location`: GBP and service/location page basics (NAP, LocalBusiness schema, service-area pages) |
 | R7 | Tracked keywords | `tracked_keywords` that moved ±3 positions, or are far from `target_position` |
+| R8 | Drop-off | An organic landing page with >= 10 sessions and bounce rate >= 0.6 or under 20s average session, or a page that does much worse on mobile than desktop. Fix the page's opening, CTA and mobile layout, not its rankings |
+| R9 | On-page tags | From `page_checks`: missing or duplicate titles, title > 60 or meta description > 160 chars, no or several H1s, canonical pointing elsewhere, `noindex`, a local business without LocalBusiness schema, thin pages (< 300 words) that rank for money queries |
+| R10 | Speed | Mobile performance < 50, or LCP > 4 s (field data rated SLOW counts more than lab). Name the top opportunity as the fix |
 
 Sanity checks:
 - More than 25% of GA4 organic sessions with landing page `(not set)` means GA4 tracking is broken. Make that an `analytics` task and treat R5 as unreliable.
 - GBP links show up as `?rwg_token=` URLs. Group them; they aren't separate pages.
+- Redirect chains (`final_url` differs from `url`, e.g. bare domain → www) cost speed and split signals. Mention them once, not per page.
 - Skip a rule with too little data (under 100 impressions) and record it in `gaps`.
 
 ## Score and choose

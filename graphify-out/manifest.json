@@ -187,9 +187,9 @@
     "semantic_hash": ""
   },
   "Components/Admin/SEO/SEOPlanView.jsx": {
-    "mtime": 1794442170.4149728,
-    "seen": 1794442217.4588683,
-    "ast_hash": "f6b7488b26a9169d25af1ccc2b6d0117",
+    "mtime": 1794443398.8914065,
+    "seen": 1794444337.0677867,
+    "ast_hash": "b07d0794c9c5bddff7f5e0e8d88622ab",
     "semantic_hash": ""
   },
   "Components/Admin/SEO/SEOReportPanel.jsx": {
@@ -1622,9 +1622,9 @@
     "semantic_hash": ""
   },
   "app/api/seo/plans/route.js": {
-    "mtime": 1794440032.3023713,
-    "seen": 1794440463.011577,
-    "ast_hash": "2f7f5a90766484248030538c14b090a5",
+    "mtime": 1794443411.0122352,
+    "seen": 1794444337.0680568,
+    "ast_hash": "19a30b247205acd50232acd9fb3b8d9f",
     "semantic_hash": ""
   },
   "app/api/seo/plans/tasks/route.js": {
@@ -2120,15 +2120,9 @@
     "semantic_hash": "b309c8cc3a55009fc3c2654aff80636a"
   },
   "lib/ga4.js": {
-    "mtime": 1794440438.9191678,
-    "seen": 1794440463.01165,
-    "ast_hash": "8c1ed8d93f0a12670d47325ffec14047",
-    "semantic_hash": ""
-  },
-  "lib/gemini-seo.js": {
-    "mtime": 1794440013.9416897,
-    "seen": 1794440463.0116508,
-    "ast_hash": "39bd6712c7f8e9775199e959e10afd29",
+    "mtime": 1794444205.6863525,
+    "seen": 1794444337.0681388,
+    "ast_hash": "d2bd1271a4c2bc265450407a4a502ed6",
     "semantic_hash": ""
   },
   "lib/github-import.js": {
@@ -2264,9 +2258,9 @@
     "semantic_hash": ""
   },
   "lib/seo-reports.js": {
-    "mtime": 1794322563.3909037,
-    "seen": 1794322572.8541467,
-    "ast_hash": "8a292204140b31870b53adb0ff401f79",
+    "mtime": 1794443398.890436,
+    "seen": 1794444337.0681677,
+    "ast_hash": "6ec83fd977a972f103342ca3d5def12c",
     "semantic_hash": ""
   },
   "lib/seo-tiers.js": {
@@ -2372,10 +2366,10 @@
     "semantic_hash": "071f075c2a04ed27f703f3507d358562"
   },
   "package.json": {
-    "mtime": 1775678719.0578666,
-    "seen": 1794284227.536094,
-    "ast_hash": "940e0eda2eb69ef05eadcc808867fec1",
-    "semantic_hash": "940e0eda2eb69ef05eadcc808867fec1"
+    "mtime": 1794443414.1816113,
+    "seen": 1794444337.0681994,
+    "ast_hash": "0dabc2a6881a3925a577a72eaaef0754",
+    "semantic_hash": ""
   },
   "postcss.config.mjs": {
     "mtime": 1763331631.8300695,
@@ -2972,15 +2966,15 @@
     "semantic_hash": ""
   },
   "seo/.claude/skills/seo-monthly-run/SKILL.md": {
-    "mtime": 1794322563.3954124,
-    "seen": 1794322572.854274,
-    "ast_hash": "72a4ecd09d669eb625dfb621d82eed33",
+    "mtime": 1794444305.0260262,
+    "seen": 1794444337.0682921,
+    "ast_hash": "65461b7e839bfdedc8fa6644810ae532",
     "semantic_hash": ""
   },
   "seo/CLAUDE.md": {
-    "mtime": 1794440457.2394216,
-    "seen": 1794440463.0117872,
-    "ast_hash": "c64edfb63a5992be740944cbb0085889",
+    "mtime": 1794443442.7365086,
+    "seen": 1794444337.0682926,
+    "ast_hash": "b802780d2397a5661a051cb6a9751d77",
     "semantic_hash": ""
   },
   "seo/docs/setup-log.md": {
@@ -3374,9 +3368,9 @@
     "semantic_hash": ""
   },
   "claude.md": {
-    "mtime": 1794440457.2394216,
-    "seen": 1794440463.0117817,
-    "ast_hash": "954907abb0c56e27a6c6d25e1ef0604d",
+    "mtime": 1794443442.7365086,
+    "seen": 1794444337.068287,
+    "ast_hash": "e3b27fe272d370f9066b9772a4ac79aa",
     "semantic_hash": ""
   },
   "Components/Admin/AdminScrollRestore.jsx": {
@@ -3476,15 +3470,15 @@
     "semantic_hash": ""
   },
   ".github/workflows/seo-plan-run.yml": {
-    "mtime": 1794442121.7619145,
-    "seen": 1794442217.4588308,
-    "ast_hash": "9311714230142fef4e051da1fb520791",
+    "mtime": 1794443184.0100615,
+    "seen": 1794444337.06774,
+    "ast_hash": "ef967ea5c5efbfa9dba4c7318e5dc96f",
     "semantic_hash": ""
   },
   "Components/Admin/SEO/planRuns.js": {
-    "mtime": 1794442104.5697777,
-    "seen": 1794442217.4588726,
-    "ast_hash": "4afa410fed07c9fe9b47059d4c534240",
+    "mtime": 1794443066.6891878,
+    "seen": 1794444337.0677927,
+    "ast_hash": "c8d626fe053f41c2a8a52e3bf18c3398",
     "semantic_hash": ""
   },
   "app/api/seo/plan-runs/[id]/input/route.js": {
@@ -3506,9 +3500,9 @@
     "semantic_hash": ""
   },
   "lib/seo-plan-input.js": {
-    "mtime": 1794440408.8840985,
-    "seen": 1794440463.01167,
-    "ast_hash": "ce040ed0204b33a2f86ab63c246ac208",
+    "mtime": 1794444253.226573,
+    "seen": 1794444337.068163,
+    "ast_hash": "74f1210fb86a75f9f903b989555500a3",
     "semantic_hash": ""
   },
   "lib/seo-plan-runs.js": {
@@ -3542,9 +3536,9 @@
     "semantic_hash": ""
   },
   "seo/github/plan-run-instructions.md": {
-    "mtime": 1794440538.361827,
-    "seen": 1794441015.563963,
-    "ast_hash": "75d4eb4887bf90c0620060555c19b0d8",
+    "mtime": 1794444305.0260262,
+    "seen": 1794444337.0682943,
+    "ast_hash": "c5b478c43879c54aa6c4ba02ad892740",
     "semantic_hash": ""
   },
   "Components/Admin/SEO/PlanRunProgress.jsx": {
@@ -3553,10 +3547,16 @@
     "ast_hash": "82e6f5085f53af95ff424dbc755506f7",
     "semantic_hash": ""
   },
+  "lib/seo-page-checks.js": {
+    "mtime": 1794444231.241896,
+    "seen": 1794444337.0681612,
+    "ast_hash": "fed397ae934b7f1d124108bf67b5af3c",
+    "semantic_hash": ""
+  },
   "package-lock.json": {
-    "mtime": 1777867234.4753077,
-    "seen": 1794287071.3996673,
-    "ast_hash": "e87737d7dfbc18fbefa5b4184b53cc33",
+    "mtime": 1794443414.3549418,
+    "seen": 1794444337.068345,
+    "ast_hash": "de35de6d8f8ce5c6f35a38f79ad1b801",
     "semantic_hash": ""
   }
 }

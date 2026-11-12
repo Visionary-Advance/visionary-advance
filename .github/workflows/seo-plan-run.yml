@@ -104,10 +104,22 @@ jobs:
           prompt: |
             Read seo/github/plan-run-instructions.md and follow it exactly.
             The data packet is work/input.json. The client's website code (read-only) is in client/ if that folder exists.
+            Tools: only Read, Glob, Grep, Write/Edit on work/plan.json, and the validator command below work. Every other shell command is blocked, so use Glob and Grep to explore files.
             Write the plan to work/plan.json and validate it with: node /tmp/seo-validator/seo/scripts/validate-plan.mjs work/plan.json work/input.json
           claude_args: |
             --max-turns 50
             --allowedTools "Read,Glob,Grep,Write(./work/plan.json),Edit(./work/plan.json),Bash(node /tmp/seo-validator/seo/scripts/validate-plan.mjs work/plan.json work/input.json)"
+
+      # Which tool calls the permission rules blocked, so a failed run says why.
+      - name: Summarize Claude run
+        if: always() && steps.claude.outputs.execution_file != ''
+        env:
+          EXECUTION_FILE: ${{ steps.claude.outputs.execution_file }}
+        run: |
+          [ -f "$EXECUTION_FILE" ] || exit 0
+          jq -r 'if type=="array" then (map(select(.type=="result")) | last) else . end
+            | (.permission_denials // [])[] | "(.tool_name): (.tool_input | tostring | .[0:160])"'             "$EXECUTION_FILE" > work/denials.txt 2>/dev/null || true
+          if [ -s work/denials.txt ]; then echo "Blocked tool calls:"; cat work/denials.txt; fi
 
       - name: Submit plan
         env:
@@ -115,7 +127,7 @@ jobs:
           EXECUTION_FILE: ${{ steps.claude.outputs.execution_file }}
         run: |
           if [ ! -s work/plan.json ]; then
-            echo "Claude finished without writing a plan." > work/error.txt; exit 1
+            { echo "Claude finished without writing a plan."; [ -s work/denials.txt ] && { echo "Blocked:"; head -5 work/denials.txt; }; } > work/error.txt; exit 1
           fi
           if ! node /tmp/seo-validator/seo/scripts/validate-plan.mjs work/plan.json work/input.json > work/validate.txt 2>&1; then
             { echo "Plan didn't pass validation:"; cat work/validate.txt; } > work/error.txt; exit 1
@@ -123,7 +135,8 @@ jobs:
           META='{}'
           if [ -n "$EXECUTION_FILE" ] && [ -f "$EXECUTION_FILE" ]; then
             META=$(jq -c 'if type=="array" then (map(select(.type=="result")) | last) else . end
-              | {num_turns, duration_ms, usage}' "$EXECUTION_FILE" 2>/dev/null || echo '{}')
+              | {num_turns, duration_ms, usage, permission_denials_count}' "$EXECUTION_FILE" 2>/dev/null || echo '{}')
+            META=$(echo "$META" | jq -c --argjson code "$([ -d client/.git ] && echo true || echo false)" '. + {client_code: $code}')
           fi
           jq -n --arg r "$RUN_ID" --arg u "$RUN_URL" --argjson meta "$META" --slurpfile plan work/plan.json \
             '{run_id:$r, status:"completed", run_url:$u, meta:$meta, plan:$plan[0]}' > work/payload.json

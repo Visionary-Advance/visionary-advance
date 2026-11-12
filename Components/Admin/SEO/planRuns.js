@@ -95,9 +95,39 @@ export function PlanRunsProvider({ children }) {
     return () => listeners.current.delete(fn);
   }, []);
 
+  // Approve / discard a draft. Owned by the provider, so the request, the toast and the
+  // dashboard refresh all finish even if you move to another site mid-click.
+  const [draftActions, setDraftActions] = useState({}); // siteId → 'approve' | 'discard'
+  const draftAction = useCallback(async (siteId, planId, action) => {
+    setDraftActions(m => ({ ...m, [siteId]: action }));
+    const { notify: toast, sites: list, loadPlanSummary: reloadSummary } = ctx.current;
+    const name = list?.find(s => s.id === siteId)?.display_name || 'Site';
+    try {
+      const res = await authFetch('/api/seo/plans/draft', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ planId, action }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || `Failed to ${action} draft`);
+      reloadSummary?.(siteId, { force: true });
+      listeners.current.forEach(fn => fn({ site_id: siteId, status: 'plan_changed', action }));
+      toast?.(action === 'approve' ? `${name}: draft approved. It’s now the active plan.` : `${name}: draft discarded`, 'success');
+    } catch (err) {
+      toast?.(`${name}: couldn't ${action} the draft. ${err.message}`, 'error');
+      throw err;
+    } finally {
+      setDraftActions(m => {
+        const next = { ...m };
+        delete next[siteId];
+        return next;
+      });
+    }
+  }, []);
+
   return createElement(
     PlanRunsContext.Provider,
-    { value: { runs, typicalMs, start, reload: load, subscribe } },
+    { value: { runs, typicalMs, start, reload: load, subscribe, draftAction, draftActions } },
     children
   );
 }

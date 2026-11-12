@@ -111,7 +111,7 @@ A unified CRM system with Supabase as the source of truth:
 - Schema: `supabase/migrations/20261020_comment_automations.sql`
 
 **SEO plan generation** (`lib/seo-plan-runs.js`):
-- Plans are written by Claude Code, never Gemini. Generate / Regenerate / "Generate all plans" in `/admin/seo` start the `seo-plan-run` GitHub Action (Claude Pro OAuth token, 2 sites at a time), so a run survives leaving the page
+- Plans are written only by Claude Code (Gemini is removed). Reports reuse the approved plan's summary and tasks. Generate / Regenerate / "Generate all plans" in `/admin/seo` start the `seo-plan-run` GitHub Action (Claude Pro OAuth token, 2 sites at a time), so a run survives leaving the page
 - Each run is a `seo_plan_runs` row (queued → running → completed/failed). The Action pulls its data from `/api/seo/plan-runs/[id]/input` and posts `plan.json` to `/api/seo/plan-runs/callback`; both use the `SEO_SHIP_CALLBACK_SECRET` bearer
 - Results land as **draft** plans that need approval. Details: `seo/CLAUDE.md` (Phase 2c)
 

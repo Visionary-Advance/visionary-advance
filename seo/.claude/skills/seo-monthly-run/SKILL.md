@@ -68,6 +68,8 @@ Run each rule and keep the findings as candidates. Every candidate cites its num
 | R6 | **Local** | Local service-area business with `gbp_location` set: apply the `claude-seo:seo-local` skill's checklist to the GBP and service/location pages. Lightweight; don't run its full audit |
 | R7 | **Tracked keyword movement** | `seo_keywords` that moved ±3 positions, or are still far from `target_position` |
 
+The background version (`seo/github/plan-run-instructions.md`) also gets per-page bounce rate and engagement by device, live title/meta/H1 checks and mobile PageSpeed, and adds rules R8 (drop-off), R9 (on-page tags) and R10 (speed). In a local run, cover those by hand where it's cheap: GA4 `bounceRate`/`averageSessionDuration` by landing page, and a fetch of the top pages' titles.
+
 Optional deep checks, **only on pages that were already flagged**: use the `seo-audit` skill's on-page checklist. Don't crawl the whole site.
 
 Skip a rule with too little data (e.g. under 100 total impressions) and record it in `run_meta.gaps`.

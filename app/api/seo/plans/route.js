@@ -1,6 +1,6 @@
 // app/api/seo/plans/route.js
 // List a site's SEO plans. New plans come from Claude via POST /api/seo/plan-runs
-// (background GitHub Action) and arrive as drafts; Gemini plan generation is retired.
+// (background GitHub Action) and arrive as drafts.
 
 import { NextResponse } from 'next/server';
 import { getPlans, getActivePlan } from '@/lib/seo-plans';
