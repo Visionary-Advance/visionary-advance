@@ -1,12 +1,12 @@
 // app/api/seo/plan-runs/route.js
 // Background Claude plan generation. Admin-only.
-//   GET  ?siteId=<id>          → { runs: { [siteId]: latestRun } } (omit siteId for every site)
+//   GET  ?siteId=<id>          → { runs: { [siteId]: latestRun }, typicalMs } (omit siteId for every site)
 //   POST { siteIds: [...] }    → start runs for those sites
 //   POST { all: true }         → start runs for every site (2 run at a time on GitHub)
 
 import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-api-auth';
-import { getLatestRuns, startPlanRuns, PlanRunError } from '@/lib/seo-plan-runs';
+import { getLatestRuns, getTypicalWritingMs, startPlanRuns, PlanRunError } from '@/lib/seo-plan-runs';
 
 export async function GET(request) {
   const auth = await requireAdmin(request);
@@ -14,8 +14,11 @@ export async function GET(request) {
 
   try {
     const siteId = new URL(request.url).searchParams.get('siteId');
-    const runs = await getLatestRuns(siteId ? [siteId] : null);
-    return NextResponse.json({ runs });
+    const [runs, typicalMs] = await Promise.all([
+      getLatestRuns(siteId ? [siteId] : null),
+      getTypicalWritingMs().catch(() => null),
+    ]);
+    return NextResponse.json({ runs, typicalMs });
   } catch (error) {
     console.error('Error loading plan runs:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });

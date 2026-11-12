@@ -6,9 +6,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ChevronRight, FileText, Globe, LoaderCircle, Plus, Search, Send, Sparkles, TriangleAlert } from 'lucide-react';
+import { ChevronRight, FileText, Globe, Plus, Search, Send, Sparkles, TriangleAlert } from 'lucide-react';
 import { useSEO } from '@/Components/Admin/SEO/SEOContext';
 import { isRunInFlight, usePlanRuns } from '@/Components/Admin/SEO/planRuns';
+import { CompactRunProgress } from '@/Components/Admin/SEO/PlanRunProgress';
 import { usePersistedState } from '@/lib/usePersistedState';
 import AddSiteModal from '@/Components/Admin/SEO/AddSiteModal';
 import {
@@ -30,15 +31,8 @@ export default function SEOSitesHome() {
   const [confirmAll, setConfirmAll] = useState(false);
   const [startingAll, setStartingAll] = useState(false);
 
-  // Background Claude plan runs (GitHub Action, 2 sites at a time).
-  const { runs, start: startRuns } = usePlanRuns(null, {
-    onFinish: run => {
-      loadPlanSummary(run.site_id, { force: true });
-      const name = sites.find(s => s.id === run.site_id)?.display_name || 'A site';
-      if (run.status === 'completed') notify(`${name}: draft plan ready to review`, 'success');
-      else notify(`${name}: plan generation failed`, 'error');
-    },
-  });
+  // Background Claude plan runs (shared with the sidebar; toasts come from the provider).
+  const { runs, start: startRuns } = usePlanRuns();
   const generatingCount = runs ? Object.values(runs).filter(isRunInFlight).length : 0;
 
   useEffect(() => {
@@ -300,9 +294,7 @@ function SiteRow({ row, run }) {
               <span className="text-xs text-adm-subtle">No plan</span>
             )}
             {isRunInFlight(run) ? (
-              <Badge tone="info" icon={LoaderCircle} className="[&>svg]:animate-spin" title="Claude is writing a draft plan">
-                {run.status === 'queued' ? 'Queued' : 'Generating'}
-              </Badge>
+              <CompactRunProgress run={run} name={site.display_name} />
             ) : run?.status === 'failed' && !plan.hasDraft ? (
               <Badge tone="bad" icon={TriangleAlert} title={run.error || 'Plan generation failed'}>Failed</Badge>
             ) : plan.hasDraft ? (

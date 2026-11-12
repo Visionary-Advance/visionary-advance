@@ -7,18 +7,22 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
-  LayoutGrid, FileText, ArrowLeft, House, LogOut, Menu, X, ChevronDown, ChartLine, Globe,
+  LayoutGrid, FileText, ArrowLeft, House, LogOut, Menu, X, ChevronDown, ChartLine, Globe, LoaderCircle,
 } from 'lucide-react'
 import { useAdminAuth } from '@/Components/Admin/AdminAuthProvider'
 import { SEOProvider, useSEO } from '@/Components/Admin/SEO/SEOContext'
 import { ToastProvider, cx, focusRing } from '@/Components/Admin/SEO/ui'
 import { SITE_SECTIONS, sectionHref, currentSection } from '@/Components/Admin/SEO/sections'
+import { PlanRunsProvider, isRunInFlight, usePlanRuns } from '@/Components/Admin/SEO/planRuns'
+import { CompactRunProgress } from '@/Components/Admin/SEO/PlanRunProgress'
 
 export default function SEOLayout({ children }) {
   return (
     <SEOProvider>
       <ToastProvider>
-        <Shell>{children}</Shell>
+        <PlanRunsProvider>
+          <Shell>{children}</Shell>
+        </PlanRunsProvider>
       </ToastProvider>
     </SEOProvider>
   )
@@ -98,6 +102,7 @@ function Logo() {
 function SidebarContent() {
   const pathname = usePathname()
   const { sites, sitesLoading, planBySite } = useSEO()
+  const { runs } = usePlanRuns()
   const activeSiteId = pathname.match(/^\/admin\/seo\/sites\/([^/]+)/)?.[1]
 
   return (
@@ -131,11 +136,14 @@ function SidebarContent() {
                 pathname={pathname}
                 expanded={site.id === activeSiteId}
                 hasDraft={planBySite[site.id]?.hasDraft}
+                generating={isRunInFlight(runs?.[site.id])}
               />
             ))}
           </ul>
         )}
       </nav>
+
+      <BackgroundRuns sites={sites} runs={runs} />
 
       <div className="border-t border-adm-border p-3">
         <UserMenu />
@@ -164,7 +172,33 @@ function NavItem({ href, icon: Icon, active, children, small }) {
   )
 }
 
-function SiteNavItem({ site, pathname, expanded, hasDraft }) {
+// Every plan run in progress, visible from any SEO page.
+function BackgroundRuns({ sites, runs }) {
+  const active = sites.filter(s => isRunInFlight(runs?.[s.id]))
+  if (active.length === 0) return null
+  return (
+    <section aria-label="Plans being generated" className="border-t border-adm-border px-3 py-3">
+      <p className="mb-2 px-2.5 text-xs font-medium uppercase tracking-wider text-adm-subtle">
+        Generating {active.length} plan{active.length === 1 ? '' : 's'}
+      </p>
+      <ul className="space-y-1">
+        {active.map(site => (
+          <li key={site.id}>
+            <Link
+              href={sectionHref(site.id, 'plan')}
+              className={cx('block rounded-lg px-2.5 py-1.5 hover:bg-adm-raised', focusRing)}
+            >
+              <span className="block truncate text-[13px] font-medium text-adm-text">{site.display_name || site.site_url}</span>
+              <CompactRunProgress run={runs[site.id]} name={site.display_name} className="mt-1" />
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
+function SiteNavItem({ site, pathname, expanded, hasDraft, generating }) {
   const base = `/admin/seo/sites/${site.id}`
   return (
     <li>
@@ -179,7 +213,9 @@ function SiteNavItem({ site, pathname, expanded, hasDraft }) {
       >
         <Globe className="h-4 w-4 shrink-0" aria-hidden />
         <span className="flex-1 truncate">{site.display_name || site.site_url}</span>
-        {hasDraft && (
+        {generating ? (
+          <LoaderCircle className="h-3.5 w-3.5 shrink-0 animate-spin text-adm-info" aria-label="Generating a plan" />
+        ) : hasDraft && (
           <span className="h-2 w-2 shrink-0 rounded-full bg-adm-warn" title="Draft plan waiting for approval">
             <span className="sr-only">Draft plan waiting for approval</span>
           </span>

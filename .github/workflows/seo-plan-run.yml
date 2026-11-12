@@ -58,7 +58,7 @@ jobs:
         run: |
           echo "API=${CALLBACK_URL%%/api/*}" >> "$GITHUB_ENV"
           mkdir -p work
-          jq -n --arg r "$RUN_ID" --arg u "$RUN_URL" '{run_id:$r, status:"running", run_url:$u}' \
+          jq -n --arg r "$RUN_ID" --arg u "$RUN_URL" '{run_id:$r, status:"running", run_url:$u, meta:{stage:"fetching"}}' \
             | curl -sS --max-time 30 -X POST "${CALLBACK_URL%%/api/*}/api/seo/plan-runs/callback" \
                 -H "Authorization: Bearer $RUNNER_SECRET" -H "Content-Type: application/json" --data @- \
             || echo "running callback failed (continuing)"
@@ -88,6 +88,12 @@ jobs:
           fetch-depth: 1
           persist-credentials: false
           token: ${{ steps.input.outputs.repo == github.repository && secrets.GITHUB_TOKEN || secrets.SEO_CLIENT_REPO_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Report writing
+        env:
+          RUNNER_SECRET: ${{ secrets.SEO_SHIP_CALLBACK_SECRET }}
+        run: |
+          jq -n --arg r "$RUN_ID" --arg u "$RUN_URL" '{run_id:$r, status:"running", run_url:$u, meta:{stage:"writing"}}'             | curl -sS --max-time 30 -X POST "$API/api/seo/plan-runs/callback"                 -H "Authorization: Bearer $RUNNER_SECRET" -H "Content-Type: application/json" --data @-             || echo "stage callback failed (continuing)"
 
       - name: Run Claude Code
         id: claude

@@ -187,9 +187,9 @@
     "semantic_hash": ""
   },
   "Components/Admin/SEO/SEOPlanView.jsx": {
-    "mtime": 1794440281.9237573,
-    "seen": 1794440463.0113478,
-    "ast_hash": "89b74652c60f35b5f55c90d3279fcd42",
+    "mtime": 1794442170.4149728,
+    "seen": 1794442217.4588683,
+    "ast_hash": "f6b7488b26a9169d25af1ccc2b6d0117",
     "semantic_hash": ""
   },
   "Components/Admin/SEO/SEOReportPanel.jsx": {
@@ -980,15 +980,15 @@
     "semantic_hash": "78f424366b61976ddc6b91f3266a3192"
   },
   "app/admin/seo/layout.js": {
-    "mtime": 1794412982.9698238,
-    "seen": 1794412991.6165082,
-    "ast_hash": "3ecb6e111d73ac6b4f7c745ab2e566b2",
+    "mtime": 1794442144.4595354,
+    "seen": 1794442217.4589946,
+    "ast_hash": "e3660a1150dd49fd45c5a30913bcfb49",
     "semantic_hash": ""
   },
   "app/admin/seo/page.js": {
-    "mtime": 1794440324.2369392,
-    "seen": 1794440463.0114748,
-    "ast_hash": "ec338099f0cce48a37bcbd9229c06e9a",
+    "mtime": 1794442193.9280183,
+    "seen": 1794442217.4589958,
+    "ast_hash": "79ea26a3ef73d88ee440aea79a41f47e",
     "semantic_hash": ""
   },
   "app/admin/seo/reports/page.js": {
@@ -3476,15 +3476,15 @@
     "semantic_hash": ""
   },
   ".github/workflows/seo-plan-run.yml": {
-    "mtime": 1794440203.962726,
-    "seen": 1794440463.0113056,
-    "ast_hash": "7045fc18cd942099ff82c07fb1c0d7b2",
+    "mtime": 1794442121.7619145,
+    "seen": 1794442217.4588308,
+    "ast_hash": "9311714230142fef4e051da1fb520791",
     "semantic_hash": ""
   },
   "Components/Admin/SEO/planRuns.js": {
-    "mtime": 1794440229.804818,
-    "seen": 1794440463.0113528,
-    "ast_hash": "c75cce51ecad2e335f4cf598857657e3",
+    "mtime": 1794442104.5697777,
+    "seen": 1794442217.4588726,
+    "ast_hash": "4afa410fed07c9fe9b47059d4c534240",
     "semantic_hash": ""
   },
   "app/api/seo/plan-runs/[id]/input/route.js": {
@@ -3500,9 +3500,9 @@
     "semantic_hash": ""
   },
   "app/api/seo/plan-runs/route.js": {
-    "mtime": 1794440122.783932,
-    "seen": 1794440463.0115752,
-    "ast_hash": "1c20c16d8343ed276ab4306396865466",
+    "mtime": 1794442121.7606914,
+    "seen": 1794442217.4590974,
+    "ast_hash": "3ffd9f7c0472b7b6240afe273204c124",
     "semantic_hash": ""
   },
   "lib/seo-plan-input.js": {
@@ -3512,9 +3512,9 @@
     "semantic_hash": ""
   },
   "lib/seo-plan-runs.js": {
-    "mtime": 1794440097.9465423,
-    "seen": 1794440463.011671,
-    "ast_hash": "5c13ef3b9583c2259c62eac1d38ea5d1",
+    "mtime": 1794442120.7388878,
+    "seen": 1794442217.459208,
+    "ast_hash": "5e8bc833e0f7193b3e4a93c16c1b279c",
     "semantic_hash": ""
   },
   "lib/seo-plan-validate.js": {
@@ -3542,9 +3542,15 @@
     "semantic_hash": ""
   },
   "seo/github/plan-run-instructions.md": {
-    "mtime": 1794440159.4849072,
-    "seen": 1794440463.0117888,
-    "ast_hash": "c0fb55d32d90739eb7ab45a8406a1b54",
+    "mtime": 1794440538.361827,
+    "seen": 1794441015.563963,
+    "ast_hash": "75d4eb4887bf90c0620060555c19b0d8",
+    "semantic_hash": ""
+  },
+  "Components/Admin/SEO/PlanRunProgress.jsx": {
+    "mtime": 1794442105.1089776,
+    "seen": 1794442217.4588652,
+    "ast_hash": "82e6f5085f53af95ff424dbc755506f7",
     "semantic_hash": ""
   },
   "package-lock.json": {
