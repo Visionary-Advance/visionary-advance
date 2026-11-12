@@ -327,6 +327,7 @@ export default function SEOPlanView({ site, onPlanChange }) {
                         {group.map(task => (
                           <TaskRow
                             key={task.id}
+                            plan={activePlan}
                             task={task}
                             onOpen={() => openTask(task.id)}
                             onStatus={s => handleSetStatus(task, s)}
@@ -340,7 +341,7 @@ export default function SEOPlanView({ site, onPlanChange }) {
                 {filtered.some(t => !PRIORITY[t.priority]) && (
                   <Card as="ul" className="divide-y divide-adm-border">
                     {filtered.filter(t => !PRIORITY[t.priority]).map(task => (
-                      <TaskRow key={task.id} task={task} onOpen={() => openTask(task.id)} onStatus={s => handleSetStatus(task, s)} onShip={handleShip} />
+                      <TaskRow key={task.id} plan={activePlan} task={task} onOpen={() => openTask(task.id)} onStatus={s => handleSetStatus(task, s)} onShip={handleShip} />
                     ))}
                   </Card>
                 )}
@@ -355,6 +356,7 @@ export default function SEOPlanView({ site, onPlanChange }) {
       {openTaskObj && (
         <TaskDrawer
           key={openTaskObj.task.id}
+          plan={openTaskObj.draft ? draftPlan : activePlan}
           task={openTaskObj.task}
           draft={openTaskObj.draft}
           onClose={() => openTask(null)}
@@ -415,7 +417,7 @@ function TaskMeta({ task }) {
   );
 }
 
-function TaskRow({ task, onOpen, onStatus, onShip, draft = false }) {
+function TaskRow({ task, plan, onOpen, onStatus, onShip, draft = false }) {
   const done = task.status === 'completed';
   const ship = SHIP[task.ship_status];
   return (
@@ -442,22 +444,51 @@ function TaskRow({ task, onOpen, onStatus, onShip, draft = false }) {
       </div>
       <div className="flex shrink-0 items-center gap-2">
         {!draft && <StatusSelect task={task} onChange={onStatus} />}
-        {!draft && <ShipControl task={task} onShip={onShip} compact />}
+        {!draft && <ShipControl task={task} plan={plan} onShip={onShip} compact />}
         <IconButton icon={ChevronRight} label={`Open details for ${task.title}`} size="sm" onClick={onOpen} />
       </div>
     </li>
   );
 }
 
-function ShipControl({ task, onShip, compact = false }) {
+const CODE_CATEGORIES = ['technical', 'on-page', 'content'];
+
+/**
+ * Why a task has no Ship button, in plain words. Ship needs files_to_modify and a
+ * claude_code_prompt; which one is missing (and who wrote the plan) says what to do.
+ */
+export function manualReason(task, plan) {
+  const regenerate = 'Regenerate the plan to get a Ship button.';
+  if (plan?.generated_by === 'gemini') {
+    return { short: 'Old Gemini plan', text: `This plan came from the old Gemini generator, which never listed files to change, so nothing in it can ship. ${regenerate}` };
+  }
+  const noCode = (plan?.run_meta?.gaps || []).some(g => /client repo not readable/i.test(g));
+  if (CODE_CATEGORIES.includes(task.category) && !(task.files_to_modify?.length > 0)) {
+    return noCode
+      ? { short: 'No file list', text: `This needs a website change, but the plan was made without access to the site's code, so Claude couldn't list the files. ${regenerate}` }
+      : { short: 'No file list', text: `This needs a website change but has no file list. Either the content lives in the CMS (edit it there), or the plan was made without the site's code. ${regenerate}` };
+  }
+  if (task.files_to_modify?.length > 0 && !task.claude_code_prompt) {
+    return { short: 'No prompt', text: `It lists files but has no implementation prompt for Claude, so it can't ship automatically. ${regenerate}` };
+  }
+  return { short: 'Manual', text: 'Not a code change (for example GA4 settings, Google Business Profile or directory listings). Do it by hand, then mark it done.' };
+}
+
+function ShipControl({ task, plan, onShip, compact = false }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
   const shippable = task.claude_code_prompt && task.files_to_modify?.length > 0;
   if (!onShip || task.status === 'completed') return null;
 
   if (!shippable) {
-    return compact ? null : (
-      <p className="text-sm text-adm-muted">No code change in this one. Do it by hand, then mark it done.</p>
+    const reason = manualReason(task, plan);
+    return compact ? (
+      <Badge title={reason.text}>{reason.short}</Badge>
+    ) : (
+      <div className="space-y-1">
+        <p className="text-sm font-medium text-adm-text">Can't ship automatically: {reason.short.toLowerCase()}</p>
+        <p className="text-sm text-adm-muted">{reason.text}</p>
+      </div>
     );
   }
 
@@ -614,7 +645,7 @@ function PlanSidePanel({ plan, counts }) {
   );
 }
 
-function TaskDrawer({ task, draft, onClose, onStatus, onShip, onSaveNotes }) {
+function TaskDrawer({ task, plan, draft, onClose, onStatus, onShip, onSaveNotes }) {
   const notify = useToast();
   const [notes, setNotes] = useState(task.notes || '');
   const [saving, setSaving] = useState(false);
@@ -672,7 +703,7 @@ function TaskDrawer({ task, draft, onClose, onStatus, onShip, onSaveNotes }) {
                 {SHIP[task.ship_status] && (
                   <Badge tone={SHIP[task.ship_status].tone} icon={SHIP[task.ship_status].icon} className="mb-3">{SHIP[task.ship_status].label}</Badge>
                 )}
-                <ShipControl task={task} onShip={onShip} />
+                <ShipControl task={task} plan={plan} onShip={onShip} />
               </div>
             )}
           </div>
