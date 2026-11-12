@@ -48,7 +48,10 @@ export function AdminAuthProvider({ children }) {
 
     // Listen for auth changes (skip initial SIGNED_IN event to avoid race condition)
     try {
-      const { data } = onAuthStateChange(async (event, session) => {
+      // Never await a Supabase call inside this callback: it runs while supabase-js holds
+      // its auth lock, so getSession() there deadlocks every later auth call (token
+      // refreshes hourly and on tab refocus). Defer the work until the lock is released.
+      const { data } = onAuthStateChange((event) => {
         if (!initialCheckDone && event === 'SIGNED_IN') {
           return
         }
@@ -56,7 +59,7 @@ export function AdminAuthProvider({ children }) {
           setUser(null)
           router.replace('/login')
         } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-          await checkAuth()
+          setTimeout(() => { checkAuth() }, 0)
         }
       })
       subscription = data?.subscription

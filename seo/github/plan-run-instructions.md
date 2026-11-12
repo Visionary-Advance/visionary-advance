@@ -69,13 +69,15 @@ Rank by score, ties by impact. Drop anything still `pending`/`in_progress` in th
 
 ## Ship-ready tasks
 
-A task gets a **Ship** button (another Action edits the client repo and opens a PR) only when
-`files_to_modify` is non-empty and `claude_code_prompt` is set. So for every code change:
-- Look in `client/` and list the real files, as **repo-relative paths** (`app/about/page.js`). Never prefix them with `client/`.
-- Write `claude_code_prompt` as a self-contained instruction: which files, the exact change, how to tell it's right. Don't tell it to build, commit, push, branch or open a PR. The workflow does that.
-- If `client/` is missing or the content lives in a CMS (e.g. Sanity), leave `files_to_modify: []` and describe the page by URL.
-
-Non-code tasks (GA4 admin, GBP edits, citations) get `files_to_modify: []`.
+Every website change gets a **Ship** button: another Action runs Claude Code in the full
+client repo, with write access, and opens a PR. That includes **new pages** (a new service
+page, a location page) and **speed work** (LCP, CLS): the Ship run creates the files. So:
+- Use category `technical`, `on-page` or `content` **only** for changes made in the website's code. Anything done elsewhere (GA4 or Search Console settings, GBP, reviews, citations) is `analytics`, `local` or `off-page`, with `files_to_modify: []` and `claude_code_prompt: null`.
+- For every website change, write `claude_code_prompt`: a self-contained instruction with the exact change and how to tell it's right. Don't tell it to build, commit, push, branch or open a PR. The workflow does that.
+- `files_to_modify` lists **repo-relative paths** (`app/about/page.js`, never prefixed with `client/`), including files to **create**. For a new page, list the new route file plus the files to edit to link it (homepage services section, nav, sitemap). Name the existing page to copy the pattern from in the prompt.
+- For speed tasks, look at the page's code in `client/` (hero image, fonts, scripts, client components) and name the likely causes from `page_speed.top_opportunities` in the prompt.
+- If `client/` is missing, still write the prompt; describe pages by URL and leave `files_to_modify: []`. The Ship run finds the files itself.
+- If the content lives in a CMS (e.g. Sanity), say what to change in the CMS in the description, and keep the prompt to what the code controls.
 
 ## Output: `work/plan.json`
 

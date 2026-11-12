@@ -14,17 +14,50 @@ const POLL_MS = 10000;
 const DEFAULT_WRITING_MS = 8 * 60 * 1000;
 const FETCH_MS = 60 * 1000;
 
+const SESSION_TIMEOUT_MS = 5000;
+const REQUEST_TIMEOUT_MS = 30000;
+
+// The stored session, read straight from localStorage (storageKey in supabase-crm-client).
+function storedAccessToken() {
+  try {
+    return JSON.parse(localStorage.getItem('va-admin-auth') || 'null')?.access_token || null;
+  } catch {
+    return null;
+  }
+}
+
+// getSession() waits on supabase-js's auth lock. If that lock is ever stuck, fall back
+// to the stored token instead of hanging every request behind it.
+async function accessToken() {
+  let timer;
+  const timeout = new Promise(resolve => { timer = setTimeout(() => resolve('timeout'), SESSION_TIMEOUT_MS); });
+  const result = await Promise.race([getCRMAuthClient().auth.getSession().catch(() => null), timeout]);
+  clearTimeout(timer);
+  if (result === 'timeout' || !result) return storedAccessToken();
+  return result.data?.session?.access_token || null;
+}
+
 // Admin sessions live in localStorage, so admin-only routes need the bearer token.
+// Requests time out, so a button can never sit on "Starting…" forever.
 export async function authFetch(url, options = {}) {
-  const { data } = await getCRMAuthClient().auth.getSession();
-  const token = data?.session?.access_token;
-  return fetch(url, {
-    ...options,
-    headers: {
-      ...(options.headers || {}),
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-  });
+  const token = await accessToken();
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  try {
+    return await fetch(url, {
+      ...options,
+      signal: controller.signal,
+      headers: {
+        ...(options.headers || {}),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    });
+  } catch (err) {
+    if (err.name === 'AbortError') throw new Error('The server took too long to respond. Try again.');
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 export function isRunInFlight(run) {

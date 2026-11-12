@@ -37,10 +37,10 @@
     "semantic_hash": "891eaecac2e5f164db241559a870f558"
   },
   "Components/Admin/AdminAuthProvider.jsx": {
-    "mtime": 1770774044.1809976,
-    "seen": 1794284227.4904501,
-    "ast_hash": "20b615cf07fe245f9f0d92f6ab359b20",
-    "semantic_hash": "20b615cf07fe245f9f0d92f6ab359b20"
+    "mtime": 1794496786.5686164,
+    "seen": 1794496836.9488766,
+    "ast_hash": "78c9bb75a4d0ec7b1f39ebbd2ebf9044",
+    "semantic_hash": ""
   },
   "Components/Admin/DevOps/CRMLeadSelector.jsx": {
     "mtime": 1770774044.1820023,
@@ -187,9 +187,9 @@
     "semantic_hash": ""
   },
   "Components/Admin/SEO/SEOPlanView.jsx": {
-    "mtime": 1794445982.3621292,
-    "seen": 1794446013.9474,
-    "ast_hash": "921e5a202c89a8e0562a14fa57338eb6",
+    "mtime": 1794497397.9163668,
+    "seen": 1794497458.9167755,
+    "ast_hash": "02147f3cd905362623b612e14d9e8483",
     "semantic_hash": ""
   },
   "Components/Admin/SEO/SEOReportPanel.jsx": {
@@ -2966,15 +2966,15 @@
     "semantic_hash": ""
   },
   "seo/.claude/skills/seo-monthly-run/SKILL.md": {
-    "mtime": 1794444305.0260262,
-    "seen": 1794444337.0682921,
-    "ast_hash": "65461b7e839bfdedc8fa6644810ae532",
+    "mtime": 1794497423.6469347,
+    "seen": 1794497458.917217,
+    "ast_hash": "f9108bf4d38b14229f0a2a302d371083",
     "semantic_hash": ""
   },
   "seo/CLAUDE.md": {
-    "mtime": 1794443442.7365086,
-    "seen": 1794444337.0682926,
-    "ast_hash": "b802780d2397a5661a051cb6a9751d77",
+    "mtime": 1794497430.7165117,
+    "seen": 1794497458.917218,
+    "ast_hash": "a906c3e175654cdb40da6a6850a6dc48",
     "semantic_hash": ""
   },
   "seo/docs/setup-log.md": {
@@ -3338,9 +3338,9 @@
     "semantic_hash": ""
   },
   "lib/seo-ship.js": {
-    "mtime": 1794322563.3919082,
-    "seen": 1794322572.8541481,
-    "ast_hash": "64364eb401826eb461562f45b307e178",
+    "mtime": 1794497464.5042915,
+    "seen": 1794497478.5976975,
+    "ast_hash": "3af73519effa32ef9893c312cf8b51b1",
     "semantic_hash": ""
   },
   "migrations/009_seo_task_shipping.sql": {
@@ -3470,15 +3470,15 @@
     "semantic_hash": ""
   },
   ".github/workflows/seo-plan-run.yml": {
-    "mtime": 1794443184.0100615,
-    "seen": 1794444337.06774,
-    "ast_hash": "ef967ea5c5efbfa9dba4c7318e5dc96f",
+    "mtime": 1794497407.7241101,
+    "seen": 1794497458.9167373,
+    "ast_hash": "424cb184de294b0d5919f87cf5ced58f",
     "semantic_hash": ""
   },
   "Components/Admin/SEO/planRuns.js": {
-    "mtime": 1794443066.6891878,
-    "seen": 1794444337.0677927,
-    "ast_hash": "c8d626fe053f41c2a8a52e3bf18c3398",
+    "mtime": 1794496804.5509255,
+    "seen": 1794496836.9489229,
+    "ast_hash": "bc0fe8a84c99fe3746f8f8f63a3c21b9",
     "semantic_hash": ""
   },
   "app/api/seo/plan-runs/[id]/input/route.js": {
@@ -3536,9 +3536,9 @@
     "semantic_hash": ""
   },
   "seo/github/plan-run-instructions.md": {
-    "mtime": 1794444305.0260262,
-    "seen": 1794444337.0682943,
-    "ast_hash": "c5b478c43879c54aa6c4ba02ad892740",
+    "mtime": 1794497422.1700015,
+    "seen": 1794497458.9172199,
+    "ast_hash": "0539307a2f5151174381884592e9fda6",
     "semantic_hash": ""
   },
   "Components/Admin/SEO/PlanRunProgress.jsx": {
@@ -3551,6 +3551,12 @@
     "mtime": 1794444385.1688352,
     "seen": 1794444412.996443,
     "ast_hash": "a738fd0e8a234fd33c5bb916421b55b2",
+    "semantic_hash": ""
+  },
+  "lib/seo-shippable.js": {
+    "mtime": 1794497370.8103762,
+    "seen": 1794497458.9171078,
+    "ast_hash": "ca56cf44eb7000cb3a4b30511bff952e",
     "semantic_hash": ""
   },
   "package-lock.json": {

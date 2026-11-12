@@ -115,7 +115,7 @@ Client config lives in Supabase (`crm_businesses` + `seo_sites` + `seo_keywords`
 - **Phase 2b: Ship button (built 2026-11-09).** Each code task on the active plan has a **Ship** button.
   - Flow: `POST /api/seo/plans/tasks/ship` (`requireAdmin`) → `lib/seo-ship.js` dispatches `.github/workflows/seo-ship-task.yml` in `seo_sites.github_repo` → Claude Code (Pro OAuth token) edits files → the workflow commits, pushes `seo/<id>-<slug>` and opens a PR → `POST /api/seo/ship-callback` (shared secret) records the PR → Telegram ping via n8n.
   - **Brandon merges. Nothing auto-merges.** Vercel posts the preview link on the PR.
-  - Shippable = `files_to_modify` non-empty and `claude_code_prompt` set. Everything else shows "Manual task".
+  - Shippable (`lib/seo-shippable.js`) = category `technical` / `on-page` / `content`, or a `claude_code_prompt` is set. No file list is needed: the Ship run finds files itself and creates new pages. Everything else (GA4, GBP, reviews, citations) shows "Manual". Updated 2026-11-12.
   - Workflow source of truth: `seo/github/seo-ship-task.yml`. Copy it into each client repo's `.github/workflows/`.
   - Task columns: `ship_status` (queued/running/pr_open/failed), `ship_branch`, `pr_url`, `ship_run_url`, `ship_error`. Migration 009.
 - **Phase 2c: Background plan runs (built 2026-11-11).** "Generate plan" / "Regenerate" on a site and **Generate all plans** on the SEO home start Claude in a GitHub Action, so runs keep going after the page is closed.

@@ -118,12 +118,12 @@ Folder: `seo/reports/<slug>/<YYYY-MM>/`. Slug = domain without TLD (e.g. `vision
 ```
 Use `files_to_modify` only when you've actually looked at the client repo. Otherwise leave it `[]` and describe the page by URL.
 
-**Shipping (the Ship button).** A task gets a Ship button in `/admin/seo` only if `files_to_modify` is non-empty and `claude_code_prompt` is set. The button runs `claude_code_prompt` in a GitHub Action inside the client repo (`seo_sites.github_repo`), so the prompt must:
+**Shipping (the Ship button).** Every website change (category `technical`, `on-page` or `content`, or any task with a `claude_code_prompt`) gets a Ship button in `/admin/seo` (`lib/seo-shippable.js`), including new pages and speed work: the Ship run can create files. Use those three categories only for code changes; GA4/GSC settings, GBP, reviews and citations are `analytics`, `local` or `off-page`. List new files to create in `files_to_modify` too. The button runs the task in a GitHub Action inside the client repo (`seo_sites.github_repo`), so the prompt must:
 - use **repo-relative paths** (`app/...`, `lib/...`), never `C:/Users/...`
 - say what to change and how to tell it's right, without asking Claude to build, commit, push, branch or open a PR (the workflow does that, and CI has no env vars)
 - stay self-contained: the Action sees only the prompt, the task's description and acceptance criteria, and the repo
 
-Non-code tasks (GA4 admin clicks, CRM data, GBP edits) get `files_to_modify: []`. They show as "Manual task".
+Non-code tasks (GA4 admin clicks, CRM data, GBP edits) get `files_to_modify: []` and no prompt. They show as "Manual".
 
 **`plan.md`** is for Brandon. It covers: a headline numbers table (current vs previous), the chosen tasks with their scores and evidence, "Considered, not chosen", carried-over tasks, gaps, and what to watch next month.
 

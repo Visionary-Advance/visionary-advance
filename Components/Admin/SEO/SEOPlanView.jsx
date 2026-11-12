@@ -16,6 +16,7 @@ import {
 } from './ui';
 import { fmtDate } from './format';
 import { authFetch, isRunInFlight, usePlanRuns, useRunFinished } from './planRuns';
+import { isShippable } from '@/lib/seo-shippable';
 import { RunLink, RunProgressCard, usePlanRunProgress } from './PlanRunProgress';
 
 const STATUS = {
@@ -451,33 +452,19 @@ function TaskRow({ task, plan, onOpen, onStatus, onShip, draft = false }) {
   );
 }
 
-const CODE_CATEGORIES = ['technical', 'on-page', 'content'];
-
 /**
- * Why a task has no Ship button, in plain words. Ship needs files_to_modify and a
- * claude_code_prompt; which one is missing (and who wrote the plan) says what to do.
+ * Why a task has no Ship button. Website changes always ship (Claude finds or creates
+ * the files in the client repo; see lib/seo-shippable.js), so this is work done elsewhere.
  */
+// eslint-disable-next-line no-unused-vars
 export function manualReason(task, plan) {
-  const regenerate = 'Regenerate the plan to get a Ship button.';
-  if (plan?.generated_by === 'gemini') {
-    return { short: 'Old Gemini plan', text: `This plan came from the old Gemini generator, which never listed files to change, so nothing in it can ship. ${regenerate}` };
-  }
-  const noCode = (plan?.run_meta?.gaps || []).some(g => /client repo not readable/i.test(g));
-  if (CODE_CATEGORIES.includes(task.category) && !(task.files_to_modify?.length > 0)) {
-    return noCode
-      ? { short: 'No file list', text: `This needs a website change, but the plan was made without access to the site's code, so Claude couldn't list the files. ${regenerate}` }
-      : { short: 'No file list', text: `This needs a website change but has no file list. Either the content lives in the CMS (edit it there), or the plan was made without the site's code. ${regenerate}` };
-  }
-  if (task.files_to_modify?.length > 0 && !task.claude_code_prompt) {
-    return { short: 'No prompt', text: `It lists files but has no implementation prompt for Claude, so it can't ship automatically. ${regenerate}` };
-  }
-  return { short: 'Manual', text: 'Not a code change (for example GA4 settings, Google Business Profile or directory listings). Do it by hand, then mark it done.' };
+  return { short: 'Manual', text: 'Not a website code change (for example GA4 settings, Google Business Profile, reviews or directory listings). Do it by hand, then mark it done.' };
 }
 
 function ShipControl({ task, plan, onShip, compact = false }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
-  const shippable = task.claude_code_prompt && task.files_to_modify?.length > 0;
+  const shippable = isShippable(task);
   if (!onShip || task.status === 'completed') return null;
 
   if (!shippable) {

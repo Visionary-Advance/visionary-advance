@@ -89,6 +89,23 @@ jobs:
           persist-credentials: false
           token: ${{ steps.input.outputs.repo == github.repository && secrets.GITHUB_TOKEN || secrets.SEO_CLIENT_REPO_TOKEN || secrets.GITHUB_TOKEN }}
 
+      # A failed checkout still leaves an empty client/.git behind. Remove it so Claude
+      # (and client_code in the run meta) see "no code" rather than an empty repo.
+      - name: Confirm client checkout
+        if: steps.input.outputs.repo != ''
+        env:
+          REPO: ${{ steps.input.outputs.repo }}
+          HAS_TOKEN: ${{ secrets.SEO_CLIENT_REPO_TOKEN != '' }}
+        run: |
+          if ! git -C client rev-parse --verify -q HEAD > /dev/null 2>&1; then
+            rm -rf client
+            if [ "$HAS_TOKEN" = "true" ]; then
+              echo "::warning::Couldn't read $REPO. Give the SEO_CLIENT_REPO_TOKEN Contents: read access to it."
+            else
+              echo "::warning::Couldn't read $REPO: SEO_CLIENT_REPO_TOKEN isn't visible to this workflow. Add it as a repository secret on this repo (org secrets don't reach private repos on this plan)."
+            fi
+          fi
+
       - name: Report writing
         env:
           RUNNER_SECRET: ${{ secrets.SEO_SHIP_CALLBACK_SECRET }}
@@ -136,7 +153,7 @@ jobs:
           if [ -n "$EXECUTION_FILE" ] && [ -f "$EXECUTION_FILE" ]; then
             META=$(jq -c 'if type=="array" then (map(select(.type=="result")) | last) else . end
               | {num_turns, duration_ms, usage, permission_denials_count}' "$EXECUTION_FILE" 2>/dev/null || echo '{}')
-            META=$(echo "$META" | jq -c --argjson code "$([ -d client/.git ] && echo true || echo false)" '. + {client_code: $code}')
+            META=$(echo "$META" | jq -c --argjson code "$([ -d client ] && echo true || echo false)" '. + {client_code: $code}')
           fi
           jq -n --arg r "$RUN_ID" --arg u "$RUN_URL" --argjson meta "$META" --slurpfile plan work/plan.json \
             '{run_id:$r, status:"completed", run_url:$u, meta:$meta, plan:$plan[0]}' > work/payload.json
