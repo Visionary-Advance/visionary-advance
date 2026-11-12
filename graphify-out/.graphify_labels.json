@@ -3,7 +3,6 @@
   "2": "002_crm_premium_features.sql",
   "3": "leads/[id]/page.js",
   "6": "app/layout.js",
-  "7": "supabase-crm.js",
   "8": "devops.js",
   "10": "20260201_seo_tables.sql",
   "12": "logActivity",

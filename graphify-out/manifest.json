@@ -3500,9 +3500,9 @@
     "semantic_hash": ""
   },
   "lib/seo-plan-input.js": {
-    "mtime": 1794444253.226573,
-    "seen": 1794444337.068163,
-    "ast_hash": "74f1210fb86a75f9f903b989555500a3",
+    "mtime": 1794444385.1688352,
+    "seen": 1794444412.996445,
+    "ast_hash": "15960a2987ace5aaa3cdfd32c7eae1f1",
     "semantic_hash": ""
   },
   "lib/seo-plan-runs.js": {
@@ -3548,9 +3548,9 @@
     "semantic_hash": ""
   },
   "lib/seo-page-checks.js": {
-    "mtime": 1794444231.241896,
-    "seen": 1794444337.0681612,
-    "ast_hash": "fed397ae934b7f1d124108bf67b5af3c",
+    "mtime": 1794444385.1688352,
+    "seen": 1794444412.996443,
+    "ast_hash": "a738fd0e8a234fd33c5bb916421b55b2",
     "semantic_hash": ""
   },
   "package-lock.json": {
