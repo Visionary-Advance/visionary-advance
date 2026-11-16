@@ -1,7 +1,7 @@
 // app/admin/finance/expenses/page.js — Expense ledger
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { format } from 'date-fns'
 import { ChevronRight, Paperclip, Pencil, Plus, Receipt, Repeat, Trash2, Upload } from 'lucide-react'
 import { usePersistedState } from '@/lib/usePersistedState'
@@ -31,6 +31,14 @@ export default function ExpensesPage() {
   const [showImport, setShowImport] = useState(false)
   const [editEntry, setEditEntry] = useState(null)
   const [selected, setSelected] = useState(null)
+
+  // Home-screen quick action: /admin/finance/{page}?new=1 opens the add form
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('new') === '1') {
+      setShowForm(true)
+      window.history.replaceState(null, '', window.location.pathname)
+    }
+  }, [])
 
   // The page number belongs to one set of filters; changing a filter starts at page 1
   const filterKey = `${year}|${month}|${category}`

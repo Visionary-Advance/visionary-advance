@@ -31,6 +31,14 @@ export default function IncomePage() {
   const [editEntry, setEditEntry] = useState(null)
   const [selected, setSelected] = useState(null)
 
+  // Home-screen quick action: /admin/finance/{page}?new=1 opens the add form
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('new') === '1') {
+      setShowForm(true)
+      window.history.replaceState(null, '', window.location.pathname)
+    }
+  }, [])
+
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(search), 250)
     return () => clearTimeout(t)
