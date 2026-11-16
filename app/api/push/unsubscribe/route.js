@@ -3,8 +3,12 @@
 
 import { NextResponse } from 'next/server'
 import { supabaseCRM } from '@/lib/supabase-crm'
+import { requireAdmin } from '@/lib/admin-api-auth'
 
 export async function POST(request) {
+  const admin = await requireAdmin(request)
+  if (!admin.ok) return NextResponse.json({ error: admin.error }, { status: admin.status })
+
   try {
     const body = await request.json()
     const endpoint = body?.endpoint || body?.subscription?.endpoint

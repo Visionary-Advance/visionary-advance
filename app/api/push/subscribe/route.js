@@ -3,8 +3,13 @@
 
 import { NextResponse } from 'next/server'
 import { supabaseCRM } from '@/lib/supabase-crm'
+import { requireAdmin } from '@/lib/admin-api-auth'
 
 export async function POST(request) {
+  // Only signed-in admins may register a device: pushes carry lead details.
+  const admin = await requireAdmin(request)
+  if (!admin.ok) return NextResponse.json({ error: admin.error }, { status: admin.status })
+
   try {
     const body = await request.json()
     const sub = body?.subscription || body

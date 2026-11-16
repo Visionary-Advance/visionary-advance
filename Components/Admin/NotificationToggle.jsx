@@ -1,6 +1,17 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { getAuthClient } from '@/lib/admin-auth'
+
+// The push API routes require an admin access token.
+async function authHeaders() {
+  const { data } = await getAuthClient().auth.getSession()
+  const token = data?.session?.access_token
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  }
+}
 
 // Base64 URL-safe VAPID public key -> Uint8Array for PushManager.subscribe.
 function urlBase64ToUint8Array(base64String) {
@@ -78,7 +89,7 @@ export default function NotificationToggle() {
 
       const res = await fetch('/api/push/subscribe', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: await authHeaders(),
         body: JSON.stringify({ subscription: sub.toJSON() }),
       })
       if (!res.ok) throw new Error('Failed to save subscription')
@@ -103,7 +114,7 @@ export default function NotificationToggle() {
       if (sub) {
         await fetch('/api/push/unsubscribe', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: await authHeaders(),
           body: JSON.stringify({ endpoint: sub.endpoint }),
         })
         await sub.unsubscribe()
