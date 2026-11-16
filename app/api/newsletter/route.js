@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { Resend } from 'resend'
+import { sendPushToAll } from '@/lib/push'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -25,6 +26,13 @@ export async function POST(request) {
         <p><strong>Email:</strong> <a href="mailto:${email}">${email}</a></p>
         <p><strong>Signed up at:</strong> ${new Date().toLocaleString()}</p>
       `,
+    })
+
+    sendPushToAll({
+      title: 'New Newsletter Signup',
+      body: email,
+      url: '/admin',
+      tag: 'newsletter',
     })
 
     return NextResponse.json({ success: true }, { status: 200 })

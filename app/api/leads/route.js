@@ -6,6 +6,7 @@ import { Resend } from 'resend'
 import { createOrUpdateLead } from '@/lib/crm'
 import { getUTMFromRequest } from '@/lib/utm'
 import { requireRecaptcha } from '@/lib/recaptcha'
+import { sendPushToAll } from '@/lib/push'
 
 export async function POST(request) {
   try {
@@ -122,6 +123,14 @@ export async function POST(request) {
       // Don't fail the request if CRM save fails - email was already sent
       console.error('CRM integration failed (non-critical):', crmError)
     }
+
+    // Push notification to admin devices (fire-and-forget, non-blocking)
+    sendPushToAll({
+      title: 'New Systems Lead',
+      body: `${body.name}${body.business_type ? ` · ${body.business_type}` : ''}`,
+      url: '/admin/crm/leads',
+      tag: 'lead',
+    })
 
     return NextResponse.json(
       { success: true, message: 'Lead submitted successfully', lead: crmResult?.lead?.id },

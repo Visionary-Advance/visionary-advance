@@ -3,6 +3,7 @@ import { Resend } from 'resend'
 import { createBookingEvent } from '@/lib/google-calendar'
 import { createOrUpdateLead } from '@/lib/crm'
 import { requireRecaptcha } from '@/lib/recaptcha'
+import { sendPushToAll } from '@/lib/push'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -182,6 +183,13 @@ export async function POST(request) {
       })
       console.log('[booking/create] admin email result:', JSON.stringify(adminEmailResult))
     }
+
+    sendPushToAll({
+      title: 'New Booking',
+      body: `${name} · ${formattedDate} at ${formattedTime}`,
+      url: '/admin/crm',
+      tag: 'booking',
+    })
 
     return NextResponse.json({
       success: true,

@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAdminAuth } from './AdminAuthProvider'
+import NotificationToggle from './NotificationToggle'
 import {
   getMFAStatus,
   enrollMFA,
@@ -185,6 +186,7 @@ export default function SettingsModal({ isOpen, onClose }) {
   const tabs = [
     { id: 'account', label: 'Account' },
     { id: 'security', label: 'Security' },
+    { id: 'notifications', label: 'Notifications' },
     { id: 'integrations', label: 'Integrations' },
   ]
 
@@ -491,6 +493,9 @@ export default function SettingsModal({ isOpen, onClose }) {
               )}
             </div>
           )}
+
+          {/* Notifications Tab */}
+          {activeTab === 'notifications' && <NotificationToggle />}
         </div>
         </motion.div>
       </div>

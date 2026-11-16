@@ -5,6 +5,7 @@ import { NextResponse } from 'next/server'
 import { supabaseCRM as supabase } from '@/lib/supabase-crm'
 import { createOrUpdateLead, STAGES, SOURCES } from '@/lib/crm'
 import { getUTMFromRequest } from '@/lib/utm'
+import { sendPushToAll } from '@/lib/push'
 
 // GET /api/crm/leads - List leads with filtering and pagination
 export async function GET(request) {
@@ -147,6 +148,15 @@ export async function POST(request) {
     }
 
     const { lead, isNew } = await createOrUpdateLead(leadData)
+
+    if (isNew) {
+      sendPushToAll({
+        title: 'New Lead',
+        body: lead?.full_name || lead?.email || 'A new lead was created',
+        url: '/admin/crm/leads',
+        tag: 'lead',
+      })
+    }
 
     return NextResponse.json({
       success: true,
