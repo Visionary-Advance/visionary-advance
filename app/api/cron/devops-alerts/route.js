@@ -2,19 +2,14 @@
 // 1-minute cron to send follow-up Slack alerts for ongoing downtime incidents
 
 import { NextResponse } from 'next/server'
+import { verifyCronRequest } from '@/lib/admin-api-auth'
 import { processAlertQueue } from '@/lib/devops'
 
 export async function GET(request) {
   try {
-    // Verify cron secret to prevent unauthorized access
-    const authHeader = request.headers.get('authorization')
-    const cronSecret = process.env.CRON_SECRET
-
-    if (authHeader !== `Bearer ${cronSecret}`) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+    const auth = verifyCronRequest(request)
+    if (!auth.ok) {
+      return NextResponse.json({ error: auth.error }, { status: auth.status })
     }
 
     const results = await processAlertQueue()

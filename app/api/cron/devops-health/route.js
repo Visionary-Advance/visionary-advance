@@ -2,19 +2,14 @@
 // Automated health check endpoint - run every 5 minutes via cron job
 
 import { NextResponse } from 'next/server'
+import { verifyCronRequest } from '@/lib/admin-api-auth'
 import { checkAllSites } from '@/lib/devops'
 
 export async function GET(request) {
   try {
-    // Verify cron secret to prevent unauthorized access
-    const authHeader = request.headers.get('authorization')
-    const cronSecret = process.env.CRON_SECRET
-
-    if (authHeader !== `Bearer ${cronSecret}`) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+    const auth = verifyCronRequest(request)
+    if (!auth.ok) {
+      return NextResponse.json({ error: auth.error }, { status: auth.status })
     }
 
     console.log('Starting DevOps health check cron...')
