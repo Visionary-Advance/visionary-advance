@@ -2,6 +2,7 @@ import { DM_Sans, Instrument_Sans } from "next/font/google";
 import "./globals.css";
 import ConditionalLayout from "@/Components/ConditionalLayout";
 import ReCaptchaScript from "@/Components/ReCaptchaScript";
+import ReCaptchaBadgeControl from "@/Components/ReCaptchaBadgeControl";
 import AEOStructuredData from "@/Components/AEOStructuredData";
 import Analytics from "@/Components/Analytics";
 import A11yProvider from "@/Components/Accessibility/A11yProvider";
@@ -116,6 +117,7 @@ export default function RootLayout({ children }) {
         {/* Google Ads + GA4 — gated to public pages only (see Components/Analytics.jsx) */}
         <Analytics />
         <ReCaptchaScript />
+        <ReCaptchaBadgeControl />
         <A11yProvider>
           <ConditionalLayout>
             {children}

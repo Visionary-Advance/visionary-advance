@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { motion } from 'framer-motion'
 
 // Frosted-glass floating tab bar for the admin area.
 // Only renders when the app is running as an installed PWA (standalone),
@@ -66,12 +67,16 @@ export default function AdminBottomNav() {
             <Link
               key={href}
               href={href}
-              className={`relative flex flex-1 flex-col items-center gap-0.5 rounded-[20px] px-1 py-1.5 transition-colors ${
+              className={`relative flex flex-1 flex-col items-center gap-0.5 rounded-[20px] px-1 py-1.5 transition-colors duration-300 ${
                 active ? 'text-[#16b39b]' : 'text-[#a1a1aa] active:text-[#fafafa]'
               }`}
             >
               {active && (
-                <span className="absolute inset-0 rounded-[20px] bg-white/10 ring-1 ring-inset ring-white/10" />
+                <motion.span
+                  layoutId="adminNavActive"
+                  className="absolute inset-0 rounded-[20px] bg-white/10 shadow-[0_1px_0_rgba(255,255,255,0.12)_inset] ring-1 ring-inset ring-white/15"
+                  transition={{ type: 'spring', stiffness: 420, damping: 34, mass: 0.7 }}
+                />
               )}
               <Icon className="relative h-[22px] w-[22px]" />
               <span className="relative text-[10px] font-medium leading-none">{label}</span>
