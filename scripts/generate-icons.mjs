@@ -8,6 +8,7 @@ import { dirname, join } from 'node:path'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const BLACK = '#000000'
+const TEAL = '#008070'
 
 // "VA" monogram (solid white letterforms on brand teal) on a 512 canvas,
 // echoing the solid V/A letterforms of the Visionary Advance logo.
@@ -17,7 +18,7 @@ function svg({ bg = BLACK, scale = 1 } = {}) {
   const t = `translate(256 256) scale(${scale}) translate(-256 -256)`
   return `<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
   <rect width="512" height="512" fill="${bg}"/>
-  <g transform="${t}" fill="#ffffff">
+  <g transform="${t}" fill="${TEAL}">
     <polygon points="104,150 160,150 186,300 212,150 268,150 214,362 158,362"/>
     <polygon points="342,150 398,150 456,362 404,362 390,308 322,308 308,362 256,362"/>
     <polygon points="356,206 374,262 338,262" fill="${bg}"/>
