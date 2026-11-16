@@ -7,6 +7,7 @@ import Link from 'next/link'
 import ScoreBadge from '@/Components/CRM/Shared/ScoreBadge'
 import StageBadge from '@/Components/CRM/Shared/StageBadge'
 import SourceBadge from '@/Components/CRM/Shared/SourceBadge'
+import Fab from '@/Components/Admin/Mobile/Fab'
 
 export default function LeadsPage() {
   const [leads, setLeads] = useState([])
@@ -80,14 +81,14 @@ export default function LeadsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-[#fafafa]">Leads</h1>
+          <h1 className="text-xl font-semibold text-[#fafafa] sm:text-2xl">Leads</h1>
           <p className="mt-1 text-sm text-[#a1a1aa]">
             {pagination.total} total leads
           </p>
         </div>
         <Link
           href="/admin/crm/leads/new"
-          className="inline-flex items-center gap-2 rounded-lg bg-[#008070] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#006b5d]"
+          className="hidden md:inline-flex items-center gap-2 rounded-lg bg-[#008070] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#006b5d]"
         >
           <PlusIcon className="h-4 w-4" />
           Add Lead
@@ -95,9 +96,9 @@ export default function LeadsPage() {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap items-center gap-4">
+      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
         {/* Search */}
-        <div className="relative flex-1 min-w-[200px] max-w-md">
+        <div className="relative w-full sm:min-w-[200px] sm:max-w-md sm:flex-1">
           <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#a1a1aa]" />
           <input
             type="text"
@@ -111,6 +112,7 @@ export default function LeadsPage() {
           />
         </div>
 
+        <div className="scrollbar-hide -mx-4 flex gap-2 overflow-x-auto px-4 sm:contents">
         {/* Stage filter */}
         <select
           value={stageFilter}
@@ -118,7 +120,7 @@ export default function LeadsPage() {
             setStageFilter(e.target.value)
             setPagination(prev => ({ ...prev, page: 1 }))
           }}
-          className="rounded-lg border border-[#262626] bg-[#0a0a0a] px-4 py-2.5 text-sm text-[#fafafa] focus:border-[#008070] focus:outline-none focus:ring-1 focus:ring-[#008070]"
+          className="shrink-0 rounded-lg border border-[#262626] bg-[#0a0a0a] px-3 py-2.5 text-sm text-[#fafafa] focus:border-[#008070] focus:outline-none focus:ring-1 focus:ring-[#008070] sm:px-4"
         >
           <option value="">All stages</option>
           <option value="contact">Contact</option>
@@ -138,7 +140,7 @@ export default function LeadsPage() {
             setSourceFilter(e.target.value)
             setPagination(prev => ({ ...prev, page: 1 }))
           }}
-          className="rounded-lg border border-[#262626] bg-[#0a0a0a] px-4 py-2.5 text-sm text-[#fafafa] focus:border-[#008070] focus:outline-none focus:ring-1 focus:ring-[#008070]"
+          className="shrink-0 rounded-lg border border-[#262626] bg-[#0a0a0a] px-3 py-2.5 text-sm text-[#fafafa] focus:border-[#008070] focus:outline-none focus:ring-1 focus:ring-[#008070] sm:px-4"
         >
           <option value="">All sources</option>
           <option value="website_audit">Website Audit</option>
@@ -156,7 +158,7 @@ export default function LeadsPage() {
             setSortBy(by)
             setSortOrder(order)
           }}
-          className="rounded-lg border border-[#262626] bg-[#0a0a0a] px-4 py-2.5 text-sm text-[#fafafa] focus:border-[#008070] focus:outline-none focus:ring-1 focus:ring-[#008070]"
+          className="shrink-0 rounded-lg border border-[#262626] bg-[#0a0a0a] px-3 py-2.5 text-sm text-[#fafafa] focus:border-[#008070] focus:outline-none focus:ring-1 focus:ring-[#008070] sm:px-4"
         >
           <option value="created_at-desc">Newest first</option>
           <option value="created_at-asc">Oldest first</option>
@@ -164,6 +166,7 @@ export default function LeadsPage() {
           <option value="score-asc">Lowest score</option>
           <option value="last_activity_at-desc">Recent activity</option>
         </select>
+        </div>
       </div>
 
       {/* Table */}
@@ -187,7 +190,32 @@ export default function LeadsPage() {
             <p className="text-[#a1a1aa]">No leads found</p>
           </div>
         ) : (
-          <table className="w-full">
+          <>
+          {/* Mobile list */}
+          <ul className="divide-y divide-[#1f1f1f] md:hidden">
+            {leads.map((lead) => (
+              <li key={lead.id}>
+                <Link href={`/admin/crm/leads/${lead.id}`} className="flex items-center gap-3 px-4 py-3.5 active:bg-[#171717]">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#171717] text-sm font-semibold text-[#fafafa]">
+                    {(lead.full_name || lead.email || '?')[0].toUpperCase()}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <p className="truncate text-[15px] font-medium text-[#fafafa]">{lead.full_name || lead.email}</p>
+                      <span className="ml-auto shrink-0 text-xs text-[#71717a]">{formatTime(lead.last_activity_at || lead.created_at)}</span>
+                    </div>
+                    <p className="truncate text-xs text-[#a1a1aa]">{lead.company || (lead.full_name ? lead.email : '') || '\u00a0'}</p>
+                    <div className="mt-1.5 flex items-center gap-2">
+                      <StageBadge stage={lead.stage} />
+                      <ScoreBadge score={lead.score || 0} size="sm" />
+                    </div>
+                  </div>
+                </Link>
+              </li>
+            ))}
+          </ul>
+
+          <table className="hidden w-full md:table">
             <thead>
               <tr className="border-b border-[#262626] bg-[#171717]">
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-[#a1a1aa]">
@@ -269,14 +297,15 @@ export default function LeadsPage() {
               ))}
             </tbody>
           </table>
+          </>
         )}
       </div>
 
       {/* Pagination */}
       {pagination.totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-[#a1a1aa]">
-            Showing {(pagination.page - 1) * pagination.limit + 1} to{' '}
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-xs text-[#a1a1aa] sm:text-sm">
+            {(pagination.page - 1) * pagination.limit + 1}–
             {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total}
           </p>
           <div className="flex gap-2">
@@ -297,6 +326,8 @@ export default function LeadsPage() {
           </div>
         </div>
       )}
+
+      <Fab href="/admin/crm/leads/new" label="Add lead" />
     </div>
   )
 }

@@ -151,7 +151,7 @@ export default function PocketInboxPage() {
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold text-[#fafafa]">Pocket Recordings</h1>
+          <h1 className="text-xl font-semibold text-[#fafafa] sm:text-2xl">Pocket Recordings</h1>
           <p className="mt-1 text-sm text-[#a1a1aa]">
             Recordings tagged with a lead&apos;s email link themselves. Anything else waits here.
           </p>

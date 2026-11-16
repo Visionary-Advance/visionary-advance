@@ -108,20 +108,20 @@ export default function ProjectsKanbanPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-[#fafafa]">Projects</h1>
+          <h1 className="text-xl font-semibold text-[#fafafa] sm:text-2xl">Projects</h1>
           <p className="text-sm text-[#a1a1aa]">
             {projects.projects?.length || 0} total projects
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <input
             type="text"
             placeholder="Search projects..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="rounded-lg border border-[#262626] bg-[#171717] px-4 py-2 text-sm text-[#fafafa] placeholder-[#71717a] focus:border-[#008070] focus:outline-none w-64"
+            className="rounded-lg border border-[#262626] bg-[#171717] px-4 py-2 text-sm text-[#fafafa] placeholder-[#71717a] focus:border-[#008070] focus:outline-none min-w-0 flex-1 sm:w-64 sm:flex-none"
           />
           <div className="flex rounded-lg border border-[#262626] overflow-hidden">
             <button
@@ -142,11 +142,11 @@ export default function ProjectsKanbanPage() {
 
       {/* Kanban View */}
       {view === 'kanban' ? (
-        <div className="flex gap-4 overflow-x-auto pb-4">
+        <div className="-mx-4 flex snap-x snap-mandatory items-start gap-3 overflow-x-auto scroll-px-4 px-4 pb-4 md:mx-0 md:snap-none md:gap-4 md:px-0">
           {STATUS_ORDER.map(status => (
             <div
               key={status}
-              className="flex-shrink-0 w-72"
+              className="w-[calc(100vw-3rem)] max-w-[22rem] flex-shrink-0 snap-center md:w-72"
               onDragOver={handleDragOver}
               onDrop={(e) => handleDrop(e, status)}
             >
@@ -182,7 +182,44 @@ export default function ProjectsKanbanPage() {
       ) : (
         /* List View */
         <div className="rounded-xl border border-[#262626] overflow-hidden">
-          <table className="w-full">
+          {/* Mobile list */}
+          <ul className="divide-y divide-[#1f1f1f] bg-[#0a0a0a] md:hidden">
+            {(projects.projects || [])
+              .filter(p => !search || p.name.toLowerCase().includes(search.toLowerCase()))
+              .map(project => {
+                const pct = project.taskSummary?.total > 0
+                  ? (project.taskSummary.completed / project.taskSummary.total) * 100
+                  : 0
+                return (
+                  <li key={project.id}>
+                    <Link href={`/admin/crm/projects/${project.id}`} className="block px-4 py-3.5 active:bg-[#171717]">
+                      <div className="flex items-center gap-2">
+                        <span className={`h-2 w-2 shrink-0 rounded-full ${STATUS_CONFIG[project.status]?.color}`} />
+                        <p className="min-w-0 flex-1 truncate text-[15px] font-medium text-[#fafafa]">{project.name}</p>
+                        {project.budget ? (
+                          <span className="shrink-0 text-xs tabular-nums text-[#008070]">${project.budget.toLocaleString()}</span>
+                        ) : null}
+                      </div>
+                      <p className="mt-0.5 truncate pl-4 text-xs text-[#a1a1aa]">
+                        {[project.lead?.company || project.lead?.full_name, STATUS_CONFIG[project.status]?.label].filter(Boolean).join(' · ')}
+                      </p>
+                      {project.taskSummary?.total > 0 && (
+                        <div className="mt-2 flex items-center gap-2 pl-4">
+                          <div className="h-1 flex-1 overflow-hidden rounded-full bg-[#262626]">
+                            <div className="h-full rounded-full bg-[#008070]" style={{ width: `${pct}%` }} />
+                          </div>
+                          <span className="text-[11px] tabular-nums text-[#71717a]">
+                            {project.taskSummary.completed}/{project.taskSummary.total}
+                          </span>
+                        </div>
+                      )}
+                    </Link>
+                  </li>
+                )
+              })}
+          </ul>
+
+          <table className="hidden w-full md:table">
             <thead className="bg-[#171717]">
               <tr>
                 <th className="text-left px-4 py-3 text-xs font-medium text-[#a1a1aa] uppercase tracking-wider">Project</th>

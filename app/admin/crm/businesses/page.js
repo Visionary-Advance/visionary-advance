@@ -65,7 +65,7 @@ export default function BusinessesPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-[#fafafa]">Businesses</h1>
+          <h1 className="text-xl font-semibold text-[#fafafa] sm:text-2xl">Businesses</h1>
           <p className="mt-1 text-sm text-[#a1a1aa]">
             Manage client businesses and their contacts
           </p>
@@ -152,8 +152,8 @@ export default function BusinessesPage() {
 
       {/* Create Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+        <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/50 sm:items-center sm:p-4">
+          <div className="w-full max-w-md border border-[#262626] bg-[#0a0a0a] px-5 pt-6 sm:p-6 rounded-t-2xl sm:rounded-2xl max-h-[92dvh] sm:max-h-[90vh] overflow-y-auto" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 1.5rem)' }}>
             <h2 className="text-lg font-semibold text-[#fafafa]">Create Business</h2>
             <form onSubmit={handleCreate} className="mt-4 space-y-4">
               <div>

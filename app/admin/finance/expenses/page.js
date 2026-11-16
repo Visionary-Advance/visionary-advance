@@ -1,365 +1,303 @@
-// app/admin/finance/expenses/page.js — Expense Categorizer
+// app/admin/finance/expenses/page.js — Expense ledger
 'use client'
 
-import { useState, useEffect } from 'react'
-import { usePersistedState } from '@/lib/usePersistedState'
-import { formatCurrency, EXPENSE_CATEGORIES } from '@/lib/finance'
+import { useMemo, useState } from 'react'
 import { format } from 'date-fns'
+import { ChevronRight, Paperclip, Pencil, Plus, Receipt, Repeat, Trash2, Upload } from 'lucide-react'
+import { usePersistedState } from '@/lib/usePersistedState'
+import { invalidate, useCachedFetch } from '@/lib/useCachedFetch'
+import { EXPENSE_CATEGORIES } from '@/lib/finance'
+import {
+  Badge, Button, Card, CardHeader, ConfirmButton, Drawer, EmptyState, PageHeader, SegmentedControl, Skeleton,
+  StatTile, Table, Td, Th, cx, focusRing, useSort, useToast,
+} from '@/Components/Admin/ui'
+import {
+  BarList, CategoryTag, DetailRow, MONTHS, SelectInput, YearSelect, categoryItems, fmtMoney,
+} from '@/Components/Admin/Finance/parts'
 import ExpenseForm from '@/Components/Admin/Finance/ExpenseForm'
 import CSVImportModal from '@/Components/Admin/Finance/CSVImportModal'
-import CategoryBadge from '@/Components/Admin/Finance/CategoryBadge'
-import CategoryPieChart from '@/Components/Admin/Finance/CategoryPieChart'
 import MonthlyExpenseSummary from '@/Components/Admin/Finance/MonthlyExpenseSummary'
+import Fab from '@/Components/Admin/Mobile/Fab'
+
+const dateOf = (d) => new Date(d + 'T00:00:00')
 
 export default function ExpensesPage() {
-  const [entries, setEntries] = useState([])
-  const [loading, setLoading] = useState(true)
+  const notify = useToast()
   const [year, setYear] = usePersistedState('year', new Date().getFullYear())
   const [month, setMonth] = usePersistedState('month', '')
   const [category, setCategory] = usePersistedState('category', '')
+  const [view, setView] = usePersistedState('view', 'transactions')
   const [showForm, setShowForm] = useState(false)
   const [showImport, setShowImport] = useState(false)
   const [editEntry, setEditEntry] = useState(null)
-  const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0 })
-  const [deleteConfirm, setDeleteConfirm] = useState(null)
-  const [categoryData, setCategoryData] = useState([])
-  const [yearTotal, setYearTotal] = useState(0)
-  const [view, setView] = usePersistedState('view', 'transactions') // 'transactions' | 'monthly'
-  const [monthlyData, setMonthlyData] = useState([])
+  const [selected, setSelected] = useState(null)
 
-  const fetchEntries = async (page = 1) => {
-    try {
-      const params = new URLSearchParams({ year: year.toString(), page: page.toString(), limit: '20' })
-      if (month) params.set('month', month)
-      if (category) params.set('category', category)
+  // The page number belongs to one set of filters; changing a filter starts at page 1
+  const filterKey = `${year}|${month}|${category}`
+  const [pageState, setPageState] = useState({ key: filterKey, n: 1 })
+  const page = pageState.key === filterKey ? pageState.n : 1
+  const setPage = (n) => setPageState({ key: filterKey, n })
 
-      const res = await fetch(`/api/finance/expenses?${params}`)
-      if (res.ok) {
-        const data = await res.json()
-        setEntries(data.entries)
-        setPagination(data.pagination)
-      }
-    } catch (err) {
-      console.error('Error fetching expenses:', err)
-    } finally {
-      setLoading(false)
-    }
+  const params = new URLSearchParams({ year: String(year), page: String(page), limit: '20' })
+  if (month) params.set('month', month)
+  if (category) params.set('category', category)
+  const list = useCachedFetch(`/api/finance/expenses?${params}`, {
+    keepPrevious: true,
+    onError: () => notify('Could not load expenses', 'error'),
+  })
+  const { data: stats } = useCachedFetch(`/api/finance/stats?year=${year}`)
+
+  const entries = list.data?.entries || []
+  const pagination = list.data?.pagination || { page: 1, totalPages: 1, total: 0 }
+  const loading = list.loading
+  const refresh = () => invalidate('/api/finance/')
+
+  const handleDelete = async (entry) => {
+    const res = await fetch(`/api/finance/expenses/${entry.id}`, { method: 'DELETE' })
+    if (!res.ok) return notify("Couldn't delete that expense", 'error')
+    notify(`Deleted ${entry.description}`, 'success')
+    setSelected(null)
+    refresh()
   }
 
-  const fetchCategoryBreakdown = async () => {
-    try {
-      const res = await fetch(`/api/finance/stats?year=${year}`)
-      if (res.ok) {
-        const data = await res.json()
-        setCategoryData(data.byCategory || [])
-        setYearTotal(data.overview?.ytdExpenses || 0)
-        setMonthlyData(data.monthly || [])
-      }
-    } catch (err) {
-      console.error('Error fetching categories:', err)
-    }
-  }
-
-  useEffect(() => {
-    setLoading(true)
-    fetchEntries()
-    fetchCategoryBreakdown()
-  }, [year, month, category])
-
-  const handleDelete = async (id) => {
-    try {
-      const res = await fetch(`/api/finance/expenses/${id}`, { method: 'DELETE' })
-      if (res.ok) {
-        setDeleteConfirm(null)
-        fetchEntries(pagination.page)
-        fetchCategoryBreakdown()
-      }
-    } catch (err) {
-      console.error('Error deleting expense:', err)
-    }
-  }
-
-  const handleEdit = (entry) => {
+  const openForm = (entry = null) => {
+    setSelected(null)
     setEditEntry(entry)
     setShowForm(true)
   }
 
-  const handleFormClose = () => {
-    setShowForm(false)
-    setEditEntry(null)
-  }
+  const [sorted, thProps] = useSort(entries, { key: 'date', dir: 'desc' }, {
+    amount: (e) => parseFloat(e.amount),
+    description: (e) => (e.description || '').toLowerCase(),
+  })
 
-  const handleSave = () => {
-    fetchEntries(pagination.page)
-    fetchCategoryBreakdown()
-  }
+  const yearTotal = stats?.overview?.ytdExpenses
+  const topCategory = useMemo(
+    () => [...(stats?.byCategory || [])].sort((a, b) => b.total - a.total)[0],
+    [stats]
+  )
+  const filtered = Boolean(month || category)
 
   return (
     <div>
-      {/* Header */}
-      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-[#fafafa]">Expenses</h1>
-          <p className="mt-1 text-[#a1a1aa]">Categorize expenses by IRS Schedule C</p>
+      <PageHeader
+        title="Expenses"
+        description="Business spending, sorted into Schedule C categories"
+        actions={
+          <>
+            <Button icon={Upload} onClick={() => setShowImport(true)}>Import CSV</Button>
+            <Button variant="primary" icon={Plus} onClick={() => openForm()} className="hidden md:inline-flex">Add expense</Button>
+          </>
+        }
+      />
+
+      <section aria-label="Totals" className="mb-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
+        <StatTile label={`${year} expenses`} value={fmtMoney(yearTotal)} loading={!stats} hint="year to date" />
+        <StatTile label="Entries" value={pagination.total} loading={loading} hint={filtered ? 'matching filters' : `in ${year}`} />
+        <div className="col-span-2 lg:col-span-1">
+          <StatTile
+            label="Top category"
+            value={topCategory ? fmtMoney(topCategory.total) : '—'}
+            loading={!stats}
+            hint={topCategory?.label || 'no spending yet'}
+          />
         </div>
-        <div className="flex items-center gap-3">
-          {/* View Toggle */}
-          <div className="flex rounded-lg border border-[#262626] overflow-hidden">
-            <button
-              onClick={() => setView('transactions')}
-              className={`px-3 py-2 text-sm font-medium transition-colors ${
-                view === 'transactions'
-                  ? 'bg-[#262626] text-[#fafafa]'
-                  : 'text-[#a1a1aa] hover:bg-[#171717] hover:text-[#fafafa]'
-              }`}
-            >
-              Transactions
-            </button>
-            <button
-              onClick={() => setView('monthly')}
-              className={`px-3 py-2 text-sm font-medium transition-colors ${
-                view === 'monthly'
-                  ? 'bg-[#262626] text-[#fafafa]'
-                  : 'text-[#a1a1aa] hover:bg-[#171717] hover:text-[#fafafa]'
-              }`}
-            >
-              Monthly
-            </button>
-          </div>
-          <button
-            onClick={() => setShowImport(true)}
-            className="rounded-lg border border-[#262626] px-4 py-2 text-sm font-medium text-[#a1a1aa] hover:bg-[#171717] hover:text-[#fafafa] transition-colors"
-          >
-            Import CSV
-          </button>
-          <button
-            onClick={() => setShowForm(true)}
-            className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 transition-colors"
-          >
-            + Add Expense
-          </button>
-        </div>
+      </section>
+
+      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <SegmentedControl
+          label="View"
+          value={view}
+          onChange={setView}
+          options={[
+            { value: 'transactions', label: 'Transactions' },
+            { value: 'monthly', label: 'By month' },
+            { value: 'categories', label: 'By category' },
+          ]}
+          className="w-full sm:w-auto [&>button]:flex-1 [&>button]:justify-center"
+        />
+        <YearSelect value={year} onChange={setYear} className="hidden sm:block" />
       </div>
 
-      {/* Year Filter (shared across both views) */}
-      <div className="mb-6 flex flex-wrap gap-3">
-        <select
-          value={year}
-          onChange={(e) => setYear(parseInt(e.target.value))}
-          className="rounded-lg border border-[#262626] bg-[#171717] px-3 py-2 text-sm text-[#fafafa] focus:border-emerald-500 focus:outline-none"
-        >
-          {[2024, 2025, 2026, 2027].map(y => (
-            <option key={y} value={y}>{y}</option>
-          ))}
-        </select>
-        {view === 'transactions' && (
-          <>
-            <select
-              value={month}
-              onChange={(e) => setMonth(e.target.value)}
-              className="rounded-lg border border-[#262626] bg-[#171717] px-3 py-2 text-sm text-[#fafafa] focus:border-emerald-500 focus:outline-none"
-            >
-              <option value="">All Months</option>
-              {['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'].map((m, i) => (
-                <option key={i+1} value={i+1}>{m}</option>
-              ))}
-            </select>
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="rounded-lg border border-[#262626] bg-[#171717] px-3 py-2 text-sm text-[#fafafa] focus:border-emerald-500 focus:outline-none"
-            >
-              <option value="">All Categories</option>
+      {view === 'monthly' && (
+        <MonthlyExpenseSummary monthly={stats?.monthly} loading={!stats} year={year} yearSelect={<YearSelect value={year} onChange={setYear} />} />
+      )}
+
+      {view === 'categories' && (
+        <Card>
+          <CardHeader
+            title="Spending by category"
+            description={`${year} · ${fmtMoney(yearTotal)} total`}
+            actions={<YearSelect value={year} onChange={setYear} className="sm:hidden" />}
+          />
+          <div className="p-4 sm:p-5">
+            {!stats ? <Skeleton className="h-48 w-full" /> : <BarList items={categoryItems(stats.byCategory)} emptyText="No expenses recorded yet" />}
+          </div>
+        </Card>
+      )}
+
+      {view === 'transactions' && (
+        <Card>
+          <div className="scrollbar-hide flex gap-2 overflow-x-auto border-b border-adm-border p-3 sm:px-5 sm:py-4">
+            <YearSelect value={year} onChange={setYear} className="shrink-0 sm:hidden" />
+            <SelectInput value={month} onChange={setMonth} label="Month" className="shrink-0">
+              <option value="">All months</option>
+              {MONTHS.map((m, i) => <option key={m} value={i + 1}>{m}</option>)}
+            </SelectInput>
+            <SelectInput value={category} onChange={setCategory} label="Category" className="min-w-0 shrink-0 sm:max-w-xs">
+              <option value="">All categories</option>
               {Object.entries(EXPENSE_CATEGORIES).map(([key, { label }]) => (
                 <option key={key} value={key}>{label}</option>
               ))}
-            </select>
-          </>
-        )}
-      </div>
-
-      {/* Monthly Summary View */}
-      {view === 'monthly' && (
-        <MonthlyExpenseSummary monthly={monthlyData} yearTotal={yearTotal} />
-      )}
-
-      {/* Transactions View */}
-      {view === 'transactions' && (
-        <>
-          {/* Category Pie Chart */}
-          {categoryData.length > 0 && (
-            <div className="mb-8 rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
-              <h2 className="text-lg font-semibold text-[#fafafa]">Spending by Category</h2>
-              <p className="mt-1 text-sm text-[#525252]">{year} expense distribution</p>
-              <CategoryPieChart data={categoryData} />
-            </div>
-          )}
-
-          {/* Running Total */}
-          <div className="mb-6 rounded-xl border border-[#262626] bg-[#0a0a0a] p-4">
-            <div className="flex gap-8">
-              <div>
-                <p className="text-sm text-[#a1a1aa]">{year} Total</p>
-                <p className="text-xl font-semibold text-red-400">{formatCurrency(yearTotal)}</p>
-              </div>
-              <div>
-                <p className="text-sm text-[#a1a1aa]">Entries</p>
-                <p className="text-xl font-semibold text-[#fafafa]">{pagination.total}</p>
-              </div>
-            </div>
+            </SelectInput>
           </div>
 
-          {/* Table */}
           {loading ? (
-            <div className="flex items-center justify-center py-16">
-              <div className="h-8 w-8 animate-spin rounded-full border-2 border-emerald-500 border-t-transparent" />
+            <div className="space-y-3 p-4 sm:p-5">
+              {[0, 1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-11 w-full" />)}
             </div>
           ) : entries.length === 0 ? (
-            <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] py-16 text-center">
-              <p className="text-[#525252]">No expense entries found</p>
-              <button
-                onClick={() => setShowForm(true)}
-                className="mt-4 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 transition-colors"
-              >
-                Add Your First Expense
-              </button>
-            </div>
+            <EmptyState
+              icon={Receipt}
+              title={filtered ? 'No matching expenses' : `No expenses in ${year} yet`}
+              description={filtered ? 'Try a different month or category.' : 'Add one by hand or import a CSV from your bank.'}
+              action={!filtered && <Button variant="primary" icon={Plus} onClick={() => openForm()}>Add expense</Button>}
+            />
           ) : (
-            <div className="overflow-x-auto rounded-xl border border-[#262626]">
-              <table className="w-full">
+            <>
+              <ul className="divide-y divide-adm-border md:hidden">
+                {sorted.map((entry) => (
+                  <li key={entry.id}>
+                    <button
+                      type="button"
+                      onClick={() => setSelected(entry)}
+                      className="flex min-h-16 w-full cursor-pointer items-center gap-3 px-4 py-3 text-left active:bg-adm-raised"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <p className="flex items-center gap-1.5 text-[15px] font-medium text-adm-text">
+                          <span className="truncate">{entry.description}</span>
+                          {entry.is_recurring && <Repeat className="h-3.5 w-3.5 shrink-0 text-adm-info" aria-label="Recurring" />}
+                          {entry.receipt_url && <Paperclip className="h-3.5 w-3.5 shrink-0 text-adm-subtle" aria-label="Has receipt" />}
+                        </p>
+                        <div className="mt-0.5 flex min-w-0 items-center gap-2 text-xs text-adm-subtle">
+                          <span className="shrink-0">{format(dateOf(entry.date), 'MMM d')}</span>
+                          <CategoryTag category={entry.category} />
+                        </div>
+                      </div>
+                      <span className="shrink-0 text-[15px] font-semibold tabular-nums text-adm-text">
+                        −{fmtMoney(entry.amount, { cents: true })}
+                      </span>
+                      <ChevronRight className="h-4 w-4 shrink-0 text-adm-subtle" aria-hidden />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+
+              <Table className="hidden md:block">
                 <thead>
-                  <tr className="border-b border-[#262626] bg-[#0a0a0a]">
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-[#525252]">Description</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-[#525252]">Amount</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-[#525252]">Date</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-[#525252]">Category</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-[#525252]">Receipt</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium uppercase text-[#525252]">Actions</th>
+                  <tr>
+                    <Th {...thProps('description', 'asc')}>Description</Th>
+                    <Th {...thProps('date')}>Date</Th>
+                    <Th>Category</Th>
+                    <Th>Receipt</Th>
+                    <Th align="right" {...thProps('amount')}>Amount</Th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#262626]">
-                  {entries.map((entry) => (
-                    <tr key={entry.id} className="bg-[#0a0a0a] hover:bg-[#171717] transition-colors">
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium text-[#fafafa]">{entry.description}</span>
-                          {entry.is_recurring && (
-                            <span className="rounded-full bg-blue-500/20 px-2 py-0.5 text-xs text-blue-400">
-                              recurring
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-sm font-semibold text-red-400">{formatCurrency(entry.amount)}</td>
-                      <td className="px-4 py-3 text-sm text-[#a1a1aa]">
-                        {format(new Date(entry.date + 'T00:00:00'), 'MMM d, yyyy')}
-                      </td>
-                      <td className="px-4 py-3">
-                        <CategoryBadge category={entry.category} size="sm" />
-                      </td>
-                      <td className="px-4 py-3">
+                <tbody className="divide-y divide-adm-border">
+                  {sorted.map((entry) => (
+                    <tr key={entry.id} onClick={() => setSelected(entry)} className="cursor-pointer transition-colors hover:bg-adm-raised">
+                      <Td>
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); setSelected(entry) }}
+                          className={cx('inline-flex cursor-pointer items-center gap-2 rounded text-left font-medium text-adm-text hover:text-adm-accent', focusRing)}
+                        >
+                          {entry.description}
+                          {entry.is_recurring && <Badge tone="info" icon={Repeat}>Recurring</Badge>}
+                        </button>
+                      </Td>
+                      <Td className="whitespace-nowrap text-adm-muted">{format(dateOf(entry.date), 'MMM d, yyyy')}</Td>
+                      <Td><CategoryTag category={entry.category} className="max-w-[14rem]" /></Td>
+                      <Td>
                         {entry.receipt_url ? (
                           <a
                             href={entry.receipt_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-sm text-emerald-400 hover:text-emerald-300 underline"
+                            onClick={(e) => e.stopPropagation()}
+                            className={cx('inline-flex items-center gap-1 rounded text-adm-accent hover:underline', focusRing)}
                           >
-                            View
+                            <Paperclip className="h-3.5 w-3.5" aria-hidden /> View
                           </a>
-                        ) : (
-                          <span className="text-sm text-[#525252]">-</span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <div className="flex justify-end gap-2">
-                          <button
-                            onClick={() => handleEdit(entry)}
-                            className="rounded px-2 py-1 text-xs text-[#a1a1aa] hover:bg-[#262626] hover:text-[#fafafa] transition-colors"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => setDeleteConfirm(entry.id)}
-                            className="rounded px-2 py-1 text-xs text-red-400 hover:bg-red-500/20 transition-colors"
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </td>
+                        ) : <span className="text-adm-subtle">—</span>}
+                      </Td>
+                      <Td align="right" numeric className="font-medium text-adm-text">{fmtMoney(entry.amount, { cents: true })}</Td>
                     </tr>
                   ))}
                 </tbody>
-              </table>
-            </div>
-          )}
+              </Table>
 
-          {/* Pagination */}
-          {pagination.totalPages > 1 && (
-            <div className="mt-4 flex items-center justify-between">
-              <p className="text-sm text-[#525252]">
-                Page {pagination.page} of {pagination.totalPages}
-              </p>
-              <div className="flex gap-2">
-                <button
-                  disabled={pagination.page <= 1}
-                  onClick={() => fetchEntries(pagination.page - 1)}
-                  className="rounded-lg border border-[#262626] px-3 py-1.5 text-sm text-[#a1a1aa] hover:bg-[#171717] disabled:opacity-50 transition-colors"
-                >
-                  Previous
-                </button>
-                <button
-                  disabled={pagination.page >= pagination.totalPages}
-                  onClick={() => fetchEntries(pagination.page + 1)}
-                  className="rounded-lg border border-[#262626] px-3 py-1.5 text-sm text-[#a1a1aa] hover:bg-[#171717] disabled:opacity-50 transition-colors"
-                >
-                  Next
-                </button>
-              </div>
-            </div>
+              {pagination.totalPages > 1 && (
+                <div className="flex items-center justify-between gap-3 border-t border-adm-border px-4 py-3 sm:px-5">
+                  <p className="text-xs text-adm-subtle">Page {pagination.page} of {pagination.totalPages}</p>
+                  <div className="flex gap-2">
+                    <Button size="sm" disabled={pagination.page <= 1} onClick={() => setPage(pagination.page - 1)}>Previous</Button>
+                    <Button size="sm" disabled={pagination.page >= pagination.totalPages} onClick={() => setPage(pagination.page + 1)}>Next</Button>
+                  </div>
+                </div>
+              )}
+            </>
           )}
-        </>
+        </Card>
       )}
 
-      {/* Expense Form Modal */}
+      {selected && (
+        <Drawer
+          onClose={() => setSelected(null)}
+          label={selected.description}
+          header={
+            <div>
+              <p className="text-sm text-adm-muted">{selected.description}</p>
+              <p className="mt-0.5 text-2xl font-semibold tabular-nums text-adm-text">{fmtMoney(selected.amount, { cents: true })}</p>
+            </div>
+          }
+          footer={
+            <div className="flex flex-wrap items-center gap-2">
+              <Button variant="primary" icon={Pencil} onClick={() => openForm(selected)}>Edit</Button>
+              {selected.receipt_url && (
+                <Button icon={Paperclip} href={selected.receipt_url} external>Receipt</Button>
+              )}
+              <ConfirmButton icon={Trash2} confirmLabel="Tap again to delete" onConfirm={() => handleDelete(selected)} className="ml-auto">
+                Delete
+              </ConfirmButton>
+            </div>
+          }
+        >
+          <dl className="divide-y divide-adm-border text-sm">
+            <DetailRow label="Date">{format(dateOf(selected.date), 'EEEE, MMMM d, yyyy')}</DetailRow>
+            <DetailRow label="Category"><CategoryTag category={selected.category} className="text-sm text-adm-text" /></DetailRow>
+            <DetailRow label="Schedule C">{EXPENSE_CATEGORIES[selected.category]?.scheduleC || '—'}</DetailRow>
+            <DetailRow label="Recurring">{selected.is_recurring ? 'Yes' : 'No'}</DetailRow>
+            <DetailRow label="Receipt">{selected.receipt_url ? 'Attached' : <span className="text-adm-subtle">None. Edit to attach one.</span>}</DetailRow>
+          </dl>
+          {selected.notes && (
+            <div className="mt-5 rounded-lg border border-adm-border bg-adm-raised p-3">
+              <p className="mb-1 text-xs font-medium text-adm-subtle">Notes</p>
+              <p className="whitespace-pre-wrap text-sm text-adm-muted">{selected.notes}</p>
+            </div>
+          )}
+        </Drawer>
+      )}
+
+      {view === 'transactions' && <Fab onClick={() => openForm()} label="Add expense" />}
+
       <ExpenseForm
         isOpen={showForm}
-        onClose={handleFormClose}
-        onSave={handleSave}
+        onClose={() => { setShowForm(false); setEditEntry(null) }}
+        onSave={refresh}
         entry={editEntry}
       />
-
-      {/* CSV Import Modal */}
-      <CSVImportModal
-        isOpen={showImport}
-        onClose={() => setShowImport(false)}
-        onComplete={handleSave}
-        type="expenses"
-      />
-
-      {/* Delete Confirmation */}
-      {deleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-          <div className="w-full max-w-sm rounded-2xl border border-[#262626] bg-[#0a0a0a] p-6">
-            <h3 className="text-lg font-semibold text-[#fafafa]">Delete Expense Entry</h3>
-            <p className="mt-2 text-sm text-[#a1a1aa]">Are you sure? This action cannot be undone.</p>
-            <div className="mt-6 flex justify-end gap-3">
-              <button
-                onClick={() => setDeleteConfirm(null)}
-                className="rounded-lg border border-[#262626] px-4 py-2 text-sm font-medium text-[#a1a1aa] hover:bg-[#171717] transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => handleDelete(deleteConfirm)}
-                className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 transition-colors"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <CSVImportModal isOpen={showImport} onClose={() => setShowImport(false)} onComplete={refresh} type="expenses" />
     </div>
   )
 }

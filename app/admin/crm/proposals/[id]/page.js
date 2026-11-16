@@ -135,8 +135,8 @@ export default function ProposalDetailPage({ params }) {
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Send Modal */}
       {showSendModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+        <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/50 sm:items-center sm:p-4">
+          <div className="w-full max-w-md border border-[#262626] bg-[#0a0a0a] px-5 pt-6 sm:p-6 rounded-t-2xl sm:rounded-2xl max-h-[92dvh] sm:max-h-[90vh] overflow-y-auto" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 1.5rem)' }}>
             <h3 className="text-lg font-semibold text-[#fafafa]">Send Proposal</h3>
             <div className="mt-4 space-y-4">
               <div>
@@ -193,7 +193,7 @@ export default function ProposalDetailPage({ params }) {
             Back to lead
           </Link>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-semibold text-[#fafafa]">{proposal.title}</h1>
+            <h1 className="text-xl font-semibold text-[#fafafa] sm:text-2xl">{proposal.title}</h1>
             <ProposalStatusBadge status={proposal.status} size="lg" />
           </div>
           {proposal.proposal_number && (
@@ -223,7 +223,7 @@ export default function ProposalDetailPage({ params }) {
       </div>
 
       {/* Metadata */}
-      <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+      <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-4 sm:p-6">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           {proposal.total_amount && (
             <div>
@@ -271,7 +271,7 @@ export default function ProposalDetailPage({ params }) {
 
       {/* Line Items */}
       {proposal.line_items && proposal.line_items.length > 0 && (
-        <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+        <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-4 sm:p-6">
           <h2 className="text-sm font-medium uppercase tracking-wider text-[#a1a1aa] mb-4">
             Line Items
           </h2>
@@ -299,7 +299,7 @@ export default function ProposalDetailPage({ params }) {
       )}
 
       {/* Content */}
-      <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+      <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-4 sm:p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
             Content

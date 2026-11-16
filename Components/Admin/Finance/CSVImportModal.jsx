@@ -10,8 +10,10 @@ import {
   REQUIRED_FIELDS,
 } from '@/lib/csv-parser'
 import { formatCurrency, EXPENSE_CATEGORIES } from '@/lib/finance'
+import { useToast } from '@/Components/Admin/ui'
 
 export default function CSVImportModal({ isOpen, onClose, onComplete, type }) {
+  const notify = useToast()
   const [step, setStep] = useState(1)
   const [dragOver, setDragOver] = useState(false)
   const [fileName, setFileName] = useState('')
@@ -46,7 +48,7 @@ export default function CSVImportModal({ isOpen, onClose, onComplete, type }) {
     if (!file) return
     const ext = file.name.split('.').pop().toLowerCase()
     if (!['csv', 'tsv', 'txt'].includes(ext)) {
-      alert('Please upload a .csv or .tsv file')
+      notify('Upload a .csv or .tsv file', 'error')
       return
     }
 
@@ -62,7 +64,7 @@ export default function CSVImportModal({ isOpen, onClose, onComplete, type }) {
       setStep(2)
     }
     reader.readAsText(file)
-  }, [type])
+  }, [type, notify])
 
   const handleDrop = (e) => {
     e.preventDefault()
@@ -135,19 +137,19 @@ export default function CSVImportModal({ isOpen, onClose, onComplete, type }) {
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-      <div className="relative w-full max-w-3xl max-h-[90vh] overflow-hidden rounded-2xl border border-[#262626] bg-[#0a0a0a] shadow-2xl flex flex-col">
+    <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/60 sm:items-center sm:p-4">
+      <div className="relative w-full max-w-3xl overflow-hidden border border-adm-border bg-adm-surface shadow-2xl flex flex-col rounded-t-2xl sm:rounded-2xl max-h-[92dvh] sm:max-h-[90vh]">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-[#262626] px-6 py-4">
+        <div className="flex items-center justify-between border-b border-adm-border px-6 py-4">
           <div>
-            <h2 className="text-lg font-semibold text-[#fafafa]">
+            <h2 className="text-lg font-semibold text-adm-text">
               Import {type === 'income' ? 'Income' : 'Expenses'} from CSV
             </h2>
-            <p className="mt-0.5 text-sm text-[#525252]">
+            <p className="mt-0.5 text-sm text-adm-subtle">
               Step {step} of 3 — {step === 1 ? 'Upload' : step === 2 ? 'Map Columns' : 'Preview & Import'}
             </p>
           </div>
-          <button onClick={handleClose} className="rounded-lg p-1.5 text-[#525252] hover:bg-[#171717] hover:text-[#fafafa] transition-colors">
+          <button onClick={handleClose} className="rounded-lg p-1.5 text-adm-subtle hover:bg-adm-surface hover:text-adm-text transition-colors">
             <XIcon />
           </button>
         </div>
@@ -155,7 +157,7 @@ export default function CSVImportModal({ isOpen, onClose, onComplete, type }) {
         {/* Step indicators */}
         <div className="flex gap-1 px-6 pt-4">
           {[1, 2, 3].map(s => (
-            <div key={s} className={`h-1 flex-1 rounded-full transition-colors ${s <= step ? 'bg-emerald-500' : 'bg-[#262626]'}`} />
+            <div key={s} className={`h-1 flex-1 rounded-full transition-colors ${s <= step ? 'bg-teal-500' : 'bg-adm-raised'}`} />
           ))}
         </div>
 
@@ -199,12 +201,12 @@ export default function CSVImportModal({ isOpen, onClose, onComplete, type }) {
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between border-t border-[#262626] px-6 py-4">
+        <div className="flex items-center justify-between border-t border-adm-border px-6 py-4">
           <div>
             {step > 1 && !result && (
               <button
                 onClick={() => setStep(step - 1)}
-                className="rounded-lg border border-[#262626] px-4 py-2 text-sm font-medium text-[#a1a1aa] hover:bg-[#171717] transition-colors"
+                className="rounded-lg border border-adm-border px-4 py-2 text-sm font-medium text-adm-muted hover:bg-adm-surface transition-colors"
               >
                 Back
               </button>
@@ -213,7 +215,7 @@ export default function CSVImportModal({ isOpen, onClose, onComplete, type }) {
           <div className="flex gap-3">
             <button
               onClick={handleClose}
-              className="rounded-lg border border-[#262626] px-4 py-2 text-sm font-medium text-[#a1a1aa] hover:bg-[#171717] transition-colors"
+              className="rounded-lg border border-adm-border px-4 py-2 text-sm font-medium text-adm-muted hover:bg-adm-surface transition-colors"
             >
               Cancel
             </button>
@@ -222,7 +224,7 @@ export default function CSVImportModal({ isOpen, onClose, onComplete, type }) {
               <button
                 onClick={goToPreview}
                 disabled={!allRequiredMapped}
-                className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="rounded-lg bg-teal-700 px-4 py-2 text-sm font-medium text-white hover:bg-teal-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 Preview Rows
               </button>
@@ -232,7 +234,7 @@ export default function CSVImportModal({ isOpen, onClose, onComplete, type }) {
               <button
                 onClick={handleImport}
                 disabled={importing || validCount === 0}
-                className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="rounded-lg bg-teal-700 px-4 py-2 text-sm font-medium text-white hover:bg-teal-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {importing ? (
                   <span className="flex items-center gap-2">
@@ -248,7 +250,7 @@ export default function CSVImportModal({ isOpen, onClose, onComplete, type }) {
             {step === 3 && result && (
               <button
                 onClick={handleDone}
-                className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 transition-colors"
+                className="rounded-lg bg-teal-700 px-4 py-2 text-sm font-medium text-white hover:bg-teal-800 transition-colors"
               >
                 Done
               </button>
@@ -272,16 +274,16 @@ function Step1Upload({ dragOver, setDragOver, handleDrop, handleFileChange, file
         onClick={() => fileRef.current?.click()}
         className={`w-full cursor-pointer rounded-xl border-2 border-dashed p-12 text-center transition-colors ${
           dragOver
-            ? 'border-emerald-500 bg-emerald-500/10'
-            : 'border-[#262626] hover:border-[#404040]'
+            ? 'border-teal-500 bg-teal-500/10'
+            : 'border-adm-border hover:border-adm-border-strong'
         }`}
       >
-        <UploadIcon className="mx-auto h-12 w-12 text-[#525252]" />
-        <p className="mt-4 text-sm text-[#a1a1aa]">
+        <UploadIcon className="mx-auto h-12 w-12 text-adm-subtle" />
+        <p className="mt-4 text-sm text-adm-muted">
           Drag and drop your CSV file here, or{' '}
-          <span className="text-emerald-400 font-medium">browse</span>
+          <span className="text-teal-400 font-medium">browse</span>
         </p>
-        <p className="mt-2 text-xs text-[#525252]">
+        <p className="mt-2 text-xs text-adm-subtle">
           Accepts .csv and .tsv files exported from Google Sheets, Excel, etc.
         </p>
       </div>
@@ -304,10 +306,10 @@ function Step2Mapping({ headers, rawRows, columnMapping, updateMapping, targetFi
   return (
     <div className="space-y-6">
       {/* File info */}
-      <div className="rounded-lg border border-[#262626] bg-[#171717] p-3">
-        <p className="text-sm text-[#a1a1aa]">
-          <span className="text-[#fafafa] font-medium">{rawRows.length}</span> rows found with{' '}
-          <span className="text-[#fafafa] font-medium">{headers.length}</span> columns
+      <div className="rounded-lg border border-adm-border bg-adm-surface p-3">
+        <p className="text-sm text-adm-muted">
+          <span className="text-adm-text font-medium">{rawRows.length}</span> rows found with{' '}
+          <span className="text-adm-text font-medium">{headers.length}</span> columns
         </p>
       </div>
 
@@ -321,7 +323,7 @@ function Step2Mapping({ headers, rawRows, columnMapping, updateMapping, targetFi
               key={rf}
               className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${
                 isMapped
-                  ? 'bg-emerald-500/20 text-emerald-400'
+                  ? 'bg-teal-500/20 text-teal-400'
                   : 'bg-red-500/20 text-red-400'
               }`}
             >
@@ -333,27 +335,27 @@ function Step2Mapping({ headers, rawRows, columnMapping, updateMapping, targetFi
       </div>
 
       {/* Mapping table */}
-      <div className="overflow-x-auto rounded-xl border border-[#262626]">
+      <div className="overflow-x-auto rounded-xl border border-adm-border">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-[#262626] bg-[#171717]">
-              <th className="px-4 py-2.5 text-left text-xs font-medium uppercase text-[#525252]">CSV Column</th>
-              <th className="px-4 py-2.5 text-left text-xs font-medium uppercase text-[#525252]">Maps To</th>
-              <th className="px-4 py-2.5 text-left text-xs font-medium uppercase text-[#525252]">Sample Data</th>
+            <tr className="border-b border-adm-border bg-adm-surface">
+              <th className="px-4 py-2.5 text-left text-xs font-medium uppercase text-adm-subtle">CSV Column</th>
+              <th className="px-4 py-2.5 text-left text-xs font-medium uppercase text-adm-subtle">Maps To</th>
+              <th className="px-4 py-2.5 text-left text-xs font-medium uppercase text-adm-subtle">Sample Data</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#262626]">
+          <tbody className="divide-y divide-adm-border">
             {headers.map(header => (
-              <tr key={header} className="bg-[#0a0a0a]">
-                <td className="px-4 py-2.5 text-sm font-medium text-[#fafafa]">{header}</td>
+              <tr key={header} className="bg-adm-bg">
+                <td className="px-4 py-2.5 text-sm font-medium text-adm-text">{header}</td>
                 <td className="px-4 py-2.5">
                   <select
                     value={columnMapping[header] || '_skip'}
                     onChange={(e) => updateMapping(header, e.target.value)}
                     className={`w-full rounded-lg border px-2.5 py-1.5 text-sm focus:outline-none transition-colors ${
                       columnMapping[header] === '_skip'
-                        ? 'border-[#262626] bg-[#171717] text-[#525252]'
-                        : 'border-emerald-500/50 bg-[#171717] text-[#fafafa]'
+                        ? 'border-adm-border bg-adm-surface text-adm-subtle'
+                        : 'border-teal-500/50 bg-adm-surface text-adm-text'
                     }`}
                   >
                     {Object.entries(targetFields).map(([key, label]) => (
@@ -361,7 +363,7 @@ function Step2Mapping({ headers, rawRows, columnMapping, updateMapping, targetFi
                     ))}
                   </select>
                 </td>
-                <td className="px-4 py-2.5 text-xs text-[#525252] max-w-[200px] truncate">
+                <td className="px-4 py-2.5 text-xs text-adm-subtle max-w-[200px] truncate">
                   {previewRows.map((r, i) => r[header]).filter(Boolean).slice(0, 2).join(', ') || '—'}
                 </td>
               </tr>
@@ -372,21 +374,21 @@ function Step2Mapping({ headers, rawRows, columnMapping, updateMapping, targetFi
 
       {/* Preview */}
       <div>
-        <h3 className="mb-2 text-sm font-medium text-[#a1a1aa]">Raw Data Preview (first 3 rows)</h3>
-        <div className="overflow-x-auto rounded-lg border border-[#262626]">
+        <h3 className="mb-2 text-sm font-medium text-adm-muted">Raw Data Preview (first 3 rows)</h3>
+        <div className="overflow-x-auto rounded-lg border border-adm-border">
           <table className="w-full text-xs">
             <thead>
-              <tr className="border-b border-[#262626] bg-[#171717]">
+              <tr className="border-b border-adm-border bg-adm-surface">
                 {headers.map(h => (
-                  <th key={h} className="px-3 py-2 text-left font-medium text-[#525252] whitespace-nowrap">{h}</th>
+                  <th key={h} className="px-3 py-2 text-left font-medium text-adm-subtle whitespace-nowrap">{h}</th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#262626]">
+            <tbody className="divide-y divide-adm-border">
               {previewRows.map((row, i) => (
-                <tr key={i} className="bg-[#0a0a0a]">
+                <tr key={i} className="bg-adm-bg">
                   {headers.map(h => (
-                    <td key={h} className="px-3 py-2 text-[#a1a1aa] whitespace-nowrap max-w-[150px] truncate">
+                    <td key={h} className="px-3 py-2 text-adm-muted whitespace-nowrap max-w-[150px] truncate">
                       {row[h] || '—'}
                     </td>
                   ))}
@@ -407,57 +409,57 @@ function Step3Preview({ validatedRows, validCount, invalidCount, type }) {
     <div className="space-y-4">
       {/* Summary */}
       <div className="flex gap-4">
-        <div className="flex-1 rounded-lg border border-[#262626] bg-[#171717] p-3 text-center">
-          <p className="text-2xl font-semibold text-emerald-400">{validCount}</p>
-          <p className="text-xs text-[#525252]">Valid rows</p>
+        <div className="flex-1 rounded-lg border border-adm-border bg-adm-surface p-3 text-center">
+          <p className="text-2xl font-semibold text-teal-400">{validCount}</p>
+          <p className="text-xs text-adm-subtle">Valid rows</p>
         </div>
         {invalidCount > 0 && (
-          <div className="flex-1 rounded-lg border border-[#262626] bg-[#171717] p-3 text-center">
+          <div className="flex-1 rounded-lg border border-adm-border bg-adm-surface p-3 text-center">
             <p className="text-2xl font-semibold text-red-400">{invalidCount}</p>
-            <p className="text-xs text-[#525252]">Invalid rows</p>
+            <p className="text-xs text-adm-subtle">Invalid rows</p>
           </div>
         )}
-        <div className="flex-1 rounded-lg border border-[#262626] bg-[#171717] p-3 text-center">
-          <p className="text-2xl font-semibold text-[#fafafa]">
+        <div className="flex-1 rounded-lg border border-adm-border bg-adm-surface p-3 text-center">
+          <p className="text-2xl font-semibold text-adm-text">
             {formatCurrency(validatedRows.filter(r => r.valid).reduce((sum, r) => sum + (r.data.amount || 0), 0))}
           </p>
-          <p className="text-xs text-[#525252]">Total amount</p>
+          <p className="text-xs text-adm-subtle">Total amount</p>
         </div>
       </div>
 
       {/* Rows table */}
-      <div className="overflow-x-auto rounded-xl border border-[#262626]">
+      <div className="overflow-x-auto rounded-xl border border-adm-border">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-[#262626] bg-[#171717]">
-              <th className="px-3 py-2.5 text-left text-xs font-medium uppercase text-[#525252] w-8">#</th>
-              <th className="px-3 py-2.5 text-left text-xs font-medium uppercase text-[#525252]">Status</th>
+            <tr className="border-b border-adm-border bg-adm-surface">
+              <th className="px-3 py-2.5 text-left text-xs font-medium uppercase text-adm-subtle w-8">#</th>
+              <th className="px-3 py-2.5 text-left text-xs font-medium uppercase text-adm-subtle">Status</th>
               {type === 'income' ? (
                 <>
-                  <th className="px-3 py-2.5 text-left text-xs font-medium uppercase text-[#525252]">Client</th>
-                  <th className="px-3 py-2.5 text-left text-xs font-medium uppercase text-[#525252]">Amount</th>
-                  <th className="px-3 py-2.5 text-left text-xs font-medium uppercase text-[#525252]">Date</th>
-                  <th className="px-3 py-2.5 text-left text-xs font-medium uppercase text-[#525252]">Method</th>
+                  <th className="px-3 py-2.5 text-left text-xs font-medium uppercase text-adm-subtle">Client</th>
+                  <th className="px-3 py-2.5 text-left text-xs font-medium uppercase text-adm-subtle">Amount</th>
+                  <th className="px-3 py-2.5 text-left text-xs font-medium uppercase text-adm-subtle">Date</th>
+                  <th className="px-3 py-2.5 text-left text-xs font-medium uppercase text-adm-subtle">Method</th>
                 </>
               ) : (
                 <>
-                  <th className="px-3 py-2.5 text-left text-xs font-medium uppercase text-[#525252]">Description</th>
-                  <th className="px-3 py-2.5 text-left text-xs font-medium uppercase text-[#525252]">Amount</th>
-                  <th className="px-3 py-2.5 text-left text-xs font-medium uppercase text-[#525252]">Date</th>
-                  <th className="px-3 py-2.5 text-left text-xs font-medium uppercase text-[#525252]">Category</th>
+                  <th className="px-3 py-2.5 text-left text-xs font-medium uppercase text-adm-subtle">Description</th>
+                  <th className="px-3 py-2.5 text-left text-xs font-medium uppercase text-adm-subtle">Amount</th>
+                  <th className="px-3 py-2.5 text-left text-xs font-medium uppercase text-adm-subtle">Date</th>
+                  <th className="px-3 py-2.5 text-left text-xs font-medium uppercase text-adm-subtle">Category</th>
                 </>
               )}
-              <th className="px-3 py-2.5 text-left text-xs font-medium uppercase text-[#525252]">Issues</th>
+              <th className="px-3 py-2.5 text-left text-xs font-medium uppercase text-adm-subtle">Issues</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#262626]">
+          <tbody className="divide-y divide-adm-border">
             {validatedRows.map((row) => (
-              <tr key={row.index} className={`${row.valid ? 'bg-[#0a0a0a]' : 'bg-red-500/5'}`}>
-                <td className="px-3 py-2 text-xs text-[#525252]">{row.index + 1}</td>
+              <tr key={row.index} className={`${row.valid ? 'bg-adm-bg' : 'bg-red-500/5'}`}>
+                <td className="px-3 py-2 text-xs text-adm-subtle">{row.index + 1}</td>
                 <td className="px-3 py-2">
                   {row.valid ? (
-                    <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500/20">
-                      <CheckIcon className="text-emerald-400" />
+                    <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-teal-500/20">
+                      <CheckIcon className="text-teal-400" />
                     </span>
                   ) : (
                     <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-red-500/20">
@@ -467,17 +469,17 @@ function Step3Preview({ validatedRows, validCount, invalidCount, type }) {
                 </td>
                 {type === 'income' ? (
                   <>
-                    <td className="px-3 py-2 text-[#fafafa]">{row.data.client_name || row.mapped.client_name || '—'}</td>
+                    <td className="px-3 py-2 text-adm-text">{row.data.client_name || row.mapped.client_name || '—'}</td>
                     <td className="px-3 py-2 text-green-400 font-medium">{row.data.amount ? formatCurrency(row.data.amount) : '—'}</td>
-                    <td className="px-3 py-2 text-[#a1a1aa]">{row.data.date_paid || '—'}</td>
-                    <td className="px-3 py-2 text-[#a1a1aa]">{row.data.payment_method || '—'}</td>
+                    <td className="px-3 py-2 text-adm-muted">{row.data.date_paid || '—'}</td>
+                    <td className="px-3 py-2 text-adm-muted">{row.data.payment_method || '—'}</td>
                   </>
                 ) : (
                   <>
-                    <td className="px-3 py-2 text-[#fafafa]">{row.data.description || row.mapped.description || '—'}</td>
+                    <td className="px-3 py-2 text-adm-text">{row.data.description || row.mapped.description || '—'}</td>
                     <td className="px-3 py-2 text-red-400 font-medium">{row.data.amount ? formatCurrency(row.data.amount) : '—'}</td>
-                    <td className="px-3 py-2 text-[#a1a1aa]">{row.data.date || '—'}</td>
-                    <td className="px-3 py-2 text-[#a1a1aa] text-xs">
+                    <td className="px-3 py-2 text-adm-muted">{row.data.date || '—'}</td>
+                    <td className="px-3 py-2 text-adm-muted text-xs">
                       {row.data.category ? (EXPENSE_CATEGORIES[row.data.category]?.label || row.data.category) : '—'}
                     </td>
                   </>
@@ -503,35 +505,35 @@ function ImportResult({ result }) {
         <div className="rounded-full bg-red-500/20 p-4">
           <AlertIcon className="h-8 w-8 text-red-400" />
         </div>
-        <h3 className="mt-4 text-lg font-semibold text-[#fafafa]">Import Failed</h3>
-        <p className="mt-2 text-sm text-[#a1a1aa]">{result.error}</p>
+        <h3 className="mt-4 text-lg font-semibold text-adm-text">Import Failed</h3>
+        <p className="mt-2 text-sm text-adm-muted">{result.error}</p>
       </div>
     )
   }
 
   return (
     <div className="flex flex-col items-center py-8">
-      <div className="rounded-full bg-emerald-500/20 p-4">
-        <CheckIcon className="h-8 w-8 text-emerald-400" />
+      <div className="rounded-full bg-teal-500/20 p-4">
+        <CheckIcon className="h-8 w-8 text-teal-400" />
       </div>
-      <h3 className="mt-4 text-lg font-semibold text-[#fafafa]">Import Complete</h3>
-      <p className="mt-2 text-sm text-[#a1a1aa]">
-        Successfully imported <span className="text-emerald-400 font-medium">{result.imported}</span> row{result.imported !== 1 ? 's' : ''}
+      <h3 className="mt-4 text-lg font-semibold text-adm-text">Import Complete</h3>
+      <p className="mt-2 text-sm text-adm-muted">
+        Successfully imported <span className="text-teal-400 font-medium">{result.imported}</span> row{result.imported !== 1 ? 's' : ''}
         {result.failed > 0 && (
           <>, <span className="text-red-400 font-medium">{result.failed}</span> failed</>
         )}
       </p>
       {result.errors?.length > 0 && (
-        <div className="mt-4 w-full max-w-md rounded-lg border border-[#262626] bg-[#171717] p-3">
+        <div className="mt-4 w-full max-w-md rounded-lg border border-adm-border bg-adm-surface p-3">
           <p className="text-xs font-medium text-red-400 mb-2">Errors:</p>
-          <ul className="space-y-1 text-xs text-[#a1a1aa]">
+          <ul className="space-y-1 text-xs text-adm-muted">
             {result.errors.slice(0, 10).map((err, i) => (
               <li key={i}>
                 Row {err.index !== undefined ? err.index + 1 : `Batch ${err.batch}`}: {err.errors?.join(', ')}
               </li>
             ))}
             {result.errors.length > 10 && (
-              <li className="text-[#525252]">...and {result.errors.length - 10} more</li>
+              <li className="text-adm-subtle">...and {result.errors.length - 10} more</li>
             )}
           </ul>
         </div>

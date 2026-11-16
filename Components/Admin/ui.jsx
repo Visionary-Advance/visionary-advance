@@ -1,6 +1,6 @@
 'use client';
 
-// Shared building blocks for the SEO dashboard. Colors come from the adm-* tokens in
+// Shared building blocks for every admin section (SEO, Finance, CRM). Colors come from the adm-* tokens in
 // app/globals.css; status colors (good/warn/bad) always ship with an icon or text.
 
 import { createContext, useCallback, useContext, useEffect, useId, useRef, useState } from 'react';
@@ -502,7 +502,7 @@ export function Modal({ title, description, onClose, children, footer, size = 'm
   const titleId = useId();
   const widths = { sm: 'max-w-sm', md: 'max-w-md', lg: 'max-w-lg', xl: 'max-w-2xl' };
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-4">
+    <div className="fixed inset-0 z-[60] flex items-end justify-center p-0 sm:items-center sm:p-4">
       <div className="absolute inset-0 bg-black/60" onClick={onClose} aria-hidden />
       <div
         ref={panelRef}
@@ -510,7 +510,7 @@ export function Modal({ title, description, onClose, children, footer, size = 'm
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
-        className={cx('relative flex max-h-[90dvh] w-full flex-col rounded-t-2xl border border-adm-border bg-adm-surface shadow-2xl sm:rounded-2xl', widths[size])}
+        className={cx('relative flex max-h-[90dvh] w-full flex-col rounded-t-2xl border border-adm-border bg-adm-surface pb-[env(safe-area-inset-bottom)] shadow-2xl sm:rounded-2xl sm:pb-0', widths[size])}
       >
         <div className="flex items-start justify-between gap-4 border-b border-adm-border px-5 py-4">
           <div className="min-w-0">
@@ -529,7 +529,7 @@ export function Modal({ title, description, onClose, children, footer, size = 'm
 export function Drawer({ onClose, title, header, children, footer, label }) {
   const panelRef = useOverlay(onClose);
   return (
-    <div className="fixed inset-0 z-50">
+    <div className="fixed inset-0 z-[60]">
       <div className="absolute inset-0 bg-black/60" onClick={onClose} aria-hidden />
       <aside
         ref={panelRef}
@@ -537,7 +537,7 @@ export function Drawer({ onClose, title, header, children, footer, label }) {
         aria-modal="true"
         aria-label={label || (typeof title === 'string' ? title : 'Details')}
         tabIndex={-1}
-        className="absolute inset-y-0 right-0 flex w-full max-w-xl flex-col border-l border-adm-border bg-adm-surface shadow-2xl focus:outline-none"
+        className="absolute inset-y-0 right-0 flex w-full max-w-xl flex-col border-l border-adm-border bg-adm-surface pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] shadow-2xl focus:outline-none"
       >
         <div className="flex items-start justify-between gap-4 border-b border-adm-border px-5 py-4">
           <div className="min-w-0 flex-1">{header || <h2 className="text-base font-semibold text-adm-text">{title}</h2>}</div>
@@ -567,7 +567,7 @@ export function ToastProvider({ children }) {
   return (
     <ToastContext.Provider value={notify}>
       {children}
-      <div aria-live="polite" className="pointer-events-none fixed bottom-4 right-4 z-[60] flex w-[calc(100%-2rem)] max-w-sm flex-col gap-2">
+      <div aria-live="polite" className="pointer-events-none fixed right-4 z-[70] flex w-[calc(100%-2rem)] max-w-sm flex-col gap-2" style={{ bottom: 'calc(var(--admin-nav-offset, env(safe-area-inset-bottom)) + 16px)' }}>
         {toasts.map(t => {
           const Icon = icons[t.tone] || Info;
           return (

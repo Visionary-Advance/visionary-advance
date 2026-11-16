@@ -258,7 +258,7 @@ export default function BusinessDetailPage({ params }) {
               className="text-2xl font-semibold bg-transparent border-b border-[#008070] text-[#fafafa] focus:outline-none"
             />
           ) : (
-            <h1 className="text-2xl font-semibold text-[#fafafa]">{business.name}</h1>
+            <h1 className="text-xl font-semibold text-[#fafafa] sm:text-2xl">{business.name}</h1>
           )}
           {editing ? (
             <input
@@ -322,7 +322,7 @@ export default function BusinessDetailPage({ params }) {
         {/* Left Column - Business Info */}
         <div className="space-y-6 lg:col-span-1">
           {/* Details */}
-          <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+          <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-4 sm:p-6">
             <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
               Details
             </h2>
@@ -364,7 +364,7 @@ export default function BusinessDetailPage({ params }) {
           </div>
 
           {/* SEO Sites */}
-          <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+          <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-4 sm:p-6">
             <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
               SEO Sites
             </h2>
@@ -395,7 +395,7 @@ export default function BusinessDetailPage({ params }) {
 
         {/* Middle Column - Contacts */}
         <div className="lg:col-span-1">
-          <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+          <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-4 sm:p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
                 Contacts ({business.contacts.length})
@@ -446,7 +446,7 @@ export default function BusinessDetailPage({ params }) {
 
         {/* Right Column - Report Recipients */}
         <div className="lg:col-span-1">
-          <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+          <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-4 sm:p-6">
             <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
               SEO Report Recipients
             </h2>
@@ -497,7 +497,7 @@ export default function BusinessDetailPage({ params }) {
       {/* Business Operations */}
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Invoices */}
-        <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+        <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-4 sm:p-6">
           <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
             Invoices
           </h2>
@@ -505,7 +505,7 @@ export default function BusinessDetailPage({ params }) {
         </div>
 
         {/* Projects */}
-        <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+        <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-4 sm:p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
               Projects
@@ -540,7 +540,7 @@ export default function BusinessDetailPage({ params }) {
         </div>
 
         {/* Proposals */}
-        <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+        <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-4 sm:p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
               Proposals
@@ -567,7 +567,7 @@ export default function BusinessDetailPage({ params }) {
         </div>
 
         {/* Hosting / DevOps */}
-        <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+        <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-4 sm:p-6">
           <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
             Hosting
           </h2>
@@ -605,8 +605,8 @@ export default function BusinessDetailPage({ params }) {
 
       {/* Project Form Modal */}
       {showProjectForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-lg rounded-xl border border-[#262626] bg-[#0a0a0a] p-6 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/50 sm:items-center sm:p-4">
+          <div className="w-full max-w-lg border border-[#262626] bg-[#0a0a0a] px-5 pt-6 sm:p-6 overflow-y-auto rounded-t-2xl sm:rounded-2xl max-h-[92dvh] sm:max-h-[90vh]" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 1.5rem)' }}>
             <h3 className="text-lg font-semibold text-[#fafafa] mb-4">Create Project</h3>
             <ProjectForm
               businessId={id}
@@ -620,8 +620,8 @@ export default function BusinessDetailPage({ params }) {
 
       {/* Add Contact Modal */}
       {showAddContactModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-xl border border-[#262626] bg-[#0a0a0a] p-6 max-h-[80vh] flex flex-col">
+        <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/50 sm:items-center sm:p-4">
+          <div className="w-full max-w-md border border-[#262626] bg-[#0a0a0a] px-5 pt-6 sm:p-6 flex flex-col rounded-t-2xl sm:rounded-2xl max-h-[92dvh] sm:max-h-[90vh]" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 1.5rem)' }}>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-[#fafafa]">Add Contact</h2>
               <button

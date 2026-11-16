@@ -6,6 +6,7 @@ import AdminScrollRestore from '@/Components/Admin/AdminScrollRestore'
 import ServiceWorkerRegister from '@/Components/Admin/ServiceWorkerRegister'
 import InstallPrompt from '@/Components/Admin/InstallPrompt'
 import AdminBottomNav from '@/Components/Admin/AdminBottomNav'
+import { ToastProvider } from '@/Components/Admin/ui'
 
 export const metadata = {
   title: 'Admin | Visionary Advance',
@@ -23,16 +24,20 @@ export const metadata = {
 
 export const viewport = {
   themeColor: '#008070',
+  // Lets env(safe-area-inset-*) report the notch/home-indicator insets
+  viewportFit: 'cover',
 }
 
 export default function AdminLayout({ children }) {
   return (
     <AdminAuthProvider>
-      <AdminScrollRestore />
-      <ServiceWorkerRegister />
-      {children}
-      <InstallPrompt />
-      <AdminBottomNav />
+      <ToastProvider>
+        <AdminScrollRestore />
+        <ServiceWorkerRegister />
+        {children}
+        <InstallPrompt />
+        <AdminBottomNav />
+      </ToastProvider>
     </AdminAuthProvider>
   )
 }

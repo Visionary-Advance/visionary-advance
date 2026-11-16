@@ -229,7 +229,7 @@ export default function ClientDetailPage({ params }) {
             Back to clients
           </Link>
           <div className="flex items-center gap-4">
-            <h1 className="text-2xl font-semibold text-[#fafafa]">
+            <h1 className="text-xl font-semibold text-[#fafafa] sm:text-2xl">
               {client.full_name || client.email}
             </h1>
           </div>
@@ -284,7 +284,7 @@ export default function ClientDetailPage({ params }) {
         {/* Client Info */}
         <div className="space-y-6 lg:col-span-1">
           {/* Contact Info */}
-          <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+          <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-4 sm:p-6">
             <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
               Contact Info
             </h2>
@@ -382,7 +382,7 @@ export default function ClientDetailPage({ params }) {
 
           {/* Business Info */}
           {(editing || client.company || client.business_type || client.project_type || client.budget_range || client.timeline) && (
-            <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+            <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-4 sm:p-6">
               <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
                 Business Info
               </h2>
@@ -490,7 +490,7 @@ export default function ClientDetailPage({ params }) {
           )}
 
           {/* Hosting */}
-          <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+          <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-4 sm:p-6">
             <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
               Hosting
             </h2>
@@ -553,7 +553,7 @@ export default function ClientDetailPage({ params }) {
           </div>
 
           {/* Metadata */}
-          <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+          <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-4 sm:p-6">
             <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
               Metadata
             </h2>
@@ -581,7 +581,7 @@ export default function ClientDetailPage({ params }) {
 
           {/* Finance Summary */}
           {financeData && financeData.entries.length > 0 && (
-            <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+            <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-4 sm:p-6">
               <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
                 Finance
               </h2>
@@ -630,7 +630,7 @@ export default function ClientDetailPage({ params }) {
 
         {/* Activity Timeline */}
         <div className="lg:col-span-2">
-          <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+          <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-4 sm:p-6">
             <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
               Activity
             </h2>

@@ -1,189 +1,149 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { EXPENSE_CATEGORIES } from '@/lib/finance'
+import { Button, Field, Modal, cx, inputClass, useToast } from '@/Components/Admin/ui'
 import ReceiptUpload from './ReceiptUpload'
 
-export default function ExpenseForm({ isOpen, onClose, onSave, entry = null }) {
-  const [form, setForm] = useState({
-    description: '',
-    amount: '',
-    date: new Date().toISOString().split('T')[0],
-    category: 'other_expenses',
-    is_recurring: false,
-    notes: '',
-  })
-  const [loading, setLoading] = useState(false)
-  const [savedId, setSavedId] = useState(null)
+const today = () => new Date().toISOString().split('T')[0]
 
-  useEffect(() => {
-    if (entry) {
-      setForm({
-        description: entry.description || '',
-        amount: entry.amount?.toString() || '',
-        date: entry.date || new Date().toISOString().split('T')[0],
-        category: entry.category || 'other_expenses',
-        is_recurring: entry.is_recurring || false,
-        notes: entry.notes || '',
-      })
-      setSavedId(entry.id)
-    } else {
-      setForm({
-        description: '',
-        amount: '',
-        date: new Date().toISOString().split('T')[0],
-        category: 'other_expenses',
-        is_recurring: false,
-        notes: '',
-      })
-      setSavedId(null)
-    }
-  }, [entry, isOpen])
+export default function ExpenseForm({ isOpen, onClose, onSave, entry = null }) {
+  if (!isOpen) return null
+  return <ExpenseFormModal onClose={onClose} onSave={onSave} entry={entry} />
+}
+
+function ExpenseFormModal({ onClose, onSave, entry }) {
+  const notify = useToast()
+  const [form, setForm] = useState(() => ({
+    description: entry?.description || '',
+    amount: entry?.amount?.toString() || '',
+    date: entry?.date || today(),
+    category: entry?.category || 'other_expenses',
+    is_recurring: entry?.is_recurring || false,
+    notes: entry?.notes || '',
+  }))
+  const [saving, setSaving] = useState(false)
+  const set = (patch) => setForm((f) => ({ ...f, ...patch }))
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setLoading(true)
+    setSaving(true)
     try {
-      const url = entry ? `/api/finance/expenses/${entry.id}` : '/api/finance/expenses'
-      const method = entry ? 'PATCH' : 'POST'
-
-      const res = await fetch(url, {
-        method,
+      const res = await fetch(entry ? `/api/finance/expenses/${entry.id}` : '/api/finance/expenses', {
+        method: entry ? 'PATCH' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       })
-
-      if (!res.ok) {
-        const err = await res.json()
-        throw new Error(err.error || 'Failed to save')
-      }
-
-      const data = await res.json()
-      if (data.entry?.id) setSavedId(data.entry.id)
-
+      if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || 'Failed to save')
+      notify(entry ? 'Expense updated' : 'Expense added. Edit it to attach a receipt.', 'success')
       onSave()
       onClose()
     } catch (err) {
-      alert(err.message)
+      notify(`Couldn't save: ${err.message}`, 'error')
     } finally {
-      setLoading(false)
+      setSaving(false)
     }
   }
 
-  if (!isOpen) return null
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-[#262626] bg-[#0a0a0a] p-6">
-        <h2 className="text-lg font-semibold text-[#fafafa]">
-          {entry ? 'Edit Expense' : 'Add Expense'}
-        </h2>
+    <Modal
+      title={entry ? 'Edit expense' : 'Add expense'}
+      onClose={onClose}
+      size="lg"
+      footer={
+        <>
+          <Button variant="ghost" onClick={onClose}>Cancel</Button>
+          <Button variant="primary" type="submit" form="expense-form" loading={saving}>
+            {entry ? 'Save changes' : 'Add expense'}
+          </Button>
+        </>
+      }
+    >
+      <form id="expense-form" onSubmit={handleSubmit} className="space-y-4">
+        <Field label="Description" htmlFor="exp-desc">
+          <input
+            id="exp-desc"
+            type="text"
+            required
+            value={form.description}
+            onChange={(e) => set({ description: e.target.value })}
+            className={cx(inputClass, 'h-11 sm:h-10')}
+            placeholder="What was it for?"
+          />
+        </Field>
 
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-[#a1a1aa]">Description</label>
-            <input
-              type="text"
-              required
-              value={form.description}
-              onChange={(e) => setForm({ ...form, description: e.target.value })}
-              className="mt-1 w-full rounded-lg border border-[#262626] bg-[#171717] px-3 py-2 text-sm text-[#fafafa] placeholder-[#525252] focus:border-emerald-500 focus:outline-none"
-              placeholder="What did you spend on?"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-[#a1a1aa]">Amount ($)</label>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Amount" htmlFor="exp-amount">
+            <div className="relative">
+              <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-adm-subtle">$</span>
               <input
+                id="exp-amount"
                 type="number"
+                inputMode="decimal"
                 required
                 min="0.01"
                 step="0.01"
                 value={form.amount}
-                onChange={(e) => setForm({ ...form, amount: e.target.value })}
-                className="mt-1 w-full rounded-lg border border-[#262626] bg-[#171717] px-3 py-2 text-sm text-[#fafafa] placeholder-[#525252] focus:border-emerald-500 focus:outline-none"
+                onChange={(e) => set({ amount: e.target.value })}
+                className={cx(inputClass, 'h-11 pl-7 tabular-nums sm:h-10')}
                 placeholder="0.00"
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-[#a1a1aa]">Date</label>
-              <input
-                type="date"
-                required
-                value={form.date}
-                onChange={(e) => setForm({ ...form, date: e.target.value })}
-                className="mt-1 w-full rounded-lg border border-[#262626] bg-[#171717] px-3 py-2 text-sm text-[#fafafa] focus:border-emerald-500 focus:outline-none"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-[#a1a1aa]">IRS Category (Schedule C)</label>
-            <select
-              value={form.category}
-              onChange={(e) => setForm({ ...form, category: e.target.value })}
-              className="mt-1 w-full rounded-lg border border-[#262626] bg-[#171717] px-3 py-2 text-sm text-[#fafafa] focus:border-emerald-500 focus:outline-none"
-            >
-              {Object.entries(EXPENSE_CATEGORIES).map(([key, { label, scheduleC }]) => (
-                <option key={key} value={key}>{label} ({scheduleC})</option>
-              ))}
-            </select>
-          </div>
-
-          <div className="flex items-center gap-3">
+          </Field>
+          <Field label="Date" htmlFor="exp-date">
             <input
-              type="checkbox"
-              id="is_recurring"
-              checked={form.is_recurring}
-              onChange={(e) => setForm({ ...form, is_recurring: e.target.checked })}
-              className="h-4 w-4 rounded border-[#262626] bg-[#171717] text-emerald-600 focus:ring-emerald-500"
+              id="exp-date"
+              type="date"
+              required
+              value={form.date}
+              onChange={(e) => set({ date: e.target.value })}
+              className={cx(inputClass, 'h-11 sm:h-10')}
             />
-            <label htmlFor="is_recurring" className="text-sm font-medium text-[#a1a1aa]">
-              Recurring expense
-            </label>
-          </div>
+          </Field>
+        </div>
 
-          {(entry?.id || savedId) && (
-            <div>
-              <label className="block text-sm font-medium text-[#a1a1aa] mb-2">Receipt</label>
-              <ReceiptUpload
-                expenseId={entry?.id || savedId}
-                currentUrl={entry?.receipt_url}
-                onUploaded={onSave}
-              />
-            </div>
-          )}
+        <Field label="Schedule C category" htmlFor="exp-cat">
+          <select
+            id="exp-cat"
+            value={form.category}
+            onChange={(e) => set({ category: e.target.value })}
+            className={cx(inputClass, 'h-11 cursor-pointer sm:h-10')}
+          >
+            {Object.entries(EXPENSE_CATEGORIES).map(([key, { label, scheduleC }]) => (
+              <option key={key} value={key}>{label} ({scheduleC})</option>
+            ))}
+          </select>
+        </Field>
 
-          <div>
-            <label className="block text-sm font-medium text-[#a1a1aa]">Notes</label>
-            <textarea
-              value={form.notes}
-              onChange={(e) => setForm({ ...form, notes: e.target.value })}
-              rows={3}
-              className="mt-1 w-full rounded-lg border border-[#262626] bg-[#171717] px-3 py-2 text-sm text-[#fafafa] placeholder-[#525252] focus:border-emerald-500 focus:outline-none"
-              placeholder="Optional notes"
-            />
-          </div>
+        <label htmlFor="exp-recurring" className="flex min-h-11 cursor-pointer items-center gap-3 rounded-lg border border-adm-border bg-adm-raised px-3 py-2.5">
+          <input
+            id="exp-recurring"
+            type="checkbox"
+            checked={form.is_recurring}
+            onChange={(e) => set({ is_recurring: e.target.checked })}
+            className="h-4 w-4 cursor-pointer accent-teal-500"
+          />
+          <span className="text-sm text-adm-text">Recurring expense</span>
+          <span className="ml-auto text-xs text-adm-subtle">subscriptions, rent…</span>
+        </label>
 
-          <div className="flex justify-end gap-3 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-lg border border-[#262626] px-4 py-2 text-sm font-medium text-[#a1a1aa] hover:bg-[#171717] transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50 transition-colors"
-            >
-              {loading ? 'Saving...' : entry ? 'Update' : 'Add Expense'}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+        {entry?.id && (
+          <Field label="Receipt">
+            <ReceiptUpload expenseId={entry.id} currentUrl={entry.receipt_url} onUploaded={onSave} />
+          </Field>
+        )}
+
+        <Field label="Notes" htmlFor="exp-notes">
+          <textarea
+            id="exp-notes"
+            rows={3}
+            value={form.notes}
+            onChange={(e) => set({ notes: e.target.value })}
+            className={inputClass}
+            placeholder="Optional"
+          />
+        </Field>
+      </form>
+    </Modal>
   )
 }

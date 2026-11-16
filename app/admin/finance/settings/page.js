@@ -1,49 +1,45 @@
-// app/admin/finance/settings/page.js — Finance Settings
+// app/admin/finance/settings/page.js — Tax rate settings
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { Button, Card, CardHeader, Field, PageHeader, PageLoader, cx, inputClass, useToast } from '@/Components/Admin/ui'
+
+const FIELDS = {
+  rates: [
+    { key: 'federal_bracket', label: 'Federal bracket', suffix: '%', hint: 'Your marginal federal rate' },
+    { key: 'state_rate', label: 'State rate', suffix: '%', hint: 'State income tax rate' },
+  ],
+  se: [
+    { key: 'se_tax_rate', label: 'SE tax rate', suffix: '%', hint: 'Default 15.3%' },
+    { key: 'se_tax_base', label: 'SE tax base', suffix: '%', hint: 'Share of net profit taxed. Default 92.35%' },
+  ],
+}
 
 export default function FinanceSettingsPage() {
-  const [form, setForm] = useState({
-    federal_bracket: '',
-    state_rate: '',
-    state_name: '',
-    se_tax_rate: '',
-    se_tax_base: '',
-    tax_year: '',
-  })
-  const [loading, setLoading] = useState(true)
+  const notify = useToast()
+  const [form, setForm] = useState(null)
   const [saving, setSaving] = useState(false)
-  const [saved, setSaved] = useState(false)
+  const set = (patch) => setForm((f) => ({ ...f, ...patch }))
 
   useEffect(() => {
-    async function fetchSettings() {
-      try {
-        const res = await fetch('/api/finance/settings')
-        if (res.ok) {
-          const data = await res.json()
-          setForm({
-            federal_bracket: data.federal_bracket?.toString() || '22',
-            state_rate: data.state_rate?.toString() || '9',
-            state_name: data.state_name || 'Oregon',
-            se_tax_rate: data.se_tax_rate?.toString() || '15.3',
-            se_tax_base: data.se_tax_base?.toString() || '92.35',
-            tax_year: data.tax_year?.toString() || new Date().getFullYear().toString(),
-          })
-        }
-      } catch (err) {
-        console.error('Error fetching settings:', err)
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchSettings()
-  }, [])
+    fetch('/api/finance/settings')
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error('Could not load settings'))))
+      .then((data) =>
+        setForm({
+          federal_bracket: data.federal_bracket?.toString() || '22',
+          state_rate: data.state_rate?.toString() || '9',
+          state_name: data.state_name || 'Oregon',
+          se_tax_rate: data.se_tax_rate?.toString() || '15.3',
+          se_tax_base: data.se_tax_base?.toString() || '92.35',
+          tax_year: data.tax_year?.toString() || String(new Date().getFullYear()),
+        })
+      )
+      .catch((err) => notify(err.message, 'error'))
+  }, [notify])
 
   const handleSave = async (e) => {
     e.preventDefault()
     setSaving(true)
-    setSaved(false)
     try {
       const res = await fetch('/api/finance/settings', {
         method: 'PATCH',
@@ -54,135 +50,86 @@ export default function FinanceSettingsPage() {
           state_name: form.state_name,
           se_tax_rate: parseFloat(form.se_tax_rate),
           se_tax_base: parseFloat(form.se_tax_base),
-          tax_year: parseInt(form.tax_year),
+          tax_year: parseInt(form.tax_year, 10),
         }),
       })
-
-      if (!res.ok) {
-        const err = await res.json()
-        throw new Error(err.error || 'Failed to save')
-      }
-
-      setSaved(true)
-      setTimeout(() => setSaved(false), 3000)
+      if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || 'Failed to save')
+      notify('Tax rates saved. Estimates use them right away.', 'success')
     } catch (err) {
-      alert(err.message)
+      notify(`Couldn't save: ${err.message}`, 'error')
     } finally {
       setSaving(false)
     }
   }
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-24">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-emerald-500 border-t-transparent" />
+  if (!form) return <PageLoader />
+
+  const percentInput = ({ key, label, suffix, hint }) => (
+    <Field key={key} label={label} htmlFor={key} hint={hint}>
+      <div className="relative">
+        <input
+          id={key}
+          type="number"
+          inputMode="decimal"
+          step="0.01"
+          min="0"
+          max="100"
+          required
+          value={form[key]}
+          onChange={(e) => set({ [key]: e.target.value })}
+          className={cx(inputClass, 'h-11 pr-8 tabular-nums sm:h-10')}
+        />
+        <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-adm-subtle">{suffix}</span>
       </div>
-    )
-  }
+    </Field>
+  )
 
   return (
-    <div>
-      <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-[#fafafa]">Finance Settings</h1>
-        <p className="mt-1 text-[#a1a1aa]">Configure tax rates for estimated payment calculations</p>
-      </div>
+    <div className="max-w-2xl">
+      <PageHeader title="Settings" description="Rates used for estimated tax on the Overview and Tax pages" />
 
-      <div className="max-w-xl rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
-        <form onSubmit={handleSave} className="space-y-6">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-[#a1a1aa]">Federal Tax Bracket (%)</label>
+      <form onSubmit={handleSave} className="space-y-6">
+        <Card>
+          <CardHeader title="Income tax" />
+          <div className="grid gap-4 p-4 sm:grid-cols-2 sm:p-5">
+            {FIELDS.rates.map(percentInput)}
+            <Field label="State" htmlFor="state_name">
               <input
-                type="number"
-                step="0.01"
-                min="0"
-                max="100"
-                value={form.federal_bracket}
-                onChange={(e) => setForm({ ...form, federal_bracket: e.target.value })}
-                className="mt-1 w-full rounded-lg border border-[#262626] bg-[#171717] px-3 py-2 text-sm text-[#fafafa] focus:border-emerald-500 focus:outline-none"
+                id="state_name"
+                type="text"
+                required
+                value={form.state_name}
+                onChange={(e) => set({ state_name: e.target.value })}
+                className={cx(inputClass, 'h-11 sm:h-10')}
               />
-              <p className="mt-1 text-xs text-[#525252]">Your marginal federal tax bracket</p>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-[#a1a1aa]">State Tax Rate (%)</label>
+            </Field>
+            <Field label="Tax year" htmlFor="tax_year">
               <input
+                id="tax_year"
                 type="number"
-                step="0.01"
-                min="0"
-                max="100"
-                value={form.state_rate}
-                onChange={(e) => setForm({ ...form, state_rate: e.target.value })}
-                className="mt-1 w-full rounded-lg border border-[#262626] bg-[#171717] px-3 py-2 text-sm text-[#fafafa] focus:border-emerald-500 focus:outline-none"
+                inputMode="numeric"
+                min="2020"
+                max="2100"
+                required
+                value={form.tax_year}
+                onChange={(e) => set({ tax_year: e.target.value })}
+                className={cx(inputClass, 'h-11 tabular-nums sm:h-10')}
               />
-              <p className="mt-1 text-xs text-[#525252]">State income tax rate</p>
-            </div>
+            </Field>
           </div>
+        </Card>
 
-          <div>
-            <label className="block text-sm font-medium text-[#a1a1aa]">State Name</label>
-            <input
-              type="text"
-              value={form.state_name}
-              onChange={(e) => setForm({ ...form, state_name: e.target.value })}
-              className="mt-1 w-full rounded-lg border border-[#262626] bg-[#171717] px-3 py-2 text-sm text-[#fafafa] focus:border-emerald-500 focus:outline-none"
-            />
+        <Card>
+          <CardHeader title="Self-employment tax" description="Social Security and Medicare on your net earnings" />
+          <div className="grid gap-4 p-4 sm:grid-cols-2 sm:p-5">
+            {FIELDS.se.map(percentInput)}
           </div>
+        </Card>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-[#a1a1aa]">SE Tax Rate (%)</label>
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                max="100"
-                value={form.se_tax_rate}
-                onChange={(e) => setForm({ ...form, se_tax_rate: e.target.value })}
-                className="mt-1 w-full rounded-lg border border-[#262626] bg-[#171717] px-3 py-2 text-sm text-[#fafafa] focus:border-emerald-500 focus:outline-none"
-              />
-              <p className="mt-1 text-xs text-[#525252]">Self-employment tax rate (default 15.3%)</p>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-[#a1a1aa]">SE Tax Base (%)</label>
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                max="100"
-                value={form.se_tax_base}
-                onChange={(e) => setForm({ ...form, se_tax_base: e.target.value })}
-                className="mt-1 w-full rounded-lg border border-[#262626] bg-[#171717] px-3 py-2 text-sm text-[#fafafa] focus:border-emerald-500 focus:outline-none"
-              />
-              <p className="mt-1 text-xs text-[#525252]">% of net profit subject to SE tax (default 92.35%)</p>
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-[#a1a1aa]">Tax Year</label>
-            <input
-              type="number"
-              min="2020"
-              max="2100"
-              value={form.tax_year}
-              onChange={(e) => setForm({ ...form, tax_year: e.target.value })}
-              className="mt-1 w-full rounded-lg border border-[#262626] bg-[#171717] px-3 py-2 text-sm text-[#fafafa] focus:border-emerald-500 focus:outline-none"
-            />
-          </div>
-
-          <div className="flex items-center gap-4">
-            <button
-              type="submit"
-              disabled={saving}
-              className="rounded-lg bg-emerald-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50 transition-colors"
-            >
-              {saving ? 'Saving...' : 'Save Settings'}
-            </button>
-            {saved && (
-              <span className="text-sm font-medium text-green-400">Settings saved successfully</span>
-            )}
-          </div>
-        </form>
-      </div>
+        <div className="flex justify-end">
+          <Button variant="primary" type="submit" loading={saving} className="w-full sm:w-auto">Save rates</Button>
+        </div>
+      </form>
     </div>
   )
 }

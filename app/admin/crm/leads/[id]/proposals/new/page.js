@@ -161,7 +161,7 @@ export default function NewProposalPage({ params }) {
           <ArrowLeftIcon className="h-4 w-4" />
           Back to {lead?.full_name || 'lead'}
         </Link>
-        <h1 className="text-2xl font-semibold text-[#fafafa]">New Proposal</h1>
+        <h1 className="text-xl font-semibold text-[#fafafa] sm:text-2xl">New Proposal</h1>
         {lead?.company && (
           <p className="mt-1 text-[#a1a1aa]">For {lead.company}</p>
         )}
@@ -214,7 +214,7 @@ export default function NewProposalPage({ params }) {
         </div>
 
         {/* Line Items */}
-        <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+        <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-4 sm:p-6">
           <h2 className="text-sm font-medium uppercase tracking-wider text-[#a1a1aa] mb-4">
             Line Items
           </h2>
@@ -296,7 +296,7 @@ export default function NewProposalPage({ params }) {
         </div>
 
         {/* Content Editor */}
-        <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+        <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-4 sm:p-6">
           <h2 className="text-sm font-medium uppercase tracking-wider text-[#a1a1aa] mb-4">
             Proposal Content
           </h2>

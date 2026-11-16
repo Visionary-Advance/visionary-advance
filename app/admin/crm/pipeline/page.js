@@ -5,6 +5,7 @@ import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import ScoreBadge from '@/Components/CRM/Shared/ScoreBadge'
 import SourceBadge from '@/Components/CRM/Shared/SourceBadge'
+import MobileSheet from '@/Components/Admin/Mobile/MobileSheet'
 
 // Custom scrollbar styles for the kanban board
 const scrollbarStyles = `
@@ -57,6 +58,30 @@ export default function PipelinePage() {
   const [updatingLead, setUpdatingLead] = useState(null)
   const [draggedLead, setDraggedLead] = useState(null)
   const [dragOverStage, setDragOverStage] = useState(null)
+  const [activeStage, setActiveStage] = useState(STAGES[0].key)
+  const boardRef = useRef(null)
+
+  // Mobile: columns are swipeable snap panes; track which one is centred
+  const handleBoardScroll = () => {
+    const board = boardRef.current
+    if (!board) return
+    const mid = board.scrollLeft + board.clientWidth / 2
+    let best = null
+    let bestDist = Infinity
+    for (const col of board.querySelectorAll('[data-stage]')) {
+      const d = Math.abs(col.offsetLeft + col.offsetWidth / 2 - mid)
+      if (d < bestDist) { bestDist = d; best = col.dataset.stage }
+    }
+    if (best && best !== activeStage) setActiveStage(best)
+  }
+
+  const jumpToStage = (key) => {
+    const board = boardRef.current
+    const col = board?.querySelector(`[data-stage="${key}"]`)
+    if (!col) return
+    board.scrollTo({ left: col.offsetLeft - (board.clientWidth - col.offsetWidth) / 2, behavior: 'smooth' })
+    setActiveStage(key)
+  }
 
   // Won modal state
   const [wonModal, setWonModal] = useState(null) // { leadId, leadName }
@@ -219,21 +244,21 @@ export default function PipelinePage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-[#fafafa]">Pipeline</h1>
-          <p className="mt-1 text-sm text-[#a1a1aa]">
+          <h1 className="text-xl font-semibold text-[#fafafa] sm:text-2xl">Pipeline</h1>
+          <p className="mt-1 hidden text-sm text-[#a1a1aa] sm:block">
             Drag and drop leads between stages to update their status
           </p>
         </div>
         <Link
           href="/admin/crm/leads"
-          className="rounded-lg border border-[#262626] bg-[#0a0a0a] px-4 py-2.5 text-sm font-medium text-[#fafafa] transition-colors hover:bg-[#171717]"
+          className="shrink-0 rounded-lg border border-[#262626] bg-[#0a0a0a] px-3 py-2 text-sm font-medium text-[#fafafa] transition-colors hover:bg-[#171717] sm:px-4 sm:py-2.5"
         >
-          View as List
+          <span className="hidden sm:inline">View as </span>List
         </Link>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="scrollbar-hide -mx-4 flex gap-3 overflow-x-auto px-4 sm:mx-0 sm:grid sm:grid-cols-2 sm:gap-4 sm:px-0 lg:grid-cols-5">
         <SummaryCard label="Total Leads" value={data?.summary?.totalLeads || 0} />
         <SummaryCard label="New This Week" value={data?.summary?.newThisWeek || 0} />
         <SummaryCard label="In Pipeline" value={data?.summary?.activeLeads || 0} />
@@ -241,9 +266,34 @@ export default function PipelinePage() {
         <SummaryCard label="Win Rate" value={data?.summary?.winRate || 0} suffix="%" />
       </div>
 
+      {/* Stage jump bar (mobile) */}
+      <div className="scrollbar-hide sticky z-20 -mx-4 flex gap-1.5 overflow-x-auto bg-[#000000]/80 px-4 py-2 backdrop-blur-xl md:hidden" style={{ top: 'var(--admin-header-h, 0px)' }}>
+        {STAGES.map((stage) => {
+          const count = data?.leadsByStage?.[stage.key]?.length || 0
+          const active = activeStage === stage.key
+          return (
+            <button
+              key={stage.key}
+              onClick={() => jumpToStage(stage.key)}
+              className={`flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+                active ? 'bg-[#262626] text-[#fafafa] ring-1 ring-white/15' : 'text-[#a1a1aa]'
+              }`}
+            >
+              <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: stage.color }} />
+              {stage.label}
+              <span className="tabular-nums text-[#71717a]">{count}</span>
+            </button>
+          )
+        })}
+      </div>
+
       {/* Kanban Board */}
-      <div className="overflow-x-auto pb-4 kanban-scroll">
-        <div className="inline-flex gap-4 min-w-full">
+      <div
+        ref={boardRef}
+        onScroll={handleBoardScroll}
+        className="kanban-scroll -mx-4 snap-x snap-mandatory overflow-x-auto scroll-px-4 px-4 pb-4 md:mx-0 md:snap-none md:px-0"
+      >
+        <div className="inline-flex min-w-full items-start gap-3 md:items-stretch md:gap-4">
           {STAGES.map((stage) => {
             const leads = data?.leadsByStage?.[stage.key] || []
             const count = leads.length
@@ -252,7 +302,8 @@ export default function PipelinePage() {
             return (
               <div
                 key={stage.key}
-                className={`flex w-72 flex-shrink-0 flex-col rounded-xl border bg-[#0a0a0a] transition-all duration-200 ${
+                data-stage={stage.key}
+                className={`flex w-[calc(100vw-3rem)] max-w-[22rem] flex-shrink-0 snap-center flex-col rounded-xl md:w-72 border bg-[#0a0a0a] transition-all duration-200 ${
                   isDropTarget
                     ? 'border-[#008070] ring-2 ring-[#008070]/30 bg-[#008070]/5'
                     : 'border-[#262626]'
@@ -273,7 +324,7 @@ export default function PipelinePage() {
                 </div>
 
                 {/* Cards */}
-                <div className="flex-1 space-y-3 overflow-y-auto p-3 column-scroll" style={{ maxHeight: 'calc(100vh - 350px)', minHeight: '100px' }}>
+                <div className="column-scroll min-h-[100px] flex-1 space-y-3 p-3 md:max-h-[calc(100vh-350px)] md:overflow-y-auto">
                   {leads.length === 0 ? (
                     <p className={`py-8 text-center text-xs ${isDropTarget ? 'text-[#008070]' : 'text-[#a1a1aa]'}`}>
                       {isDropTarget ? 'Drop here' : stage.key === 'won' ? 'No clients yet' : 'No leads'}
@@ -314,9 +365,9 @@ export default function PipelinePage() {
 
 function SummaryCard({ label, value, suffix = '', color }) {
   return (
-    <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-4">
-      <p className="text-xs font-medium uppercase tracking-wider text-[#a1a1aa]">{label}</p>
-      <p className="mt-2 text-2xl font-semibold" style={{ color: color || '#fafafa' }}>
+    <div className="min-w-[8.5rem] shrink-0 rounded-xl border border-[#262626] bg-[#0a0a0a] p-3.5 sm:min-w-0 sm:p-4">
+      <p className="whitespace-nowrap text-[11px] font-medium uppercase tracking-wider text-[#a1a1aa] sm:text-xs">{label}</p>
+      <p className="mt-1.5 text-xl font-semibold tabular-nums sm:mt-2 sm:text-2xl" style={{ color: color || '#fafafa' }}>
         {value}
         {suffix && <span className="text-lg text-[#a1a1aa]">{suffix}</span>}
       </p>
@@ -326,6 +377,7 @@ function SummaryCard({ label, value, suffix = '', color }) {
 
 function PipelineCard({ lead, currentStage, stages, onMove, isUpdating, onDragStart, onDragEnd, isDragging }) {
   const [showMenu, setShowMenu] = useState(false)
+  const [showSheet, setShowSheet] = useState(false)
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 })
   const buttonRef = useRef(null)
 
@@ -407,15 +459,48 @@ function PipelineCard({ lead, currentStage, stages, onMove, isUpdating, onDragSt
         ) : (
           <SourceBadge source={lead.source} />
         )}
-        <span className="text-xs text-[#a1a1aa]">{formatTime(lead.created_at)}</span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-[#a1a1aa]">{formatTime(lead.created_at)}</span>
+          {!isWonClient && (
+            <button
+              onClick={() => setShowSheet(true)}
+              className="rounded-md bg-[#262626] px-2 py-1 text-xs font-medium text-[#fafafa] active:bg-[#404040] md:hidden"
+            >
+              Move
+            </button>
+          )}
+        </div>
       </div>
+
+      {/* Move sheet (mobile) */}
+      <MobileSheet open={showSheet} onClose={() => setShowSheet(false)} title={`Move ${lead.full_name || lead.email} to`}>
+        <div className="-mx-2">
+          {stages.map((stage) => (
+            <button
+              key={stage.key}
+              disabled={stage.key === currentStage}
+              onClick={() => {
+                setShowSheet(false)
+                if (stage.key !== currentStage) onMove(lead.id, stage.key)
+              }}
+              className={`flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-[15px] font-medium active:bg-white/5 ${
+                stage.key === currentStage ? 'text-[#71717a]' : 'text-[#fafafa]'
+              }`}
+            >
+              <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: stage.color }} />
+              {stage.label}
+              {stage.key === currentStage && <span className="ml-auto text-xs">Current</span>}
+            </button>
+          ))}
+        </div>
+      </MobileSheet>
 
       {/* Move Menu Button - only for non-won leads */}
       {!isWonClient && (
         <button
           ref={buttonRef}
           onClick={handleMenuOpen}
-          className="absolute -right-1 -top-1 hidden rounded-lg bg-[#262626] p-1.5 text-[#a1a1aa] shadow-lg hover:bg-[#404040] hover:text-[#fafafa] group-hover:block"
+          className="absolute -right-1 -top-1 hidden rounded-lg bg-[#262626] p-1.5 text-[#a1a1aa] shadow-lg hover:bg-[#404040] hover:text-[#fafafa] md:group-hover:block"
         >
           <DotsIcon className="h-4 w-4" />
         </button>
@@ -514,8 +599,8 @@ function WonModal({ leadName, onConfirm, onCancel }) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="w-full max-w-md rounded-2xl border border-[#262626] bg-[#0a0a0a] shadow-2xl">
+    <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/60 backdrop-blur-sm sm:items-center sm:p-4">
+      <div className="w-full max-w-md border border-[#262626] bg-[#0a0a0a] shadow-2xl rounded-t-2xl sm:rounded-2xl max-h-[92dvh] sm:max-h-[90vh] overflow-y-auto" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
         {/* Header */}
         <div className="border-b border-[#262626] px-6 py-4">
           <div className="flex items-center gap-3">

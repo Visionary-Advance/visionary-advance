@@ -39,14 +39,19 @@ export default function AdminBottomNav() {
     if (!standalone) return
     const mq = window.matchMedia('(max-width: 767px)')
     const prev = document.body.style.paddingBottom
+    const root = document.documentElement
     const apply = () => {
       document.body.style.paddingBottom = mq.matches ? '92px' : prev
+      // Lets floating buttons (Fab) sit above the bar
+      if (mq.matches) root.style.setProperty('--admin-nav-offset', 'calc(env(safe-area-inset-bottom) + 82px)')
+      else root.style.removeProperty('--admin-nav-offset')
     }
     apply()
     mq.addEventListener?.('change', apply)
     return () => {
       mq.removeEventListener?.('change', apply)
       document.body.style.paddingBottom = prev
+      root.style.removeProperty('--admin-nav-offset')
     }
   }, [standalone])
 

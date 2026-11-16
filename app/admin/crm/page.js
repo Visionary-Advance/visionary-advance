@@ -42,13 +42,13 @@ export default function CRMDashboardPage() {
     <div>
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-white">Dashboard</h1>
+          <h1 className="text-xl font-bold text-white sm:text-2xl">Dashboard</h1>
           <p className="text-gray-400">Welcome back, {user?.email?.split('@')[0]}</p>
         </div>
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
+      <div className="grid grid-cols-2 gap-3 sm:gap-6 md:grid-cols-5 mb-6 sm:mb-8 [&>*:last-child]:col-span-2 md:[&>*:last-child]:col-span-1">
         <QuickStatCard
           label="Active Leads"
           value={stats?.overview?.totalLeads || 0}
@@ -104,12 +104,12 @@ export default function CRMDashboardPage() {
       </div>
 
       {/* Quick Actions */}
-      <div className="bg-gray-800 rounded-lg border border-gray-700 p-6 mb-8">
+      <div className="bg-gray-800 rounded-lg border border-gray-700 p-4 sm:p-6 mb-6 sm:mb-8">
         <h2 className="text-lg font-semibold text-white mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-3 gap-2 sm:gap-4">
           <Link
             href="/admin/crm/leads"
-            className="flex items-center gap-3 p-4 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors"
+            className="flex flex-col items-center gap-2 p-3 text-center sm:flex-row sm:gap-3 sm:p-4 sm:text-left bg-gray-700 rounded-lg hover:bg-gray-600 active:bg-gray-600 transition-colors"
           >
             <div className="p-2 bg-teal-500/20 rounded-lg">
               <svg className="w-5 h-5 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -117,14 +117,14 @@ export default function CRMDashboardPage() {
               </svg>
             </div>
             <div>
-              <div className="text-white font-medium">View Leads</div>
-              <div className="text-gray-400 text-sm">Manage your leads</div>
+              <div className="text-white text-sm sm:text-base font-medium">View Leads</div>
+              <div className="hidden sm:block text-gray-400 text-sm">Manage your leads</div>
             </div>
           </Link>
 
           <Link
             href="/admin/crm/pipeline"
-            className="flex items-center gap-3 p-4 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors"
+            className="flex flex-col items-center gap-2 p-3 text-center sm:flex-row sm:gap-3 sm:p-4 sm:text-left bg-gray-700 rounded-lg hover:bg-gray-600 active:bg-gray-600 transition-colors"
           >
             <div className="p-2 bg-blue-500/20 rounded-lg">
               <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -132,14 +132,14 @@ export default function CRMDashboardPage() {
               </svg>
             </div>
             <div>
-              <div className="text-white font-medium">Pipeline View</div>
-              <div className="text-gray-400 text-sm">Lead kanban board</div>
+              <div className="text-white text-sm sm:text-base font-medium">Pipeline View</div>
+              <div className="hidden sm:block text-gray-400 text-sm">Lead kanban board</div>
             </div>
           </Link>
 
           <Link
             href="/admin/crm/projects"
-            className="flex items-center gap-3 p-4 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors"
+            className="flex flex-col items-center gap-2 p-3 text-center sm:flex-row sm:gap-3 sm:p-4 sm:text-left bg-gray-700 rounded-lg hover:bg-gray-600 active:bg-gray-600 transition-colors"
           >
             <div className="p-2 bg-purple-500/20 rounded-lg">
               <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -147,15 +147,15 @@ export default function CRMDashboardPage() {
               </svg>
             </div>
             <div>
-              <div className="text-white font-medium">Projects</div>
-              <div className="text-gray-400 text-sm">Project kanban board</div>
+              <div className="text-white text-sm sm:text-base font-medium">Projects</div>
+              <div className="hidden sm:block text-gray-400 text-sm">Project kanban board</div>
             </div>
           </Link>
         </div>
       </div>
 
       {/* Tasks Widget and Project Widgets in 2-column layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 mb-8">
         {/* Tasks Widget - Left Column */}
         <div className="lg:col-span-1">
           <h2 className="text-lg font-semibold text-white mb-4">My Tasks</h2>
@@ -183,14 +183,14 @@ function QuickStatCard({ label, value, icon, color = 'teal', href }) {
   return (
     <Link
       href={href}
-      className="bg-gray-800 rounded-lg border border-gray-700 p-6 hover:border-gray-600 transition-colors"
+      className="bg-gray-800 rounded-lg border border-gray-700 p-4 sm:p-6 hover:border-gray-600 transition-colors active:bg-gray-700/60"
     >
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-gray-400 text-sm">{label}</p>
-          <p className="text-3xl font-bold text-white mt-1">{value}</p>
+          <p className="text-gray-400 text-xs sm:text-sm">{label}</p>
+          <p className="text-2xl sm:text-3xl font-bold text-white mt-1 tabular-nums">{value}</p>
         </div>
-        <div className={`p-2 rounded-lg ${colorClasses[color]}`}>
+        <div className={`hidden sm:block p-2 rounded-lg ${colorClasses[color]}`}>
           {icon}
         </div>
       </div>

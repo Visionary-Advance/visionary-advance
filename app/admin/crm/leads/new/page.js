@@ -87,7 +87,7 @@ export default function NewLeadPage() {
             <ArrowLeftIcon className="h-4 w-4" />
             Back to leads
           </Link>
-          <h1 className="text-2xl font-semibold text-[#fafafa]">Add New Lead</h1>
+          <h1 className="text-xl font-semibold text-[#fafafa] sm:text-2xl">Add New Lead</h1>
           <p className="mt-1 text-sm text-[#a1a1aa]">Enter the lead's information below</p>
         </div>
         <div className="flex items-center gap-4">
@@ -128,7 +128,7 @@ export default function NewLeadPage() {
           {/* Left Column */}
           <div className="space-y-6">
             {/* Contact Info */}
-            <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+            <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-4 sm:p-6">
               <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
                 Contact Information
               </h2>
@@ -208,7 +208,7 @@ export default function NewLeadPage() {
             </div>
 
             {/* Pipeline Info */}
-            <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+            <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-4 sm:p-6">
               <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
                 Pipeline
               </h2>
@@ -238,7 +238,7 @@ export default function NewLeadPage() {
           {/* Right Column */}
           <div className="space-y-6">
             {/* Business Info */}
-            <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+            <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-4 sm:p-6">
               <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
                 Business Details
               </h2>
@@ -293,7 +293,7 @@ export default function NewLeadPage() {
             </div>
 
             {/* Notes */}
-            <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+            <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-4 sm:p-6">
               <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
                 Notes
               </h2>

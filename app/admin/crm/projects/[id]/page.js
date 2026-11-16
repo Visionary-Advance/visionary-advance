@@ -218,7 +218,7 @@ export default function ProjectDetailPage({ params }) {
               className="text-2xl font-semibold text-[#fafafa] bg-transparent border-b border-[#262626] focus:border-[#008070] focus:outline-none w-full"
             />
           ) : (
-            <h1 className="text-2xl font-semibold text-[#fafafa]">{project.name}</h1>
+            <h1 className="text-xl font-semibold text-[#fafafa] sm:text-2xl">{project.name}</h1>
           )}
           {lead && (
             <p className="mt-1 text-[#a1a1aa]">
@@ -264,7 +264,7 @@ export default function ProjectDetailPage({ params }) {
       </div>
 
       {/* Status Pipeline */}
-      <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+      <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-4 sm:p-6">
         <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
           Status
         </h2>
@@ -295,7 +295,7 @@ export default function ProjectDetailPage({ params }) {
         {/* Main Content */}
         <div className="space-y-6 lg:col-span-2">
           {/* Description */}
-          <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+          <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-4 sm:p-6">
             <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
               Description
             </h2>
@@ -316,7 +316,7 @@ export default function ProjectDetailPage({ params }) {
           </div>
 
           {/* Milestones */}
-          <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+          <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-4 sm:p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
                 Milestones
@@ -343,12 +343,12 @@ export default function ProjectDetailPage({ params }) {
           </div>
 
           {/* Tasks */}
-          <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+          <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-4 sm:p-6">
             <TaskList projectId={id} onUpdate={fetchProject} />
           </div>
 
           {/* Time Tracking */}
-          <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+          <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-4 sm:p-6">
             <TimeTracker
               projectId={id}
               estimatedHours={project.estimated_hours}
@@ -358,7 +358,7 @@ export default function ProjectDetailPage({ params }) {
 
           {/* Proposals */}
           {project.proposals && project.proposals.length > 0 && (
-            <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+            <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-4 sm:p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
                   Linked Proposals
@@ -382,7 +382,7 @@ export default function ProjectDetailPage({ params }) {
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Details */}
-          <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+          <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-4 sm:p-6">
             <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
               Details
             </h2>
@@ -467,7 +467,7 @@ export default function ProjectDetailPage({ params }) {
           </div>
 
           {/* Financials */}
-          <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+          <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-4 sm:p-6">
             <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
               Financials
             </h2>
@@ -493,7 +493,7 @@ export default function ProjectDetailPage({ params }) {
 
           {/* DevOps Sites */}
           {project.devopsSites && project.devopsSites.length > 0 && (
-            <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+            <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-4 sm:p-6">
               <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
                 Linked Sites
               </h2>
@@ -519,7 +519,7 @@ export default function ProjectDetailPage({ params }) {
 
           {/* Tags */}
           {project.tags && project.tags.length > 0 && (
-            <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+            <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-4 sm:p-6">
               <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
                 Tags
               </h2>
@@ -537,7 +537,7 @@ export default function ProjectDetailPage({ params }) {
           )}
 
           {/* Metadata */}
-          <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+          <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-4 sm:p-6">
             <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
               Metadata
             </h2>

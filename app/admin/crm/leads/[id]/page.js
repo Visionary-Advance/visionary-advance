@@ -242,7 +242,7 @@ export default function LeadDetailPage({ params }) {
             Back to leads
           </Link>
           <div className="flex items-center gap-4">
-            <h1 className="text-2xl font-semibold text-[#fafafa]">
+            <h1 className="text-xl font-semibold text-[#fafafa] sm:text-2xl">
               {lead.full_name || lead.email}
             </h1>
             {lead.score != null && !lead.is_client && lead.stage !== 'won' && (
@@ -303,7 +303,7 @@ export default function LeadDetailPage({ params }) {
       </div>
 
       {/* Stage Pipeline */}
-      <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+      <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-4 sm:p-6">
         <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
           Pipeline Stage
         </h2>
@@ -337,7 +337,7 @@ export default function LeadDetailPage({ params }) {
         {/* Lead Info */}
         <div className="space-y-6 lg:col-span-1">
           {/* Contact Info */}
-          <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+          <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-4 sm:p-6">
             <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
               Contact Info
             </h2>
@@ -435,7 +435,7 @@ export default function LeadDetailPage({ params }) {
 
           {/* Business Info */}
           {(editing || lead.company || lead.business_type || lead.project_type || lead.budget_range || lead.timeline) && (
-            <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+            <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-4 sm:p-6">
               <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
                 Business Info
               </h2>
@@ -528,14 +528,14 @@ export default function LeadDetailPage({ params }) {
 
           {/* Audit Scores */}
           {lead.audit_scores && (
-            <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+            <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-4 sm:p-6">
               <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
                 Audit Scores
               </h2>
               <div className="grid grid-cols-2 gap-4">
                 {Object.entries(lead.audit_scores).map(([key, value]) => (
                   <div key={key} className="text-center">
-                    <div className="text-2xl font-bold text-[#fafafa]">{value}</div>
+                    <div className="text-xl font-bold text-[#fafafa] sm:text-2xl">{value}</div>
                     <div className="text-xs capitalize text-[#a1a1aa]">
                       {key.replace(/([A-Z])/g, ' $1').trim()}
                     </div>
@@ -547,7 +547,7 @@ export default function LeadDetailPage({ params }) {
 
           {/* UTM Data */}
           {(lead.utm_source || lead.utm_medium || lead.utm_campaign) && (
-            <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+            <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-4 sm:p-6">
               <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
                 Attribution
               </h2>
@@ -581,7 +581,7 @@ export default function LeadDetailPage({ params }) {
           )}
 
           {/* Metadata */}
-          <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+          <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-4 sm:p-6">
             <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
               Metadata
             </h2>
@@ -612,7 +612,7 @@ export default function LeadDetailPage({ params }) {
 
         {/* Activity Timeline */}
         <div className="lg:col-span-2">
-          <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-6">
+          <div className="rounded-xl border border-[#262626] bg-[#0a0a0a] p-4 sm:p-6">
             <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-[#a1a1aa]">
               Activity
             </h2>

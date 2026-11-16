@@ -6,6 +6,7 @@ import { usePersistedState } from '@/lib/usePersistedState'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import IndustrySelect from '@/Components/IndustrySelect'
+import Fab from '@/Components/Admin/Mobile/Fab'
 
 export default function ClientsPage() {
   const router = useRouter()
@@ -141,14 +142,14 @@ export default function ClientsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-[#fafafa]">Clients</h1>
+          <h1 className="text-xl font-semibold text-[#fafafa] sm:text-2xl">Clients</h1>
           <p className="mt-1 text-sm text-[#a1a1aa]">
             {pagination.total} total clients
           </p>
         </div>
         <button
           onClick={() => { setShowCreateModal(true); fetchBusinesses() }}
-          className="inline-flex items-center gap-2 rounded-lg bg-[#008070] px-4 py-2 text-sm font-medium text-white hover:bg-[#006b5d]"
+          className="hidden md:inline-flex items-center gap-2 rounded-lg bg-[#008070] px-4 py-2 text-sm font-medium text-white hover:bg-[#006b5d]"
         >
           <PlusIcon className="h-4 w-4" />
           New Client
@@ -156,9 +157,9 @@ export default function ClientsPage() {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap items-center gap-4">
+      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
         {/* Search */}
-        <div className="relative flex-1 min-w-[200px] max-w-md">
+        <div className="relative w-full sm:min-w-[200px] sm:max-w-md sm:flex-1">
           <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#a1a1aa]" />
           <input
             type="text"
@@ -222,7 +223,38 @@ export default function ClientsPage() {
             </button>
           </div>
         ) : (
-          <table className="w-full">
+          <>
+          {/* Mobile list */}
+          <ul className="divide-y divide-[#1f1f1f] md:hidden">
+            {clients.map((client) => (
+              <li key={client.id} className="flex items-center pr-3 active:bg-[#171717]">
+                <Link href={`/admin/crm/clients/${client.id}`} className="flex min-w-0 flex-1 items-center gap-3 py-3.5 pl-4 pr-2">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 text-sm font-semibold text-emerald-400">
+                    {(client.full_name || client.email || '?')[0].toUpperCase()}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-[15px] font-medium text-[#fafafa]">{client.full_name || client.email}</p>
+                    <p className="truncate text-xs text-[#a1a1aa]">
+                      {[client.company, client.phone].filter(Boolean).join(' · ') || client.email}
+                    </p>
+                  </div>
+                </Link>
+                  {client.phone && (
+                    <a
+                      href={`tel:${client.phone}`}
+                      aria-label={`Call ${client.full_name || client.phone}`}
+                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#171717] text-[#a1a1aa] active:bg-[#262626]"
+                    >
+                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+                      </svg>
+                    </a>
+                  )}
+              </li>
+            ))}
+          </ul>
+
+          <table className="hidden w-full md:table">
             <thead>
               <tr className="border-b border-[#262626] bg-[#171717]">
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-[#a1a1aa]">
@@ -292,14 +324,15 @@ export default function ClientsPage() {
               ))}
             </tbody>
           </table>
+          </>
         )}
       </div>
 
       {/* Pagination */}
       {pagination.totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-[#a1a1aa]">
-            Showing {(pagination.page - 1) * pagination.limit + 1} to{' '}
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-xs text-[#a1a1aa] sm:text-sm">
+            {(pagination.page - 1) * pagination.limit + 1}–
             {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total}
           </p>
           <div className="flex gap-2">
@@ -321,10 +354,12 @@ export default function ClientsPage() {
         </div>
       )}
 
+      <Fab onClick={() => { setShowCreateModal(true); fetchBusinesses() }} label="New client" />
+
       {/* Create Client Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-xl border border-[#262626] bg-[#0a0a0a] p-6 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/50 sm:items-center sm:p-4">
+          <div className="w-full max-w-md border border-[#262626] bg-[#0a0a0a] px-5 pt-6 sm:p-6 overflow-y-auto rounded-t-2xl sm:rounded-2xl max-h-[92dvh] sm:max-h-[90vh]" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 1.5rem)' }}>
             <h2 className="text-lg font-semibold text-[#fafafa]">New Client</h2>
             <p className="mt-1 text-sm text-[#a1a1aa]">Create a client directly, skipping the lead pipeline.</p>
             <form onSubmit={handleCreateClient} className="mt-4 space-y-4">
