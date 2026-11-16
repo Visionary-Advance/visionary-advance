@@ -5,6 +5,7 @@ import { AdminAuthProvider } from '@/Components/Admin/AdminAuthProvider'
 import AdminScrollRestore from '@/Components/Admin/AdminScrollRestore'
 import ServiceWorkerRegister from '@/Components/Admin/ServiceWorkerRegister'
 import InstallPrompt from '@/Components/Admin/InstallPrompt'
+import AdminBottomNav from '@/Components/Admin/AdminBottomNav'
 
 export const metadata = {
   title: 'Admin | Visionary Advance',
@@ -31,6 +32,7 @@ export default function AdminLayout({ children }) {
       <ServiceWorkerRegister />
       {children}
       <InstallPrompt />
+      <AdminBottomNav />
     </AdminAuthProvider>
   )
 }
