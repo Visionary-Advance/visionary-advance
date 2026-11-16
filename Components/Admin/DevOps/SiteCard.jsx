@@ -1,95 +1,34 @@
 'use client'
 
 import Link from 'next/link'
-import StatusBadge from './StatusBadge'
+import { cx, focusRing } from '@/Components/Admin/ui'
+import StatusBadge, { checkStatus } from './StatusBadge'
+import { CompactTimeline } from './HealthTimeline'
+import { hostOf, timeAgo } from './format'
 
-// Environment badge colors
-const ENV_COLORS = {
-  production: 'bg-red-500/10 text-red-400',
-  staging: 'bg-amber-500/10 text-amber-400',
-  development: 'bg-blue-500/10 text-blue-400',
-}
-
-export default function SiteCard({ site, compact = false }) {
-  const { id, name, url, environment, category, latestCheck } = site
-  const status = latestCheck?.status || 'unknown'
-  const responseTime = latestCheck?.response_time_ms
-  const lastChecked = latestCheck?.checked_at
-
-  // Format last checked time
-  const formatLastChecked = (dateStr) => {
-    if (!dateStr) return 'Never'
-    const date = new Date(dateStr)
-    const now = new Date()
-    const diffMs = now - date
-    const diffMins = Math.floor(diffMs / (1000 * 60))
-
-    if (diffMins < 1) return 'Just now'
-    if (diffMins < 60) return `${diffMins}m ago`
-    const diffHours = Math.floor(diffMins / 60)
-    if (diffHours < 24) return `${diffHours}h ago`
-    return date.toLocaleDateString()
-  }
-
-  // Get domain from URL
-  const getDomain = (urlStr) => {
-    try {
-      return new URL(urlStr).hostname
-    } catch {
-      return urlStr
-    }
-  }
-
-  if (compact) {
-    return (
-      <Link
-        href={`/admin/devops/sites/${id}`}
-        className="flex items-center justify-between p-3 bg-[#171717] rounded-lg border border-[#262626] hover:border-[#404040] transition-colors"
-      >
-        <div className="flex items-center gap-3">
-          <StatusBadge status={status} size="sm" showLabel={false} />
-          <div>
-            <div className="text-white font-medium text-sm">{name}</div>
-            <div className="text-gray-500 text-xs">{getDomain(url)}</div>
-          </div>
-        </div>
-        {responseTime && (
-          <div className="text-gray-400 text-xs">{responseTime}ms</div>
-        )}
-      </Link>
-    )
-  }
+// One monitored site: status, last 30 checks, response time.
+export default function SiteCard({ site }) {
+  const status = checkStatus(site.latestCheck) === 'blocked' ? 'blocked' : site.current_status || checkStatus(site.latestCheck)
+  const ms = site.latestCheck?.response_time_ms
 
   return (
     <Link
-      href={`/admin/devops/sites/${id}`}
-      className="block p-4 bg-[#171717] rounded-lg border border-[#262626] hover:border-[#404040] transition-colors"
+      href={`/admin/devops/sites/${site.id}`}
+      className={cx('block rounded-xl border border-adm-border bg-adm-surface p-4 transition-colors hover:border-adm-border-strong', focusRing)}
     >
-      <div className="flex items-start justify-between mb-3">
-        <div className="flex items-center gap-3">
-          <StatusBadge status={status} />
-          {environment && (
-            <span className={`text-xs px-2 py-0.5 rounded-full ${ENV_COLORS[environment] || ENV_COLORS.production}`}>
-              {environment}
-            </span>
-          )}
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="truncate font-medium text-adm-text">{site.name}</p>
+          <p className="truncate text-sm text-adm-subtle">{hostOf(site.url)}</p>
         </div>
-        {category && (
-          <span className="text-xs text-gray-500 bg-[#262626] px-2 py-0.5 rounded">
-            {category}
-          </span>
-        )}
+        <StatusBadge status={status} />
       </div>
-
-      <h3 className="text-white font-semibold mb-1">{name}</h3>
-      <p className="text-gray-400 text-sm truncate mb-3">{getDomain(url)}</p>
-
-      <div className="flex items-center justify-between text-xs text-gray-500">
+      {site.history && <CompactTimeline checks={site.history} count={30} className="mt-3" height="h-5" />}
+      <div className="mt-3 flex items-center justify-between text-xs text-adm-subtle">
+        <span className="tabular-nums">{ms ? `${ms}ms` : '—'}</span>
         <span>
-          {responseTime ? `${responseTime}ms` : 'N/A'}
-        </span>
-        <span>
-          {formatLastChecked(lastChecked)}
+          {site.openIncidentCount > 0 && <span className="mr-2 font-medium text-adm-bad">{site.openIncidentCount} open</span>}
+          {timeAgo(site.latestCheck?.checked_at)}
         </span>
       </div>
     </Link>

@@ -2,10 +2,14 @@
 // GET CRM leads for linking to DevOps sites
 
 import { NextResponse } from 'next/server'
+import { requireAdmin } from '@/lib/admin-api-auth'
 import { getCRMLeadsForLinking } from '@/lib/devops'
 
 // GET /api/devops/crm-leads - Get CRM leads for site linking
 export async function GET(request) {
+  const auth = await requireAdmin(request)
+  if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status })
+
   try {
     const { searchParams } = new URL(request.url)
     const ownerEmail = searchParams.get('owner_email')

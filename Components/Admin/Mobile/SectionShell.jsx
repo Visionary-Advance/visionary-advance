@@ -1,6 +1,7 @@
 'use client'
 
-// Shared chrome for admin sections (Finance, CRM, …), styled like the SEO shell.
+// Shared chrome for admin sections (Finance, CRM, DevOps, …), styled like the SEO shell.
+// navItems: { href, label, icon, exact?, mobileLabel?, badge? }
 // Desktop (lg+): fixed sidebar. Mobile: frosted sticky top bar that clears the
 // notch, a swipeable row of section tabs and an account sheet. Switching between
 // sections on mobile is the job of the glass AdminBottomNav.
@@ -84,7 +85,8 @@ export default function SectionShell({ title, icon: SectionIcon, basePath, navIt
                       )}
                     >
                       <item.icon className={cx('h-4 w-4', active && 'text-adm-accent')} aria-hidden />
-                      <span className="truncate">{item.label}</span>
+                      <span className="flex-1 truncate">{item.label}</span>
+                      <NavBadge value={item.badge} />
                     </Link>
                   </li>
                 )
@@ -140,6 +142,7 @@ export default function SectionShell({ title, icon: SectionIcon, basePath, navIt
               >
                 <item.icon className="h-4 w-4" aria-hidden />
                 {item.mobileLabel || item.label}
+                <NavBadge value={item.badge} />
               </Link>
             )
           })}
@@ -168,6 +171,17 @@ export default function SectionShell({ title, icon: SectionIcon, basePath, navIt
         </main>
       </div>
     </div>
+  )
+}
+
+// Count shown next to a nav item (e.g. PRs waiting for approval); hidden at 0
+function NavBadge({ value }) {
+  if (!value) return null
+  return (
+    <span className="ml-0.5 min-w-[1.25rem] rounded-full bg-adm-accent-solid px-1.5 text-center text-[11px] font-semibold leading-5 text-white tabular-nums">
+      {value > 99 ? '99+' : value}
+      <span className="sr-only"> waiting</span>
+    </span>
   )
 }
 

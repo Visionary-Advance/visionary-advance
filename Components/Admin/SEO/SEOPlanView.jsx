@@ -7,7 +7,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ArrowDown, ArrowUp, Check, ChevronDown, ChevronRight, Circle, CircleCheck, CircleDot, Copy, ExternalLink,
-  GitPullRequest, History, ListChecks, LoaderCircle, Minus, RefreshCw, Rocket, Sparkles, TriangleAlert,
+  GitMerge, GitPullRequest, History, ListChecks, LoaderCircle, Minus, RefreshCw, Rocket, Sparkles, TriangleAlert, Undo2,
 } from 'lucide-react';
 import { usePersistedState } from '@/lib/usePersistedState';
 import {
@@ -40,7 +40,13 @@ const SHIP = {
   running: { label: 'Claude is working', tone: 'warn', icon: LoaderCircle, spin: true },
   pr_open: { label: 'PR ready to review', tone: 'accent', icon: GitPullRequest },
   failed: { label: 'Ship failed', tone: 'bad', icon: TriangleAlert },
+  merged: { label: 'Merged', tone: 'good', icon: GitMerge },
+  closed: { label: 'PR closed', tone: 'neutral', icon: GitPullRequest },
+  changes_requested: { label: 'Sent back', tone: 'warn', icon: Undo2 },
 };
+
+// Ship states that allow shipping again
+const RESHIPPABLE = ['failed', 'closed', 'changes_requested'];
 
 function capitalize(s) {
   return s ? s.charAt(0).toUpperCase() + s.slice(1).replace(/-/g, ' ') : s;
@@ -479,7 +485,7 @@ function ShipControl({ task, plan, onShip, compact = false }) {
     );
   }
 
-  const canShip = !task.ship_status || task.ship_status === 'failed';
+  const canShip = !task.ship_status || RESHIPPABLE.includes(task.ship_status);
   const errText = error || (task.ship_status === 'failed' ? task.ship_error : null);
 
   async function ship() {
@@ -496,8 +502,11 @@ function ShipControl({ task, plan, onShip, compact = false }) {
 
   const links = (
     <>
+      {task.ship_status === 'pr_open' && (
+        <Button size="sm" variant="primary" icon={GitPullRequest} href={`/admin/devops/approvals?task=${task.id}`}>Review in DevOps</Button>
+      )}
       {task.pr_url && (
-        <Button size="sm" icon={GitPullRequest} href={task.pr_url} external>Open PR</Button>
+        <Button size="sm" variant={task.ship_status === 'pr_open' ? 'secondary' : undefined} icon={ExternalLink} href={task.pr_url} external>GitHub</Button>
       )}
       {task.ship_run_url && task.ship_status !== 'pr_open' && (
         <Button size="sm" variant="ghost" icon={ExternalLink} href={task.ship_run_url} external>Run log</Button>
@@ -508,10 +517,12 @@ function ShipControl({ task, plan, onShip, compact = false }) {
   if (compact) {
     return (
       <>
-        {task.pr_url && <Button size="sm" icon={GitPullRequest} href={task.pr_url} external>PR</Button>}
+        {task.ship_status === 'pr_open'
+          ? <Button size="sm" icon={GitPullRequest} href={`/admin/devops/approvals?task=${task.id}`}>Review</Button>
+          : task.pr_url && <Button size="sm" icon={GitPullRequest} href={task.pr_url} external>PR</Button>}
         {canShip && (
           <Button size="sm" variant="primary" icon={Rocket} onClick={ship} loading={busy} title={errText || 'Claude makes this change on a branch and opens a PR. You review and merge.'}>
-            {task.ship_status === 'failed' ? 'Retry' : 'Ship'}
+            {task.ship_status ? 'Ship again' : 'Ship'}
           </Button>
         )}
       </>
@@ -523,15 +534,18 @@ function ShipControl({ task, plan, onShip, compact = false }) {
       <div className="flex flex-wrap items-center gap-2">
         {canShip && (
           <Button size="sm" variant="primary" icon={Rocket} onClick={ship} loading={busy}>
-            {busy ? 'Starting…' : task.ship_status === 'failed' ? 'Retry ship' : 'Ship as PR'}
+            {busy ? 'Starting…' : task.ship_status === 'failed' ? 'Retry ship' : task.ship_status ? 'Ship again' : 'Ship as PR'}
           </Button>
         )}
         {links}
       </div>
       {canShip && !errText && (
-        <p className="text-xs text-adm-subtle">Claude makes this change on a branch and opens a PR. You review and merge.</p>
+        <p className="text-xs text-adm-subtle">Claude makes this change on a branch and opens a PR. You review and approve it in DevOps.</p>
       )}
       {errText && <p className="text-xs text-adm-bad" role="alert">{errText}</p>}
+      {task.ship_status === 'changes_requested' && task.review_note && (
+        <p className="text-xs text-adm-muted"><span className="font-medium text-adm-text">Your note:</span> {task.review_note} Shipping again passes it to Claude.</p>
+      )}
     </div>
   );
 }

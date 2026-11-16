@@ -2,10 +2,14 @@
 // POST - Trigger a manual health check
 
 import { NextResponse } from 'next/server'
+import { requireAdmin } from '@/lib/admin-api-auth'
 import { performHealthCheck } from '@/lib/devops'
 
 // POST /api/devops/sites/[id]/check - Trigger health check
 export async function POST(request, { params }) {
+  const auth = await requireAdmin(request)
+  if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status })
+
   try {
     const { id } = await params
 

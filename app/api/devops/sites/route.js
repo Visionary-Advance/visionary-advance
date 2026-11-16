@@ -2,10 +2,14 @@
 // GET list, POST create sites
 
 import { NextResponse } from 'next/server'
+import { requireAdmin } from '@/lib/admin-api-auth'
 import { supabaseCRM as supabase } from '@/lib/supabase-crm'
 
 // GET /api/devops/sites - List all sites
 export async function GET(request) {
+  const auth = await requireAdmin(request)
+  if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status })
+
   try {
     const { searchParams } = new URL(request.url)
     const environment = searchParams.get('environment')
@@ -18,7 +22,7 @@ export async function GET(request) {
       .select(`
         *,
         devops_health_checks (
-          id, status, response_time_ms, checked_at
+          id, status, response_time_ms, http_status_code, checked_at
         ),
         devops_incidents (
           id, status
@@ -40,9 +44,9 @@ export async function GET(request) {
       query = query.or(`name.ilike.%${search}%,url.ilike.%${search}%`)
     }
 
-    // Limit health checks to most recent
+    // Last 30 checks per site, newest first (for the uptime strip)
     query = query.order('checked_at', { foreignTable: 'devops_health_checks', ascending: false })
-      .limit(1, { foreignTable: 'devops_health_checks' })
+      .limit(30, { foreignTable: 'devops_health_checks' })
 
     const { data, error } = await query
 
@@ -54,6 +58,7 @@ export async function GET(request) {
       return {
         ...site,
         latestCheck: site.devops_health_checks?.[0] || null,
+        history: site.devops_health_checks || [],
         openIncidentCount,
         devops_health_checks: undefined,
         devops_incidents: undefined,
@@ -69,6 +74,9 @@ export async function GET(request) {
 
 // POST /api/devops/sites - Create a new site
 export async function POST(request) {
+  const auth = await requireAdmin(request)
+  if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status })
+
   try {
     const body = await request.json()
 

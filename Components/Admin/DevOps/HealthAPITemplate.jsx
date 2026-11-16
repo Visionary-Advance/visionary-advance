@@ -193,19 +193,19 @@ export default function HealthAPITemplate({ showFull = false }) {
   }
 
   return (
-    <div className="bg-[#0a0a0a] border border-[#262626] rounded-lg overflow-hidden">
-      <div className="flex items-center justify-between p-4 border-b border-[#262626]">
+    <div className="bg-adm-surface border border-adm-border rounded-lg overflow-hidden">
+      <div className="flex items-center justify-between p-4 border-b border-adm-border">
         <div>
-          <h3 className="text-white font-semibold">Health API Template</h3>
-          <p className="text-gray-400 text-sm mt-1">
-            Add this endpoint to your client site at <code className="text-purple-400">/app/api/health/route.js</code>
+          <h3 className="text-adm-text font-semibold">Health API Template</h3>
+          <p className="text-adm-muted text-sm mt-1">
+            Add this endpoint to your client site at <code className="text-adm-accent">/app/api/health/route.js</code>
           </p>
         </div>
         <div className="flex items-center gap-2">
           <select
             value={version}
             onChange={(e) => setVersion(e.target.value)}
-            className="px-3 py-1.5 bg-[#171717] border border-[#262626] rounded-lg text-sm text-white focus:outline-none focus:border-purple-500"
+            className="px-3 py-1.5 bg-adm-raised border border-adm-border rounded-lg text-sm text-adm-text focus:outline-none focus:border-adm-accent"
           >
             <option value="simple">Simple</option>
             <option value="full">With DB Check</option>
@@ -214,8 +214,8 @@ export default function HealthAPITemplate({ showFull = false }) {
             onClick={copyToClipboard}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               copied
-                ? 'bg-green-600 text-white'
-                : 'bg-purple-600 text-white hover:bg-purple-700'
+                ? 'bg-green-600 text-adm-text'
+                : 'bg-adm-accent-solid text-adm-text hover:bg-adm-accent-solid-hover'
             }`}
           >
             {copied ? (
@@ -237,7 +237,7 @@ export default function HealthAPITemplate({ showFull = false }) {
       <div className="relative">
         <button
           onClick={() => setExpanded(!expanded)}
-          className="w-full flex items-center justify-between p-3 bg-[#171717] text-gray-400 text-sm hover:bg-[#1a1a1a] transition-colors"
+          className="w-full flex items-center justify-between p-3 bg-adm-raised text-adm-muted text-sm hover:bg-adm-hover transition-colors"
         >
           <span>{expanded ? 'Hide code' : 'Show code preview'}</span>
           <ChevronIcon className={`w-4 h-4 transition-transform ${expanded ? 'rotate-180' : ''}`} />
@@ -245,7 +245,7 @@ export default function HealthAPITemplate({ showFull = false }) {
 
         {expanded && (
           <div className="max-h-96 overflow-auto">
-            <pre className="p-4 text-sm text-gray-300 font-mono leading-relaxed">
+            <pre className="p-4 text-sm text-adm-text font-mono leading-relaxed">
               <code>{code}</code>
             </pre>
           </div>
@@ -253,26 +253,26 @@ export default function HealthAPITemplate({ showFull = false }) {
       </div>
 
       {/* Instructions */}
-      <div className="p-4 border-t border-[#262626] bg-[#0d0d0d]">
-        <h4 className="text-white text-sm font-medium mb-2">Quick Setup</h4>
-        <ol className="text-gray-400 text-sm space-y-1 list-decimal list-inside">
+      <div className="p-4 border-t border-adm-border bg-adm-bg">
+        <h4 className="text-adm-text text-sm font-medium mb-2">Quick Setup</h4>
+        <ol className="text-adm-muted text-sm space-y-1 list-decimal list-inside">
           <li>Copy the code above</li>
-          <li>Create <code className="text-purple-400">/app/api/health/route.js</code> in your client project</li>
+          <li>Create <code className="text-adm-accent">/app/api/health/route.js</code> in your client project</li>
           <li>Paste the code and save</li>
           <li>(Optional) Generate an API key below for authentication</li>
         </ol>
       </div>
 
       {/* API Key Generator */}
-      <div className="p-4 border-t border-[#262626]">
+      <div className="p-4 border-t border-adm-border">
         <div className="flex items-center justify-between mb-3">
           <div>
-            <h4 className="text-white text-sm font-medium">API Key Authentication</h4>
-            <p className="text-gray-500 text-xs mt-0.5">Optional - protects the health endpoint from public access</p>
+            <h4 className="text-adm-text text-sm font-medium">API Key Authentication</h4>
+            <p className="text-adm-subtle text-xs mt-0.5">Optional - protects the health endpoint from public access</p>
           </div>
           <button
             onClick={handleGenerateKey}
-            className="flex items-center gap-2 px-3 py-1.5 bg-[#171717] border border-[#262626] rounded-lg text-sm text-gray-300 hover:border-purple-500 hover:text-white transition-colors"
+            className="flex items-center gap-2 px-3 py-1.5 bg-adm-raised border border-adm-border rounded-lg text-sm text-adm-text hover:border-adm-accent hover:text-adm-text transition-colors"
           >
             <KeyIcon className="w-4 h-4" />
             Generate Key
@@ -283,15 +283,15 @@ export default function HealthAPITemplate({ showFull = false }) {
           <div className="space-y-3">
             {/* Generated Key */}
             <div className="flex items-center gap-2">
-              <div className="flex-1 px-3 py-2 bg-[#171717] border border-[#262626] rounded-lg font-mono text-sm text-green-400 overflow-x-auto">
+              <div className="flex-1 px-3 py-2 bg-adm-raised border border-adm-border rounded-lg font-mono text-sm text-adm-good overflow-x-auto">
                 {apiKey}
               </div>
               <button
                 onClick={copyApiKey}
                 className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm transition-colors ${
                   keyCopied
-                    ? 'bg-green-600 text-white'
-                    : 'bg-[#262626] text-gray-300 hover:bg-[#333] hover:text-white'
+                    ? 'bg-green-600 text-adm-text'
+                    : 'bg-adm-hover text-adm-text hover:bg-[#333] hover:text-adm-text'
                 }`}
               >
                 {keyCopied ? <CheckIcon className="w-4 h-4" /> : <CopyIcon className="w-4 h-4" />}
@@ -301,17 +301,17 @@ export default function HealthAPITemplate({ showFull = false }) {
 
             {/* Env line */}
             <div>
-              <p className="text-gray-400 text-xs mb-1.5">Add to client site's <code className="text-purple-400">.env</code>:</p>
+              <p className="text-adm-muted text-xs mb-1.5">Add to client site's <code className="text-adm-accent">.env</code>:</p>
               <div className="flex items-center gap-2">
-                <div className="flex-1 px-3 py-2 bg-[#171717] border border-[#262626] rounded-lg font-mono text-xs text-gray-300 overflow-x-auto">
+                <div className="flex-1 px-3 py-2 bg-adm-raised border border-adm-border rounded-lg font-mono text-xs text-adm-text overflow-x-auto">
                   HEALTH_CHECK_API_KEY={apiKey}
                 </div>
                 <button
                   onClick={copyEnvLine}
                   className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm transition-colors ${
                     envCopied
-                      ? 'bg-green-600 text-white'
-                      : 'bg-[#262626] text-gray-300 hover:bg-[#333] hover:text-white'
+                      ? 'bg-green-600 text-adm-text'
+                      : 'bg-adm-hover text-adm-text hover:bg-[#333] hover:text-adm-text'
                   }`}
                 >
                   {envCopied ? <CheckIcon className="w-4 h-4" /> : <CopyIcon className="w-4 h-4" />}
@@ -321,9 +321,9 @@ export default function HealthAPITemplate({ showFull = false }) {
             </div>
 
             {/* Reminder */}
-            <div className="flex items-start gap-2 p-3 bg-purple-500/10 border border-purple-500/20 rounded-lg">
-              <InfoIcon className="w-4 h-4 text-purple-400 mt-0.5 shrink-0" />
-              <p className="text-purple-300 text-xs">
+            <div className="flex items-start gap-2 p-3 bg-teal-500/10 border border-teal-500/25 rounded-lg">
+              <InfoIcon className="w-4 h-4 text-adm-accent mt-0.5 shrink-0" />
+              <p className="text-adm-accent text-xs">
                 Remember to also paste this key in the "API Key" field when adding this site to the DevOps dashboard.
               </p>
             </div>
@@ -353,8 +353,8 @@ export function HealthAPITemplateCompact() {
       onClick={copyToClipboard}
       className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors ${
         copied
-          ? 'bg-green-600/20 text-green-400 border border-green-600/30'
-          : 'bg-[#171717] text-gray-300 border border-[#262626] hover:border-purple-500 hover:text-white'
+          ? 'bg-green-600/20 text-adm-good border border-green-600/30'
+          : 'bg-adm-raised text-adm-text border border-adm-border hover:border-adm-accent hover:text-adm-text'
       }`}
     >
       {copied ? (

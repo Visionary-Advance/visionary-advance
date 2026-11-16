@@ -1,58 +1,33 @@
 'use client'
 
-// Severity badge component for incident severity display
+// Incident severity and incident status badges.
 
-const SEVERITY_CONFIG = {
-  critical: {
-    label: 'Critical',
-    bgColor: 'bg-red-500/20',
-    textColor: 'text-red-400',
-    borderColor: 'border-red-500/30',
-  },
-  major: {
-    label: 'Major',
-    bgColor: 'bg-orange-500/20',
-    textColor: 'text-orange-400',
-    borderColor: 'border-orange-500/30',
-  },
-  minor: {
-    label: 'Minor',
-    bgColor: 'bg-amber-500/20',
-    textColor: 'text-amber-400',
-    borderColor: 'border-amber-500/30',
-  },
-  info: {
-    label: 'Info',
-    bgColor: 'bg-blue-500/20',
-    textColor: 'text-blue-400',
-    borderColor: 'border-blue-500/30',
-  },
+import { CircleAlert, CircleCheck, Eye, Info, Search, Siren, Target, TriangleAlert } from 'lucide-react'
+import { Badge } from '@/Components/Admin/ui'
+
+export const SEVERITY = {
+  critical: { label: 'Critical', tone: 'bad', icon: Siren },
+  major: { label: 'Major', tone: 'warn', icon: TriangleAlert },
+  minor: { label: 'Minor', tone: 'neutral', icon: CircleAlert },
+  info: { label: 'Info', tone: 'info', icon: Info },
 }
 
-export default function SeverityBadge({ severity, size = 'md', variant = 'filled' }) {
-  const config = SEVERITY_CONFIG[severity] || SEVERITY_CONFIG.info
+export const INCIDENT_STATUS = {
+  open: { label: 'Open', tone: 'bad', icon: CircleAlert },
+  investigating: { label: 'Investigating', tone: 'warn', icon: Search },
+  identified: { label: 'Identified', tone: 'warn', icon: Target },
+  monitoring: { label: 'Monitoring', tone: 'info', icon: Eye },
+  resolved: { label: 'Resolved', tone: 'good', icon: CircleCheck },
+}
 
-  const sizeClasses = {
-    sm: 'text-xs px-2 py-0.5',
-    md: 'text-sm px-2.5 py-1',
-    lg: 'text-base px-3 py-1.5',
-  }
+export const INCIDENT_STATUS_ORDER = ['open', 'investigating', 'identified', 'monitoring', 'resolved']
 
-  if (variant === 'outline') {
-    return (
-      <span
-        className={`inline-flex items-center rounded-full font-medium border ${config.borderColor} ${config.textColor} ${sizeClasses[size]}`}
-      >
-        {config.label}
-      </span>
-    )
-  }
+export default function SeverityBadge({ severity, className }) {
+  const s = SEVERITY[severity] || SEVERITY.info
+  return <Badge tone={s.tone} icon={s.icon} className={className}>{s.label}</Badge>
+}
 
-  return (
-    <span
-      className={`inline-flex items-center rounded-full font-medium ${config.bgColor} ${config.textColor} ${sizeClasses[size]}`}
-    >
-      {config.label}
-    </span>
-  )
+export function IncidentStatusBadge({ status, className }) {
+  const s = INCIDENT_STATUS[status] || INCIDENT_STATUS.open
+  return <Badge tone={s.tone} icon={s.icon} className={className}>{s.label}</Badge>
 }

@@ -2,11 +2,15 @@
 // GET list, POST create incidents
 
 import { NextResponse } from 'next/server'
+import { requireAdmin } from '@/lib/admin-api-auth'
 import { supabaseCRM as supabase } from '@/lib/supabase-crm'
 import { createIncident } from '@/lib/devops'
 
 // GET /api/devops/incidents - List incidents
 export async function GET(request) {
+  const auth = await requireAdmin(request)
+  if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status })
+
   try {
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status')
@@ -64,6 +68,9 @@ export async function GET(request) {
 
 // POST /api/devops/incidents - Create a new incident
 export async function POST(request) {
+  const auth = await requireAdmin(request)
+  if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status })
+
   try {
     const body = await request.json()
 

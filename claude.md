@@ -110,6 +110,12 @@ A unified CRM system with Supabase as the source of truth:
 - Comments from people without a role on the Meta app only arrive after App Review grants Advanced Access
 - Schema: `supabase/migrations/20261020_comment_automations.sql`
 
+**DevOps approvals** (`lib/devops-approvals.js`, `lib/github.js`, `/admin/devops/approvals`):
+- PRs opened by SEO "Ship" (`ship_status = 'pr_open'`) wait here. Each load pulls the PR live (diff, checks, Vercel preview from GitHub deployments)
+- Approve & merge squash-merges pinned to the reviewed head SHA, then sets the task `merged` + `completed`. Send back comments the note, closes the PR, sets `changes_requested` and keeps `review_note`; the next Ship passes the note to Claude
+- PRs merged/closed on GitHub directly are recorded on the next list load and by `POST /api/github/webhook` (HMAC of the raw body, so it reads `request.text()`)
+- Migration `migrations/011_seo_pr_approvals.sql` (applied 2026-11-16)
+
 **SEO plan generation** (`lib/seo-plan-runs.js`):
 - Plans are written only by Claude Code (Gemini is removed). Reports reuse the approved plan's summary and tasks. Generate / Regenerate / "Generate all plans" in `/admin/seo` start the `seo-plan-run` GitHub Action (Claude Pro OAuth token, 2 sites at a time), so a run survives leaving the page
 - Each run is a `seo_plan_runs` row (queued → running → completed/failed). The Action pulls its data from `/api/seo/plan-runs/[id]/input` and posts `plan.json` to `/api/seo/plan-runs/callback`; both use the `SEO_SHIP_CALLBACK_SECRET` bearer
@@ -218,6 +224,10 @@ The app uses a conditional layout system via `Components/ConditionalLayout.jsx`:
 - `NEXT_PUBLIC_RECAPTCHA_KEY` (Client-side site key)
 - `RECAPTCHA_SECRET_KEY` (Server-side secret key)
 
+**GitHub (DevOps approvals)**:
+- `GITHUB_DEVOPS_TOKEN` (fine-grained PAT, Visionary-Advance org, all repos: Pull requests R/W, Contents R/W, Commit statuses R, Deployments R). Without it Approvals is review-only
+- `GITHUB_WEBHOOK_SECRET` (org webhook → `/api/github/webhook`, Pull requests events). The route fails closed without it
+
 **Optional**:
 - `PAGESPEED_API_KEY` (Google PageSpeed API, falls back to anonymous if not set)
 
@@ -270,7 +280,8 @@ The admin section is protected with Supabase Auth:
 3. **Server-Side Keys**: Always use `SUPABASE_SERVICE_ROLE_KEY` in API routes (never anon key for privileged operations)
 
 3b. **Admin API auth** (`lib/admin-api-auth.js`): `requireAdmin(request)` verifies the caller's Supabase access token and checks it against `ADMIN_EMAILS`, failing closed if that var is unset. `lib/admin-auth.js` is **client-side only** and cannot protect an API route. Admin sessions are stored in localStorage (`va-admin-auth`), not cookies, so the browser must send `Authorization: Bearer <access_token>` — see `authFetch` in `app/admin/crm/pocket/page.js`.
-   - ⚠️ Only the `/api/crm/pocket/*` routes currently use this guard. The other `/api/crm/*` routes have **no server-side auth** and are publicly reachable.
+   - The `/api/crm/pocket/*`, `/api/devops/*` and push routes use this guard. ⚠️ The other `/api/crm/*` routes have **no server-side auth** and are publicly reachable.
+   - DevOps pages call their APIs through `devopsApi` / `authFetch` in `Components/Admin/DevOps/api.js`.
    - `verifyCronRequest(request)` is the constant-time, fail-closed replacement for the inline `authHeader !== \`Bearer ${cronSecret}\`` check. The older cron routes still use the inline version, which authenticates a literal `Bearer undefined` when `CRON_SECRET` is unset.
 
 4. **OAuth Token Pattern**: Both Square and Jobber use similar patterns:

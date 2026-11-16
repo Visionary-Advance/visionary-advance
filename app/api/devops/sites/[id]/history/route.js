@@ -2,10 +2,14 @@
 // GET - Get health check history for a site
 
 import { NextResponse } from 'next/server'
+import { requireAdmin } from '@/lib/admin-api-auth'
 import { supabaseCRM as supabase } from '@/lib/supabase-crm'
 
 // GET /api/devops/sites/[id]/history - Get health check history
 export async function GET(request, { params }) {
+  const auth = await requireAdmin(request)
+  if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status })
+
   try {
     const { id } = await params
     const { searchParams } = new URL(request.url)

@@ -2,10 +2,14 @@
 // GET dashboard statistics
 
 import { NextResponse } from 'next/server'
+import { requireAdmin } from '@/lib/admin-api-auth'
 import { getDevOpsStats } from '@/lib/devops'
 
 // GET /api/devops/stats - Get DevOps dashboard stats
-export async function GET() {
+export async function GET(request) {
+  const auth = await requireAdmin(request)
+  if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status })
+
   try {
     const stats = await getDevOpsStats()
 

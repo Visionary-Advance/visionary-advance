@@ -2,11 +2,15 @@
 // GET, PATCH, DELETE single site
 
 import { NextResponse } from 'next/server'
+import { requireAdmin } from '@/lib/admin-api-auth'
 import { supabaseCRM as supabase } from '@/lib/supabase-crm'
 import { getSiteWithHistory } from '@/lib/devops'
 
 // GET /api/devops/sites/[id] - Get site details with history
 export async function GET(request, { params }) {
+  const auth = await requireAdmin(request)
+  if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status })
+
   try {
     const { id } = await params
 
@@ -24,6 +28,9 @@ export async function GET(request, { params }) {
 
 // PATCH /api/devops/sites/[id] - Update site
 export async function PATCH(request, { params }) {
+  const auth = await requireAdmin(request)
+  if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status })
+
   try {
     const { id } = await params
     const body = await request.json()
@@ -130,6 +137,9 @@ export async function PATCH(request, { params }) {
 
 // DELETE /api/devops/sites/[id] - Delete site
 export async function DELETE(request, { params }) {
+  const auth = await requireAdmin(request)
+  if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status })
+
   try {
     const { id } = await params
 

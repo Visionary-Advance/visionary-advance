@@ -2,11 +2,15 @@
 // GET, PATCH single incident
 
 import { NextResponse } from 'next/server'
+import { requireAdmin } from '@/lib/admin-api-auth'
 import { supabaseCRM as supabase } from '@/lib/supabase-crm'
 import { updateIncidentStatus } from '@/lib/devops'
 
 // GET /api/devops/incidents/[id] - Get incident details
 export async function GET(request, { params }) {
+  const auth = await requireAdmin(request)
+  if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status })
+
   try {
     const { id } = await params
 
@@ -36,6 +40,9 @@ export async function GET(request, { params }) {
 
 // PATCH /api/devops/incidents/[id] - Update incident
 export async function PATCH(request, { params }) {
+  const auth = await requireAdmin(request)
+  if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status })
+
   try {
     const { id } = await params
     const body = await request.json()

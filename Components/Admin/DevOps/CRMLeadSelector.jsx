@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { authFetch } from './api'
 
 export default function CRMLeadSelector({ value, onChange, ownerEmail }) {
   const [leads, setLeads] = useState([])
@@ -42,7 +43,7 @@ export default function CRMLeadSelector({ value, onChange, ownerEmail }) {
       const params = new URLSearchParams()
       if (ownerEmail) params.set('owner_email', ownerEmail)
 
-      const res = await fetch(`/api/devops/crm-leads?${params}`)
+      const res = await authFetch(`/api/devops/crm-leads?${params}`)
       if (res.ok) {
         const data = await res.json()
         setLeads(data.leads || [])
@@ -79,7 +80,7 @@ export default function CRMLeadSelector({ value, onChange, ownerEmail }) {
 
   return (
     <div className="relative" ref={dropdownRef}>
-      <label className="block text-sm font-medium text-gray-300 mb-2">
+      <label className="block text-sm font-medium text-adm-text mb-2">
         Link to CRM Lead
       </label>
 
@@ -87,21 +88,21 @@ export default function CRMLeadSelector({ value, onChange, ownerEmail }) {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-4 py-2 bg-[#171717] border border-[#262626] rounded-lg text-left flex items-center justify-between hover:border-[#404040] focus:outline-none focus:border-purple-500 transition-colors"
+        className="w-full px-4 py-2 bg-adm-raised border border-adm-border rounded-lg text-left flex items-center justify-between hover:border-adm-border-strong focus:outline-none focus:border-adm-accent transition-colors"
       >
         {selectedLead ? (
           <div className="flex-1 min-w-0">
-            <div className="text-white truncate">
+            <div className="text-adm-text truncate">
               {selectedLead.full_name || selectedLead.email}
             </div>
             {selectedLead.company && (
-              <div className="text-gray-400 text-sm truncate">{selectedLead.company}</div>
+              <div className="text-adm-muted text-sm truncate">{selectedLead.company}</div>
             )}
           </div>
         ) : (
-          <span className="text-gray-500">Select a CRM lead...</span>
+          <span className="text-adm-subtle">Select a CRM lead...</span>
         )}
-        <ChevronIcon className={`w-4 h-4 text-gray-400 ml-2 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronIcon className={`w-4 h-4 text-adm-muted ml-2 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       {/* Clear button if selected */}
@@ -109,7 +110,7 @@ export default function CRMLeadSelector({ value, onChange, ownerEmail }) {
         <button
           type="button"
           onClick={handleClear}
-          className="absolute right-10 top-9 text-gray-400 hover:text-white"
+          className="absolute right-10 top-9 text-adm-muted hover:text-adm-text"
         >
           <XIcon className="w-4 h-4" />
         </button>
@@ -117,15 +118,15 @@ export default function CRMLeadSelector({ value, onChange, ownerEmail }) {
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute z-50 mt-1 w-full bg-[#171717] border border-[#262626] rounded-lg shadow-lg overflow-hidden">
+        <div className="absolute z-50 mt-1 w-full bg-adm-raised border border-adm-border rounded-lg shadow-lg overflow-hidden">
           {/* Search input */}
-          <div className="p-2 border-b border-[#262626]">
+          <div className="p-2 border-b border-adm-border">
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search leads..."
-              className="w-full px-3 py-2 bg-[#0a0a0a] border border-[#262626] rounded text-white placeholder-gray-500 text-sm focus:outline-none focus:border-purple-500"
+              className="w-full px-3 py-2 bg-adm-surface border border-adm-border rounded text-adm-text placeholder:text-adm-subtle text-sm focus:outline-none focus:border-adm-accent"
               autoFocus
             />
           </div>
@@ -133,11 +134,11 @@ export default function CRMLeadSelector({ value, onChange, ownerEmail }) {
           {/* Options list */}
           <div className="max-h-60 overflow-y-auto">
             {loading ? (
-              <div className="p-4 text-center text-gray-400">
-                <div className="animate-spin inline-block w-4 h-4 border-2 border-purple-400 border-t-transparent rounded-full"></div>
+              <div className="p-4 text-center text-adm-muted">
+                <div className="animate-spin inline-block w-4 h-4 border-2 border-adm-accent border-t-transparent rounded-full"></div>
               </div>
             ) : filteredLeads.length === 0 ? (
-              <div className="p-4 text-center text-gray-400 text-sm">
+              <div className="p-4 text-center text-adm-muted text-sm">
                 {search ? 'No leads found' : 'No CRM leads available'}
               </div>
             ) : (
@@ -146,9 +147,9 @@ export default function CRMLeadSelector({ value, onChange, ownerEmail }) {
                 <button
                   type="button"
                   onClick={() => handleSelect(null)}
-                  className="w-full px-4 py-3 text-left hover:bg-[#262626] transition-colors border-b border-[#262626]"
+                  className="w-full px-4 py-3 text-left hover:bg-adm-hover transition-colors border-b border-adm-border"
                 >
-                  <span className="text-gray-400">None (unlinked)</span>
+                  <span className="text-adm-muted">None (unlinked)</span>
                 </button>
 
                 {filteredLeads.map((lead) => {
@@ -158,27 +159,27 @@ export default function CRMLeadSelector({ value, onChange, ownerEmail }) {
                       key={lead.id}
                       type="button"
                       onClick={() => handleSelect(lead)}
-                      className={`w-full px-4 py-3 text-left hover:bg-[#262626] transition-colors ${
-                        lead.id === value ? 'bg-purple-600/20' : ''
+                      className={`w-full px-4 py-3 text-left hover:bg-adm-hover transition-colors ${
+                        lead.id === value ? 'bg-teal-500/10' : ''
                       }`}
                     >
                       <div className="flex items-center gap-2">
                         <div className="flex-1 min-w-0">
-                          <div className="text-white truncate flex items-center gap-2">
+                          <div className="text-adm-text truncate flex items-center gap-2">
                             {lead.full_name || lead.email}
                             {isMatch && (
-                              <span className="text-xs px-1.5 py-0.5 bg-green-500/20 text-green-400 rounded">
+                              <span className="text-xs px-1.5 py-0.5 bg-green-500/20 text-adm-good rounded">
                                 Match
                               </span>
                             )}
                           </div>
-                          <div className="text-gray-400 text-sm truncate">
+                          <div className="text-adm-muted text-sm truncate">
                             {lead.email}
                             {lead.company && ` - ${lead.company}`}
                           </div>
                         </div>
                         {lead.id === value && (
-                          <CheckIcon className="w-4 h-4 text-purple-400" />
+                          <CheckIcon className="w-4 h-4 text-adm-accent" />
                         )}
                       </div>
                     </button>
@@ -190,7 +191,7 @@ export default function CRMLeadSelector({ value, onChange, ownerEmail }) {
         </div>
       )}
 
-      <p className="text-gray-500 text-xs mt-1">
+      <p className="text-adm-subtle text-xs mt-1">
         Link this site to a CRM lead to sync status changes and incidents
       </p>
     </div>

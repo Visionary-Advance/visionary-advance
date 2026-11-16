@@ -1,57 +1,42 @@
 'use client'
 
-// Status badge component for health status display
+// Site health status. Color always comes with an icon and a word.
 
-const STATUS_CONFIG = {
-  healthy: {
-    label: 'Healthy',
-    bgColor: 'bg-green-500/20',
-    textColor: 'text-green-400',
-    dotColor: 'bg-green-400',
-  },
-  degraded: {
-    label: 'Degraded',
-    bgColor: 'bg-amber-500/20',
-    textColor: 'text-amber-400',
-    dotColor: 'bg-amber-400',
-  },
-  down: {
-    label: 'Down',
-    bgColor: 'bg-red-500/20',
-    textColor: 'text-red-400',
-    dotColor: 'bg-red-400',
-  },
-  unknown: {
-    label: 'Unknown',
-    bgColor: 'bg-gray-500/20',
-    textColor: 'text-gray-400',
-    dotColor: 'bg-gray-400',
-  },
+import { CircleCheck, CircleHelp, CircleX, ShieldOff, TriangleAlert } from 'lucide-react'
+import { Badge, cx } from '@/Components/Admin/ui'
+
+export const STATUS = {
+  healthy: { label: 'Healthy', tone: 'good', icon: CircleCheck, bar: 'bg-green-500' },
+  degraded: { label: 'Degraded', tone: 'warn', icon: TriangleAlert, bar: 'bg-amber-500' },
+  down: { label: 'Down', tone: 'bad', icon: CircleX, bar: 'bg-red-500' },
+  blocked: { label: 'Blocked', tone: 'neutral', icon: ShieldOff, bar: 'bg-zinc-500' },
+  unknown: { label: 'Unknown', tone: 'neutral', icon: CircleHelp, bar: 'bg-zinc-600' },
 }
 
-export default function StatusBadge({ status, size = 'md', showDot = true, showLabel = true }) {
-  const config = STATUS_CONFIG[status] || STATUS_CONFIG.unknown
+/** A check recorded as 'unknown' because a firewall turned the monitor away (403/429). */
+export function checkStatus(check) {
+  if (!check) return 'unknown'
+  if (check.status === 'unknown' && [403, 429].includes(check.http_status_code)) return 'blocked'
+  return check.status || 'unknown'
+}
 
-  const sizeClasses = {
-    sm: 'text-xs px-2 py-0.5',
-    md: 'text-sm px-2.5 py-1',
-    lg: 'text-base px-3 py-1.5',
-  }
-
-  const dotSizes = {
-    sm: 'w-1.5 h-1.5',
-    md: 'w-2 h-2',
-    lg: 'w-2.5 h-2.5',
-  }
-
+export default function StatusBadge({ status, className, title }) {
+  const s = STATUS[status] || STATUS.unknown
   return (
-    <span
-      className={`inline-flex items-center gap-1.5 rounded-full font-medium ${config.bgColor} ${config.textColor} ${sizeClasses[size]}`}
-    >
-      {showDot && (
-        <span className={`${dotSizes[size]} rounded-full ${config.dotColor} animate-pulse`} />
-      )}
-      {showLabel && config.label}
+    <Badge tone={s.tone} icon={s.icon} className={className} title={title}>
+      {s.label}
+    </Badge>
+  )
+}
+
+/** Just a colored dot with screen-reader text, for dense lists. */
+export function StatusDot({ status, className }) {
+  const s = STATUS[status] || STATUS.unknown
+  return (
+    <span className={cx('relative inline-flex h-2.5 w-2.5 shrink-0', className)} title={s.label}>
+      {status === 'down' && <span className="absolute inset-0 animate-ping rounded-full bg-red-500/60" />}
+      <span className={cx('relative h-2.5 w-2.5 rounded-full', s.bar)} />
+      <span className="sr-only">{s.label}</span>
     </span>
   )
 }
