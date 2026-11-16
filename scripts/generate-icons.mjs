@@ -7,13 +7,13 @@ import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
-const TEAL = '#008070'
+const BLACK = '#000000'
 
 // "VA" monogram (solid white letterforms on brand teal) on a 512 canvas,
 // echoing the solid V/A letterforms of the Visionary Advance logo.
 // `scale` shrinks the marks toward the centre so maskable / apple icons
 // keep their art inside the safe zone.
-function svg({ bg = TEAL, scale = 1 } = {}) {
+function svg({ bg = BLACK, scale = 1 } = {}) {
   const t = `translate(256 256) scale(${scale}) translate(-256 -256)`
   return `<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
   <rect width="512" height="512" fill="${bg}"/>
