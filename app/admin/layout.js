@@ -6,6 +6,7 @@ import AdminScrollRestore from '@/Components/Admin/AdminScrollRestore'
 import ServiceWorkerRegister from '@/Components/Admin/ServiceWorkerRegister'
 import InstallPrompt from '@/Components/Admin/InstallPrompt'
 import AdminBottomNav from '@/Components/Admin/AdminBottomNav'
+import PullToRefresh from '@/Components/Admin/PullToRefresh'
 import { ToastProvider } from '@/Components/Admin/ui'
 
 export const metadata = {
@@ -33,6 +34,7 @@ export default function AdminLayout({ children }) {
     <AdminAuthProvider>
       <ToastProvider>
         <AdminScrollRestore />
+        <PullToRefresh />
         <ServiceWorkerRegister />
         {children}
         <InstallPrompt />

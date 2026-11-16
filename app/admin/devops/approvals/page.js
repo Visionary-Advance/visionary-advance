@@ -8,13 +8,14 @@ import { Suspense, useCallback, useEffect, useState } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import {
   CircleAlert, CircleCheck, CircleDashed, CircleX, ExternalLink, FileCode, GitBranch, GitMerge, GitPullRequest,
-  Globe, RefreshCw, Undo2,
+  Globe, Undo2,
 } from 'lucide-react'
 import {
   Alert, Badge, Button, Card, Drawer, EmptyState, Field, PageHeader, PageLoader, SectionLabel, Skeleton, cx,
   focusRing, inputClass, useToast,
 } from '@/Components/Admin/ui'
 import { announceApprovalsChanged, devopsApi } from '@/Components/Admin/DevOps/api'
+import { usePullToRefresh } from '@/Components/Admin/PullToRefresh'
 import { timeAgo } from '@/Components/Admin/DevOps/format'
 
 export default function ApprovalsPage() {
@@ -33,10 +34,8 @@ function Approvals() {
   const openTaskId = searchParams.get('task')
   const [data, setData] = useState(null)
   const [error, setError] = useState(null)
-  const [refreshing, setRefreshing] = useState(false)
 
-  const load = useCallback(async ({ quiet } = {}) => {
-    if (!quiet) setRefreshing(true)
+  const load = useCallback(async () => {
     try {
       const result = await devopsApi('/api/devops/approvals')
       setData(result)
@@ -53,24 +52,23 @@ function Approvals() {
       }
     } catch (err) {
       setError(err.message)
-    } finally {
-      setRefreshing(false)
     }
   }, [notify])
 
-  useEffect(() => { load({ quiet: true }) }, [load])
+  useEffect(() => { load() }, [load])
+  usePullToRefresh(load)
 
   const openTask = id => router.push(id ? `${pathname}?task=${id}` : pathname, { scroll: false })
 
   const onDone = useCallback(() => {
     openTask(null)
     announceApprovalsChanged()
-    load({ quiet: true })
+    load()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [load])
 
   if (error && !data) {
-    return <EmptyState icon={GitPullRequest} title="Couldn't load approvals" description={error} action={<Button onClick={() => load()}>Try again</Button>} />
+    return <EmptyState icon={GitPullRequest} title="Couldn't load approvals" description={error} action={<Button onClick={load}>Try again</Button>} />
   }
   if (!data) return <PageLoader />
 
@@ -81,7 +79,6 @@ function Approvals() {
       <PageHeader
         title="Approvals"
         description="Changes Claude made from your SEO plans. Approving merges the PR and deploys the site."
-        actions={<Button icon={RefreshCw} onClick={() => load()} loading={refreshing}>Refresh</Button>}
       />
 
       {!data.githubConfigured && (

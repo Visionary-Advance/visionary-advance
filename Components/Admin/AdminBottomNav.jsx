@@ -1,13 +1,20 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { motion } from 'framer-motion'
+import { LayoutGroup, motion, useReducedMotion } from 'framer-motion'
 
-// Frosted-glass floating tab bar for the admin area.
-// Only renders when the app is running as an installed PWA (standalone),
-// and only on mobile (hidden on md+ where the section sidebars live).
+// Floating tab bar in the style of iOS 26 "Liquid Glass" (Apple's "Adopting Liquid
+// Glass"): a glass capsule on its own layer above the content, a glass lens that
+// slides to the selected tab, and a bar that shrinks to the current tab while you
+// scroll down and comes back when you scroll up (tap it to expand). A soft blur at
+// the bottom edge keeps it legible over content ("scroll edge effect").
+//
+// Only shown in the installed app (standalone) on phones; section sidebars do this
+// job on wider screens. Glass styles live in globals.css (.liquid-glass*), including
+// the Reduce Transparency fallback.
+
 const NAV = [
   { href: '/admin', label: 'Home', exact: true, Icon: HomeIcon },
   { href: '/admin/crm', label: 'CRM', Icon: CrmIcon },
@@ -16,9 +23,16 @@ const NAV = [
   { href: '/admin/seo', label: 'SEO', Icon: SeoIcon },
 ]
 
+const SPRING = { type: 'spring', stiffness: 380, damping: 32, mass: 0.8 }
+const MINIMIZE_AFTER = 120 // px scrolled before the bar may shrink
+const DIRECTION_SLOP = 6 // px of movement before a scroll counts as a direction
+
 export default function AdminBottomNav() {
   const pathname = usePathname()
+  const reduceMotion = useReducedMotion()
   const [standalone, setStandalone] = useState(false)
+  const [minimized, setMinimized] = useState(false)
+  const lastY = useRef(0)
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -41,9 +55,9 @@ export default function AdminBottomNav() {
     const prev = document.body.style.paddingBottom
     const root = document.documentElement
     const apply = () => {
-      document.body.style.paddingBottom = mq.matches ? '92px' : prev
-      // Lets floating buttons (Fab) sit above the bar
-      if (mq.matches) root.style.setProperty('--admin-nav-offset', 'calc(env(safe-area-inset-bottom) + 82px)')
+      document.body.style.paddingBottom = mq.matches ? '96px' : prev
+      // Lets floating buttons (Fab) and toasts sit above the bar
+      if (mq.matches) root.style.setProperty('--admin-nav-offset', 'calc(env(safe-area-inset-bottom) + 84px)')
       else root.style.removeProperty('--admin-nav-offset')
     }
     apply()
@@ -55,41 +69,85 @@ export default function AdminBottomNav() {
     }
   }, [standalone])
 
+  // Shrink while scrolling down, expand while scrolling up or near the top
+  useEffect(() => {
+    if (!standalone) return
+    lastY.current = window.scrollY
+    const onScroll = () => {
+      const y = window.scrollY
+      const delta = y - lastY.current
+      if (Math.abs(delta) < DIRECTION_SLOP) return
+      if (y < MINIMIZE_AFTER || delta < 0) setMinimized(false)
+      else setMinimized(true)
+      lastY.current = y
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [standalone])
+
+  // A new page starts with the full bar
+  useEffect(() => { setMinimized(false) }, [pathname])
+
   if (!standalone) return null
 
+  const isActive = (item) => (item.exact ? pathname === item.href : pathname?.startsWith(item.href))
+  const active = NAV.find(isActive) || NAV[0]
+  const transition = reduceMotion ? { duration: 0 } : SPRING
+
   return (
-    <nav
-      className="pointer-events-none fixed inset-x-0 bottom-0 z-50 flex justify-center md:hidden"
-      style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 10px)' }}
-      aria-label="Primary"
-    >
-      <div className="pointer-events-auto relative mx-3 flex w-full max-w-sm items-stretch justify-between gap-1 overflow-hidden rounded-[26px] border border-white/10 bg-[#0a0a0a]/60 p-1.5 shadow-[0_8px_40px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
-        {/* top edge highlight to sell the glass look */}
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent" />
-        {NAV.map(({ href, label, exact, Icon }) => {
-          const active = exact ? pathname === href : pathname?.startsWith(href)
-          return (
-            <Link
-              key={href}
-              href={href}
-              className={`relative flex flex-1 flex-col items-center gap-0.5 rounded-[20px] px-1 py-1.5 transition-colors duration-300 ${
-                active ? 'text-[#16b39b]' : 'text-[#a1a1aa] active:text-[#fafafa]'
-              }`}
-            >
-              {active && (
-                <motion.span
-                  layoutId="adminNavActive"
-                  className="absolute inset-0 rounded-[20px] bg-white/10 shadow-[0_1px_0_rgba(255,255,255,0.12)_inset] ring-1 ring-inset ring-white/15"
-                  transition={{ type: 'spring', stiffness: 420, damping: 34, mass: 0.7 }}
-                />
-              )}
-              <Icon className="relative h-[22px] w-[22px]" />
-              <span className="relative text-[10px] font-medium leading-none">{label}</span>
-            </Link>
-          )
-        })}
-      </div>
-    </nav>
+    <>
+      {/* Scroll edge effect: content softens as it passes under the bar */}
+      <div aria-hidden className="liquid-glass-edge pointer-events-none fixed inset-x-0 bottom-0 z-40 md:hidden" />
+
+      <nav
+        aria-label="Primary"
+        className="pointer-events-none fixed inset-x-0 bottom-0 z-50 flex px-4 md:hidden"
+        style={{
+          paddingBottom: 'calc(env(safe-area-inset-bottom) + 8px)',
+          justifyContent: minimized ? 'flex-start' : 'center',
+        }}
+      >
+        <LayoutGroup>
+          <motion.div
+            layout
+            transition={transition}
+            className="liquid-glass pointer-events-auto relative flex items-stretch overflow-hidden rounded-full p-1"
+            style={{ width: minimized ? 'auto' : '100%', maxWidth: minimized ? undefined : 400 }}
+          >
+            {minimized ? (
+              <button
+                type="button"
+                onClick={() => setMinimized(false)}
+                aria-label={`${active.label}. Show all tabs`}
+                className="relative flex h-[52px] w-[56px] items-center justify-center rounded-full text-[#2dd4bf]"
+              >
+                <active.Icon className="relative h-6 w-6" />
+              </button>
+            ) : (
+              NAV.map(({ href, label, exact, Icon }) => {
+                const on = isActive({ href, exact })
+                return (
+                  <Link
+                    key={href}
+                    href={href}
+                    aria-current={on ? 'page' : undefined}
+                    className={`relative flex h-[52px] flex-1 flex-col items-center justify-center gap-0.5 rounded-full transition-colors duration-200 ${
+                      on ? 'text-[#2dd4bf]' : 'text-white/75 active:text-white'
+                    }`}
+                  >
+                    {on && (
+                      <motion.span layoutId="liquidGlassLens" transition={transition} className="liquid-glass-lens absolute inset-0 rounded-full" />
+                    )}
+                    <Icon className="relative h-[22px] w-[22px]" />
+                    <span className="relative text-[10px] font-semibold leading-none tracking-tight">{label}</span>
+                  </Link>
+                )
+              })
+            )}
+          </motion.div>
+        </LayoutGroup>
+      </nav>
+    </>
   )
 }
 

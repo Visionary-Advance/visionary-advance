@@ -12,6 +12,7 @@ import {
 import SiteCard from '@/Components/Admin/DevOps/SiteCard'
 import SeverityBadge from '@/Components/Admin/DevOps/SeverityBadge'
 import { devopsApi } from '@/Components/Admin/DevOps/api'
+import { usePullToRefresh } from '@/Components/Admin/PullToRefresh'
 import { timeAgo } from '@/Components/Admin/DevOps/format'
 
 export default function DevOpsOverviewPage() {
@@ -41,6 +42,7 @@ export default function DevOpsOverviewPage() {
   }, [])
 
   useEffect(() => { load() }, [load])
+  usePullToRefresh(load)
 
   async function runAllChecks() {
     setChecking(true)

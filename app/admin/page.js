@@ -8,13 +8,13 @@ import Link from 'next/link'
 import { format, isPast, isToday, isTomorrow, parseISO } from 'date-fns'
 import {
   ArrowDownLeft, CalendarClock, ChevronRight, CircleAlert, FolderKanban, Flame, House,
-  ListTodo, LogOut, Mic, Receipt, RefreshCw, Search, Server, Settings, TrendingUp, UserPlus, Users, Wallet,
+  ListTodo, LogOut, Mic, Receipt, Search, Server, Settings, TrendingUp, UserPlus, Users, Wallet,
 } from 'lucide-react'
 import { useAdminAuth } from '@/Components/Admin/AdminAuthProvider'
 import SettingsModal from '@/Components/Admin/SettingsModal'
 import MobileSheet, { SheetAction } from '@/Components/Admin/Mobile/MobileSheet'
-import { Badge, Card, CardHeader, IconButton, Skeleton, StatTile, cx, focusRing } from '@/Components/Admin/ui'
-import { invalidate, useCachedFetch } from '@/lib/useCachedFetch'
+import { Badge, Card, CardHeader, Skeleton, StatTile, cx, focusRing } from '@/Components/Admin/ui'
+import { useCachedFetch } from '@/lib/useCachedFetch'
 import { fmtMoney } from '@/Components/Admin/Finance/parts'
 
 const TOOLS = [
@@ -56,7 +56,6 @@ export default function AdminHome() {
   const { user, signOut } = useAdminAuth()
   const [showAccount, setShowAccount] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
-  const [refreshing, setRefreshing] = useState(false)
 
   const year = new Date().getFullYear()
   const crm = useCachedFetch('/api/crm/stats')
@@ -71,11 +70,6 @@ export default function AdminHome() {
   const stale = crm.data?.staleLeads || []
   const initial = user?.email?.[0]?.toUpperCase() || 'A'
 
-  const refresh = async () => {
-    setRefreshing(true)
-    try { await invalidate('/api/') } finally { setRefreshing(false) }
-  }
-
   return (
     <div className="min-h-dvh bg-adm-bg text-adm-text">
       {/* ── Header ─────────────────────────────────────────────────── */}
@@ -83,12 +77,6 @@ export default function AdminHome() {
         <div className="mx-auto flex h-14 max-w-5xl items-center gap-3 px-4 sm:px-6">
           <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-adm-accent-solid text-xs font-bold text-white">VA</span>
           <p className="min-w-0 flex-1 truncate text-[15px] font-semibold">Visionary Advance</p>
-          <IconButton
-            icon={RefreshCw}
-            label="Refresh"
-            onClick={refresh}
-            className={cx('h-11 w-11', refreshing && '[&_svg]:animate-spin')}
-          />
           <button
             type="button"
             onClick={() => setShowAccount(true)}

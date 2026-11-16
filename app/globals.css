@@ -361,6 +361,79 @@ body {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* Admin (html.va-admin is set by Components/Admin/PullToRefresh.jsx).
+   Our own pull-to-refresh replaces the browser's, so stop it from also firing. */
+html.va-admin {
+  overscroll-behavior-y: contain;
+}
+
+/* Liquid Glass tab bar (Components/Admin/AdminBottomNav.jsx), after Apple's
+   "Adopting Liquid Glass". Safari can't refract a backdrop, so the glass comes
+   from blur + saturation (content colour bleeds through) and specular edges. */
+.liquid-glass {
+  background:
+    radial-gradient(120% 140% at 15% -20%, rgba(255, 255, 255, 0.16), transparent 55%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02)),
+    rgba(28, 28, 32, 0.42);
+  -webkit-backdrop-filter: blur(14px) saturate(190%) brightness(1.05);
+  backdrop-filter: blur(14px) saturate(190%) brightness(1.05);
+  box-shadow:
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.38),   /* lit top rim */
+    inset 0 -1px 0.5px rgba(255, 255, 255, 0.10),  /* bottom rim */
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.14),   /* edge */
+    0 10px 30px -6px rgba(0, 0, 0, 0.55),
+    0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+/* The selected-tab lens: a brighter piece of glass inside the bar */
+.liquid-glass-lens {
+  background:
+    radial-gradient(100% 120% at 30% 0%, rgba(255, 255, 255, 0.22), transparent 60%),
+    rgba(255, 255, 255, 0.10);
+  box-shadow:
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.45),
+    inset 0 -0.5px 0.5px rgba(255, 255, 255, 0.12),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.10);
+}
+
+/* Scroll edge effect: blur and darken content as it slides under the bar */
+.liquid-glass-edge {
+  height: calc(env(safe-area-inset-bottom) + 96px);
+  background: linear-gradient(to top, rgba(9, 9, 11, 0.85), rgba(9, 9, 11, 0));
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  -webkit-mask-image: linear-gradient(to top, #000 40%, transparent);
+  mask-image: linear-gradient(to top, #000 40%, transparent);
+}
+
+/* Reduce Transparency: frosted becomes solid, as the system does */
+@media (prefers-reduced-transparency: reduce) {
+  .liquid-glass {
+    background: rgb(30, 30, 34);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .liquid-glass-edge {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+/* Installed admin app: no page scrollbar, like a native app */
+@media (display-mode: standalone) {
+  html.va-admin,
+  html.va-admin body {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  html.va-admin::-webkit-scrollbar,
+  html.va-admin body::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+}
 .circle {
   position: absolute;
   border-radius: 50%;
