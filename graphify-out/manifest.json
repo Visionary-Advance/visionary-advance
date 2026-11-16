@@ -938,9 +938,9 @@
     "semantic_hash": ""
   },
   "app/admin/seo/layout.js": {
-    "mtime": 1794442144.4595354,
-    "seen": 1794442217.4589946,
-    "ast_hash": "e3660a1150dd49fd45c5a30913bcfb49",
+    "mtime": 1794864752.9762416,
+    "seen": 1794864860.2094214,
+    "ast_hash": "7c20065cc3be055a4585eb9fac85db6c",
     "semantic_hash": ""
   },
   "app/admin/seo/page.js": {
@@ -3398,9 +3398,9 @@
     "semantic_hash": ""
   },
   "app/admin/seo/sites/[id]/layout.js": {
-    "mtime": 1794412982.972955,
-    "seen": 1794412991.6165133,
-    "ast_hash": "133ac4d2e734614b6c0a22f7fa150f70",
+    "mtime": 1794864770.9283266,
+    "seen": 1794864860.209426,
+    "ast_hash": "1357e1ccfa251e7afcb69ac100f20f6b",
     "semantic_hash": ""
   },
   "app/admin/seo/sites/[id]/plan/page.js": {

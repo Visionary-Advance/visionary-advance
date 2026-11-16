@@ -1,13 +1,13 @@
 'use client'
 
 // SEO shell: a sidebar that knows about your sites (and, inside one, its sections),
-// fixed on desktop and a slide-out drawer on mobile.
+// fixed on desktop. On phones: a sticky top bar with section tabs and bottom sheets.
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
-  LayoutGrid, FileText, ArrowLeft, House, LogOut, Menu, X, ChevronDown, ChartLine, Globe, LoaderCircle,
+  LayoutGrid, FileText, ArrowLeft, House, LogOut, ChevronDown, ChevronsUpDown, Check, ChartLine, Globe, LoaderCircle,
 } from 'lucide-react'
 import { useAdminAuth } from '@/Components/Admin/AdminAuthProvider'
 import { SEOProvider, useSEO } from '@/Components/Admin/SEO/SEOContext'
@@ -15,6 +15,8 @@ import { ToastProvider, cx, focusRing } from '@/Components/Admin/SEO/ui'
 import { SITE_SECTIONS, sectionHref, currentSection } from '@/Components/Admin/SEO/sections'
 import { PlanRunsProvider, isRunInFlight, usePlanRuns } from '@/Components/Admin/SEO/planRuns'
 import { CompactRunProgress } from '@/Components/Admin/SEO/PlanRunProgress'
+import { hostOf } from '@/Components/Admin/SEO/format'
+import MobileSheet from '@/Components/Admin/Mobile/MobileSheet'
 
 export default function SEOLayout({ children }) {
   return (
@@ -29,12 +31,6 @@ export default function SEOLayout({ children }) {
 }
 
 function Shell({ children }) {
-  const pathname = usePathname()
-  const [mobileOpen, setMobileOpen] = useState(false)
-
-  // Close the mobile drawer on navigation.
-  useEffect(() => { setMobileOpen(false) }, [pathname])
-
   return (
     <div className="min-h-dvh bg-adm-bg text-adm-text">
       <a
@@ -49,41 +45,10 @@ function Shell({ children }) {
         <SidebarContent />
       </aside>
 
-      {/* Mobile drawer */}
-      {mobileOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="absolute inset-0 bg-black/60" onClick={() => setMobileOpen(false)} aria-hidden />
-          <aside className="absolute inset-y-0 left-0 w-72 max-w-[85%] border-r border-adm-border bg-adm-surface shadow-2xl">
-            <button
-              type="button"
-              onClick={() => setMobileOpen(false)}
-              aria-label="Close menu"
-              className={cx('absolute right-3 top-3.5 rounded-lg p-1.5 text-adm-muted hover:bg-adm-raised hover:text-adm-text', focusRing)}
-            >
-              <X className="h-5 w-5" aria-hidden />
-            </button>
-            <SidebarContent />
-          </aside>
-        </div>
-      )}
-
       <div className="lg:pl-60">
-        {/* Mobile top bar */}
-        <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-adm-border bg-adm-surface/95 px-4 backdrop-blur lg:hidden">
-          <button
-            type="button"
-            onClick={() => setMobileOpen(true)}
-            aria-label="Open menu"
-            className={cx('rounded-lg p-2 -ml-2 text-adm-muted hover:bg-adm-raised hover:text-adm-text', focusRing)}
-          >
-            <Menu className="h-5 w-5" aria-hidden />
-          </button>
-          <Link href="/admin/seo" className="flex items-center gap-2 font-semibold">
-            <Logo /> SEO
-          </Link>
-        </header>
+        <MobileHeader />
 
-        <main id="seo-main" className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+        <main id="seo-main" className="mx-auto max-w-7xl px-4 pb-6 pt-5 sm:px-6 lg:px-8 lg:py-8">
           {children}
         </main>
       </div>
@@ -288,6 +253,241 @@ function MenuLink({ href, icon: Icon, children }) {
       className={cx('flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-adm-muted hover:bg-adm-hover hover:text-adm-text', focusRing)}
     >
       <Icon className="h-4 w-4" aria-hidden /> {children}
+    </Link>
+  )
+}
+
+// ── Mobile chrome (below lg) ──────────────────────────────────────────────
+// Frosted sticky bar that clears the notch: the title doubles as the site
+// switcher, a pill shows plan runs in progress, and the avatar opens the
+// account sheet. Under it, swipeable section tabs stay in reach while you scroll.
+
+const TOP_TABS = [
+  { href: '/admin/seo', label: 'All sites', icon: LayoutGrid, exact: true },
+  { href: '/admin/seo/reports', label: 'Reports', icon: FileText },
+]
+
+function MobileHeader() {
+  const pathname = usePathname() || ''
+  const { user } = useAdminAuth()
+  const { sites } = useSEO()
+  const { runs } = usePlanRuns()
+  const [sheet, setSheet] = useState(null) // 'sites' | 'runs' | 'account' | null
+  const headerRef = useRef(null)
+  const tabsRef = useRef(null)
+
+  const activeSiteId = pathname.match(/^\/admin\/seo\/sites\/([^/]+)/)?.[1]
+  const activeSite = activeSiteId ? sites.find(s => s.id === activeSiteId) : null
+  const section = activeSiteId ? currentSection(pathname, activeSiteId) : null
+  const running = sites.filter(s => isRunInFlight(runs?.[s.id]))
+
+  const tabs = activeSiteId
+    ? SITE_SECTIONS.map(s => ({ href: sectionHref(activeSiteId, s.slug), label: s.label, icon: s.icon, active: s.slug === section }))
+    : TOP_TABS.map(t => ({ ...t, active: t.exact ? pathname === t.href : pathname.startsWith(t.href) }))
+
+  // Close any sheet on navigation
+  useEffect(() => { setSheet(null) }, [pathname])
+
+  // Keep the active tab in view
+  useEffect(() => {
+    tabsRef.current?.querySelector('[data-active="true"]')
+      ?.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' })
+  }, [pathname])
+
+  // Publish the header height so pages can stick things right under it
+  useEffect(() => {
+    const el = headerRef.current
+    if (!el || typeof ResizeObserver === 'undefined') return
+    const root = document.documentElement
+    const ro = new ResizeObserver(() => root.style.setProperty('--admin-header-h', `${el.offsetHeight}px`))
+    ro.observe(el)
+    return () => {
+      ro.disconnect()
+      root.style.removeProperty('--admin-header-h')
+    }
+  }, [])
+
+  const title = activeSite ? (activeSite.display_name || hostOf(activeSite.site_url)) : 'SEO'
+  const close = () => setSheet(null)
+
+  return (
+    <>
+      <header
+        ref={headerRef}
+        className="sticky top-0 z-30 border-b border-adm-border/70 bg-adm-bg/80 backdrop-blur-xl lg:hidden"
+        style={{ paddingTop: 'env(safe-area-inset-top)' }}
+      >
+        <div className="flex h-12 items-center gap-1.5 px-4">
+          <Logo />
+          <button
+            type="button"
+            onClick={() => setSheet('sites')}
+            aria-haspopup="dialog"
+            className={cx('flex h-11 min-w-0 flex-1 cursor-pointer items-center gap-1 rounded-lg px-1.5 text-left', focusRing)}
+          >
+            <span className="truncate text-[15px] font-semibold">{title}</span>
+            <ChevronsUpDown className="h-4 w-4 shrink-0 text-adm-subtle" aria-hidden />
+            <span className="sr-only">Switch site</span>
+          </button>
+          {running.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setSheet('runs')}
+              aria-label={`${running.length} plan${running.length === 1 ? '' : 's'} generating`}
+              className={cx('flex h-11 shrink-0 cursor-pointer items-center', focusRing)}
+            >
+              <span className="flex h-8 items-center gap-1.5 rounded-full border border-adm-border bg-adm-surface px-2.5 text-xs font-medium tabular-nums text-adm-info">
+                <LoaderCircle className="h-3.5 w-3.5 animate-spin" aria-hidden /> {running.length}
+              </span>
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => setSheet('account')}
+            aria-label="Account"
+            className={cx('-mr-1.5 flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full', focusRing)}
+          >
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-adm-raised text-xs font-semibold ring-1 ring-adm-border">
+              {user?.email?.[0]?.toUpperCase() || 'A'}
+            </span>
+          </button>
+        </div>
+
+        <nav ref={tabsRef} aria-label={activeSiteId ? 'Site sections' : 'SEO'} className="scrollbar-hide flex gap-1.5 overflow-x-auto px-4 pb-2.5">
+          {tabs.map(tab => (
+            <Link
+              key={tab.href}
+              href={tab.href}
+              data-active={tab.active}
+              aria-current={tab.active ? 'page' : undefined}
+              className={cx(
+                'flex h-9 shrink-0 items-center gap-1.5 rounded-full border px-3.5 text-[13px] font-medium transition-colors',
+                tab.active
+                  ? 'border-teal-500/30 bg-teal-500/10 text-adm-accent'
+                  : 'border-adm-border bg-adm-surface text-adm-muted active:bg-adm-raised',
+                focusRing
+              )}
+            >
+              <tab.icon className="h-4 w-4" aria-hidden />
+              {tab.label}
+            </Link>
+          ))}
+        </nav>
+      </header>
+
+      <SitesSheet open={sheet === 'sites'} onClose={close} activeSiteId={activeSiteId} section={section} pathname={pathname} />
+      <RunsSheet open={sheet === 'runs'} onClose={close} sites={running} runs={runs} />
+      <AccountSheet open={sheet === 'account'} onClose={close} />
+    </>
+  )
+}
+
+function SitesSheet({ open, onClose, activeSiteId, section, pathname }) {
+  const { sites, sitesLoading, planBySite } = useSEO()
+  const { runs } = usePlanRuns()
+
+  return (
+    <MobileSheet open={open} onClose={onClose} title="Go to">
+      <div className="-mx-2">
+        <SheetLink href="/admin/seo" icon={LayoutGrid} active={pathname === '/admin/seo'} onClick={onClose}>All sites</SheetLink>
+        <SheetLink href="/admin/seo/reports" icon={FileText} active={pathname.startsWith('/admin/seo/reports')} onClick={onClose}>Reports</SheetLink>
+
+        <p className="mb-1 mt-4 px-3 text-xs font-medium uppercase tracking-wider text-adm-subtle">Sites</p>
+        {sitesLoading && sites.length === 0 ? (
+          <div className="space-y-2 px-3 py-2">
+            {[0, 1, 2].map(i => <div key={i} className="h-6 animate-pulse rounded bg-adm-raised" />)}
+          </div>
+        ) : sites.length === 0 ? (
+          <p className="px-3 py-2 text-sm text-adm-subtle">No sites yet</p>
+        ) : (
+          <ul>
+            {sites.map(site => {
+              const generating = isRunInFlight(runs?.[site.id])
+              const hasDraft = planBySite[site.id]?.hasDraft
+              const current = site.id === activeSiteId
+              return (
+                <li key={site.id}>
+                  <Link
+                    // Stay on the same section when hopping between sites
+                    href={sectionHref(site.id, section || '')}
+                    onClick={onClose}
+                    aria-current={current ? 'page' : undefined}
+                    className="flex min-h-[52px] items-center gap-3 rounded-xl px-3 py-2 active:bg-adm-raised"
+                  >
+                    <Globe className={cx('h-5 w-5 shrink-0', current ? 'text-adm-accent' : 'text-adm-muted')} aria-hidden />
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-[15px] font-medium text-adm-text">{site.display_name || hostOf(site.site_url)}</span>
+                      <span className="block truncate text-xs text-adm-subtle">{hostOf(site.site_url)}</span>
+                    </span>
+                    {generating ? (
+                      <LoaderCircle className="h-4 w-4 shrink-0 animate-spin text-adm-info" aria-label="Generating a plan" />
+                    ) : hasDraft && (
+                      <span className="h-2 w-2 shrink-0 rounded-full bg-adm-warn" title="Draft plan waiting for approval">
+                        <span className="sr-only">Draft plan waiting for approval</span>
+                      </span>
+                    )}
+                    {current && <Check className="h-4 w-4 shrink-0 text-adm-accent" aria-hidden />}
+                  </Link>
+                </li>
+              )
+            })}
+          </ul>
+        )}
+      </div>
+    </MobileSheet>
+  )
+}
+
+function RunsSheet({ open, onClose, sites, runs }) {
+  return (
+    <MobileSheet open={open} onClose={onClose} title={`Generating ${sites.length} plan${sites.length === 1 ? '' : 's'}`}>
+      <ul className="-mx-2">
+        {sites.map(site => (
+          <li key={site.id}>
+            <Link
+              href={sectionHref(site.id, 'plan')}
+              onClick={onClose}
+              className="block rounded-xl px-3 py-3 active:bg-adm-raised"
+            >
+              <span className="block truncate text-[15px] font-medium text-adm-text">{site.display_name || hostOf(site.site_url)}</span>
+              <CompactRunProgress run={runs[site.id]} name={site.display_name} className="mt-1.5" />
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </MobileSheet>
+  )
+}
+
+function AccountSheet({ open, onClose }) {
+  const { user, signOut } = useAdminAuth()
+  return (
+    <MobileSheet open={open} onClose={onClose} title={user?.email || 'Account'}>
+      <div className="-mx-2">
+        <SheetLink href="/admin" icon={ArrowLeft} onClick={onClose}>Admin hub</SheetLink>
+        <SheetLink href="/" icon={House} onClick={onClose}>Back to site</SheetLink>
+        <div className="my-1 border-t border-adm-border" />
+        <button
+          type="button"
+          onClick={() => signOut()}
+          className="flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-3.5 text-left text-[15px] font-medium text-adm-bad active:bg-adm-raised"
+        >
+          <LogOut className="h-5 w-5" aria-hidden /> Sign out
+        </button>
+      </div>
+    </MobileSheet>
+  )
+}
+
+function SheetLink({ href, icon: Icon, active, onClick, children }) {
+  return (
+    <Link
+      href={href}
+      onClick={onClick}
+      aria-current={active ? 'page' : undefined}
+      className="flex items-center gap-3 rounded-xl px-3 py-3.5 text-[15px] font-medium text-adm-text active:bg-adm-raised"
+    >
+      <Icon className={cx('h-5 w-5', active ? 'text-adm-accent' : 'text-adm-muted')} aria-hidden /> {children}
     </Link>
   )
 }

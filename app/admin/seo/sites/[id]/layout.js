@@ -104,13 +104,16 @@ export default function SiteLayout({ children }) {
       }}
     >
       <header className="mb-6">
-        <Breadcrumbs
-          items={[
-            { label: 'All sites', href: '/admin/seo' },
-            { label: site.display_name || hostOf(site.site_url), href: sectionHref(site.id, '') },
-            ...(section ? [{ label: sectionLabel }] : []),
-          ]}
-        />
+        {/* On phones the sticky shell bar shows where you are */}
+        <div className="hidden lg:block">
+          <Breadcrumbs
+            items={[
+              { label: 'All sites', href: '/admin/seo' },
+              { label: site.display_name || hostOf(site.site_url), href: sectionHref(site.id, '') },
+              ...(section ? [{ label: sectionLabel }] : []),
+            ]}
+          />
+        </div>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
             <SiteSwitcher site={site} sites={sites} section={section} />
@@ -137,32 +140,7 @@ export default function SiteLayout({ children }) {
             {syncing ? 'Syncing…' : 'Sync data'}
           </Button>
         </div>
-
-        {/* Section tabs on small screens; the sidebar does this job on desktop. */}
-        <nav aria-label="Site sections" className="-mx-4 mt-5 overflow-x-auto border-b border-adm-border px-4 lg:hidden">
-          <ul className="flex gap-1">
-            {SITE_SECTIONS.map(s => {
-              const active = s.slug === section
-              return (
-                <li key={s.slug}>
-                  <Link
-                    href={sectionHref(site.id, s.slug)}
-                    aria-current={active ? 'page' : undefined}
-                    className={cx(
-                      'relative flex items-center gap-1.5 whitespace-nowrap px-3 py-2.5 text-sm font-medium',
-                      active ? 'text-adm-text' : 'text-adm-muted hover:text-adm-text',
-                      focusRing
-                    )}
-                  >
-                    <s.icon className="h-4 w-4" aria-hidden />
-                    {s.label}
-                    {active && <span className="absolute inset-x-2 -bottom-px h-0.5 rounded-full bg-adm-accent" />}
-                  </Link>
-                </li>
-              )
-            })}
-          </ul>
-        </nav>
+        {/* Section tabs live in the sticky shell bar on phones and the sidebar on desktop */}
       </header>
 
       {children}
@@ -175,13 +153,15 @@ function SiteSwitcher({ site, sites, section }) {
   const [open, setOpen] = useState(false)
   const router = useRouter()
   const name = site.display_name || hostOf(site.site_url)
+  const plain = <h1 className="truncate text-2xl font-semibold tracking-tight">{name}</h1>
 
-  if (sites.length < 2) {
-    return <h1 className="truncate text-2xl font-semibold tracking-tight">{name}</h1>
-  }
+  if (sites.length < 2) return plain
 
+  // Phones switch sites from the shell's top bar sheet, so the popover is desktop-only
   return (
-    <div className="relative">
+    <>
+    <div className="lg:hidden">{plain}</div>
+    <div className="relative hidden lg:block">
       <h1 className="text-2xl font-semibold tracking-tight">
         <button
           type="button"
@@ -218,5 +198,6 @@ function SiteSwitcher({ site, sites, section }) {
         </>
       )}
     </div>
+    </>
   )
 }
