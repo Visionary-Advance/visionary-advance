@@ -45,6 +45,7 @@ export default function LeadDetailPage({ params }) {
   const [editData, setEditData] = useState({})
   const [savingEdit, setSavingEdit] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [emailCopied, setEmailCopied] = useState(false)
 
   useEffect(() => {
     fetchLead()
@@ -120,6 +121,16 @@ export default function LeadDetailPage({ params }) {
   const handlePinToggle = (updatedActivity) => {
     // Refresh activities to get proper sort order
     fetchLead()
+  }
+
+  const handleCopyEmail = async () => {
+    try {
+      await navigator.clipboard.writeText(lead.email)
+      setEmailCopied(true)
+      setTimeout(() => setEmailCopied(false), 2000)
+    } catch {
+      // ignore clipboard failures
+    }
   }
 
   const handleDeleteLead = async () => {
@@ -397,10 +408,18 @@ export default function LeadDetailPage({ params }) {
                 <>
                   <div>
                     <dt className="text-xs text-[#a1a1aa]">Email</dt>
-                    <dd className="mt-1">
+                    <dd className="mt-1 flex items-center gap-2">
                       <a href={`mailto:${lead.email}`} className="text-[#008070] hover:underline">
                         {lead.email}
                       </a>
+                      <button
+                        type="button"
+                        onClick={handleCopyEmail}
+                        aria-label="Copy email address"
+                        className="text-xs text-[#a1a1aa] hover:text-[#fafafa] border border-[#262626] rounded px-2 py-0.5 transition-colors"
+                      >
+                        {emailCopied ? 'Copied' : 'Copy'}
+                      </button>
                     </dd>
                   </div>
                   {lead.phone && (
