@@ -46,7 +46,7 @@ jobs:
     env:
       RUN_ID: ${{ inputs.run_id }}
       RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-      CHAT_TMP: ${{ runner.temp }}/chat
+      CHAT_TMP: /tmp/claude-chat-work
     steps:
       - name: Report running
         env:
@@ -201,7 +201,7 @@ jobs:
       RUN_ID: ${{ inputs.run_id }}
       THREAD_ID: ${{ inputs.thread_id }}
       RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-      CHAT_TMP: ${{ runner.temp }}/chat
+      CHAT_TMP: /tmp/claude-chat-work
     steps:
       - name: Report running
         env:
