@@ -23,6 +23,11 @@ export async function devopsApi(url, { method = 'GET', body } = {}) {
   return data
 }
 
+// Tell the shell to refresh the Claude "needs you" count after a chat changes
+export function announceClaudeChanged() {
+  if (typeof window !== 'undefined') window.dispatchEvent(new Event('devops:claude-changed'))
+}
+
 // Tell the shell to refresh the Approvals count after a merge or send-back
 export function announceApprovalsChanged() {
   if (typeof window !== 'undefined') window.dispatchEvent(new Event('devops:approvals-changed'))

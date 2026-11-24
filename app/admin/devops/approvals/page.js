@@ -1,14 +1,14 @@
 'use client'
 
-// Approvals: PRs opened by SEO "Ship", waiting for you. Review the change, open the
+// Approvals: PRs opened by SEO "Ship" and the Claude chat, waiting for you. Review the change, open the
 // Vercel preview, then Approve & merge (deploys to production) or Send back with a note.
 // ?task=<id> opens a review directly (Telegram links here).
 
 import { Suspense, useCallback, useEffect, useState } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import {
-  CircleAlert, CircleCheck, CircleDashed, CircleX, ExternalLink, FileCode, GitBranch, GitMerge, GitPullRequest,
-  Globe, Undo2,
+  CircleAlert, CircleCheck, CircleDashed, CircleX, Database, ExternalLink, FileCode, GitBranch, GitMerge, GitPullRequest,
+  Globe, MessageSquare, Undo2,
 } from 'lucide-react'
 import {
   Alert, Badge, Button, Card, Drawer, EmptyState, Field, PageHeader, PageLoader, SectionLabel, Skeleton, cx,
@@ -78,7 +78,7 @@ function Approvals() {
     <div>
       <PageHeader
         title="Approvals"
-        description="Changes Claude made from your SEO plans. Approving merges the PR and deploys the site."
+        description="Changes Claude made from your SEO plans and chats. Approving merges the PR and deploys the site."
       />
 
       {!data.githubConfigured && (
@@ -98,8 +98,8 @@ function Approvals() {
           <EmptyState
             icon={CircleCheck}
             title="Nothing waiting"
-            description="When you ship a task from an SEO plan, its PR shows up here for review."
-            action={<Button href="/admin/seo">Go to SEO</Button>}
+            description="When you ship a task from an SEO plan or approve a plan in the Claude chat, its PR shows up here for review."
+            action={<Button href="/admin/devops/claude">Open Claude chat</Button>}
           />
         </Card>
       ) : (
@@ -141,6 +141,7 @@ function ApprovalCard({ item, onReview }) {
           )}
         </div>
         <div className="flex shrink-0 flex-wrap items-center gap-2">
+          {task.source === 'claude' && <Button size="sm" variant="ghost" icon={MessageSquare} href={`/admin/devops/claude/${task.thread_id}`}>Chat</Button>}
           {preview?.url && <Button size="sm" icon={Globe} href={preview.url} external>Preview</Button>}
           <Button size="sm" variant="primary" icon={GitPullRequest} onClick={onReview} disabled={!pr}>Review</Button>
         </div>
@@ -153,6 +154,7 @@ function ApprovalCard({ item, onReview }) {
           <ChecksBadge checks={checks} />
           <PreviewBadge preview={preview} />
           <MergeableBadge pr={pr} />
+          {task.needs_migration && <Badge tone="warn" icon={Database}>Has a migration</Badge>}
         </div>
       ) : (
         <p className="mt-3 text-xs text-adm-subtle">PR details unavailable.</p>
@@ -210,6 +212,7 @@ function ReviewDrawer({ taskId, canMerge, onClose, onDone }) {
 
   const task = detail?.task
   const pr = detail?.pr
+  const isChat = task?.source === 'claude'
   const waiting = task?.ship_status === 'pr_open' && pr?.state === 'open'
   const blockedReason = !pr ? null
     : !canMerge ? 'Approving needs GITHUB_DEVOPS_TOKEN.'
@@ -236,7 +239,10 @@ function ReviewDrawer({ taskId, canMerge, onClose, onDone }) {
     setBusy(true)
     try {
       await devopsApi(`/api/devops/approvals/${taskId}/request-changes`, { method: 'POST', body: { note } })
-      notify('Sent back. Ship the task again from the SEO plan when ready.', 'success')
+      notify(
+        isChat ? 'Sent to Claude. It will reply with a revised plan in the chat.' : 'Sent back. Ship the task again from the SEO plan when ready.',
+        'success'
+      )
       onDone()
     } catch (err) {
       notify(err.message, 'error')
@@ -255,12 +261,20 @@ function ReviewDrawer({ taskId, canMerge, onClose, onDone }) {
   const footer = detail && waiting && (
     mode === 'send-back' ? (
       <div className="space-y-3">
-        <Field label="What should change?" htmlFor="sendback-note" hint="Posted on the PR, which then closes. Shipping the task again gives Claude this note.">
+        <Field
+          label="What should change?"
+          htmlFor="sendback-note"
+          hint={isChat
+            ? 'Posted on the PR and sent to the chat. Claude replies with a revised plan, and the PR stays open until you approve it.'
+            : 'Posted on the PR, which then closes. Shipping the task again gives Claude this note.'}
+        >
           <textarea id="sendback-note" rows={3} value={note} onChange={e => setNote(e.target.value)} className={cx(inputClass, 'resize-y')} data-autofocus />
         </Field>
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           <Button variant="ghost" onClick={() => setMode('review')}>Cancel</Button>
-          <Button variant="danger" icon={Undo2} onClick={sendBack} loading={busy} disabled={!note.trim()}>Close PR and send back</Button>
+          <Button variant="danger" icon={Undo2} onClick={sendBack} loading={busy} disabled={!note.trim()}>
+            {isChat ? 'Send to Claude' : 'Close PR and send back'}
+          </Button>
         </div>
       </div>
     ) : (
@@ -304,6 +318,12 @@ function ReviewDrawer({ taskId, canMerge, onClose, onDone }) {
             </Alert>
           )}
 
+          {task.needs_migration && (
+            <Alert tone="warn" title="This PR includes a database migration">
+              Apply it in Supabase before or right after merging, or the new code will hit missing tables.
+            </Alert>
+          )}
+
           <div className="flex flex-wrap gap-1.5">
             <ChecksBadge checks={detail.checks} />
             <PreviewBadge preview={detail.preview} />
@@ -313,16 +333,20 @@ function ReviewDrawer({ taskId, canMerge, onClose, onDone }) {
             </a>
           </div>
 
+          {isChat && (
+            <Button size="sm" variant="ghost" icon={MessageSquare} href={`/admin/devops/claude/${task.thread_id}`}>Open the chat</Button>
+          )}
+
           {task.description && (
             <section>
-              <SectionLabel className="mb-2">Why</SectionLabel>
+              <SectionLabel className="mb-2">{isChat ? 'Plan' : 'Why'}</SectionLabel>
               <p className="whitespace-pre-wrap text-sm text-adm-muted">{task.description}</p>
             </section>
           )}
 
           {task.acceptance_criteria?.length > 0 && (
             <section>
-              <SectionLabel className="mb-2">Done when</SectionLabel>
+              <SectionLabel className="mb-2">{isChat ? 'Steps' : 'Done when'}</SectionLabel>
               <ul className="space-y-1.5 text-sm text-adm-muted">
                 {task.acceptance_criteria.map((c, i) => (
                   <li key={i} className="flex gap-2"><CircleCheck className="mt-0.5 h-4 w-4 shrink-0 text-adm-subtle" aria-hidden />{c}</li>

@@ -1,0 +1,448 @@
+# Claude Chat Run: started from the chat in /admin/devops/claude (lib/claude-chat.js).
+#   mode=plan     Claude reads the repo (read-only) and replies: an answer, a question or a plan.
+#   mode=execute  Claude carries out the approved plan on a branch; this workflow commits,
+#                 pushes and opens (or updates) the PR. It then waits in DevOps → Approvals.
+# Nothing is merged automatically.
+#
+# Lives only in this repo and works only on this repo for now.
+# Secrets (already set for SEO Ship / plan runs):
+#   CLAUDE_CODE_OAUTH_TOKEN   from `claude setup-token` (Claude Pro subscription)
+#   SEO_SHIP_CALLBACK_URL     https://visionaryadvance.com/api/seo/ship-callback (the app's base URL is taken from it)
+#   SEO_SHIP_CALLBACK_SECRET  same value as in Vercel
+# Secrets are set only on the steps that call the app, never while Claude runs. The
+# checkout keeps no git credentials while Claude runs; they're passed per command.
+
+name: Claude Chat Run
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: claude_runs.id
+        required: true
+      thread_id:
+        description: claude_threads.id (one run per chat at a time)
+        required: true
+      mode:
+        description: plan or execute
+        required: true
+        type: choice
+        options: [plan, execute]
+
+concurrency:
+  group: claude-chat-${{ inputs.thread_id }}
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  # ─────────────────────────────────────────────────────────────────────────────
+  plan:
+    if: inputs.mode == 'plan'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    env:
+      RUN_ID: ${{ inputs.run_id }}
+      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      CHAT_TMP: ${{ runner.temp }}/chat
+    steps:
+      - name: Report running
+        env:
+          CALLBACK_URL: ${{ secrets.SEO_SHIP_CALLBACK_URL }}
+          RUNNER_SECRET: ${{ secrets.SEO_SHIP_CALLBACK_SECRET }}
+        run: |
+          echo "API=${CALLBACK_URL%%/api/*}" >> "$GITHUB_ENV"
+          mkdir -p "$CHAT_TMP"
+          jq -n --arg r "$RUN_ID" --arg u "$RUN_URL" '{run_id:$r, status:"running", run_url:$u, meta:{stage:"reading"}}' \
+            | curl -sS --max-time 30 -X POST "${CALLBACK_URL%%/api/*}/api/devops/claude/runs/callback" \
+                -H "Authorization: Bearer $RUNNER_SECRET" -H "Content-Type: application/json" --data @- \
+            || echo "running callback failed (continuing)"
+
+      - name: Fetch input
+        id: input
+        env:
+          RUNNER_SECRET: ${{ secrets.SEO_SHIP_CALLBACK_SECRET }}
+        run: |
+          if ! curl -sS --fail-with-body --max-time 60 -H "Authorization: Bearer $RUNNER_SECRET" \
+              "$API/api/devops/claude/runs/$RUN_ID/input" -o "$CHAT_TMP/input.json"; then
+            echo "Couldn't fetch the chat: $(head -c 300 "$CHAT_TMP/input.json" 2>/dev/null)" > "$CHAT_TMP/error.txt"
+            exit 1
+          fi
+          REPO=$(jq -r '.thread.repo' "$CHAT_TMP/input.json")
+          if [ "$REPO" != "$GITHUB_REPOSITORY" ]; then
+            echo "Chats can only work on $GITHUB_REPOSITORY for now (this chat is on $REPO)." > "$CHAT_TMP/error.txt"; exit 1
+          fi
+          echo "ref=$(jq -r '.checkout_ref // "main"' "$CHAT_TMP/input.json")" >> "$GITHUB_OUTPUT"
+
+      # Actions are pinned to commit SHAs (tag in the comment). Bump deliberately.
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+
+      # Instructions and validator come from this workflow's commit (main), copied read-only
+      # outside the workspace, so a PR branch can't change what Claude is told or what checks it.
+      - name: Install tools outside the workspace
+        run: |
+          mkdir -p /tmp/claude-chat-tools/devops/scripts /tmp/claude-chat-tools/devops/github /tmp/claude-chat-tools/lib
+          cp devops/scripts/validate-reply.mjs /tmp/claude-chat-tools/devops/scripts/
+          cp devops/github/claude-chat-plan.md /tmp/claude-chat-tools/devops/github/
+          cp lib/claude-chat-validate.js /tmp/claude-chat-tools/lib/
+          echo '{"type":"module"}' > /tmp/claude-chat-tools/package.json
+          chmod -R a-w /tmp/claude-chat-tools
+
+      - name: Switch to the chat's branch
+        env:
+          REF: ${{ steps.input.outputs.ref }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "$REF" != "$GITHUB_REF_NAME" ]; then
+            AUTH="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
+            git -c "http.https://github.com/.extraheader=$AUTH" fetch -q --depth 1 origin "$REF"
+            git checkout -q FETCH_HEAD
+          fi
+          mkdir -p work
+          cp "$CHAT_TMP/input.json" work/input.json
+          echo "Replying on $(git rev-parse --short HEAD) ($REF)"
+
+      - name: Report planning
+        env:
+          RUNNER_SECRET: ${{ secrets.SEO_SHIP_CALLBACK_SECRET }}
+        run: |
+          jq -n --arg r "$RUN_ID" --arg u "$RUN_URL" '{run_id:$r, status:"running", run_url:$u, meta:{stage:"thinking"}}' \
+            | curl -sS --max-time 30 -X POST "$API/api/devops/claude/runs/callback" \
+                -H "Authorization: Bearer $RUNNER_SECRET" -H "Content-Type: application/json" --data @- \
+            || echo "stage callback failed (continuing)"
+
+      - name: Build prompt
+        id: prompt
+        run: |
+          D="PROMPT_$(openssl rand -hex 12)"
+          {
+            echo "prompt<<$D"
+            cat /tmp/claude-chat-tools/devops/github/claude-chat-plan.md
+            echo
+            echo "---"
+            echo "The chat is in work/input.json. Reply to the last user message by writing work/reply.json, then validate it."
+            echo "$D"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Run Claude Code
+        id: claude
+        uses: anthropics/claude-code-action@4fa93a88de49bbef68b10eb15aabedf28ca0e1ed # v1.0.271
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ github.token }}
+          prompt: ${{ steps.prompt.outputs.prompt }}
+          claude_args: |
+            --max-turns 60
+            --allowedTools "Read,Glob,Grep,Write(./work/reply.json),Edit(./work/reply.json),Bash(node /tmp/claude-chat-tools/devops/scripts/validate-reply.mjs work/reply.json)"
+
+      - name: Summarize Claude run
+        if: always() && steps.claude.outputs.execution_file != ''
+        env:
+          EXECUTION_FILE: ${{ steps.claude.outputs.execution_file }}
+        run: |
+          [ -f "$EXECUTION_FILE" ] || exit 0
+          jq -r 'if type=="array" then (map(select(.type=="result")) | last) else . end
+            | (.permission_denials // [])[] | "\(.tool_name): \(.tool_input | tostring | .[0:160])"' \
+            "$EXECUTION_FILE" > "$CHAT_TMP/denials.txt" 2>/dev/null || true
+          if [ -s "$CHAT_TMP/denials.txt" ]; then echo "Blocked tool calls:"; cat "$CHAT_TMP/denials.txt"; fi
+
+      - name: Submit reply
+        env:
+          RUNNER_SECRET: ${{ secrets.SEO_SHIP_CALLBACK_SECRET }}
+          EXECUTION_FILE: ${{ steps.claude.outputs.execution_file }}
+        run: |
+          if [ ! -s work/reply.json ]; then
+            { echo "Claude finished without writing a reply."; [ -s "$CHAT_TMP/denials.txt" ] && { echo "Blocked:"; head -5 "$CHAT_TMP/denials.txt"; }; } > "$CHAT_TMP/error.txt"; exit 1
+          fi
+          if ! node /tmp/claude-chat-tools/devops/scripts/validate-reply.mjs work/reply.json > "$CHAT_TMP/validate.txt" 2>&1; then
+            { echo "Claude's reply didn't pass validation:"; cat "$CHAT_TMP/validate.txt"; } > "$CHAT_TMP/error.txt"; exit 1
+          fi
+          META='{}'
+          if [ -n "$EXECUTION_FILE" ] && [ -f "$EXECUTION_FILE" ]; then
+            META=$(jq -c 'if type=="array" then (map(select(.type=="result")) | last) else . end
+              | {num_turns, duration_ms, permission_denials_count}' "$EXECUTION_FILE" 2>/dev/null || echo '{}')
+          fi
+          jq -n --arg r "$RUN_ID" --arg u "$RUN_URL" --argjson meta "$META" --slurpfile reply work/reply.json \
+            '{run_id:$r, status:"completed", run_url:$u, meta:$meta, reply:$reply[0]}' > "$CHAT_TMP/payload.json"
+          if ! curl -sS --fail-with-body --max-time 60 -X POST "$API/api/devops/claude/runs/callback" \
+              -H "Authorization: Bearer $RUNNER_SECRET" -H "Content-Type: application/json" \
+              --data @"$CHAT_TMP/payload.json" -o "$CHAT_TMP/response.json"; then
+            echo "The app rejected the reply: $(head -c 300 "$CHAT_TMP/response.json" 2>/dev/null)" > "$CHAT_TMP/error.txt"; exit 1
+          fi
+          cat "$CHAT_TMP/response.json"
+
+      - name: Report failure
+        if: failure() || cancelled()
+        env:
+          CALLBACK_URL: ${{ secrets.SEO_SHIP_CALLBACK_URL }}
+          RUNNER_SECRET: ${{ secrets.SEO_SHIP_CALLBACK_SECRET }}
+        run: |
+          ERR=$(head -c 1200 "$CHAT_TMP/error.txt" 2>/dev/null || true)
+          jq -n --arg r "$RUN_ID" --arg u "$RUN_URL" --arg e "${ERR:-The run failed. Open it on GitHub for details.}" \
+            '{run_id:$r, status:"failed", run_url:$u, error:$e}' \
+            | curl -sS --max-time 30 -X POST "${CALLBACK_URL%%/api/*}/api/devops/claude/runs/callback" \
+                -H "Authorization: Bearer $RUNNER_SECRET" -H "Content-Type: application/json" --data @- || true
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  execute:
+    if: inputs.mode == 'execute'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: write
+      pull-requests: write
+    env:
+      RUN_ID: ${{ inputs.run_id }}
+      THREAD_ID: ${{ inputs.thread_id }}
+      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      CHAT_TMP: ${{ runner.temp }}/chat
+    steps:
+      - name: Report running
+        env:
+          CALLBACK_URL: ${{ secrets.SEO_SHIP_CALLBACK_URL }}
+          RUNNER_SECRET: ${{ secrets.SEO_SHIP_CALLBACK_SECRET }}
+        run: |
+          echo "API=${CALLBACK_URL%%/api/*}" >> "$GITHUB_ENV"
+          mkdir -p "$CHAT_TMP"
+          jq -n --arg r "$RUN_ID" --arg u "$RUN_URL" '{run_id:$r, status:"running", run_url:$u, meta:{stage:"reading"}}' \
+            | curl -sS --max-time 30 -X POST "${CALLBACK_URL%%/api/*}/api/devops/claude/runs/callback" \
+                -H "Authorization: Bearer $RUNNER_SECRET" -H "Content-Type: application/json" --data @- \
+            || echo "running callback failed (continuing)"
+
+      - name: Fetch input
+        id: input
+        env:
+          RUNNER_SECRET: ${{ secrets.SEO_SHIP_CALLBACK_SECRET }}
+        run: |
+          if ! curl -sS --fail-with-body --max-time 60 -H "Authorization: Bearer $RUNNER_SECRET" \
+              "$API/api/devops/claude/runs/$RUN_ID/input" -o "$CHAT_TMP/input.json"; then
+            echo "Couldn't fetch the approved plan: $(head -c 300 "$CHAT_TMP/input.json" 2>/dev/null)" > "$CHAT_TMP/error.txt"
+            exit 1
+          fi
+          REPO=$(jq -r '.thread.repo' "$CHAT_TMP/input.json")
+          if [ "$REPO" != "$GITHUB_REPOSITORY" ]; then
+            echo "Chats can only work on $GITHUB_REPOSITORY for now (this chat is on $REPO)." > "$CHAT_TMP/error.txt"; exit 1
+          fi
+          BRANCH=$(jq -r '.branch // empty' "$CHAT_TMP/input.json")
+          if ! printf '%s' "$BRANCH" | grep -Eq '^claude/[a-z0-9._/-]+$'; then
+            echo "Unexpected branch name: $BRANCH" > "$CHAT_TMP/error.txt"; exit 1
+          fi
+          {
+            echo "branch=$BRANCH"
+            echo "base=$(jq -r '.thread.base_branch // "main"' "$CHAT_TMP/input.json")"
+            echo "existing_pr=$(jq -r '.existing_pr.number // empty' "$CHAT_TMP/input.json")"
+          } >> "$GITHUB_OUTPUT"
+          jq -r '"Plan: \(.plan.title) (\(.plan.size))"' "$CHAT_TMP/input.json"
+
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Install tools outside the workspace
+        run: |
+          mkdir -p /tmp/claude-chat-tools/devops/github
+          cp devops/github/claude-chat-execute.md /tmp/claude-chat-tools/devops/github/
+          chmod -R a-w /tmp/claude-chat-tools
+
+      - name: Check out the branch
+        env:
+          BRANCH: ${{ steps.input.outputs.branch }}
+          BASE: ${{ steps.input.outputs.base }}
+          EXISTING_PR: ${{ steps.input.outputs.existing_pr }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          AUTH="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
+          if git -c "http.https://github.com/.extraheader=$AUTH" ls-remote --exit-code --heads origin "$BRANCH" > /dev/null; then
+            if [ -z "$EXISTING_PR" ]; then
+              echo "Branch $BRANCH already exists on GitHub. Retry from the chat to get a new branch." > "$CHAT_TMP/error.txt"; exit 1
+            fi
+            git -c "http.https://github.com/.extraheader=$AUTH" fetch -q origin "$BRANCH"
+          else
+            git -c "http.https://github.com/.extraheader=$AUTH" fetch -q origin "$BASE"
+          fi
+          git checkout -q -B "$BRANCH" FETCH_HEAD
+          mkdir -p work
+          cp "$CHAT_TMP/input.json" work/input.json
+          echo "work/" >> .git/info/exclude
+          # Restored after Claude runs, so nothing it writes under .git can run in later steps.
+          cp .git/config "$CHAT_TMP/git-config"
+          echo "Working on $BRANCH at $(git rev-parse --short HEAD)"
+
+      - name: Report editing
+        env:
+          RUNNER_SECRET: ${{ secrets.SEO_SHIP_CALLBACK_SECRET }}
+        run: |
+          jq -n --arg r "$RUN_ID" --arg u "$RUN_URL" '{run_id:$r, status:"running", run_url:$u, meta:{stage:"editing"}}' \
+            | curl -sS --max-time 30 -X POST "$API/api/devops/claude/runs/callback" \
+                -H "Authorization: Bearer $RUNNER_SECRET" -H "Content-Type: application/json" --data @- \
+            || echo "stage callback failed (continuing)"
+
+      - name: Build prompt
+        id: prompt
+        run: |
+          D="PROMPT_$(openssl rand -hex 12)"
+          {
+            echo "prompt<<$D"
+            cat /tmp/claude-chat-tools/devops/github/claude-chat-execute.md
+            echo
+            echo "---"
+            echo "The approved plan and the chat are in work/input.json. Make the changes, then write work/summary.md."
+            echo "$D"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Run Claude Code
+        id: claude
+        uses: anthropics/claude-code-action@4fa93a88de49bbef68b10eb15aabedf28ca0e1ed # v1.0.271
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ github.token }}
+          prompt: ${{ steps.prompt.outputs.prompt }}
+          claude_args: |
+            --max-turns 100
+            --allowedTools "Read,Edit,Write,MultiEdit,Glob,Grep,Bash(git diff:*),Bash(git status:*),Bash(git log:*)"
+
+      - name: Check the changes
+        id: changes
+        env:
+          EXECUTION_FILE: ${{ steps.claude.outputs.execution_file }}
+        run: |
+          cp "$CHAT_TMP/git-config" .git/config
+          rm -rf .git/hooks && mkdir .git/hooks
+          git add -A
+          git rm -r -q --cached --ignore-unmatch work > /dev/null
+          SUMMARY=$(head -c 6000 work/summary.md 2>/dev/null || true)
+          if [ -z "$SUMMARY" ] && [ -n "$EXECUTION_FILE" ] && [ -f "$EXECUTION_FILE" ]; then
+            SUMMARY=$(jq -r 'if type=="array" then (map(select(.type=="result")) | last | .result // "") else (.result // "") end' "$EXECUTION_FILE" 2>/dev/null | head -c 6000 || true)
+          fi
+          printf '%s' "$SUMMARY" > "$CHAT_TMP/summary.md"
+          git diff --cached --name-only > "$CHAT_TMP/files.txt"
+          if [ ! -s "$CHAT_TMP/files.txt" ]; then
+            { echo "Claude made no changes."; [ -n "$SUMMARY" ] && { echo; echo "$SUMMARY"; }; } | head -c 1200 > "$CHAT_TMP/error.txt"; exit 1
+          fi
+          BLOCKED=$(grep -E '^\.github/|(^|/)\.env' "$CHAT_TMP/files.txt" || true)
+          if [ -n "$BLOCKED" ]; then
+            { echo "Claude changed files it isn't allowed to touch, so nothing was pushed:"; echo "$BLOCKED"; } > "$CHAT_TMP/error.txt"; exit 1
+          fi
+          if grep -Eq '^(migrations|supabase)/.*\.sql$' "$CHAT_TMP/files.txt"; then
+            echo "needs_migration=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "needs_migration=false" >> "$GITHUB_OUTPUT"
+          fi
+          git diff --cached --stat
+
+      # Cancelled from the chat while Claude worked? Then don't push anything.
+      - name: Confirm the run is still wanted
+        env:
+          RUNNER_SECRET: ${{ secrets.SEO_SHIP_CALLBACK_SECRET }}
+        run: |
+          CODE=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 60 -H "Authorization: Bearer $RUNNER_SECRET" \
+            "$API/api/devops/claude/runs/$RUN_ID/input")
+          if [ "$CODE" != "200" ]; then
+            echo "The run was cancelled or finished elsewhere (HTTP $CODE). Nothing was pushed." > "$CHAT_TMP/error.txt"; exit 1
+          fi
+          jq -n --arg r "$RUN_ID" --arg u "$RUN_URL" '{run_id:$r, status:"running", run_url:$u, meta:{stage:"pushing"}}' \
+            | curl -sS --max-time 30 -X POST "$API/api/devops/claude/runs/callback" \
+                -H "Authorization: Bearer $RUNNER_SECRET" -H "Content-Type: application/json" --data @- \
+            || echo "stage callback failed (continuing)"
+
+      - name: Commit, push and open PR
+        id: pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ steps.input.outputs.branch }}
+          BASE: ${{ steps.input.outputs.base }}
+          EXISTING_PR: ${{ steps.input.outputs.existing_pr }}
+        run: |
+          TITLE=$(jq -r '.plan.title' work/input.json)
+          git config user.name "Visionary Advance Claude"
+          git config user.email "claude-chat-bot@users.noreply.github.com"
+          git -c core.hooksPath=/dev/null commit -q -m "Claude: $TITLE" -m "From Claude chat $THREAD_ID ($RUN_URL)"
+          AUTH="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
+          git -c core.hooksPath=/dev/null -c "http.https://github.com/.extraheader=$AUTH" push -q origin "HEAD:refs/heads/$BRANCH"
+
+          CHAT_URL="$API/admin/devops/claude/$THREAD_ID"
+          SUMMARY=$(cat "$CHAT_TMP/summary.md")
+          UPDATED=false
+          PR_URL=""
+          if [ -n "$EXISTING_PR" ] && [ "$(gh pr view "$EXISTING_PR" --json state -q .state 2>/dev/null)" = "OPEN" ]; then
+            PR_URL=$(gh pr view "$EXISTING_PR" --json url -q .url)
+            UPDATED=true
+            {
+              echo "**Updated from the Claude chat:** $TITLE"
+              echo
+              echo "${SUMMARY:-See the diff.}"
+              echo
+              echo "[Chat]($CHAT_URL) · [workflow run]($RUN_URL)"
+            } > "$CHAT_TMP/comment.md"
+            gh pr comment "$EXISTING_PR" --body-file "$CHAT_TMP/comment.md" > /dev/null
+          else
+            {
+              echo "Planned and approved in the **Claude chat** in DevOps."
+              echo
+              echo "### Plan"
+              jq -r '.plan.summary' work/input.json
+              echo
+              jq -r '.plan.steps | to_entries[] | "\(.key + 1). \(.value.title)"' work/input.json
+              echo
+              echo "### What changed"
+              echo "${SUMMARY:-See the diff.}"
+              if [ "${{ steps.changes.outputs.needs_migration }}" = "true" ]; then
+                echo
+                echo "> **Includes a migration.** Apply it in Supabase before or right after merging."
+              fi
+              echo
+              echo "---"
+              echo "Review the Vercel preview, then merge from DevOps → Approvals. Nothing here merges automatically."
+              echo "[Chat]($CHAT_URL) · [workflow run]($RUN_URL)"
+            } > "$CHAT_TMP/pr-body.md"
+            PR_URL=$(gh pr create --base "$BASE" --head "$BRANCH" --title "Claude: $TITLE" --body-file "$CHAT_TMP/pr-body.md")
+          fi
+          echo "pr_url=$PR_URL" >> "$GITHUB_OUTPUT"
+          echo "updated=$UPDATED" >> "$GITHUB_OUTPUT"
+
+      - name: Report PR
+        env:
+          RUNNER_SECRET: ${{ secrets.SEO_SHIP_CALLBACK_SECRET }}
+          EXECUTION_FILE: ${{ steps.claude.outputs.execution_file }}
+          PR_URL: ${{ steps.pr.outputs.pr_url }}
+          UPDATED: ${{ steps.pr.outputs.updated }}
+          BRANCH: ${{ steps.input.outputs.branch }}
+          NEEDS_MIGRATION: ${{ steps.changes.outputs.needs_migration }}
+        run: |
+          META='{}'
+          if [ -n "$EXECUTION_FILE" ] && [ -f "$EXECUTION_FILE" ]; then
+            META=$(jq -c 'if type=="array" then (map(select(.type=="result")) | last) else . end
+              | {num_turns, duration_ms, permission_denials_count}' "$EXECUTION_FILE" 2>/dev/null || echo '{}')
+          fi
+          jq -n --arg r "$RUN_ID" --arg u "$RUN_URL" --argjson meta "$META" --arg pr "$PR_URL" --arg b "$BRANCH" \
+              --argjson updated "$UPDATED" --argjson mig "$NEEDS_MIGRATION" \
+              --rawfile summary "$CHAT_TMP/summary.md" --rawfile files "$CHAT_TMP/files.txt" \
+            '{run_id:$r, status:"completed", run_url:$u, meta:$meta,
+              result:{pr_url:$pr, branch:$b, updated:$updated, needs_migration:$mig, summary:$summary,
+                      files:($files | split("\n") | map(select(length > 0)))}}' > "$CHAT_TMP/payload.json"
+          if ! curl -sS --fail-with-body --max-time 60 -X POST "$API/api/devops/claude/runs/callback" \
+              -H "Authorization: Bearer $RUNNER_SECRET" -H "Content-Type: application/json" \
+              --data @"$CHAT_TMP/payload.json" -o "$CHAT_TMP/response.json"; then
+            echo "The PR is open ($PR_URL) but the app didn't record it: $(head -c 300 "$CHAT_TMP/response.json" 2>/dev/null)" > "$CHAT_TMP/error.txt"; exit 1
+          fi
+          cat "$CHAT_TMP/response.json"
+
+      - name: Report failure
+        if: failure() || cancelled()
+        env:
+          CALLBACK_URL: ${{ secrets.SEO_SHIP_CALLBACK_URL }}
+          RUNNER_SECRET: ${{ secrets.SEO_SHIP_CALLBACK_SECRET }}
+        run: |
+          ERR=$(head -c 1200 "$CHAT_TMP/error.txt" 2>/dev/null || true)
+          jq -n --arg r "$RUN_ID" --arg u "$RUN_URL" --arg e "${ERR:-The run failed. Open it on GitHub for details.}" \
+            '{run_id:$r, status:"failed", run_url:$u, error:$e}' \
+            | curl -sS --max-time 30 -X POST "${CALLBACK_URL%%/api/*}/api/devops/claude/runs/callback" \
+                -H "Authorization: Bearer $RUNNER_SECRET" -H "Content-Type: application/json" --data @- || true

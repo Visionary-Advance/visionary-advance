@@ -116,6 +116,15 @@ A unified CRM system with Supabase as the source of truth:
 - PRs merged/closed on GitHub directly are recorded on the next list load and by `POST /api/github/webhook` (HMAC of the raw body, so it reads `request.text()`)
 - Migration `migrations/011_seo_pr_approvals.sql` (applied 2026-11-16)
 
+**Claude chat** (`lib/claude-chat.js`, `/admin/devops/claude`):
+- Message Claude from the admin app (phone-first). Each message starts the `claude-chat-run` GitHub Action (`.github/workflows/claude-chat-run.yml`, Claude Pro OAuth token) in **plan** mode: Claude reads the repo read-only and replies with an answer, a question, or a plan (`work/reply.json`, schema in `lib/claude-chat-validate.js`)
+- Approve a plan and an **execute** run makes the changes on a `claude/…` branch; the workflow commits, pushes and opens the PR. It then shows in DevOps → Approvals as `claude-<threadId>` next to SEO Ship PRs. Follow-up messages while the PR is open update the same branch. Send back from Approvals keeps the PR open and posts your note to the chat as the next message
+- The workflow rejects changes to `.github/` or `.env*`, restores `.git/config` and hooks after Claude runs, and keeps no git credentials while Claude runs. Instructions Claude follows: `devops/github/claude-chat-plan.md` / `claude-chat-execute.md` (copied from main, read-only, so a PR branch can't change them)
+- One run per chat at a time (unique index). The Action pulls `/api/devops/claude/runs/[id]/input` and posts `/api/devops/claude/runs/callback` (`SEO_SHIP_CALLBACK_SECRET` bearer). A cancelled run's input returns 409, so it stops before pushing. Runs silent for 75 min read as failed
+- Replies trigger a push notification (`lib/push.js`) linking to the chat. The page polls every 4s while Claude works
+- Works on this repo only for now (client repos would need a write-scoped token or a workflow in each client repo)
+- Tables `claude_threads`, `claude_messages`, `claude_runs` in the **main** instance: `migrations/012_claude_chat.sql` (applied 2026-11-24)
+
 **SEO plan generation** (`lib/seo-plan-runs.js`):
 - Plans are written only by Claude Code (Gemini is removed). Reports reuse the approved plan's summary and tasks. Generate / Regenerate / "Generate all plans" in `/admin/seo` start the `seo-plan-run` GitHub Action (Claude Pro OAuth token, 2 sites at a time), so a run survives leaving the page
 - Each run is a `seo_plan_runs` row (queued → running → completed/failed). The Action pulls its data from `/api/seo/plan-runs/[id]/input` and posts `plan.json` to `/api/seo/plan-runs/callback`; both use the `SEO_SHIP_CALLBACK_SECRET` bearer
@@ -227,6 +236,7 @@ The app uses a conditional layout system via `Components/ConditionalLayout.jsx`:
 **GitHub (DevOps approvals)**:
 - `GITHUB_DEVOPS_TOKEN` (fine-grained PAT, Visionary-Advance org, all repos: Pull requests R/W, Contents R/W, Commit statuses R, Deployments R). Without it Approvals is review-only
 - `GITHUB_WEBHOOK_SECRET` (org webhook → `/api/github/webhook`, Pull requests events). The route fails closed without it
+- Claude chat starts its Action with `GITHUB_SEO_DISPATCH_TOKEN` (Actions: write), or `GITHUB_CLAUDE_DISPATCH_TOKEN` if set. Optional `CLAUDE_CHAT_WORKFLOW_REPO` / `CLAUDE_CHAT_WORKFLOW_REF` (default `Visionary-Advance/visionary-advance` / `main`)
 
 **Optional**:
 - `PAGESPEED_API_KEY` (Google PageSpeed API, falls back to anonymous if not set)

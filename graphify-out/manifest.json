@@ -848,9 +848,9 @@
     "semantic_hash": ""
   },
   "app/admin/devops/layout.js": {
-    "mtime": 1794865929.14783,
-    "seen": 1794866223.0625231,
-    "ast_hash": "e0e699416d4841b457f02a38a5cf864d",
+    "mtime": 1795502074.4163754,
+    "seen": 1795502343.6014981,
+    "ast_hash": "848c0ba32fc65b924813504fc0d57eb5",
     "semantic_hash": ""
   },
   "app/admin/devops/page.js": {
@@ -2324,9 +2324,9 @@
     "semantic_hash": "071f075c2a04ed27f703f3507d358562"
   },
   "package.json": {
-    "mtime": 1794811362.3874846,
-    "seen": 1794811378.843124,
-    "ast_hash": "0c934b831ad1804f94293cba65d47897",
+    "mtime": 1795502023.0490143,
+    "seen": 1795502343.601836,
+    "ast_hash": "31a99eb639ec2ff4173c38409accfc65",
     "semantic_hash": ""
   },
   "postcss.config.mjs": {
@@ -2846,9 +2846,9 @@
     "semantic_hash": ""
   },
   "CLAUDE.md": {
-    "mtime": 1794286986.5284524,
-    "seen": 1794287071.3996034,
-    "ast_hash": "b8eff74dd67a9f706e7d65b262ed08ab",
+    "mtime": 1795502333.3477025,
+    "seen": 1795502343.6019347,
+    "ast_hash": "8dba5b0b65a130540a55b8674194da87",
     "semantic_hash": ""
   },
   "HUBSPOT_SETUP.md": {
@@ -3476,9 +3476,9 @@
     "semantic_hash": ""
   },
   "lib/seo-runner-auth.js": {
-    "mtime": 1794440122.594327,
-    "seen": 1794440463.0116751,
-    "ast_hash": "043d063e744d19c7caa8d4370426b352",
+    "mtime": 1795502325.656933,
+    "seen": 1795502343.601799,
+    "ast_hash": "cb22fc779917a87b2977276f9f5a6db1",
     "semantic_hash": ""
   },
   "migrations/010_seo_plan_runs.sql": {
@@ -3686,9 +3686,9 @@
     "semantic_hash": ""
   },
   "Components/Admin/DevOps/api.js": {
-    "mtime": 1794865865.584052,
-    "seen": 1794866223.0623794,
-    "ast_hash": "d6c0017e96a27a69449001c03d6663d6",
+    "mtime": 1795502193.3799424,
+    "seen": 1795502343.6013083,
+    "ast_hash": "dc27995aade0985f67545cb9966f2e28",
     "semantic_hash": ""
   },
   "Components/Admin/DevOps/format.js": {
@@ -3698,9 +3698,9 @@
     "semantic_hash": ""
   },
   "app/admin/devops/approvals/page.js": {
-    "mtime": 1794868024.4261632,
-    "seen": 1794868434.8518245,
-    "ast_hash": "1736b3dfe051cbbf0ea61717ce23d1f1",
+    "mtime": 1795502062.252267,
+    "seen": 1795502343.6014917,
+    "ast_hash": "7c36d7dc252440d27d185fa0a40b4eec",
     "semantic_hash": ""
   },
   "app/api/devops/approvals/[taskId]/merge/route.js": {
@@ -3740,9 +3740,9 @@
     "semantic_hash": ""
   },
   "lib/devops-approvals.js": {
-    "mtime": 1794865747.5744476,
-    "seen": 1794866223.0627186,
-    "ast_hash": "90c560583de4c57583c0a638c477324d",
+    "mtime": 1795501997.9291189,
+    "seen": 1795502343.6017573,
+    "ast_hash": "e347dc77198d3410d08359785f102770",
     "semantic_hash": ""
   },
   "lib/github.js": {
@@ -3763,10 +3763,112 @@
     "ast_hash": "a9e88ad02179d03e6c1431cc565a8f08",
     "semantic_hash": ""
   },
+  ".github/workflows/claude-chat-run.yml": {
+    "mtime": 1795502258.1706786,
+    "seen": 1795502343.6012697,
+    "ast_hash": "5948d7c50103521ffabbf51c9539ce93",
+    "semantic_hash": ""
+  },
+  "Components/Admin/DevOps/ClaudeChat.jsx": {
+    "mtime": 1795502173.4063506,
+    "seen": 1795502343.6012964,
+    "ast_hash": "f611d606763c518b3a34a01d52e18cdc",
+    "semantic_hash": ""
+  },
+  "app/admin/devops/claude/[threadId]/page.js": {
+    "mtime": 1795502238.289481,
+    "seen": 1795502343.6014926,
+    "ast_hash": "0d1f3efa4f1b879dd2f8d0c8bd8ff173",
+    "semantic_hash": ""
+  },
+  "app/admin/devops/claude/page.js": {
+    "mtime": 1795502193.970507,
+    "seen": 1795502343.6014946,
+    "ast_hash": "f1caab1fb468308a5996713da0ce623a",
+    "semantic_hash": ""
+  },
+  "app/api/devops/claude/plans/[messageId]/route.js": {
+    "mtime": 1795501747.5751362,
+    "seen": 1795502343.601601,
+    "ast_hash": "14cfd8d4890f13317b06f855c5b9e230",
+    "semantic_hash": ""
+  },
+  "app/api/devops/claude/runs/[id]/input/route.js": {
+    "mtime": 1795501748.735905,
+    "seen": 1795502343.6016018,
+    "ast_hash": "b7761c78eef5b9d1879d35c2b0444902",
+    "semantic_hash": ""
+  },
+  "app/api/devops/claude/runs/[id]/route.js": {
+    "mtime": 1795501748.1617873,
+    "seen": 1795502343.6016028,
+    "ast_hash": "da38fcd9a2f8e8283a091f1ed45aabee",
+    "semantic_hash": ""
+  },
+  "app/api/devops/claude/runs/callback/route.js": {
+    "mtime": 1795501749.3040104,
+    "seen": 1795502343.6016037,
+    "ast_hash": "6f8c995499d238cd9808d8b67c33d703",
+    "semantic_hash": ""
+  },
+  "app/api/devops/claude/threads/[id]/messages/route.js": {
+    "mtime": 1795501746.954621,
+    "seen": 1795502343.6016047,
+    "ast_hash": "072e0a768bab1152c5dd790ad5847479",
+    "semantic_hash": ""
+  },
+  "app/api/devops/claude/threads/[id]/route.js": {
+    "mtime": 1795501746.3644612,
+    "seen": 1795502343.6016057,
+    "ast_hash": "2e1b360189b8806c2e78501080987a18",
+    "semantic_hash": ""
+  },
+  "app/api/devops/claude/threads/route.js": {
+    "mtime": 1795501745.725991,
+    "seen": 1795502343.6016066,
+    "ast_hash": "b5a94520065df4c45dab4ccb1ccba7d5",
+    "semantic_hash": ""
+  },
+  "devops/scripts/validate-reply.mjs": {
+    "mtime": 1795501563.6461854,
+    "seen": 1795502343.6017447,
+    "ast_hash": "59ec59c474c25b7702d3bc18f2590d20",
+    "semantic_hash": ""
+  },
+  "lib/claude-chat-validate.js": {
+    "mtime": 1795501562.763869,
+    "seen": 1795502343.601752,
+    "ast_hash": "5e4579259b172a541cd6c7b326f95320",
+    "semantic_hash": ""
+  },
+  "lib/claude-chat.js": {
+    "mtime": 1795501928.989606,
+    "seen": 1795502343.601753,
+    "ast_hash": "be5bf410ad0617ccd95871caac73ebee",
+    "semantic_hash": ""
+  },
+  "migrations/012_claude_chat.sql": {
+    "mtime": 1795501686.3288379,
+    "seen": 1795502343.601834,
+    "ast_hash": "ac8592ae5944c2eeb1a1f4a2210c1681",
+    "semantic_hash": ""
+  },
+  "devops/github/claude-chat-execute.md": {
+    "mtime": 1795501827.5319781,
+    "seen": 1795502343.6019435,
+    "ast_hash": "d51db3127cfe9f25664b9ca43c026908",
+    "semantic_hash": ""
+  },
+  "devops/github/claude-chat-plan.md": {
+    "mtime": 1795501826.9514153,
+    "seen": 1795502343.6019447,
+    "ast_hash": "657aa5e3ae18ceefa44cf5486dca3b95",
+    "semantic_hash": ""
+  },
   "package-lock.json": {
-    "mtime": 1794812380.423782,
-    "seen": 1794813294.1021862,
-    "ast_hash": "2bf6499f99e81f64f57115ce6c32c222",
+    "mtime": 1795502023.269043,
+    "seen": 1795502343.6020267,
+    "ast_hash": "71ad059371a90009c8ea00f3b74b4672",
     "semantic_hash": ""
   }
 }
